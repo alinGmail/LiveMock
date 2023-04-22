@@ -1,5 +1,5 @@
 {
-  "name": "mockserver",
+  "name": "LiveMockBackEnd",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -37,6 +37,7 @@
     "lodash": "^4.17.21",
     "nedb": "^1.8.0",
     "requires-port": "^1.0.0",
-    "type-is": "^1.6.18"
+    "type-is": "^1.6.18",
+    "core": "file:../core"
   }
 }
