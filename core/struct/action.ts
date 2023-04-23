@@ -25,7 +25,6 @@ type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
 export interface ProxyActionM {
     type: ActionType.PROXY;
     host: string;
-    port: number;
     pathRewrite: Array<PathRewriteM>;
 }
 
