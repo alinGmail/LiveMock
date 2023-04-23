@@ -1,6 +1,6 @@
 
 
-export interface Log {
+export interface LogM {
   _id?: string;
   req: RequestLogM;
   res: ResponseLogM | null;
