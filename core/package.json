@@ -2,5 +2,10 @@
   "name": "core",
   "version": "1.0.0",
   "main": "index.js",
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "scripts": {},
+  "dependencies": {
+    "prettier": "^2.8.8",
+    "express": "^4.18.1"
+  }
 }

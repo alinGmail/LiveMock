@@ -7,3 +7,10 @@ let projectDbP = new PromiseDatastore<IProject>(projectDb);
 function getProjectDB():PromiseDatastore<IProject>{
    return projectDbP;
 }
+
+
+const expectationMap = new Map();
+
+function getExpectationDB():PromiseDatastore<IExpectation>{
+
+}
