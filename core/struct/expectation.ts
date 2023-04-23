@@ -4,7 +4,7 @@ import {ActionM} from "./action";
 
 
 
-export interface Expectation {
+export interface ExpectationM {
     id: string;
     name: string;
     delay: number;
