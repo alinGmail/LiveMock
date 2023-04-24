@@ -21,3 +21,19 @@ test("header matcher", async () => {
   expect(res).toBe(true);
 
 });
+test("header matcher array", async () => {
+    const headerMatcherM = createHeaderMatcher();
+    headerMatcherM.name = "firstName";
+    headerMatcherM.value = "jeff";
+    headerMatcherM.conditions = MatcherCondition.SHOWED;
+    const headerMatcher = new HeaderMatcher(headerMatcherM);
+
+    const res = headerMatcher.match({
+        header:(name): string[] | undefined => {
+            return ["jeff","tom","marry"];
+        },
+    } as express.Request);
+
+    expect(res).toBe(true);
+
+});

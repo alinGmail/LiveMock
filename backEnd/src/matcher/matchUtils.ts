@@ -38,18 +38,20 @@ export function matchAnyValue(
     } else {
       return false;
     }
-  } else if (typeof value == "string") {
+  } else if (typeof value === "string") {
     return stringMatchCondition(
       value,
       matcher.conditions as StringMatcherCondition,
       matcher.value
     );
-  } else if (typeof value == "object") {
+  } else if (typeof value === "object") {
     if (_.isArray(value)) {
       switch (matcher.conditions) {
         case MatcherCondition.CONTAINS:
+        case MatcherCondition.SHOWED:
           return (value as Array<any>).includes(matcher.value);
         case MatcherCondition.NOT_CONTAINS:
+        case MatcherCondition.NOT_SHOWED:
           return !(value as Array<any>).includes(matcher.value);
         default:
           return false;
