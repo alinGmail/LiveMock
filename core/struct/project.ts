@@ -13,3 +13,15 @@ export enum ProjectStatus {
     STARTED = "STARTED",
     STOPPED = "STOPPED",
 }
+
+export function createProject():ProjectM{
+    return {
+        createDate: new Date(),
+        description: "",
+        error: false,
+        errorMessage: null,
+        name: "",
+        port: "8088",
+        status: ProjectStatus.STOPPED,
+    }
+}

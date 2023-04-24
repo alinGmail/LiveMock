@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "prettier": "^2.8.8",
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "uuid": "^8.3.2"
   }
 }

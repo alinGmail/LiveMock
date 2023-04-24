@@ -1,3 +1,6 @@
+import express from "express";
+import { v4 as uuId } from "uuid";
+
 export type RequestMatcherM =
   | MethodMatcherM
   | PathMatcherM
@@ -74,3 +77,18 @@ export type StringMatcherCondition = Extract<
   | MatcherCondition.MATCH_REGEX
   | MatcherCondition.NOT_MATCH_REGEX
 >;
+
+
+export interface IMatcher {
+  match: (req: express.Request) => boolean;
+}
+
+export function createHeaderMatcher():HeaderMatcherM{
+  return {
+    id: uuId(),
+    type: RequestMatcherType.HEADER,
+    conditions: MatcherCondition.IS,
+    value: "",
+    name:'',
+  }
+}
