@@ -32,8 +32,12 @@ export function matchAnyValue(
   value: string | undefined | Array<any> | Object,
   matcher: RequestMatcherM
 ): boolean {
-  if (typeof value == "undefined") {
-    return false;
+  if (typeof value === "undefined") {
+    if (MatcherCondition.NOT_SHOWED) {
+      return true;
+    } else {
+      return false;
+    }
   } else if (typeof value == "string") {
     return stringMatchCondition(
       value,

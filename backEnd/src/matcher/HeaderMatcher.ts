@@ -5,6 +5,8 @@ import {
 } from "core/struct/matcher";
 import express from "express";
 import * as matchUtils from "./matchUtils";
+import _ from 'lodash';
+import {matchAnyValue} from "./matchUtils";
 
 class HeaderMatcher implements IMatcher {
   matcher: HeaderMatcherM;
@@ -15,15 +17,7 @@ class HeaderMatcher implements IMatcher {
 
   match(req: express.Request): boolean {
     let header = req.header(this.matcher.name);
-    if (typeof header == "undefined") {
-      return false;
-    } else {
-      return matchUtils.stringMatchCondition(
-        header,
-        this.matcher.conditions as StringMatcherCondition,
-        this.matcher.value
-      );
-    }
+    return matchAnyValue(header,this.matcher);
   }
 }
 
