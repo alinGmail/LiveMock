@@ -1,8 +1,4 @@
-import {
-  MatcherCondition,
-  RequestMatcherM,
-  StringMatcherCondition,
-} from "core/struct/matcher";
+import {MatcherCondition, RequestMatcherM, StringMatcherCondition,} from "core/struct/matcher";
 import _ from "lodash";
 
 export const stringMatchCondition = (
@@ -23,6 +19,10 @@ export const stringMatchCondition = (
       return left !== right;
     case MatcherCondition.NOT_CONTAINS:
       return left.indexOf(right) == -1;
+    case MatcherCondition.SHOWED:
+      return left == null;
+    case MatcherCondition.NOT_SHOWED:
+      return left != null;
     default:
       return false;
   }

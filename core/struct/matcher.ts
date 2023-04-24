@@ -60,9 +60,12 @@ export enum MatcherCondition {
   NOT_CONTAINS = "NOT_CONTAINS",
   START_WITH = "START_WITH",
   END_WITH = "END_WITH",
+
   MATCH_REGEX = "MATCH_REGEX",
   NOT_MATCH_REGEX = "NOT_MATCH_REGEX",
+  // 出现了
   SHOWED = "SHOWED",
+  // 没出现
   NOT_SHOWED = "NOT_SHOWED",
 }
 
@@ -76,19 +79,37 @@ export type StringMatcherCondition = Extract<
   | MatcherCondition.END_WITH
   | MatcherCondition.MATCH_REGEX
   | MatcherCondition.NOT_MATCH_REGEX
+  | MatcherCondition.SHOWED
+  | MatcherCondition.NOT_SHOWED
 >;
 
+export type ArrayMatcherCondition = Extract<
+  MatcherCondition,
+  | MatcherCondition.CONTAINS
+  | MatcherCondition.NOT_CONTAINS
+  | MatcherCondition.SHOWED
+  | MatcherCondition.NOT_CONTAINS
+>;
 
 export interface IMatcher {
   match: (req: express.Request) => boolean;
 }
 
-export function createHeaderMatcher():HeaderMatcherM{
+export function createHeaderMatcher(): HeaderMatcherM {
   return {
     id: uuId(),
     type: RequestMatcherType.HEADER,
     conditions: MatcherCondition.IS,
     value: "",
-    name:'',
+    name: "",
+  };
+}
+
+export function createMethodMatcher(): MethodMatcherM{
+  return {
+    id: uuId(),
+    type: RequestMatcherType.METHOD,
+    conditions: MatcherCondition.IS,
+    value: ""
   }
 }

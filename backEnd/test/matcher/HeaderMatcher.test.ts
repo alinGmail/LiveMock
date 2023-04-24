@@ -1,7 +1,7 @@
 import {
   createHeaderMatcher,
   MatcherCondition,
-} from "../../../core/struct/matcher";
+} from "core/struct/matcher";
 import HeaderMatcher from "../../src/matcher/HeaderMatcher";
 import express from "express";
 
