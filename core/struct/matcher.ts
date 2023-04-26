@@ -105,11 +105,21 @@ export function createHeaderMatcher(): HeaderMatcherM {
   };
 }
 
-export function createMethodMatcher(): MethodMatcherM{
+export function createMethodMatcher(): MethodMatcherM {
   return {
     id: uuId(),
     type: RequestMatcherType.METHOD,
     conditions: MatcherCondition.IS,
-    value: ""
-  }
+    value: "",
+  };
+}
+
+export function createParamMatcher(): ParamMatcherM {
+  return {
+    id: uuId(),
+    type: RequestMatcherType.PARAM,
+    conditions: MatcherCondition.IS,
+    value: "",
+    name: "",
+  };
 }
