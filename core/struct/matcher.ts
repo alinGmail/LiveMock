@@ -123,3 +123,20 @@ export function createParamMatcher(): ParamMatcherM {
     name: "",
   };
 }
+export function createPathMatcher(): PathMatcherM {
+  return {
+    conditions: MatcherCondition.IS,
+    id: uuId(),
+    type: RequestMatcherType.PATH,
+    value: "",
+  };
+}
+export function createQueryMatcher(): QueryMatcherM {
+  return {
+    conditions: MatcherCondition.IS,
+    id: uuId(),
+    name: "",
+    type: RequestMatcherType.QUERY,
+    value: "",
+  };
+}
