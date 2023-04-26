@@ -3,12 +3,12 @@ import express from "express";
 import MethodMatcher from "../../src/matcher/MethodMatcher";
 
 test("method matcher", async () => {
-  const methodMatcher = createMethodMatcher();
-  methodMatcher.value = "POST";
-  methodMatcher.conditions = MatcherCondition.IS;
-  const headerMatcher = new MethodMatcher(methodMatcher);
+  const methodMatcherM = createMethodMatcher();
+  methodMatcherM.value = "POST";
+  methodMatcherM.conditions = MatcherCondition.IS;
+  const methodMatcher = new MethodMatcher(methodMatcherM);
 
-  const res = headerMatcher.match({
+  const res = methodMatcher.match({
     method: "post",
   } as express.Request);
 

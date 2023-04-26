@@ -37,7 +37,7 @@ export function matchAnyValue(
   matcher: RequestMatcherM
 ): boolean {
   if (typeof value === "undefined") {
-    if (MatcherCondition.NOT_SHOWED) {
+    if (matcher.conditions === MatcherCondition.NOT_SHOWED) {
       return true;
     } else {
       return false;
