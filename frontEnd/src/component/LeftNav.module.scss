@@ -1,7 +1,6 @@
 .leftNav {
-  .linkList {
-    margin-top: 20px;
-  }
+  margin-top: 20px;
+
   .linkRow {
     margin: 3px 10px;
     border-radius: 8px;
@@ -11,6 +10,7 @@
     display: block;
     color: #595959;
     transition: all ease-in 200ms;
+    text-decoration: none;
   }
   .linkRow:hover {
     background: rgba(0, 0, 0, 0.08);

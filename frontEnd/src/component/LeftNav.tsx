@@ -8,7 +8,7 @@ import {
 
 const LeftNav = () => {
   return (
-    <div className={mStyle.linkList}>
+    <div className={mStyle.leftNav}>
       <NavLink
         to={"/expectation"}
         className={({ isActive }) => {
