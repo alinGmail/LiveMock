@@ -1,0 +1,28 @@
+.leftNav {
+  .linkList {
+    margin-top: 20px;
+  }
+  .linkRow {
+    margin: 3px 10px;
+    border-radius: 8px;
+    padding-left: 20px;
+    height: 32px;
+    line-height: 32px;
+    display: block;
+    color: #595959;
+    transition: all ease-in 200ms;
+  }
+  .linkRow:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #595959;
+  }
+  .linkActivate {
+    background: rgba(0, 0, 0, 0.12);
+    color: #595959;
+  }
+
+  .linkActivate:hover {
+    background: rgba(0, 0, 0, 0.18);
+    color: #595959;
+  }
+}
