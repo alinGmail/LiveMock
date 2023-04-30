@@ -12,3 +12,22 @@ export function addCross(res: express.Response) {
   );
   res.header("Allow", "GET, POST, PATCH, OPTIONS, PUT, DELETE");
 }
+
+// content type filter
+export function contentTypeFilter(req, res, next) {
+  const originalSend = res.send;
+
+  res.send = function (data) {
+    const dataType = typeof data;
+
+    if (dataType === 'string') {
+      res.set('Content-Type', 'text/plain');
+    } else if (dataType === 'object') {
+      res.set('Content-Type', 'application/json');
+    }
+
+    originalSend.apply(res, arguments);
+  };
+
+  next();
+}

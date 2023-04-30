@@ -4,21 +4,32 @@ import { ProjectM } from "core/struct/project";
 import { ExpectationM } from "core/struct/expectation";
 import { LogM } from "core/struct/log";
 
-let projectDb = new Datastore({ filename: "db/project.db", autoload: true });
-let projectDbP = new PromiseDatastore<ProjectM>(projectDb);
-export function getProjectDb(): PromiseDatastore<ProjectM> {
-  return projectDbP;
+const projectDbMap = new Map<string, PromiseDatastore<ExpectationM>>();
+
+export function getProjectDb(path: string): PromiseDatastore<ProjectM> {
+  let projectDbP = projectDbMap.get(path);
+  if (!projectDbP) {
+    let projectDb = new Datastore({
+      filename: `${path}/project.db`,
+      autoload: true,
+    });
+    projectDbP = new PromiseDatastore<ProjectM>(projectDb);
+    return projectDbP;
+  } else {
+    return projectDbP;
+  }
 }
 
 const expectationDbMap = new Map<string, PromiseDatastore<ExpectationM>>();
 
 export function getExpectationDb(
-  projectName: string
+  projectName: string,
+  path: string
 ): PromiseDatastore<ExpectationM> {
-  const expectationDbP = expectationDbMap.get(projectName);
+  const expectationDbP = expectationDbMap.get(`${path}/${projectName}`);
   if (!expectationDbP) {
     const newExpectationDb = new Datastore({
-      filename: `db/${projectName}_Exp.db`,
+      filename: `${path}/${projectName}_Exp.db`,
       autoload: true,
     });
     let newExpectationDbP = new PromiseDatastore<ExpectationM>(
@@ -33,11 +44,14 @@ export function getExpectationDb(
 
 const logDbMap = new Map<string, PromiseDatastore<LogM>>();
 
-export function getLogDb(projectName: string): PromiseDatastore<LogM> {
-  const logDbP = logDbMap.get(projectName);
+export function getLogDb(
+  projectName: string,
+  path: string
+): PromiseDatastore<LogM> {
+  const logDbP = logDbMap.get(`${path}/${projectName}`);
   if (!logDbP) {
     const newLogDb = new Datastore({
-      filename: `db/${projectName}_Log.db`,
+      filename: `${path}/${projectName}_Log.db`,
       autoload: true,
     });
     let newLogDbP = new PromiseDatastore<LogM>(newLogDb);
@@ -47,3 +61,5 @@ export function getLogDb(projectName: string): PromiseDatastore<LogM> {
     return logDbP;
   }
 }
+
+

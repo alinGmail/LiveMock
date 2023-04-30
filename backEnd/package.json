@@ -25,7 +25,7 @@
     "mockttp": "^3.1.0",
     "nodemon": "^2.0.16",
     "prettier": "2.8.7",
-    "supertest": "^6.2.3",
+    "supertest": "^6.3.3",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
