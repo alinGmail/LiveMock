@@ -19,7 +19,7 @@ test("project controller", async () => {
     .expect(200)
     .expect("Content-Type", /json/);
   expect(res.body.name === projectM.name).toBe(true);
-
+  expect(res.body._id).toBeTruthy();
 
   const projectListRes = await request(server).get("/project/")
       .expect(200);

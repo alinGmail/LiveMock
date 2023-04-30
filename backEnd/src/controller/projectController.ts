@@ -1,5 +1,5 @@
 import express, { Request } from "express";
-import { addCross } from "./common";
+import {addCross, ServerError} from "./common";
 import { getProjectDb } from "../db/dbManager";
 import bodyParser from "body-parser";
 import { ProjectM } from "core/struct/project";
@@ -31,9 +31,11 @@ function getProjectRouter(path: string): express.Router {
     async (req: Request<{}, {}, { project: ProjectM }>, res) => {
       addCross(res);
       if (req.body.project) {
-        await projectDbP.insertPromise(req.body.project);
+        const project = await projectDbP.insertPromise(req.body.project);
+        res.json(project);
+      }else{
+        throw new ServerError(400,'invalid request param')
       }
-      res.json(req.body.project);
     }
   );
 

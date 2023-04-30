@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getExpectationDb } from "../db/dbManager";
-import {addCross, ServerError} from "./common";
+import { addCross, ServerError } from "./common";
 import bodyParser from "body-parser";
 import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
 
@@ -17,8 +17,12 @@ export function getExpectationRouter(path: string): express.Router {
     "/",
     bodyParser.json(),
     (req: Request<{}, {}, CreateExpectationParam>, res: Response<string>) => {
-      let expectationP = getExpectationDb(req.body.projectId, path);
       addCross(res);
+      const projectId = req.body.projectId;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      let expectationP = getExpectationDb(projectId, path);
       if (req.body.expectation) {
         expectationP.getDb().insert(req.body.expectation);
       }
@@ -30,10 +34,10 @@ export function getExpectationRouter(path: string): express.Router {
     "/",
     async (req: Request<{}, {}, {}, { projectId: string }>, res) => {
       const projectId = req.query.projectId;
-      if(!projectId){
-          throw new ServerError(400,'project id not exist!');
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
       }
-      getExpectationDb(projectId,path);
+      getExpectationDb(projectId, path);
     }
   );
 

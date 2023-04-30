@@ -16,3 +16,15 @@ export interface ExpectationM {
     _id?: string | undefined | null;
 }
 
+export function createExpectation():ExpectationM{
+    return {
+        action: null,
+        activate: false,
+        createTime: new Date(),
+        delay: 0,
+        id: "",
+        matchers: [],
+        name: "",
+        priority: 0
+    }
+}
