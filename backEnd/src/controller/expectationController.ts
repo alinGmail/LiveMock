@@ -4,6 +4,7 @@ import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
 import { ExpectationM } from "core/struct/expectation";
+import {ListExpectationResponse} from "core/struct/response/ExpectationResponse";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -41,12 +42,14 @@ export function getExpectationRouter(path: string): express.Router {
 
   router.get(
     "/",
-    async (req: Request<{}, {}, {}, { projectId: string }>, res) => {
+    async (req: Request<{}, {}, {}, { projectId: string }>, res:Response<ListExpectationResponse>) => {
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      getExpectationDb(projectId, path);
+      const expectationDb = getExpectationDb(projectId, path);
+      let expectations = await expectationDb.findPromise({});
+      res.json(expectations);
     }
   );
 
