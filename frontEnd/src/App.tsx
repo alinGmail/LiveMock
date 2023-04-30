@@ -1,4 +1,4 @@
-import "antd/dist/reset.css"
+import "antd/dist/reset.css";
 import "./App.css";
 
 import Layout from "./component/Layout";

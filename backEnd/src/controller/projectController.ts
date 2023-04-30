@@ -51,14 +51,15 @@ router.put(
       { _id: req.params.projectId },
       req.body.updateQuery
     );
-    res.end('success');
+    res.end("success");
   }
 );
-
 
 router.delete("/:projectId", bodyParser.json(), async (req, res) => {
   addCross(res);
   // todo remove expectation
   // todo remove log
-  res.end('success');
+  res.end("success");
 });
+
+export { router as projectRouter };
