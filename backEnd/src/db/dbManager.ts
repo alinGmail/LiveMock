@@ -23,19 +23,19 @@ export function getProjectDb(path: string): PromiseDatastore<ProjectM> {
 const expectationDbMap = new Map<string, PromiseDatastore<ExpectationM>>();
 
 export function getExpectationDb(
-  projectName: string,
+  projectId: string,
   path: string
 ): PromiseDatastore<ExpectationM> {
-  const expectationDbP = expectationDbMap.get(`${path}/${projectName}`);
+  const expectationDbP = expectationDbMap.get(`${path}/${projectId}`);
   if (!expectationDbP) {
     const newExpectationDb = new Datastore({
-      filename: `${path}/${projectName}_Exp.db`,
+      filename: `${path}/${projectId}_Exp.db`,
       autoload: true,
     });
     let newExpectationDbP = new PromiseDatastore<ExpectationM>(
       newExpectationDb
     );
-    expectationDbMap.set(projectName, newExpectationDbP);
+    expectationDbMap.set(projectId, newExpectationDbP);
     return newExpectationDbP;
   } else {
     return expectationDbP;
@@ -45,17 +45,17 @@ export function getExpectationDb(
 const logDbMap = new Map<string, PromiseDatastore<LogM>>();
 
 export function getLogDb(
-  projectName: string,
+  projectId: string,
   path: string
 ): PromiseDatastore<LogM> {
-  const logDbP = logDbMap.get(`${path}/${projectName}`);
+  const logDbP = logDbMap.get(`${path}/${projectId}`);
   if (!logDbP) {
     const newLogDb = new Datastore({
-      filename: `${path}/${projectName}_Log.db`,
+      filename: `${path}/${projectId}_Log.db`,
       autoload: true,
     });
     let newLogDbP = new PromiseDatastore<LogM>(newLogDb);
-    logDbMap.set(projectName, newLogDbP);
+    logDbMap.set(projectId, newLogDbP);
     return newLogDbP;
   } else {
     return logDbP;
