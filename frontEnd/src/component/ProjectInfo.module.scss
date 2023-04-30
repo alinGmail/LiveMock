@@ -1,0 +1,29 @@
+.projectInfo {
+  .curProjectRow {
+    margin-left: 30px;
+    height: 50px;
+    .rowLeft {
+      float: left;
+    }
+    .rowRight {
+      float: left;
+      padding-left: 20px;
+    }
+    .projectName {
+      font-size: 20px;
+      line-height: 1.5em;
+      font-weight: bold;
+    }
+    .projectStatus {
+      font-size: 14px;
+      color: #999;
+    }
+    .startIcon {
+      margin-top: 8px;
+      transition: transform 0.3s;
+    }
+    .startIcon:hover {
+      transform: scale(1.2);
+    }
+  }
+}

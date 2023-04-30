@@ -15,7 +15,9 @@
     "modern-css-reset": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.11.0"
+    "react-router-dom": "^6.11.0",
+    "superagent": "^8.0.9",
+    "vite-plugin-svgr": "^2.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",

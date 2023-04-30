@@ -1,5 +1,13 @@
 .layout {
-  display: flex;
+  .headRow{
+    padding: 10px 0px;
+    background: #24292f;
+    color: #fff;
+  }
+  .mainRow{
+    display: flex;
+  }
+
   .leftCol {
     width: 200px;
     background: rgb(247, 246, 243);
