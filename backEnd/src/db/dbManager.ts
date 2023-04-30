@@ -35,7 +35,7 @@ export function getExpectationDb(
     let newExpectationDbP = new PromiseDatastore<ExpectationM>(
       newExpectationDb
     );
-    expectationDbMap.set(projectId, newExpectationDbP);
+    expectationDbMap.set(`${path}/${projectId}`, newExpectationDbP);
     return newExpectationDbP;
   } else {
     return expectationDbP;
@@ -55,7 +55,7 @@ export function getLogDb(
       autoload: true,
     });
     let newLogDbP = new PromiseDatastore<LogM>(newLogDb);
-    logDbMap.set(projectId, newLogDbP);
+    logDbMap.set(`${path}/${projectId}`, newLogDbP);
     return newLogDbP;
   } else {
     return logDbP;

@@ -1,4 +1,4 @@
-import express, {NextFunction, Request, Response} from "express";
+import express, { NextFunction, Request, Response } from "express";
 
 export function addCross(res: express.Response) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -20,10 +20,10 @@ export function contentTypeFilter(req, res, next) {
   res.send = function (data) {
     const dataType = typeof data;
 
-    if (dataType === 'string') {
-      res.set('Content-Type', 'text/plain');
-    } else if (dataType === 'object') {
-      res.set('Content-Type', 'application/json');
+    if (dataType === "string") {
+      res.set("Content-Type", "text/plain");
+    } else if (dataType === "object") {
+      res.set("Content-Type", "application/json");
     }
 
     originalSend.apply(res, arguments);
@@ -32,21 +32,19 @@ export function contentTypeFilter(req, res, next) {
   next();
 }
 
-
-export class ServerError extends Error{
+export class ServerError extends Error {
   status: number;
   constructor(status: number, message: string) {
     super(message);
     this.status = status;
-
   }
 }
 
 export const CustomErrorMiddleware = (
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction,
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   if (err instanceof ServerError) {
     res.status(err.status || 500);
@@ -64,3 +62,25 @@ export const CustomErrorMiddleware = (
     });
   }
 };
+
+const asyncHandler = (fn) => (req, res, next) => {
+  return Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+const methods = [
+  "get",
+  "post",
+  "put",
+  "delete", // & etc.
+];
+
+export function toAsyncRouter(router:express.Router) {
+  for (let key in router) {
+    if (methods.includes(key)) {
+      let method = router[key];
+      router[key] = (path, ...callbacks) =>
+        method.call(router, path, ...callbacks.map((cb) => asyncHandler(cb)));
+    }
+  }
+  return router;
+}

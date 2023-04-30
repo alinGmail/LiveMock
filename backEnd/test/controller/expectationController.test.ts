@@ -6,6 +6,7 @@ import { createExpectation } from "core/struct/expectation";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
+import {deleteFolderRecursive} from "../../src/common/utils";
 
 describe("expectation controller", () => {
   const server = express();
@@ -28,6 +29,11 @@ describe("expectation controller", () => {
     // create expectation
   });
 
+
+  afterAll(async ()=>{
+    deleteFolderRecursive("test_db");
+  })
+
   test("test project id not exist error", async () => {
     const errorRes = await request(server).post("/expectation/").expect(400);
     expect(errorRes.body.error.message).toEqual("project id not exist!");
@@ -42,6 +48,7 @@ describe("expectation controller", () => {
     const expectationM = createExpectation();
     expectationM.name = "text expectation";
     expectationM.priority = 100;
+
     const createParam: CreateExpectationParam = {
       expectation: expectationM,
       projectId: projectId,
