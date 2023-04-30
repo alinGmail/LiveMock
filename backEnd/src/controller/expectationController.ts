@@ -1,8 +1,9 @@
-import express, { Request, Response } from "express";
+import express, {NextFunction, Request, Response} from "express";
 import { getExpectationDb } from "../db/dbManager";
 import { addCross, ServerError } from "./common";
 import bodyParser from "body-parser";
 import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
+import { ExpectationM } from "core/struct/expectation";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = express();
@@ -16,17 +17,31 @@ export function getExpectationRouter(path: string): express.Router {
   router.post(
     "/",
     bodyParser.json(),
-    (req: Request<{}, {}, CreateExpectationParam>, res: Response<string>) => {
-      addCross(res);
-      const projectId = req.body.projectId;
-      if (!projectId) {
-        throw new ServerError(400, "project id not exist!");
+    async (
+      req: Request<{}, {}, CreateExpectationParam>,
+      res: Response<ExpectationM>,
+      next:NextFunction
+    ) => {
+      try{
+        addCross(res);
+        const projectId = req.body.projectId;
+        if (!projectId) {
+          throw new ServerError(400, "project id not exist!");
+        }
+        let expectationP = getExpectationDb(projectId, path);
+        if (req.body.expectation) {
+          const insertPromise = await expectationP.insertPromise(
+              req.body.expectation
+          );
+          res.json(insertPromise);
+        } else {
+          throw new ServerError(400, "expectation not exist!");
+        }
+      }catch (err){
+        next(err);
       }
-      let expectationP = getExpectationDb(projectId, path);
-      if (req.body.expectation) {
-        expectationP.getDb().insert(req.body.expectation);
-      }
-      res.end("success");
+
+
     }
   );
 
