@@ -7,13 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getProjectList } from "./server/projectServer";
 
 function App() {
+  const projectListQuery = useQuery(["getProjectList"], () => {
+    return getProjectList();
+  });
   useEffect(() => {
     // load project list
-    useQuery(["getProjectList"], () => {
-      return getProjectList().then(res =>{
 
-      });
-    });
   }, []);
 
   return (

@@ -4,5 +4,9 @@ import { ProjectListResponse } from "../../../core/struct/response/ProjectListRe
 
 export const getProjectList = async (): Promise<ProjectListResponse> => {
   const res = await superagent.get(`${ServerUrl}/project/`);
-  return res.body;
+  if (res.status === 200) {
+    return res.body;
+  } else {
+    throw new Error(res.body.message);
+  }
 };
