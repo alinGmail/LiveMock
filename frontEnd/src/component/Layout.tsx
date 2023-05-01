@@ -1,7 +1,7 @@
 import mStyle from "./Layout.module.scss";
 import LeftNav from "./LeftNav";
 import { HashRouter } from "react-router-dom";
-import ProjectInfo from "./ProjectInfo";
+import ProjectInfo from "./project/ProjectInfo";
 
 const Layout = () => {
   return (

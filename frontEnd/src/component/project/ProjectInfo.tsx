@@ -1,5 +1,5 @@
 import mStyle from "./ProjectInfo.module.scss";
-import { ReactComponent as StartIcon } from "../assets/svg/play2.svg";
+import { ReactComponent as StartIcon } from "../../assets/svg/play2.svg";
 import StopIcon from "../svg/stop.svg";
 import Icon, { PlusOutlined } from "@ant-design/icons";
 
