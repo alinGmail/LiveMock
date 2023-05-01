@@ -38,6 +38,7 @@ describe("expectation controller", () => {
     const errorRes = await request(server).post("/expectation/").expect(400);
     expect(errorRes.body.error.message).toEqual("project id not exist!");
   });
+
   test("test expectation  not exist error", async () => {
     const errorRes = await request(server)
       .post("/expectation/")
@@ -47,6 +48,14 @@ describe("expectation controller", () => {
       .expect(400);
     expect(errorRes.body.error.message).toEqual("expectation not exist!");
   });
+
+  test("delete expectation fail", async () => {
+    const errorRes = await request(server)
+      .delete("/expectation/12321?projectId=" + projectId)
+      .expect(500);
+    expect(errorRes.body.error.message).toEqual("delete fail");
+  });
+
   test("create expectation ", async () => {
     const expectationM = createExpectation();
     expectationM.name = "text expectation";
@@ -66,8 +75,24 @@ describe("expectation controller", () => {
     expect(createRes.body.action.host).toEqual("https://github.com");
 
     // test list expectation
-    const listResponse = await request(server).get("/expectation/?projectId=" + projectId).expect(200);
-    expect(listResponse.body.length >= 1).toBe(true);
+    const listResponse = await request(server)
+      .get("/expectation/?projectId=" + projectId)
+      .expect(200);
+    expect(listResponse.body.length === 1).toBe(true);
     expect(listResponse.body[0].action.host).toEqual("https://github.com");
+
+    // test delete expectation
+    const delResponse = await request(server)
+      .delete(`/expectation/${createRes.body._id}?projectId=${projectId}`)
+      .expect(200);
+    expect(delResponse.text).toEqual("success");
+
+
+    // after delete,the list is empty
+    const listResponse2 = await request(server)
+        .get("/expectation/?projectId=" + projectId)
+        .expect(200);
+    expect(listResponse2.body.length === 0).toBe(true);
+
   });
 });

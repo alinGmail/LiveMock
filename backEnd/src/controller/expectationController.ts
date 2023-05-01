@@ -4,7 +4,7 @@ import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
 import { ExpectationM } from "core/struct/expectation";
-import {ListExpectationResponse} from "core/struct/response/ExpectationResponse";
+import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -40,9 +40,15 @@ export function getExpectationRouter(path: string): express.Router {
     }
   );
 
+  /**
+   * list expectation
+   */
   router.get(
     "/",
-    async (req: Request<{}, {}, {}, { projectId: string }>, res:Response<ListExpectationResponse>) => {
+    async (
+      req: Request<{}, {}, {}, { projectId: string }>,
+      res: Response<ListExpectationResponse>
+    ) => {
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -52,6 +58,40 @@ export function getExpectationRouter(path: string): express.Router {
       res.json(expectations);
     }
   );
+
+  /**
+   * delete expectation
+   */
+  router.delete(
+    "/:expectationId",
+    async (
+      req: Request<
+        {
+          expectationId: string;
+        },
+        {},
+        {},
+        {
+          projectId: string;
+        }
+      >,
+      res:Response<string>
+    ) => {
+      const expectationId = req.params.expectationId;
+      const projectId = req.query.projectId;
+      const expectationDb = getExpectationDb(projectId, path);
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      let removeNum = await expectationDb.removePromise({ _id: expectationId });
+      if (removeNum >= 1) {
+        res.end('success');
+      } else {
+        throw new ServerError(500,'delete fail');
+      }
+    }
+  );
+
 
   return router;
 }
