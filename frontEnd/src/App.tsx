@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
+import {Spin} from "antd";
 
 function App() {
   const dispatch = useDispatch();
@@ -20,9 +21,20 @@ function App() {
       return res;
     },
   });
+
   return (
     <>
-      {projectList.length === 0 ? <WelcomePage /> : <Layout />}
+      {!projectListQuery.isLoading ? (
+        projectList.length === 0 ? (
+          <WelcomePage />
+        ) : (
+          <Layout />
+        )
+      ) : (
+        <Spin tip="Loading" size="large">
+          <div className="content" style={{height:"500px"}}/>
+        </Spin>
+      )}
       <Toaster />
     </>
   );
