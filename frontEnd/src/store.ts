@@ -4,7 +4,7 @@ import { reducer as projectReducer } from "./slice/projectSlice";
 
 export const store = configureStore({
   reducer: {
-    [projectReducer.name]: projectReducer,
+    "project": projectReducer,
   },
 });
 

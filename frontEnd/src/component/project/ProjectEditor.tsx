@@ -5,7 +5,7 @@ import { Button, Col, Input, InputNumber, Row } from "antd";
 import mStyle from "./ProjectEditor.module.scss";
 import TextArea from "antd/es/input/TextArea";
 import {Updater} from "use-immer";
-import {register} from "./common";
+import {register, registerNumber} from "./common";
 
 const ProjectEditor: FC<{
   editorType: EditorType;
@@ -15,20 +15,19 @@ const ProjectEditor: FC<{
 }> = (
   { editorType, projectM,updaterProjectM }
 ) => {
-  const aa = register<ProjectM>("name",updaterProjectM,projectM);
   return (
     <div className={mStyle.projectEditor}>
       <Row gutter={16}>
         <Col span={18}>
           <div className={mStyle.inpLabel}>project name:</div>
           <div>
-            <Input placeholder={""} />
+            <Input placeholder={""} {...register(projectM,"name",updaterProjectM)}/>
           </div>
         </Col>
         <Col span={6}>
           <div className={mStyle.inpLabel}>port:</div>
           <div>
-            <InputNumber style={{ width: "100%" }} placeholder={""} />
+            <InputNumber {...registerNumber(projectM,"port",updaterProjectM)} style={{ width: "100%" }} placeholder={""} />
           </div>
         </Col>
       </Row>
