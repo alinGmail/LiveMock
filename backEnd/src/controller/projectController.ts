@@ -1,14 +1,15 @@
 import express, {Request, Response} from "express";
-import {addCross, ServerError} from "./common";
+import {addCross, ServerError, toAsyncRouter} from "./common";
 import { getProjectDb } from "../db/dbManager";
 import bodyParser from "body-parser";
 import { ProjectM } from "core/struct/project";
 import {CreateProjectParam} from "core/struct/params/ProjectParams";
 import {CreateProjectResponse} from "core/struct/response/ProjectListResponse";
+import {isNotEmptyString} from "../common/utils";
 
 function getProjectRouter(path: string): express.Router {
   const projectDbP = getProjectDb(path);
-  let router = express.Router();
+  let router = toAsyncRouter(express());
 
   router.options("*", (req, res) => {
     addCross(res);
@@ -33,6 +34,9 @@ function getProjectRouter(path: string): express.Router {
     async (req: Request<{}, {}, CreateProjectParam>, res:Response<CreateProjectResponse>) => {
       addCross(res);
       if (req.body.project) {
+        if(!isNotEmptyString(req.body.project.name)){
+          throw new ServerError(400,'project name can not be empty!');
+        }
         const project = await projectDbP.insertPromise(req.body.project);
         res.json(project);
       }else{
