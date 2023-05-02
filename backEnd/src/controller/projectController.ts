@@ -1,8 +1,10 @@
-import express, { Request } from "express";
+import express, {Request, Response} from "express";
 import {addCross, ServerError} from "./common";
 import { getProjectDb } from "../db/dbManager";
 import bodyParser from "body-parser";
 import { ProjectM } from "core/struct/project";
+import {CreateProjectParam} from "core/struct/params/ProjectParams";
+import {CreateProjectResponse} from "core/struct/response/ProjectListResponse";
 
 function getProjectRouter(path: string): express.Router {
   const projectDbP = getProjectDb(path);
@@ -28,7 +30,7 @@ function getProjectRouter(path: string): express.Router {
   router.post(
     "/",
     bodyParser.json(),
-    async (req: Request<{}, {}, { project: ProjectM }>, res) => {
+    async (req: Request<{}, {}, CreateProjectParam>, res:Response<CreateProjectResponse>) => {
       addCross(res);
       if (req.body.project) {
         const project = await projectDbP.insertPromise(req.body.project);

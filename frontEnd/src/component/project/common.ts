@@ -6,14 +6,12 @@ type StringProperties<T> = {
   [K in keyof T]: T[K] extends string ? K : never;
 };
 
-
-
 type StringKeys<T> = {
   [K in keyof T]: T[K] extends string ? K : never;
 }[keyof T];
 
 type NumberKeys<T> = {
-    [K in keyof T]: T[K] extends number ? K : never;
+  [K in keyof T]: T[K] extends number ? K : never;
 }[keyof T];
 
 export function register<T>(
@@ -38,16 +36,15 @@ export function registerNumber<T>(
   updater: Updater<T>
 ) {
   return {
-    onChange: (value: (number|string)|null) => {
+    onChange: (value: (number | string) | null) => {
       updater((draft: Draft<T>) => {
-
-          if (typeof value === "string") {
-              // @ts-ignore
-              draft[name] = parseInt(value);
-          }else if(typeof value === "number"){
-              // @ts-ignore
-              draft[name] = value;
-          }
+        if (typeof value === "string") {
+          // @ts-ignore
+          draft[name] = parseInt(value);
+        } else if (typeof value === "number") {
+          // @ts-ignore
+          draft[name] = value;
+        }
       });
     },
     value: model[name],

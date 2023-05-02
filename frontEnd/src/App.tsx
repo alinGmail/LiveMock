@@ -2,7 +2,7 @@ import "antd/dist/reset.css";
 import "./App.css";
 import Layout from "./component/Layout";
 import { useQuery } from "@tanstack/react-query";
-import { getProjectList } from "./server/projectServer";
+import { getProjectListReq } from "./server/projectServer";
 import WelcomePage from "./page/WelcomePage";
 import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
@@ -14,7 +14,7 @@ function App() {
   const projectListQuery = useQuery({
     queryKey: ["projectList"],
     queryFn: async () => {
-      let res = await getProjectList();
+      let res = await getProjectListReq();
       dispatch(setProjectList(res));
       return res;
     },

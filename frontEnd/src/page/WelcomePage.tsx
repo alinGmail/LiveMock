@@ -1,10 +1,11 @@
 import mStyle from "./WelcomePage.module.scss";
-import {Updater, useImmer} from "use-immer";
+import { Updater, useImmer } from "use-immer";
 import { ProjectM } from "core/struct/project";
 import { useEffect, useState } from "react";
 import { createProject } from "core/struct/project";
 import ProjectEditor from "../component/project/ProjectEditor";
 import { EditorType } from "../struct/common";
+import {createProjectReq} from "../server/projectServer";
 
 export const WelcomePage = () => {
   const [project, updateProject] = useImmer<ProjectM | null>(null);
@@ -12,7 +13,9 @@ export const WelcomePage = () => {
     updateProject(createProject());
   }, []);
 
-  function onProjectEditorSubmit(project: ProjectM) {}
+  function onProjectEditorSubmit(project: ProjectM) {
+      createProjectReq({project});
+  }
 
   return (
     <div className={mStyle.welcomePage}>

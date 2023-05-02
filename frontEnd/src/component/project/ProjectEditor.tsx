@@ -13,7 +13,7 @@ const ProjectEditor: FC<{
   onSubmit: (project: ProjectM) => void;
   updaterProjectM:Updater<ProjectM>;
 }> = (
-  { editorType, projectM,updaterProjectM }
+  { editorType, projectM,updaterProjectM ,onSubmit}
 ) => {
   return (
     <div className={mStyle.projectEditor}>
@@ -35,13 +35,15 @@ const ProjectEditor: FC<{
         <Col span={24}>
           <div className={mStyle.inpLabel}>description:</div>
           <div>
-            <TextArea rows={4} placeholder={""} />
+            <TextArea {...register(projectM,'description',updaterProjectM)} rows={4} placeholder={""} />
           </div>
         </Col>
       </Row>
       <Row>
         <Col span={24}>
-          <Button className={mStyle.submitBtn} size={"large"} type={"primary"}>Submit</Button>
+          <Button className={mStyle.submitBtn} size={"large"} type={"primary"} onClick={()=>{
+            onSubmit(projectM);
+          }}>Submit</Button>
         </Col>
       </Row>
     </div>
