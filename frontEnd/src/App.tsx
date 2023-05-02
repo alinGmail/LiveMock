@@ -7,6 +7,7 @@ import WelcomePage from "./page/WelcomePage";
 import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const dispatch = useDispatch();
@@ -19,7 +20,12 @@ function App() {
       return res;
     },
   });
-  return <>{projectList.length === 0 ? <WelcomePage /> : <Layout />}</>;
+  return (
+    <>
+      {projectList.length === 0 ? <WelcomePage /> : <Layout />}
+      <Toaster />
+    </>
+  );
 }
 
 export default App;

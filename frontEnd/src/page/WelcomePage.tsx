@@ -6,6 +6,8 @@ import { createProject } from "core/struct/project";
 import ProjectEditor from "../component/project/ProjectEditor";
 import { EditorType } from "../struct/common";
 import {createProjectReq} from "../server/projectServer";
+import toast from "react-hot-toast";
+import {getErrorMessage} from "../component/common";
 
 export const WelcomePage = () => {
   const [project, updateProject] = useImmer<ProjectM | null>(null);
@@ -14,7 +16,13 @@ export const WelcomePage = () => {
   }, []);
 
   function onProjectEditorSubmit(project: ProjectM) {
-      createProjectReq({project});
+
+      const createPromise =  createProjectReq({project});
+      toast.promise(createPromise,{
+          error: getErrorMessage,
+          loading: "loading",
+          success: 'operation successful'
+      })
   }
 
   return (
