@@ -17,8 +17,9 @@ function App() {
 
   return (
     <>
+        <WelcomePage/>
       <Layout />
-      <WelcomePage></WelcomePage>
+
     </>
   );
 }

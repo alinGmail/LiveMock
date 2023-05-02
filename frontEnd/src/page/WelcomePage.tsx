@@ -1,26 +1,23 @@
 import mStyle from "./WelcomePage.module.scss";
 import { useImmer } from "use-immer";
-import { ProjectM } from "/core/struct";
+import { ProjectM } from "core/struct/project";
 import { useEffect, useState } from "react";
-import { createProject } from "../../../core/struct/project";
+import { createProject } from "core/struct/project";
+import ProjectEditor from "../component/project/ProjectEditor";
+import { EditorType } from "../struct/common";
 
 export const WelcomePage = () => {
   const [project, updateProject] = useImmer<ProjectM | null>(null);
-  useEffect(()=>{
-      updateProject(createProject());
-  },[])
-  const [count, setCount] = useState(0);
+  useEffect(() => {
+    updateProject(createProject());
+  }, []);
+
   return (
     <div className={mStyle.welcomePage}>
-      <div className={mStyle.title}>Welcome to LiveMock{count}</div>
+      <div className={mStyle.title}>Welcome to LiveMock</div>
       <div className={mStyle.smallTitle}>create a project to start</div>
-      <div
-        onClick={() => {
-          setCount(count + 1);
-        }}
-      >
-        ffff
-      </div>
+      <ProjectEditor editorType={EditorType.ADD} projectM={project} />
+
     </div>
   );
 };
