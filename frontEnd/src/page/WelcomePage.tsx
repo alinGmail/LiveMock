@@ -1,5 +1,5 @@
 import mStyle from "./WelcomePage.module.scss";
-import { useImmer } from "use-immer";
+import {Updater, useImmer} from "use-immer";
 import { ProjectM } from "core/struct/project";
 import { useEffect, useState } from "react";
 import { createProject } from "core/struct/project";
@@ -12,12 +12,20 @@ export const WelcomePage = () => {
     updateProject(createProject());
   }, []);
 
+  function onProjectEditorSubmit(project: ProjectM) {}
+
   return (
     <div className={mStyle.welcomePage}>
       <div className={mStyle.title}>Welcome to LiveMock</div>
       <div className={mStyle.smallTitle}>create a project to start</div>
-      <ProjectEditor editorType={EditorType.ADD} projectM={project} />
-
+      {project && (
+        <ProjectEditor
+          editorType={EditorType.ADD}
+          projectM={project}
+          onSubmit={onProjectEditorSubmit}
+          updaterProjectM={updateProject as Updater<ProjectM>}
+        />
+      )}
     </div>
   );
 };

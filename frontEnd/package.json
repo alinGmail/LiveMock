@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
-    "@reduxjs/toolkit": "^1.9.5",
-    "@tanstack/react-query": "^4.29.5",
+    "@reduxjs/toolkit": "^1.8.1",
+    "@tanstack/react-query": "^4.24.10",
     "@types/superagent": "^4.1.17",
     "antd": "^5.4.6",
     "core": "file:../core",
@@ -37,7 +37,7 @@
     "prettier": "^2.8.8",
     "sass": "^1.62.1",
     "supertest": "^6.3.3",
-    "typescript": "^5.0.2",
+    "typescript": "^4.9.5",
     "vite": "^4.3.0"
   }
 }

@@ -4,20 +4,18 @@ import { FC } from "react";
 import { Button, Col, Input, InputNumber, Row } from "antd";
 import mStyle from "./ProjectEditor.module.scss";
 import TextArea from "antd/es/input/TextArea";
+import {Updater} from "use-immer";
+import {register} from "./common";
 
 const ProjectEditor: FC<{
   editorType: EditorType;
-  projectM: ProjectM | null;
+  projectM: ProjectM;
   onSubmit: (project: ProjectM) => void;
+  updaterProjectM:Updater<ProjectM>;
 }> = (
-  { editorType, projectM } = {
-    projectM: null,
-    editorType: EditorType.ADD,
-  }
+  { editorType, projectM,updaterProjectM }
 ) => {
-  if (!projectM) {
-    return null;
-  }
+  const aa = register<ProjectM>("name",updaterProjectM,projectM);
   return (
     <div className={mStyle.projectEditor}>
       <Row gutter={16}>
