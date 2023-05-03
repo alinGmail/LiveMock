@@ -2,8 +2,11 @@ import mStyle from "./Layout.module.scss";
 import LeftNav from "./LeftNav";
 import { HashRouter } from "react-router-dom";
 import ProjectInfo from "./project/ProjectInfo";
+import * as React from "react";
 
-const Layout = () => {
+const Layout:React.FC<{
+  children:React.ReactNode
+}> = (props) => {
   return (
     <HashRouter>
       <div className={mStyle.layout}>
@@ -14,7 +17,9 @@ const Layout = () => {
           <div className={mStyle.leftCol}>
             <LeftNav />
           </div>
-          <div className={mStyle.rightCol}>bbb</div>
+          <div className={mStyle.rightCol}>
+            {props.children}
+          </div>
         </div>
       </div>
     </HashRouter>

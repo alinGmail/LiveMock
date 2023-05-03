@@ -9,6 +9,8 @@ import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
 import {Spin} from "antd";
+import {Route, Routes } from "react-router-dom";
+import ExpectationPage from "./page/ExpectationPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -28,7 +30,11 @@ function App() {
         projectList.length === 0 ? (
           <WelcomePage />
         ) : (
-          <Layout />
+            <Layout >
+              <Routes>
+                <Route path={"expectation"} element={<ExpectationPage />} />
+              </Routes>
+            </Layout>
         )
       ) : (
         <Spin tip="Loading" size="large">

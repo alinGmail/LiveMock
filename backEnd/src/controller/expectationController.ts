@@ -79,6 +79,7 @@ export function getExpectationRouter(path: string): express.Router {
           expectationId: string;
         },
         {},
+        {},
         {
           projectId: string;
         }
@@ -86,7 +87,7 @@ export function getExpectationRouter(path: string): express.Router {
       res: Response<DeleteExpectationResponse>
     ) => {
       const expectationId = req.params.expectationId;
-      const projectId = req.body.projectId;
+      const projectId = req.query.projectId;
       const expectationDb = getExpectationDb(projectId, path);
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
