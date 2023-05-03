@@ -1,5 +1,5 @@
 import { ExpectationM } from "core/struct/expectation";
-import { Input } from "antd";
+import {Input, InputNumber} from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import { updateExpectationState } from "../../slice/expectationSlice";
@@ -46,4 +46,28 @@ export const NameColumn = ({
       />
     </div>
   );
+};
+
+export const DelayColumn = ({
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
+    return <div>
+        <InputNumber placeholder={"empty"}
+        value={expectation.delay}
+                     onChange={(number) =>{
+                         const { data, run } = useRequest(updateExpectationName, {
+                             debounceWait: debounceWait,
+                             manual: true,
+                         });
+                     }}
+        />
+    </div>
 };

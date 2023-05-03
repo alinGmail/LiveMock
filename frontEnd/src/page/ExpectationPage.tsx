@@ -9,6 +9,7 @@ import { createExpectation, ExpectationM } from "core/struct/expectation";
 import { NameColumn } from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
+import {toastPromise} from "../component/common";
 
 const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
@@ -50,6 +51,10 @@ const ExpectationPage = () => {
               projectState.projectList[projectState.curProjectIndex]._id!,
               createExpectation()
             );
+            toastPromise(createPromise);
+            createPromise.then(res =>{
+              getExpectationListQuery.refetch();
+            });
           }}
         >
           Add Expectation

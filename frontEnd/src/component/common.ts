@@ -1,4 +1,5 @@
 import * as superagent from "superagent";
+import toast from "react-hot-toast";
 
 /**
  * get the error message
@@ -15,4 +16,13 @@ export function getErrorMessage(error: any) {
   } else {
     return "an error occurred";
   }
+}
+
+
+export function toastPromise(promise:Promise<any>){
+  return toast.promise(promise,{
+    error: getErrorMessage,
+    loading: "loading",
+    success: 'operation successful'
+  })
 }
