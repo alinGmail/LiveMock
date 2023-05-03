@@ -6,16 +6,19 @@ import { updateExpectationState } from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
 
-async function updateExpectationName(expectationId:string,updateQuery:any) {
+async function updateExpectationName(expectationId: string, updateQuery: any) {}
 
-}
-
-export const NameColumn = (
-  text: string,
-  expectation: ExpectationM,
-  index: number,
-  dispatch: AppDispatch
-) => {
+export const NameColumn = ({
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
   return (
     <div>
       <Input

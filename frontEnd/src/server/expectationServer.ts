@@ -5,7 +5,7 @@ import {
 import { ExpectationM } from "core/struct/expectation";
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
-import { CreateExpectationResponse } from "core/struct/response/ExpectationResponse";
+import {CreateExpectationResponse, ListExpectationResponse} from "core/struct/response/ExpectationResponse";
 
 export const createExpectationReq = async (
   projectId: string,
@@ -31,5 +31,12 @@ export const updateExpectationReq = async (
   const res = await superagent
     .put(`${ServerUrl}/expectation/${expectationId}`)
     .send(param);
+  return res.body;
+};
+
+export const getExpectationListReq = async (projectId: string):Promise<ListExpectationResponse> => {
+  const res = await superagent.get(
+    `${ServerUrl}/Expectation/?projectId=${projectId}`
+  );
   return res.body;
 };

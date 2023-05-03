@@ -58,6 +58,7 @@ export function getExpectationRouter(path: string): express.Router {
       req: Request<{}, {}, {}, { projectId: string }>,
       res: Response<ListExpectationResponse>
     ) => {
+      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
