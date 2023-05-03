@@ -19,7 +19,7 @@ export const createExpectationReq = async (
   return res.body;
 };
 
-export const updateExpectationResponse = async (
+export const updateExpectationReq = async (
   projectId: string,
   expectationId: string,
   updateQuery: any

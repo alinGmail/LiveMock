@@ -6,6 +6,7 @@ export interface ProjectM{
     status: ProjectStatus;
     error: boolean;
     errorMessage: string | null;
+    _id?:string;
 }
 
 
