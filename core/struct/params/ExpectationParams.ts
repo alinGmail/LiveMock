@@ -11,3 +11,7 @@ export interface UpdateExpectationParam{
     projectId:string;
 }
 
+export interface ExpectationDetailParam{
+    projectId:string;
+}
+

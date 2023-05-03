@@ -4,10 +4,13 @@ import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
   CreateExpectationParam,
+  ExpectationDetailParam,
   UpdateExpectationParam,
 } from "core/struct/params/ExpectationParams";
 import { ExpectationM } from "core/struct/expectation";
 import {
+  DeleteExpectationResponse,
+  ExpectationDetailResponse,
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
@@ -80,7 +83,7 @@ export function getExpectationRouter(path: string): express.Router {
           projectId: string;
         }
       >,
-      res: Response<string>
+      res: Response<DeleteExpectationResponse>
     ) => {
       const expectationId = req.params.expectationId;
       const projectId = req.body.projectId;
@@ -90,7 +93,7 @@ export function getExpectationRouter(path: string): express.Router {
       }
       let removeNum = await expectationDb.removePromise({ _id: expectationId });
       if (removeNum >= 1) {
-        res.end("success");
+        res.json({ message: "operation success" });
       } else {
         throw new ServerError(500, "delete fail");
       }
@@ -122,11 +125,38 @@ export function getExpectationRouter(path: string): express.Router {
 
       let updateRes = await expectationDb.updatePromise(
         {
-          _id: req.params.expectationId,
+          _id: expectationId,
         },
         req.body.updateQuery
       );
       res.json({ message: "operation success" });
+    }
+  );
+
+  /**
+   * get expectation
+   */
+  router.get(
+    "/:expectationId",
+    bodyParser.json(),
+    async (
+      req: Request<
+        {
+          expectationId: string;
+        },
+        {},
+        ExpectationDetailParam
+      >,
+      res: Response<ExpectationDetailResponse>
+    ) => {
+      const projectId = req.body.projectId;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const expectationDb = getExpectationDb(projectId, path);
+      const expectationId = req.params.expectationId;
+      const result = await expectationDb.findOnePromise({ _id: expectationId });
+      res.json(result);
     }
   );
 
