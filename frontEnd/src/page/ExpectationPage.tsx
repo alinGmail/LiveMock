@@ -1,6 +1,6 @@
 import { Button, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useAppSelector } from "../store";
+import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
   getExpectationListReq,
@@ -9,16 +9,20 @@ import { createExpectation, ExpectationM } from "core/struct/expectation";
 import { NameColumn } from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
-import {toastPromise} from "../component/common";
+import { toastPromise } from "../component/common";
+import { getExpectationSuccess } from "../slice/thunk";
 
 const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
+  const expectationState = useAppSelector((state) => state.expectation);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject._id],
     () => {
-      return getExpectationListReq(currentProject._id!);
+      return getExpectationListReq(currentProject._id!).then((res) => {
+        dispatch(getExpectationSuccess(currentProject._id!, res));
+      });
     }
   );
 
@@ -52,7 +56,7 @@ const ExpectationPage = () => {
               createExpectation()
             );
             toastPromise(createPromise);
-            createPromise.then(res =>{
+            createPromise.then((res) => {
               getExpectationListQuery.refetch();
             });
           }}
@@ -65,7 +69,7 @@ const ExpectationPage = () => {
           columns={expectationColumn}
           size={"small"}
           rowKey={"_id"}
-          dataSource={getExpectationListQuery.data}
+          dataSource={expectationState.expectationList}
           loading={getExpectationListQuery.isFetching}
         />
       </div>
