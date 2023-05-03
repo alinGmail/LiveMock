@@ -16,19 +16,21 @@ const expectationSlice = createSlice({
     setExpectationList(state, action: PayloadAction<Array<ExpectationM>>) {
       state.expectationList = action.payload;
     },
-    updateExpectationState: (
+    updateExpectationItem: (
       state,
       action: PayloadAction<{
-        updateFn: (expectation: Draft<ExpectationState>) => void;
+       expectationIndex:number,
+        modifyValues:Partial<ExpectationM>
       }>
     ) => {
-      action.payload.updateFn(state);
+      const item = state.expectationList[action.payload.expectationIndex];
+      Object.assign(item,action.payload.modifyValues);
     },
   },
 });
 
 let {actions, caseReducers, getInitialState, name, reducer} = expectationSlice;
 
-let {setExpectationList, updateExpectationState} = actions;
+let {setExpectationList, updateExpectationItem} = actions;
 
-export {setExpectationList,updateExpectationState,reducer}
+export {setExpectationList,updateExpectationItem,reducer}

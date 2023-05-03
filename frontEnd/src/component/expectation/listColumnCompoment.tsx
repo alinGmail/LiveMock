@@ -1,24 +1,44 @@
 import { ExpectationM } from "core/struct/expectation";
-import {Input, InputNumber} from "antd";
+import { Input, InputNumber } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
-import { updateExpectationState } from "../../slice/expectationSlice";
+import { updateExpectationItem } from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
+import { updateExpectationReq } from "../../server/expectationServer";
+import { toastPromise } from "../common";
 
-async function updateExpectationName(expectationId: string, updateQuery: any) {}
+async function updateExpectationName(
+  projectId: string,
+  expectationId: string,
+  updateQuery: any
+) {
+  const updatePromise = updateExpectationReq(
+    projectId,
+    expectationId,
+    updateQuery
+  );
+  toastPromise(updatePromise);
+  return updatePromise;
+}
 
 export const NameColumn = ({
+  projectId,
   text,
   expectation,
   index,
   dispatch,
 }: {
+  projectId: string;
   text: string;
   expectation: ExpectationM;
   index: number;
   dispatch: AppDispatch;
 }) => {
+  const { data, run } = useRequest(updateExpectationName, {
+    debounceWait: debounceWait,
+    manual: true,
+  });
   return (
     <div>
       <Input
@@ -29,15 +49,16 @@ export const NameColumn = ({
             value: string;
           }>
         ) => {
-          const { data, run } = useRequest(updateExpectationName, {
-            debounceWait: debounceWait,
-            manual: true,
+          run(projectId, expectation._id!, {
+            $set: {
+              name: event.target.value,
+            },
           });
           dispatch(
-            updateExpectationState({
-              updateFn: (expectationStateDraft) => {
-                expectationStateDraft.expectationList[index].name =
-                  event.target.value;
+            updateExpectationItem({
+              expectationIndex: index,
+              modifyValues: {
+                name: event.target.value,
               },
             })
           );
@@ -59,15 +80,18 @@ export const DelayColumn = ({
   index: number;
   dispatch: AppDispatch;
 }) => {
-    return <div>
-        <InputNumber placeholder={"empty"}
+  return (
+    <div>
+      <InputNumber
+        placeholder={"empty"}
         value={expectation.delay}
-                     onChange={(number) =>{
-                         const { data, run } = useRequest(updateExpectationName, {
-                             debounceWait: debounceWait,
-                             manual: true,
-                         });
-                     }}
-        />
+        onChange={(number) => {
+          const { data, run } = useRequest(updateExpectationName, {
+            debounceWait: debounceWait,
+            manual: true,
+          });
+        }}
+      />
     </div>
+  );
 };

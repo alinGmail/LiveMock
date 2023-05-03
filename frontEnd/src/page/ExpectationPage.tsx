@@ -22,6 +22,7 @@ const ExpectationPage = () => {
     () => {
       return getExpectationListReq(currentProject._id!).then((res) => {
         dispatch(getExpectationSuccess(currentProject._id!, res));
+        return res;
       });
     }
   );
@@ -34,6 +35,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
           <NameColumn
+              projectId={currentProject._id!}
             text={text}
             expectation={record}
             index={index}
