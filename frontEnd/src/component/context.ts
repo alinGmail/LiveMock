@@ -1,0 +1,48 @@
+import {createContext, useContext} from "react";
+import {RequestMatcherM} from "core/struct/matcher";
+import {IAction} from "core/struct/action";
+
+const ExpectationContext = createContext(null);
+
+interface MatcherContextData {
+  matcherIndex: number | null;
+  onMatcherAdd: (matcher: RequestMatcherM) => void;
+  onMatcherModify: (matcher: RequestMatcherM) => void;
+  onMatcherDel: (matcher: RequestMatcherM) => void;
+}
+const MatcherContext = createContext<MatcherContextData>({
+  matcherIndex: null,
+  onMatcherAdd: () => {},
+  onMatcherModify: () => {},
+  onMatcherDel: () => {},
+});
+
+function useMatcherContext(): MatcherContextData {
+  const context = useContext(MatcherContext);
+  if (context.matcherIndex === null) {
+    throw new Error("matcherIndex must not null");
+  }
+  return context;
+}
+
+interface ActionContextData {
+  onActionModify: (action: IAction) => void;
+  onActionRemove: () => void;
+}
+
+const ActionContext = createContext<ActionContextData>({
+  onActionModify: () => {},
+  onActionRemove: () => {},
+});
+
+function useActionContext(): ActionContextData {
+  return useContext(ActionContext);
+}
+
+export {
+  ExpectationContext,
+  MatcherContext,
+  useMatcherContext,
+  useActionContext,
+  ActionContext,
+};

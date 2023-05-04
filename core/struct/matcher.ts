@@ -140,3 +140,12 @@ export function createQueryMatcher(): QueryMatcherM {
     value: "",
   };
 }
+export const matcherHasName = (matcher: RequestMatcherM) => {
+  return [
+    RequestMatcherType.HEADER,
+    RequestMatcherType.PARAM,
+    RequestMatcherType.QUERY,
+  ].indexOf(matcher.type) !== -1;
+};
+
+export type RequestMatcherHasName = HeaderMatcherM | QueryMatcherM | ParamMatcherM;
