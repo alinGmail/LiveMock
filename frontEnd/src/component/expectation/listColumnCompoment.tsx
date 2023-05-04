@@ -1,5 +1,5 @@
 import { ExpectationM } from "core/struct/expectation";
-import { Input, InputNumber } from "antd";
+import { Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import { updateExpectationItem } from "../../slice/expectationSlice";
@@ -120,6 +120,11 @@ export const NumberColumn: React.FC<NumberColumnProps> = ({
   );
 };
 
+/**
+ * DelayColumn
+ * @param props
+ * @constructor
+ */
 export const DelayColumn: React.FC<
   Pick<
     NumberColumnProps,
@@ -127,6 +132,11 @@ export const DelayColumn: React.FC<
   >
 > = (props) => <NumberColumn {...props} valueKey="delay" placeholder="empty" />;
 
+/**
+ * PriorityColumn
+ * @param props
+ * @constructor
+ */
 export const PriorityColumn: React.FC<
   Pick<
     NumberColumnProps,
@@ -135,3 +145,51 @@ export const PriorityColumn: React.FC<
 > = (props) => (
   <NumberColumn {...props} valueKey="priority" placeholder="empty" />
 );
+
+/**
+ * ActivateColumn
+ * @param projectId
+ * @param text
+ * @param expectation
+ * @param index
+ * @param dispatch
+ * @constructor
+ */
+export const ActivateColumn = ({
+  projectId,
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  projectId: string;
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
+
+  return (
+    <div>
+      <Switch
+        checked={expectation.activate}
+        onChange={(value) => {
+          updateExpectation(projectId, expectation._id!, {
+            $set: {
+              activate: value,
+            },
+          });
+          dispatch(
+            updateExpectationItem({
+              expectationIndex: index,
+              modifyValues: {
+                activate: value,
+              },
+            })
+          );
+          //
+        }}
+      />
+    </div>
+  );
+};
