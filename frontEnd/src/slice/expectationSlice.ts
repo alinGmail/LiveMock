@@ -5,8 +5,6 @@ export interface ExpectationState {
   expectationList: Array<ExpectationM>;
 }
 
-
-
 const expectationSlice = createSlice({
   name: "expectation",
   initialState: {
@@ -19,18 +17,19 @@ const expectationSlice = createSlice({
     updateExpectationItem: (
       state,
       action: PayloadAction<{
-       expectationIndex:number,
-        modifyValues:Partial<ExpectationM>
+        expectationIndex: number;
+        modifyValues: Partial<ExpectationM>;
       }>
     ) => {
       const item = state.expectationList[action.payload.expectationIndex];
-      Object.assign(item,action.payload.modifyValues);
+      Object.assign(item, action.payload.modifyValues);
     },
   },
 });
 
-let {actions, caseReducers, getInitialState, name, reducer} = expectationSlice;
+let { actions, caseReducers, getInitialState, name, reducer } =
+  expectationSlice;
 
-let {setExpectationList, updateExpectationItem} = actions;
+let { setExpectationList, updateExpectationItem } = actions;
 
-export {setExpectationList,updateExpectationItem,reducer}
+export { setExpectationList, updateExpectationItem, reducer };

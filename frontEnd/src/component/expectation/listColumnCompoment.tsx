@@ -7,8 +7,9 @@ import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
 import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
+import * as React from "react";
 
-async function updateExpectationName(
+async function updateExpectation(
   projectId: string,
   expectationId: string,
   updateQuery: any
@@ -35,7 +36,7 @@ export const NameColumn = ({
   index: number;
   dispatch: AppDispatch;
 }) => {
-  const { data, run } = useRequest(updateExpectationName, {
+  const { data, run } = useRequest(updateExpectation, {
     debounceWait: debounceWait,
     manual: true,
   });
@@ -69,29 +70,68 @@ export const NameColumn = ({
   );
 };
 
-export const DelayColumn = ({
-  text,
-  expectation,
-  index,
-  dispatch,
-}: {
+interface NumberColumnProps {
+  projectId: string;
   text: string;
   expectation: ExpectationM;
   index: number;
   dispatch: AppDispatch;
+  valueKey: keyof ExpectationM;
+  placeholder: string;
+}
+
+export const NumberColumn: React.FC<NumberColumnProps> = ({
+  projectId,
+  text,
+  expectation,
+  index,
+  dispatch,
+  valueKey,
+  placeholder,
 }) => {
+  const { data, run } = useRequest(updateExpectation, {
+    debounceWait: debounceWait,
+    manual: true,
+  });
+  const handleChange = (number: number | null) => {
+    if (number === null) return;
+    run(projectId, expectation._id!, {
+      $set: {
+        [valueKey]: number,
+      },
+    });
+    dispatch(
+      updateExpectationItem({
+        expectationIndex: index,
+        modifyValues: {
+          [valueKey]: number,
+        },
+      })
+    );
+  };
   return (
     <div>
       <InputNumber
-        placeholder={"empty"}
-        value={expectation.delay}
-        onChange={(number) => {
-          const { data, run } = useRequest(updateExpectationName, {
-            debounceWait: debounceWait,
-            manual: true,
-          });
-        }}
+        placeholder={placeholder}
+        value={expectation[valueKey] as number}
+        onChange={handleChange}
       />
     </div>
   );
 };
+
+export const DelayColumn: React.FC<
+  Pick<
+    NumberColumnProps,
+    "projectId" | "text" | "expectation" | "dispatch" | "index"
+  >
+> = (props) => <NumberColumn {...props} valueKey="delay" placeholder="empty" />;
+
+export const PriorityColumn: React.FC<
+  Pick<
+    NumberColumnProps,
+    "projectId" | "text" | "expectation" | "dispatch" | "index"
+  >
+> = (props) => (
+  <NumberColumn {...props} valueKey="priority" placeholder="empty" />
+);

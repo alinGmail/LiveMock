@@ -6,7 +6,10 @@ import {
   getExpectationListReq,
 } from "../server/expectationServer";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
-import { NameColumn } from "../component/expectation/listColumnCompoment";
+import {
+    DelayColumn,
+    NameColumn, PriorityColumn,
+} from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
@@ -35,7 +38,39 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
           <NameColumn
-              projectId={currentProject._id!}
+            projectId={currentProject._id!}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+          />
+        );
+      },
+    },
+    {
+      title: "delay",
+      dataIndex: "delay",
+      key: "delay",
+      render: (text: string, record: ExpectationM, index: number) => {
+        return (
+          <DelayColumn
+            projectId={currentProject._id!}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+          />
+        );
+      },
+    },
+    {
+      title: "priority",
+      dataIndex: "priority",
+      key: "priority",
+      render: (text: string, record: ExpectationM, index: number) => {
+        return (
+          <PriorityColumn
+            projectId={currentProject._id!}
             text={text}
             expectation={record}
             index={index}
