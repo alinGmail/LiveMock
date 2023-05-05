@@ -13,9 +13,9 @@ import styles from "./MatcherItem.module.css";
 import { Dropdown } from "antd";
 import { useMatcherContext } from "../context";
 import { v4 as uuidv4 } from "uuid";
-import { NInput } from "./nui/NInput";
+import { NInput } from "../nui/NInput";
 import { CloseSquareTwoTone } from "@ant-design/icons";
-import MatcherTypeSelector from "./matcher/MatcherTypeSelector";
+import MatcherTypeSelector from "../matcher/MatcherTypeSelector";
 
 const MatcherConditionMenu = ({
   onConditionChange,

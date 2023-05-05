@@ -15,6 +15,8 @@ import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
+import {NInput} from "../component/nui/NInput";
+import {useState} from "react";
 
 const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
@@ -30,6 +32,8 @@ const ExpectationPage = () => {
       });
     }
   );
+
+  const [text,setText] = useState("")
 
   const expectationColumn = [
     {
@@ -117,6 +121,11 @@ const ExpectationPage = () => {
         >
           Add Expectation
         </Button>
+      </div>
+      <div>
+        <NInput value={text} onChange={(value)=>{
+          setText(value);
+        }} />
       </div>
       <div>
         <Table

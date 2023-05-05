@@ -1,0 +1,50 @@
+.inputEditor {
+  outline: none;
+  border: 1px solid #fff;
+  transition: background 50ms ease-in 0s;
+  font-size: 14px;
+  line-height: 24px;
+  min-width: 60px;
+  border-radius: 2px;
+}
+.sizeSmall .inputEditor {
+  padding: 0px 4px;
+}
+.inputEditor:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.inputEditor:focus {
+  box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+  background: #ffffff;
+  border: 1px solid #40a9ff;
+}
+
+.inputWrap {
+  position: relative;
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.inputWrap .placeHolder,
+.inputWrap .rightHolder {
+  position: absolute;
+  color: #bfbfbf;
+  pointer-events: none;
+  top: 0px;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 4px 11px;
+  left: 1px;
+}
+.sizeSmall .placeHolder {
+  padding: 0px 4px;
+}
+
+.inputWrap .rightHolder {
+  left: 1px;
+}
+.inputWrap .placeHolder {
+  left: 1px;
+}
