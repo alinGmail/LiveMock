@@ -126,6 +126,7 @@ const ExpectationPage = () => {
         <NInput value={text} onChange={(value)=>{
           setText(value);
         }} />
+        {JSON.stringify(text)}
       </div>
       <div>
         <Table

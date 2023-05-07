@@ -1,13 +1,24 @@
 import { ExpectationM } from "core/struct/expectation";
-import { Input, InputNumber, Switch } from "antd";
+import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
-import { updateExpectationItem } from "../../slice/expectationSlice";
+import {
+  addMatcher,
+  updateExpectationItem,
+} from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
 import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import * as React from "react";
+import { MatcherContext } from "../context";
+import MatcherItem from "./MatcherItem";
+import { PlusOutlined } from "@ant-design/icons";
+import {
+  createPathMatcher,
+  MatcherCondition,
+  RequestMatcherType,
+} from "core/struct/matcher";
 
 async function updateExpectation(
   projectId: string,
@@ -168,7 +179,6 @@ export const ActivateColumn = ({
   index: number;
   dispatch: AppDispatch;
 }) => {
-
   return (
     <div>
       <Switch
@@ -191,5 +201,101 @@ export const ActivateColumn = ({
         }}
       />
     </div>
+  );
+};
+
+export const MatcherColumn = ({
+  projectId,
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  projectId: string;
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
+  return (
+    <div>
+      {expectation.matchers.map((matcherItem, matcherIndex) => {
+        return (
+          <MatcherContext.Provider
+            key={matcherIndex}
+            value={{
+              matcherIndex: matcherIndex,
+              onMatcherAdd: (matcher) => {},
+              onMatcherModify: (matcher) => {
+                /*dispatch(
+                        modifyMatcher({
+                            expectationIndex: expectationIndex,
+                            matcherIndex: matcherIndex,
+                            matcher,
+                        })
+                    );
+                    matcherServer.updateMatcher(
+                        record._id!,
+                        matcherIndex,
+                        matcher
+                    );*/
+              },
+              onMatcherDel: (matcher) => {
+                /*dispatch(
+                        removeMatcher({
+                            expectationIndex: expectationIndex,
+                            matcher,
+                        })
+                    );
+                    matcherServer.removeMatcher(record._id!, matcher.id);*/
+              },
+            }}
+          >
+            <MatcherItem matcher={matcherItem} />
+          </MatcherContext.Provider>
+        );
+      })}
+    </div>
+  );
+};
+
+export const MatcherAddBtn = ({
+  dispatch,
+  expectationIndex,
+}: {
+  dispatch: AppDispatch;
+  expectationIndex: number;
+}) => {
+  return (
+    <Button
+      type="text"
+      onClick={() => {
+        let newMatcher = createPathMatcher();
+
+        dispatch(
+          addMatcher({
+            expectationIndex: expectationIndex,
+            matcher: newMatcher,
+          })
+        );
+
+        // matcherServer.createMatcher(record._id!, newMatcher);*/
+      }}
+      style={{
+        fontSize: "14px",
+        color: "#8c8c8c",
+        lineHeight: "1.57",
+      }}
+      icon={
+        <PlusOutlined
+          style={{
+            position: "relative",
+            top: "0px",
+          }}
+        />
+      }
+    >
+      Add Matcher
+    </Button>
   );
 };
