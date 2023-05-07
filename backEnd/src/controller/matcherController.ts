@@ -21,6 +21,7 @@ export function getMatcherRouter(path: string): express.Router {
       req: Request<{}, {}, CreateMatcherParams>,
       res: Response<CreateMatcherResponse>
     ) => {
+      addCross(res);
       const params = req.body;
       if (!params.projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -50,6 +51,7 @@ export function getMatcherRouter(path: string): express.Router {
     projectId:string;
     expectationId:string;
   }>,res:Response<DeleteMatcherResponse>)=>{
+    addCross(res);
     let {expectationId, projectId} = req.query;
     if (!projectId) {
       throw new ServerError(400, "project id not exist!");

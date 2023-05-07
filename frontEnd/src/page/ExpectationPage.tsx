@@ -8,7 +8,7 @@ import {
 import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
   ActivateColumn,
-  DelayColumn,
+  DelayColumn, MatcherColumn,
   NameColumn, PriorityColumn,
 } from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
@@ -91,6 +91,22 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
             <ActivateColumn
+                projectId={currentProject._id!}
+                text={text}
+                expectation={record}
+                index={index}
+                dispatch={dispatch}
+            />
+        );
+      },
+    },
+    {
+      title: "matchers",
+      dataIndex: "matcher",
+      key: "matchers",
+      render: (text: string, record: ExpectationM, index: number) => {
+        return (
+            <MatcherColumn
                 projectId={currentProject._id!}
                 text={text}
                 expectation={record}

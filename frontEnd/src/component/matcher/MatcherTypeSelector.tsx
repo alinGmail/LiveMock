@@ -1,6 +1,5 @@
 import react, { useState } from "react";
 import { Dropdown } from "antd";
-import styles from "../MatcherItem.module.css";
 import React from "react";
 import { RequestMatcherType } from "core/struct/matcher";
 
@@ -52,7 +51,7 @@ export const MatcherTypeSelector: react.FC<{
         setTypeDropShow(visible);
       }}
     >
-      <span className={styles.textBtn}>{type}</span>
+      <span >{type}</span>
     </Dropdown>
   );
 };

@@ -19,6 +19,7 @@ import {
   MatcherCondition,
   RequestMatcherType,
 } from "core/struct/matcher";
+import { createMatcherReq } from "../../server/matcherServer";
 
 async function updateExpectation(
   projectId: string,
@@ -255,6 +256,12 @@ export const MatcherColumn = ({
           </MatcherContext.Provider>
         );
       })}
+      <MatcherAddBtn
+        dispatch={dispatch}
+        expectationIndex={index}
+        projectId={projectId}
+        expectationId={expectation._id!}
+      />
     </div>
   );
 };
@@ -262,24 +269,31 @@ export const MatcherColumn = ({
 export const MatcherAddBtn = ({
   dispatch,
   expectationIndex,
+  projectId,
+  expectationId,
 }: {
   dispatch: AppDispatch;
   expectationIndex: number;
+  projectId: string;
+  expectationId: string;
 }) => {
   return (
     <Button
       type="text"
       onClick={() => {
         let newMatcher = createPathMatcher();
-
         dispatch(
           addMatcher({
             expectationIndex: expectationIndex,
             matcher: newMatcher,
           })
         );
-
-        // matcherServer.createMatcher(record._id!, newMatcher);*/
+        const createPromise = createMatcherReq({
+          projectId: projectId,
+          expectationId: expectationId,
+          matcher: newMatcher,
+        });
+        toastPromise(createPromise);
       }}
       style={{
         fontSize: "14px",
