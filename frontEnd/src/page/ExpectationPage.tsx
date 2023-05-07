@@ -9,7 +9,7 @@ import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
   ActivateColumn,
   DelayColumn, MatcherColumn,
-  NameColumn, PriorityColumn,
+  NameColumn, OperationColumn, PriorityColumn,
 } from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
@@ -116,6 +116,22 @@ const ExpectationPage = () => {
         );
       },
     },
+    {
+      title: "operation",
+      dataIndex: "operation",
+      key: "operation",
+      render: (text: string, record: ExpectationM, index: number) => {
+        return (
+            <OperationColumn
+                projectId={currentProject._id!}
+                text={text}
+                expectation={record}
+                index={index}
+                dispatch={dispatch}
+            />
+        );
+      },
+    }
   ];
   return (
     <div>

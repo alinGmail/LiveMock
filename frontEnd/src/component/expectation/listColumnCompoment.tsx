@@ -4,6 +4,7 @@ import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
   addMatcher,
+  removeMatcher,
   updateExpectationItem,
 } from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
@@ -19,7 +20,7 @@ import {
   MatcherCondition,
   RequestMatcherType,
 } from "core/struct/matcher";
-import { createMatcherReq } from "../../server/matcherServer";
+import { createMatcherReq, deleteMatcherReq } from "../../server/matcherServer";
 
 async function updateExpectation(
   projectId: string,
@@ -242,13 +243,18 @@ export const MatcherColumn = ({
                     );*/
               },
               onMatcherDel: (matcher) => {
-                /*dispatch(
-                        removeMatcher({
-                            expectationIndex: expectationIndex,
-                            matcher,
-                        })
-                    );
-                    matcherServer.removeMatcher(record._id!, matcher.id);*/
+                dispatch(
+                  removeMatcher({
+                    expectationIndex: index,
+                    matcher,
+                  })
+                );
+                const deletePromise = deleteMatcherReq({
+                  matcherId: matcher.id,
+                  projectId: projectId,
+                  expectationId: expectation._id!,
+                });
+                toastPromise(deletePromise);
               },
             }}
           >
@@ -311,5 +317,25 @@ export const MatcherAddBtn = ({
     >
       Add Matcher
     </Button>
+  );
+};
+
+export const OperationColumn = ({
+  projectId,
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  projectId: string;
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
+  return (
+    <div>
+      <Button type={"text"}>delete</Button>
+    </div>
   );
 };

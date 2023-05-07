@@ -1,4 +1,4 @@
-import {FC, useCallback, useState} from "react";
+import { FC, useCallback, useState } from "react";
 import {
   HeaderMatcherM,
   MatcherCondition,
@@ -14,7 +14,7 @@ import { Dropdown } from "antd";
 import { useMatcherContext } from "../context";
 import { v4 as uuidv4 } from "uuid";
 import { NInput } from "../nui/NInput";
-import { CloseSquareTwoTone } from "@ant-design/icons";
+import { CloseSquareOutlined, CloseSquareTwoTone } from "@ant-design/icons";
 import MatcherTypeSelector from "../matcher/MatcherTypeSelector";
 
 const MatcherConditionMenu = ({
@@ -194,10 +194,11 @@ const MatcherItem: FC<{
         <div
           style={{
             display: "inline-block",
+            margin: "0px 4px",
           }}
         >
-          <CloseSquareTwoTone
-            twoToneColor={"red"}
+          <CloseSquareOutlined
+            className={styles.closeBtn}
             onClick={() => {
               onDelMatcher();
             }}

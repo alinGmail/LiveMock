@@ -51,7 +51,7 @@ export const MatcherTypeSelector: react.FC<{
         setTypeDropShow(visible);
       }}
     >
-      <span >{type}</span>
+      <span className={"textBtn"}>{type}</span>
     </Dropdown>
   );
 };
