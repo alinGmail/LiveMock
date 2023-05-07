@@ -5,3 +5,9 @@ export interface CreateMatcherParams {
   expectationId: string;
   matcher: RequestMatcherM;
 }
+
+export interface UpdateMatcherParams{
+  projectId:string;
+  expectationId:string;
+  updateQuery:any;
+}

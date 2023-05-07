@@ -1,8 +1,15 @@
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
-import { CreateMatcherParams } from "core/struct/params/MatcherParams";
-import {CreateMatcherResponse, DeleteMatcherResponse} from "core/struct/response/MatcherResponse";
+import {
+  CreateMatcherParams,
+  UpdateMatcherParams,
+} from "core/struct/params/MatcherParams";
+import {
+  CreateMatcherResponse,
+  DeleteMatcherResponse,
+  UpdateMatcherResponse,
+} from "core/struct/response/MatcherResponse";
 import { getExpectationDb } from "../db/dbManager";
 
 export function getMatcherRouter(path: string): express.Router {
@@ -46,18 +53,28 @@ export function getMatcherRouter(path: string): express.Router {
   /**
    * delete matcher
    */
-  router.delete('/:matcherId',bodyParser.json(),async (req:Request<
-      {matcherId:string},{},{},{
-    projectId:string;
-    expectationId:string;
-  }>,res:Response<DeleteMatcherResponse>)=>{
-    addCross(res);
-    let {expectationId, projectId} = req.query;
-    if (!projectId) {
-      throw new ServerError(400, "project id not exist!");
-    }
-    const expectationDb = getExpectationDb(projectId,path);
-    await expectationDb.updatePromise(
+  router.delete(
+    "/:matcherId",
+    bodyParser.json(),
+    async (
+      req: Request<
+        { matcherId: string },
+        {},
+        {},
+        {
+          projectId: string;
+          expectationId: string;
+        }
+      >,
+      res: Response<DeleteMatcherResponse>
+    ) => {
+      addCross(res);
+      let { expectationId, projectId } = req.query;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const expectationDb = getExpectationDb(projectId, path);
+      await expectationDb.updatePromise(
         {
           _id: expectationId,
         },
@@ -68,9 +85,32 @@ export function getMatcherRouter(path: string): express.Router {
             },
           },
         }
-    );
-    res.json({message:'operation success'});
-  });
+      );
+      res.json({ message: "operation success" });
+    }
+  );
+
+  /**
+   * update matcher
+   */
+  router.put(
+    "/:matcherId",
+    bodyParser.json(),
+    async (
+      req: Request<{ matcherId: string }, {}, UpdateMatcherParams, {}>,
+      res: Response<UpdateMatcherResponse>
+    ) => {
+      addCross(res);
+      let {expectationId, projectId, updateQuery} = req.body;
+      let matcherId = req.params.matcherId;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const expectationDb = getExpectationDb(projectId, path);
+
+
+    }
+  );
 
   return router;
 }
