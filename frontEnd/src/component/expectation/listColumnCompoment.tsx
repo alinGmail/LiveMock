@@ -13,7 +13,7 @@ import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import * as React from "react";
 import { MatcherContext } from "../context";
-import MatcherItem from "./MatcherItem";
+import MatcherItem from "../matcher/MatcherItem";
 import { PlusOutlined } from "@ant-design/icons";
 import {
   createPathMatcher,

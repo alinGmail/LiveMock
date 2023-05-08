@@ -15,7 +15,7 @@ import { useMatcherContext } from "../context";
 import { v4 as uuidv4 } from "uuid";
 import { NInput } from "../nui/NInput";
 import { CloseSquareOutlined, CloseSquareTwoTone } from "@ant-design/icons";
-import MatcherTypeSelector from "../matcher/MatcherTypeSelector";
+import MatcherTypeSelector from "./MatcherTypeSelector";
 
 const MatcherConditionMenu = ({
   onConditionChange,
