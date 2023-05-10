@@ -1,14 +1,33 @@
-import express, {Request, Response} from "express";
-import {addCross, ServerError, toAsyncRouter} from "./common";
+import express, { Request, Response } from "express";
+import { addCross, ServerError, toAsyncRouter } from "./common";
 import { getProjectDb } from "../db/dbManager";
 import bodyParser from "body-parser";
+import {
+  CreateProjectPathParam,
+  CreateProjectReqBody,
+  CreateProjectReqQuery,
+  GetProjectPathParam,
+  GetProjectReqBody,
+  GetProjectReqQuery,
+  ListProjectPathParam,
+  ListProjectReqBody,
+  ListProjectReqQuery,
+  UpdateProjectPathParam,
+  UpdateProjectReqBody,
+} from "core/struct/params/ProjectParams";
+import { isNotEmptyString } from "../common/utils";
+import {
+  CreateProjectResponse,
+  GetProjectResponse,
+  ListProjectResponse,
+  UpdateProjectResponse,
+} from "core/struct/response/ProjectResponse";
 import { ProjectM } from "core/struct/project";
-import {CreateProjectParam} from "core/struct/params/ProjectParams";
-import {CreateProjectResponse} from "core/struct/response/ProjectListResponse";
-import {isNotEmptyString} from "../common/utils";
+import { Collection } from "lokijs";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
+  const collection: Collection<ProjectM> = projectDbP.getCollection("project");
   let router = toAsyncRouter(express());
 
   router.options("*", (req, res) => {
@@ -19,11 +38,22 @@ async function getProjectRouter(path: string): Promise<express.Router> {
   /**
    * get all project
    */
-  router.get("/", async (req, res) => {
-    addCross(res);
-    let projects = projectDbP.getCollection('project').find({});
-    res.json(projects);
-  });
+  router.get(
+    "/",
+    async (
+      req: Request<
+        ListProjectPathParam,
+        {},
+        ListProjectReqBody,
+        ListProjectReqQuery
+      >,
+      res: Response<ListProjectResponse>
+    ) => {
+      addCross(res);
+      let projects = collection.find({});
+      res.json(projects);
+    }
+  );
 
   /**
    * create project
@@ -31,16 +61,25 @@ async function getProjectRouter(path: string): Promise<express.Router> {
   router.post(
     "/",
     bodyParser.json(),
-    async (req: Request<{}, {}, CreateProjectParam>, res:Response<CreateProjectResponse>) => {
+    async (
+      req: Request<
+        CreateProjectPathParam,
+        CreateProjectResponse,
+        CreateProjectReqBody,
+        CreateProjectReqQuery
+      >,
+      res: Response<CreateProjectResponse>
+    ) => {
       addCross(res);
       if (req.body.project) {
-        if(!isNotEmptyString(req.body.project.name)){
-          throw new ServerError(400,'project name can not be empty!');
+        if (!isNotEmptyString(req.body.project.name)) {
+          throw new ServerError(400, "project name can not be empty!");
         }
-        const project =  projectDbP.getCollection('project').insert(req.body.project);
+        const project = collection
+          .insert(req.body.project);
         res.json(project);
-      }else{
-        throw new ServerError(400,'invalid request param')
+      } else {
+        throw new ServerError(400, "invalid request param");
       }
     }
   );
@@ -52,17 +91,22 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     "/:projectId",
     bodyParser.json(),
     async (
-      req: Request<{ projectId: number }, {}, { updateQuery: any }>,
-      res
+      req: Request<
+        UpdateProjectPathParam,
+        {},
+        UpdateProjectReqBody,
+        UpdateProjectReqBody
+      >,
+      res: Response<UpdateProjectResponse>
     ) => {
       addCross(res);
-      // todo
-      /*
-       projectDbP.getCollection("project").update(
-        { _id: req.params.projectId },
-        req.body.updateQuery
-      );*/
-      res.end("success");
+      const project = collection.findOne({ id: req.params.projectId });
+      if(!project){
+        throw new ServerError(500,'project not exist')
+      }
+      Object.assign(project, req.body.projectUpdate);
+      collection.update(project);
+      res.json(project);
     }
   );
 

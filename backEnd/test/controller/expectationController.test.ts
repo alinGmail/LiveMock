@@ -24,9 +24,9 @@ async function deleteExpectation(
   expect(delResponse.body.message).toEqual("operation success");
 }
 
-describe("expectation controller", () => {
+describe("expectation controller", async () => {
   const server = express();
-  server.use("/project", getProjectRouter("test_db"));
+  server.use("/project",await getProjectRouter("test_db"));
   server.use("/expectation", getExpectationRouter("test_db"));
   server.use(CustomErrorMiddleware);
 

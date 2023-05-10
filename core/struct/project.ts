@@ -1,4 +1,7 @@
+import { v4 as uuId } from "uuid";
+
 export interface ProjectM{
+    id:string;
     name: string;
     description: string;
     port: string;
@@ -6,7 +9,6 @@ export interface ProjectM{
     status: ProjectStatus;
     error: boolean;
     errorMessage: string | null;
-    _id?:string;
 }
 
 
@@ -17,6 +19,7 @@ export enum ProjectStatus {
 
 export function createProject():ProjectM{
     return {
+        id:uuId(),
         createDate: new Date(),
         description: "",
         error: false,
