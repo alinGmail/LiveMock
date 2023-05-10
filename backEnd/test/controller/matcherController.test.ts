@@ -82,7 +82,7 @@ describe("matcher controller", () => {
 
 
     // test modify matcher
-    request(server)
+    const modifyRes = await request(server)
       .put(`/matcher/${pathMatcherM.id}`)
       .send({
         projectId,
