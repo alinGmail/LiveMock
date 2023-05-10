@@ -6,23 +6,27 @@ import { createProject } from "core/struct/project";
 import request from "supertest";
 import { deleteFolderRecursive } from "../../src/common/utils";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
-import { CreateExpectationParam } from "core/struct/params/ExpectationParams";
+import { CreateExpectationReqBody } from "core/struct/params/ExpectationParams";
 import { createPathMatcher, RequestMatcherType } from "core/struct/matcher";
 import { getMatcherRouter } from "../../src/controller/matcherController";
-import { CreateMatcherParams } from "core/struct/params/MatcherParams";
+import {
+  CreateMatcherReqBody,
+  UpdateMatcherReqBody,
+} from "core/struct/params/MatcherParams";
 
 describe("matcher controller", () => {
   const server = express();
-  server.use("/project", getProjectRouter("test_db"));
-  server.use("/expectation", getExpectationRouter("test_db"));
-  server.use("/matcher", getMatcherRouter("test_db"));
-  server.use(CustomErrorMiddleware);
 
   const projectM = createProject();
   projectM.name = "new Project";
   let projectId = "";
   let expectationId = "";
   beforeAll(async () => {
+    server.use("/project", await getProjectRouter("test_db"));
+    server.use("/expectation", getExpectationRouter("test_db"));
+    server.use("/matcher", getMatcherRouter("test_db"));
+    server.use(CustomErrorMiddleware);
+
     const res = await request(server)
       .post("/project/")
       .send({
@@ -30,12 +34,12 @@ describe("matcher controller", () => {
       })
       .expect(200)
       .expect("Content-Type", /json/);
-    projectId = res.body._id;
+    projectId = res.body.id;
 
     const expectationM = createExpectation();
     expectationM.name = "text expectation";
     expectationM.priority = 100;
-    const createParam: CreateExpectationParam = {
+    const createParam: CreateExpectationReqBody = {
       expectation: expectationM,
       projectId: projectId,
     };
@@ -44,7 +48,7 @@ describe("matcher controller", () => {
       .send(createParam)
       .expect(200);
     expect(createRes.body.priority).toBe(100);
-    expectationId = createRes.body._id;
+    expectationId = createRes.body.id;
   });
 
   afterAll(async () => {
@@ -61,30 +65,53 @@ describe("matcher controller", () => {
         projectId: projectId,
         expectationId: expectationId,
         matcher: pathMatcherM,
-      } as CreateMatcherParams)
+      } as CreateMatcherReqBody)
       .expect(200);
-
+    //console.log(pathCreateParam.body);
     // get the expectation
     const expectationRes: request.Response = await request(server)
       .get(`/expectation/${expectationId}?projectId=${projectId}`)
       .expect(200);
-    expect(expectationRes.body._id).toEqual(expectationId);
+    expect(expectationRes.body.id).toEqual(expectationId);
     const expectation: ExpectationM = expectationRes.body;
     expect(expectation.matchers.length).toBe(1);
     expect(expectation.matchers[0].value).toEqual("/testPath");
     expect(expectation.matchers[0].conditions).toEqual(pathMatcherM.conditions);
     expect(expectation.matchers[0].type).toEqual(RequestMatcherType.PATH);
 
+
+
+    // test modify matcher
+    request(server)
+      .put(`/matcher/${pathMatcherM.id}`)
+      .send({
+        projectId,
+        expectationId,
+        matcherUpdate: {
+          value: "/modifyPath",
+        },
+      } as UpdateMatcherReqBody).expect(200);
+
+    // test the result
+    const expectationRes3: request.Response = await request(server)
+        .get(`/expectation/${expectationId}?projectId=${projectId}`)
+        .expect(200);
+    expect(expectationRes3.body.id).toEqual(expectationId);
+    const expectation3: ExpectationM = expectationRes3.body;
+    expect(expectation3.matchers.length).toBe(1);
+    expect(expectation3.matchers[0].value).toEqual("/modifyPath");
+
+    // test delete
     const deleteRes: request.Response = await request(server)
-      .delete(
-        `/matcher/${pathMatcherM.id}?projectId=${projectId}&expectationId=${expectationId}`
-      )
-      .expect(200);
+        .delete(
+            `/matcher/${pathMatcherM.id}?projectId=${projectId}&expectationId=${expectationId}`
+        )
+        .expect(200);
     expect(deleteRes.body.message).toEqual("operation success");
 
     const expectationRes2: request.Response = await request(server)
-      .get(`/expectation/${expectationId}?projectId=${projectId}`)
-      .expect(200);
+        .get(`/expectation/${expectationId}?projectId=${projectId}`)
+        .expect(200);
     expect(expectationRes2.body.matchers.length).toBe(0);
 
   });

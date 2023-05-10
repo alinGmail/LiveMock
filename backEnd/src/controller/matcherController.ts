@@ -2,8 +2,14 @@ import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
-  CreateMatcherParams,
-  UpdateMatcherParams,
+  CreateMatcherPathParam,
+  CreateMatcherReqBody,
+  DeleteMatcherPathParam,
+  DeleteMatcherReqBody,
+  DeleteMatcherReqQuery,
+  UpdateMatcherPathParam,
+  UpdateMatcherReqBody,
+  UpdateMatcherReqQuery,
 } from "core/struct/params/MatcherParams";
 import {
   CreateMatcherResponse,
@@ -11,6 +17,16 @@ import {
   UpdateMatcherResponse,
 } from "core/struct/response/MatcherResponse";
 import { getExpectationDb } from "../db/dbManager";
+import { Collection } from "lokijs";
+import { ExpectationM } from "../../../core/struct/expectation";
+
+async function getCollection(
+  projectId: string,
+  path: string
+): Promise<Collection<ExpectationM>> {
+  const db = await getExpectationDb(projectId, path);
+  return db.getCollection("expectation");
+}
 
 export function getMatcherRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -25,29 +41,29 @@ export function getMatcherRouter(path: string): express.Router {
     "/",
     bodyParser.json(),
     async (
-      req: Request<{}, {}, CreateMatcherParams>,
+      req: Request<
+        CreateMatcherPathParam,
+        CreateMatcherResponse,
+        CreateMatcherReqBody
+      >,
       res: Response<CreateMatcherResponse>
     ) => {
       addCross(res);
-      const params = req.body;
-      if (!params.projectId) {
+      let { expectationId, matcher, projectId } = req.body;
+      if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(params.projectId, path);
-      if (params.matcher) {
-        /*
-        const updateRes = await expectationDb.updatePromise(
-          { _id: params.expectationId },
-          {
-            $push: {
-              matchers: params.matcher,
-            },
-          }
-        );*/
-        res.json(params.matcher);
-      } else {
+      if (!matcher) {
         throw new ServerError(400, "invalid params!");
       }
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
+      expectation.matchers.push(matcher);
+      collection.update(expectation);
+      res.json(matcher);
     }
   );
 
@@ -59,13 +75,10 @@ export function getMatcherRouter(path: string): express.Router {
     bodyParser.json(),
     async (
       req: Request<
-        { matcherId: string },
-        {},
-        {},
-        {
-          projectId: string;
-          expectationId: string;
-        }
+        DeleteMatcherPathParam,
+        DeleteMatcherResponse,
+        DeleteMatcherReqBody,
+        DeleteMatcherReqQuery
       >,
       res: Response<DeleteMatcherResponse>
     ) => {
@@ -74,20 +87,15 @@ export function getMatcherRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(projectId, path);
-      /*
-      await expectationDb.updatePromise(
-        {
-          _id: expectationId,
-        },
-        {
-          $pull: {
-            matchers: {
-              id: req.params.matcherId,
-            },
-          },
-        }
-      );*/
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
+      expectation.matchers = expectation.matchers.filter(
+        (item) => item.id !== req.params.matcherId
+      );
+      collection.update(expectation);
       res.json({ message: "operation success" });
     }
   );
@@ -99,18 +107,33 @@ export function getMatcherRouter(path: string): express.Router {
     "/:matcherId",
     bodyParser.json(),
     async (
-      req: Request<{ matcherId: string }, {}, UpdateMatcherParams, {}>,
+      req: Request<
+        UpdateMatcherPathParam,
+        UpdateMatcherResponse,
+        UpdateMatcherReqBody,
+        UpdateMatcherReqQuery
+      >,
       res: Response<UpdateMatcherResponse>
     ) => {
       addCross(res);
-      let {expectationId, projectId, updateQuery} = req.body;
+      let { expectationId, projectId, matcherUpdate } = req.body;
       let matcherId = req.params.matcherId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(projectId, path);
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
 
-
+      const matcher = expectation.matchers.find(item => item.id === matcherId);
+      if(!matcher){
+        throw new ServerError(500, "matcher not exist");
+      }
+      Object.assign(matcher,matcherUpdate);
+      collection.update(expectation);
+      res.json(matcher);
     }
   );
 
