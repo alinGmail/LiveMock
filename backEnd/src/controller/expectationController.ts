@@ -6,17 +6,24 @@ import {
   CreateExpectationPathParam,
   CreateExpectationReqBody,
   CreateExpectationReqQuery,
-  ExpectationDetailParam,
+  DeleteExpectationPathParam,
+  DeleteExpectationReqBody,
+  DeleteExpectationReqQuery,
+  GetExpectationPathParam,
+  GetExpectationReqBody,
+  GetExpectationReqQuery,
   ListExpectationPathParam,
   ListExpectationReqBody,
   ListExpectationReqQuery,
-  UpdateExpectationParam,
+  UpdateExpectationPathParam,
+  UpdateExpectationReqBody,
+  UpdateExpectationReqQuery,
 } from "core/struct/params/ExpectationParams";
 import { ExpectationM } from "core/struct/expectation";
 import {
   CreateExpectationResponse,
   DeleteExpectationResponse,
-  ExpectationDetailResponse,
+  GetExpectationResponse,
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
@@ -45,7 +52,7 @@ export function getExpectationRouter(path: string): express.Router {
     async (
       req: Request<
         CreateExpectationPathParam,
-        {},
+        CreateExpectationResponse,
         CreateExpectationReqBody,
         CreateExpectationReqQuery
       >,
@@ -85,7 +92,7 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId,path);
+      const collection = await getCollection(projectId, path);
       const expectations = collection.find({});
       res.json(expectations);
     }
@@ -98,31 +105,27 @@ export function getExpectationRouter(path: string): express.Router {
     "/:expectationId",
     async (
       req: Request<
-        {
-          expectationId: string;
-        },
-        {},
-        {},
-        {
-          projectId: string;
-        }
+        DeleteExpectationPathParam,
+        DeleteExpectationResponse,
+        DeleteExpectationReqBody,
+        DeleteExpectationReqQuery
       >,
       res: Response<DeleteExpectationResponse>
     ) => {
       addCross(res);
       const expectationId = req.params.expectationId;
       const projectId = req.query.projectId;
-      const expectationDb = getExpectationDb(projectId, path);
+
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      // let removeNum = await expectationDb.removePromise({ _id: expectationId });
-      let removeNum = 0;
-      if (removeNum >= 1) {
-        res.json({ message: "operation success" });
-      } else {
-        throw new ServerError(500, "delete fail");
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
       }
+      collection.remove(expectation);
+      res.json({ message: "success" });
     }
   );
 
@@ -134,11 +137,10 @@ export function getExpectationRouter(path: string): express.Router {
     bodyParser.json(),
     async (
       req: Request<
-        {
-          expectationId: string;
-        },
-        {},
-        UpdateExpectationParam
+        UpdateExpectationPathParam,
+        UpdateExpectationResponse,
+        UpdateExpectationReqBody,
+        UpdateExpectationReqQuery
       >,
       res: Response<UpdateExpectationResponse>
     ) => {
@@ -147,16 +149,15 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(projectId, path);
+      const collection = await getCollection(projectId, path);
       const expectationId = req.params.expectationId;
-
-      /* let updateRes = await expectationDb.updatePromise(
-        {
-          _id: expectationId,
-        },
-        req.body.updateQuery
-      );*/
-      res.json({ message: "operation success" });
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
+      Object.assign(expectation, req.body.expectationUpdate);
+      const result = collection.update(expectation);
+      res.json(result);
     }
   );
 
@@ -168,24 +169,25 @@ export function getExpectationRouter(path: string): express.Router {
     bodyParser.json(),
     async (
       req: Request<
-        {
-          expectationId: string;
-        },
-        {},
-        ExpectationDetailParam,
-        { projectId: string }
+        GetExpectationPathParam,
+        GetExpectationResponse,
+        GetExpectationReqBody,
+        GetExpectationReqQuery
       >,
-      res: Response<ExpectationDetailResponse>
+      res: Response<GetExpectationResponse>
     ) => {
       addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(projectId, path);
       const expectationId = req.params.expectationId;
-      //const result = await expectationDb.findOnePromise({ _id: expectationId });
-      //res.json(result);
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
+      res.json(expectation);
     }
   );
 

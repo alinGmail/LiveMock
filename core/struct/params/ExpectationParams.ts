@@ -21,7 +21,6 @@ export interface CreateExpectationReqQuery{
  * list expectation
  */
 export interface ListExpectationPathParam{
-
 }
 
 export interface ListExpectationReqBody{
@@ -33,12 +32,50 @@ export interface ListExpectationReqQuery{
 }
 
 
+/**
+ * update expectation
+ */
+export interface UpdateExpectationPathParam{
+    expectationId: string;
+}
 
-export interface UpdateExpectationParam{
-    updateQuery:any;
+export interface UpdateExpectationReqBody{
+    expectationUpdate:Partial<ExpectationM>;
     projectId:string;
 }
 
-export interface ExpectationDetailParam{
+export interface UpdateExpectationReqQuery{
+
 }
+
+/**
+ * get expectation
+ */
+export interface GetExpectationPathParam{
+    expectationId:string
+}
+
+export interface GetExpectationReqBody{
+
+}
+
+export interface GetExpectationReqQuery{
+    projectId:string;
+}
+
+/**
+ * delete expectation
+ */
+export interface DeleteExpectationPathParam{
+    expectationId: string;
+}
+
+export interface DeleteExpectationReqBody{
+
+}
+
+export interface DeleteExpectationReqQuery{
+    projectId: string;
+}
+
 

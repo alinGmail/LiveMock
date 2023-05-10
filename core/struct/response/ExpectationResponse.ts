@@ -1,13 +1,12 @@
 import { ExpectationM } from "../expectation";
+import {EmptyResponse} from "./common";
 
 export type CreateExpectationResponse = ExpectationM;
 
 export type ListExpectationResponse = Array<ExpectationM>;
 
-export type ExpectationDetailResponse = ExpectationM;
+export type GetExpectationResponse = ExpectationM;
 
-export type UpdateExpectationResponse = {
-  message: string;
-};
+export type UpdateExpectationResponse = ExpectationM;
 
-export type DeleteExpectationResponse = UpdateExpectationResponse;
+export type DeleteExpectationResponse = EmptyResponse;

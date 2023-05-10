@@ -6,8 +6,8 @@ import { createExpectation } from "core/struct/expectation";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import {
-  CreateExpectationParam,
-  UpdateExpectationParam,
+  CreateExpectationReqBody, UpdateExpectationReqBody
+
 } from "core/struct/params/ExpectationParams";
 import { deleteFolderRecursive } from "../../src/common/utils";
 import { createProxyAction } from "../../../core/struct/action";
@@ -21,19 +21,20 @@ async function deleteExpectation(
   const delResponse = await request(server)
     .delete(`/expectation/${id}?projectId=${projectId}`)
     .expect(200);
-  expect(delResponse.body.message).toEqual("operation success");
+  expect(delResponse.body.message).toEqual("success");
 }
 
-describe("expectation controller", async () => {
+describe("expectation controller",  () => {
   const server = express();
-  server.use("/project",await getProjectRouter("test_db"));
-  server.use("/expectation", getExpectationRouter("test_db"));
-  server.use(CustomErrorMiddleware);
+
 
   const projectM = createProject();
   projectM.name = "new Project";
   let projectId = "";
   beforeAll(async () => {
+    server.use("/project",await getProjectRouter("test_db"));
+    server.use("/expectation", getExpectationRouter("test_db"));
+    server.use(CustomErrorMiddleware);
     const res = await request(server)
       .post("/project/")
       .send({
@@ -41,7 +42,7 @@ describe("expectation controller", async () => {
       })
       .expect(200)
       .expect("Content-Type", /json/);
-    projectId = res.body._id;
+    projectId = res.body.id;
     // create expectation
   });
 
@@ -68,7 +69,7 @@ describe("expectation controller", async () => {
     const errorRes = await request(server)
       .delete("/expectation/12321?projectId=" + projectId)
       .expect(500);
-    expect(errorRes.body.error.message).toEqual("delete fail");
+    expect(errorRes.body.error.message).toEqual("expectation not exist");
   });
 
   test("create expectation ", async () => {
@@ -78,7 +79,7 @@ describe("expectation controller", async () => {
     expectationM.action = createProxyAction();
     expectationM.action.host = "https://github.com";
 
-    const createParam: CreateExpectationParam = {
+    const createParam: CreateExpectationReqBody = {
       expectation: expectationM,
       projectId: projectId,
     };
@@ -96,7 +97,7 @@ describe("expectation controller", async () => {
     expect(listResponse.body.length === 1).toBe(true);
     expect(listResponse.body[0].action.host).toEqual("https://github.com");
 
-    await deleteExpectation(server, createRes.body._id, projectId);
+    await deleteExpectation(server, createRes.body.id, projectId);
 
     // after delete,the list is empty
     const listResponse2 = await request(server)
@@ -112,7 +113,7 @@ describe("expectation controller", async () => {
     expectationM.action = createProxyAction();
     expectationM.action.host = "https://github.com";
 
-    const createParam: CreateExpectationParam = {
+    const createParam: CreateExpectationReqBody = {
       expectation: expectationM,
       projectId: projectId,
     };
@@ -124,26 +125,23 @@ describe("expectation controller", async () => {
     expect(createRes.body.action.host).toEqual("https://github.com");
 
     // test update expectation
-    const updateParam: UpdateExpectationParam = {
+    const updateParam: UpdateExpectationReqBody = {
       projectId: projectId,
-      updateQuery: {
-        $set: {
-          name: "expectation new name",
-        },
-      },
+      expectationUpdate:{
+        name: "expectation new name",
+      }
     };
     const updateResponse = await request(server)
-      .put("/expectation/" + createRes.body._id)
+      .put("/expectation/" + createRes.body.id)
       .send(updateParam)
       .expect(200);
 
     // get the expectation
     const detailResponse = await request(server)
-      .get("/expectation/" + createRes.body._id)
-      .send({ projectId: projectId })
+      .get(`/expectation/${createRes.body.id}?projectId=${projectId}`)
       .expect(200);
     expect(detailResponse.body.name).toEqual("expectation new name");
 
-    await deleteExpectation(server, createRes.body._id, projectId);
+    await deleteExpectation(server, createRes.body.id, projectId);
   });
 });
