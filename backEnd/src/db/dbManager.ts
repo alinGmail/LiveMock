@@ -1,65 +1,92 @@
 import Datastore from "nedb";
 import PromiseDatastore from "./promiseDatastore";
-import { ProjectM } from "core/struct/project";
 import { ExpectationM } from "core/struct/expectation";
 import { LogM } from "core/struct/log";
+import lokijs from "lokijs";
 
-const projectDbMap = new Map<string, PromiseDatastore<ExpectationM>>();
+const projectDbPromiseMap = new Map<string, Promise<Loki>>();
 
-export function getProjectDb(path: string): PromiseDatastore<ProjectM> {
-  let projectDbP = projectDbMap.get(path);
+export async function getProjectDb(path: string): Promise<Loki> {
+  let projectDbP = projectDbPromiseMap.get(path);
   if (!projectDbP) {
-    let projectDb = new Datastore({
-      filename: `${path}/project.db`,
-      autoload: true,
+    let newDbP = new Promise<Loki>((resolve, reject) => {
+      let projectDb = new lokijs(`${path}/project.db`, {
+        autoload: true,
+        autosave: true,
+        autosaveInterval: 4000,
+        autoloadCallback: databaseInitialize,
+      });
+      function databaseInitialize() {
+        let entries = projectDb.getCollection("project");
+        if (entries === null) {
+          entries = projectDb.addCollection("project");
+        }
+        resolve(projectDb);
+      }
     });
-    projectDbP = new PromiseDatastore<ProjectM>(projectDb);
-    return projectDbP;
+    projectDbPromiseMap.set(path, newDbP);
+    return newDbP;
   } else {
     return projectDbP;
   }
 }
 
-const expectationDbMap = new Map<string, PromiseDatastore<ExpectationM>>();
+const expectationDbMap = new Map<string, Promise<Loki>>();
 
-export function getExpectationDb(
+export async function getExpectationDb(
   projectId: string,
   path: string
-): PromiseDatastore<ExpectationM> {
+): Promise<Loki> {
   const expectationDbP = expectationDbMap.get(`${path}/${projectId}`);
   if (!expectationDbP) {
-    const newExpectationDb = new Datastore({
-      filename: `${path}/${projectId}_Exp.db`,
-      autoload: true,
+    let newDbP = new Promise<Loki>((resolve, reject) => {
+      let expectationDb = new lokijs(`${path}/${projectId}_Exp.db`, {
+        autoload: true,
+        autosave: true,
+        autosaveInterval: 4000,
+        autoloadCallback: databaseInitialize,
+      });
+      function databaseInitialize() {
+        let entries = expectationDb.getCollection("expectation");
+        if (entries === null) {
+          entries = expectationDb.addCollection("expectation");
+        }
+        resolve(expectationDb);
+      }
     });
-    let newExpectationDbP = new PromiseDatastore<ExpectationM>(
-      newExpectationDb
-    );
-    expectationDbMap.set(`${path}/${projectId}`, newExpectationDbP);
-    return newExpectationDbP;
+    expectationDbMap.set(`${path}/${projectId}`, newDbP);
+    return newDbP;
   } else {
     return expectationDbP;
   }
 }
 
-const logDbMap = new Map<string, PromiseDatastore<LogM>>();
+const logDbMap = new Map<string, Promise<Loki>>();
 
-export function getLogDb(
+export async function getLogDb(
   projectId: string,
   path: string
-): PromiseDatastore<LogM> {
+): Promise<Loki> {
   const logDbP = logDbMap.get(`${path}/${projectId}`);
   if (!logDbP) {
-    const newLogDb = new Datastore({
-      filename: `${path}/${projectId}_Log.db`,
-      autoload: true,
-    });
-    let newLogDbP = new PromiseDatastore<LogM>(newLogDb);
-    logDbMap.set(`${path}/${projectId}`, newLogDbP);
-    return newLogDbP;
+    let newDbP = new Promise<Loki>((resolve, reject) => {
+      let logDb = new lokijs(`${path}/${projectId}_Log.db`, {
+        autoload: true,
+        autosave: true,
+        autosaveInterval: 4000,
+        autoloadCallback: databaseInitialize,
+      });
+      function databaseInitialize() {
+        let entries = logDb.getCollection("log");
+        if (entries === null) {
+          entries = logDb.addCollection("log");
+        }
+        resolve(logDb);
+      }
+    })
+    logDbMap.set(`${path}/${projectId}`, newDbP);
+    return newDbP;
   } else {
     return logDbP;
   }
 }
-
-

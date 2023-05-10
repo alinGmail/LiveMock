@@ -35,6 +35,7 @@ export function getMatcherRouter(path: string): express.Router {
       }
       const expectationDb = getExpectationDb(params.projectId, path);
       if (params.matcher) {
+        /*
         const updateRes = await expectationDb.updatePromise(
           { _id: params.expectationId },
           {
@@ -42,7 +43,7 @@ export function getMatcherRouter(path: string): express.Router {
               matchers: params.matcher,
             },
           }
-        );
+        );*/
         res.json(params.matcher);
       } else {
         throw new ServerError(400, "invalid params!");
@@ -74,6 +75,7 @@ export function getMatcherRouter(path: string): express.Router {
         throw new ServerError(400, "project id not exist!");
       }
       const expectationDb = getExpectationDb(projectId, path);
+      /*
       await expectationDb.updatePromise(
         {
           _id: expectationId,
@@ -85,7 +87,7 @@ export function getMatcherRouter(path: string): express.Router {
             },
           },
         }
-      );
+      );*/
       res.json({ message: "operation success" });
     }
   );

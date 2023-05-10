@@ -7,8 +7,8 @@ import {CreateProjectParam} from "core/struct/params/ProjectParams";
 import {CreateProjectResponse} from "core/struct/response/ProjectListResponse";
 import {isNotEmptyString} from "../common/utils";
 
-function getProjectRouter(path: string): express.Router {
-  const projectDbP = getProjectDb(path);
+async function getProjectRouter(path: string): Promise<express.Router> {
+  const projectDbP = await getProjectDb(path);
   let router = toAsyncRouter(express());
 
   router.options("*", (req, res) => {
@@ -21,7 +21,7 @@ function getProjectRouter(path: string): express.Router {
    */
   router.get("/", async (req, res) => {
     addCross(res);
-    let projects = await projectDbP.findPromise({});
+    let projects = projectDbP.getCollection('project').find({});
     res.json(projects);
   });
 
@@ -37,7 +37,7 @@ function getProjectRouter(path: string): express.Router {
         if(!isNotEmptyString(req.body.project.name)){
           throw new ServerError(400,'project name can not be empty!');
         }
-        const project = await projectDbP.insertPromise(req.body.project);
+        const project =  projectDbP.getCollection('project').insert(req.body.project);
         res.json(project);
       }else{
         throw new ServerError(400,'invalid request param')
@@ -56,10 +56,12 @@ function getProjectRouter(path: string): express.Router {
       res
     ) => {
       addCross(res);
-      await projectDbP.updatePromise(
+      // todo
+      /*
+       projectDbP.getCollection("project").update(
         { _id: req.params.projectId },
         req.body.updateQuery
-      );
+      );*/
       res.end("success");
     }
   );

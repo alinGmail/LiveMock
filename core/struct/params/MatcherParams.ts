@@ -9,5 +9,5 @@ export interface CreateMatcherParams {
 export interface UpdateMatcherParams{
   projectId:string;
   expectationId:string;
-  updateQuery:any;
+  updateQuery:Partial<RequestMatcherM>;
 }

@@ -7,7 +7,7 @@ import {CustomErrorMiddleware} from "../../src/controller/common";
 
 test("project controller", async () => {
   const server = express(); //创建服务器
-  server.use("/project", getProjectRouter("test_db"));
+  server.use("/project", await getProjectRouter("test_db"));
   server.use(CustomErrorMiddleware);
 
 
