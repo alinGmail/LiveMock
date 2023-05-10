@@ -3,17 +3,32 @@ import { getExpectationDb } from "../db/dbManager";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
-  CreateExpectationParam,
+  CreateExpectationPathParam,
+  CreateExpectationReqBody,
+  CreateExpectationReqQuery,
   ExpectationDetailParam,
+  ListExpectationPathParam,
+  ListExpectationReqBody,
+  ListExpectationReqQuery,
   UpdateExpectationParam,
 } from "core/struct/params/ExpectationParams";
 import { ExpectationM } from "core/struct/expectation";
 import {
+  CreateExpectationResponse,
   DeleteExpectationResponse,
   ExpectationDetailResponse,
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
+import { Collection } from "lokijs";
+
+async function getCollection(
+  projectId: string,
+  path: string
+): Promise<Collection<ExpectationM>> {
+  const db = await getExpectationDb(projectId, path);
+  return db.getCollection("expectation");
+}
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -28,21 +43,23 @@ export function getExpectationRouter(path: string): express.Router {
     "/",
     bodyParser.json(),
     async (
-      req: Request<{}, {}, CreateExpectationParam>,
-      res: Response<ExpectationM>,
-      next: NextFunction
+      req: Request<
+        CreateExpectationPathParam,
+        {},
+        CreateExpectationReqBody,
+        CreateExpectationReqQuery
+      >,
+      res: Response<CreateExpectationResponse>
     ) => {
       addCross(res);
       const projectId = req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      let expectationP = getExpectationDb(projectId, path);
+      const collection = await getCollection(projectId, path);
       if (req.body.expectation) {
-       /* const insertPromise = await expectationP.insertPromise(
-          req.body.expectation
-        );
-        res.json(insertPromise);*/
+        const resExp = collection.insert(req.body.expectation);
+        res.json(resExp);
       } else {
         throw new ServerError(400, "expectation not exist!");
       }
@@ -55,7 +72,12 @@ export function getExpectationRouter(path: string): express.Router {
   router.get(
     "/",
     async (
-      req: Request<{}, {}, {}, { projectId: string }>,
+      req: Request<
+        ListExpectationPathParam,
+        ListExpectationResponse,
+        ListExpectationReqBody,
+        ListExpectationReqQuery
+      >,
       res: Response<ListExpectationResponse>
     ) => {
       addCross(res);
@@ -63,9 +85,9 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const expectationDb = getExpectationDb(projectId, path);
-      //let expectations = await expectationDb.findPromise({});
-      //res.json(expectations);
+      const collection = await getCollection(projectId,path);
+      const expectations = collection.find({});
+      res.json(expectations);
     }
   );
 
@@ -128,7 +150,7 @@ export function getExpectationRouter(path: string): express.Router {
       const expectationDb = getExpectationDb(projectId, path);
       const expectationId = req.params.expectationId;
 
-     /* let updateRes = await expectationDb.updatePromise(
+      /* let updateRes = await expectationDb.updatePromise(
         {
           _id: expectationId,
         },
