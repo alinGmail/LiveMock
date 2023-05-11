@@ -79,8 +79,6 @@ describe("matcher controller", () => {
     expect(expectation.matchers[0].conditions).toEqual(pathMatcherM.conditions);
     expect(expectation.matchers[0].type).toEqual(RequestMatcherType.PATH);
 
-
-
     // test modify matcher
     const modifyRes = await request(server)
       .put(`/matcher/${pathMatcherM.id}`)
@@ -90,12 +88,13 @@ describe("matcher controller", () => {
         matcherUpdate: {
           value: "/modifyPath",
         },
-      } as UpdateMatcherReqBody).expect(200);
+      } as UpdateMatcherReqBody)
+      .expect(200);
 
     // test the result
     const expectationRes3: request.Response = await request(server)
-        .get(`/expectation/${expectationId}?projectId=${projectId}`)
-        .expect(200);
+      .get(`/expectation/${expectationId}?projectId=${projectId}`)
+      .expect(200);
     expect(expectationRes3.body.id).toEqual(expectationId);
     const expectation3: ExpectationM = expectationRes3.body;
     expect(expectation3.matchers.length).toBe(1);
@@ -103,16 +102,15 @@ describe("matcher controller", () => {
 
     // test delete
     const deleteRes: request.Response = await request(server)
-        .delete(
-            `/matcher/${pathMatcherM.id}?projectId=${projectId}&expectationId=${expectationId}`
-        )
-        .expect(200);
+      .delete(
+        `/matcher/${pathMatcherM.id}?projectId=${projectId}&expectationId=${expectationId}`
+      )
+      .expect(200);
     expect(deleteRes.body.message).toEqual("operation success");
 
     const expectationRes2: request.Response = await request(server)
-        .get(`/expectation/${expectationId}?projectId=${projectId}`)
-        .expect(200);
+      .get(`/expectation/${expectationId}?projectId=${projectId}`)
+      .expect(200);
     expect(expectationRes2.body.matchers.length).toBe(0);
-
   });
 });

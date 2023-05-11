@@ -18,7 +18,7 @@ import {
 } from "core/struct/response/MatcherResponse";
 import { getExpectationDb } from "../db/dbManager";
 import { Collection } from "lokijs";
-import { ExpectationM } from "../../../core/struct/expectation";
+import { ExpectationM } from "core/struct/expectation";
 
 async function getCollection(
   projectId: string,

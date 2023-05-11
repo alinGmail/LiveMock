@@ -10,7 +10,7 @@ import {
 
 } from "core/struct/params/ExpectationParams";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { createProxyAction } from "../../../core/struct/action";
+import { createProxyAction } from "core/struct/action";
 
 async function deleteExpectation(
   server: express.Express,
@@ -76,8 +76,9 @@ describe("expectation controller",  () => {
     const expectationM = createExpectation();
     expectationM.name = "text expectation";
     expectationM.priority = 100;
-    expectationM.action = createProxyAction();
-    expectationM.action.host = "https://github.com";
+    const action = createProxyAction();
+    action.host = "https://github.com";
+    expectationM.actions = [action];
 
     const createParam: CreateExpectationReqBody = {
       expectation: expectationM,
@@ -88,14 +89,14 @@ describe("expectation controller",  () => {
       .send(createParam)
       .expect(200);
     expect(createRes.body.priority).toBe(100);
-    expect(createRes.body.action.host).toEqual("https://github.com");
+    expect(createRes.body.actions.host).toEqual("https://github.com");
 
     // test list expectation
     const listResponse = await request(server)
       .get("/expectation/?projectId=" + projectId)
       .expect(200);
     expect(listResponse.body.length === 1).toBe(true);
-    expect(listResponse.body[0].action.host).toEqual("https://github.com");
+    expect(listResponse.body[0].actions.host).toEqual("https://github.com");
 
     await deleteExpectation(server, createRes.body.id, projectId);
 
@@ -110,8 +111,9 @@ describe("expectation controller",  () => {
     const expectationM = createExpectation();
     expectationM.name = "text expectation";
     expectationM.priority = 100;
-    expectationM.action = createProxyAction();
-    expectationM.action.host = "https://github.com";
+    const action = createProxyAction();
+    action.host = "https://github.com";
+    expectationM.actions = [action];
 
     const createParam: CreateExpectationReqBody = {
       expectation: expectationM,
@@ -122,7 +124,7 @@ describe("expectation controller",  () => {
       .send(createParam)
       .expect(200);
     expect(createRes.body.priority).toBe(100);
-    expect(createRes.body.action.host).toEqual("https://github.com");
+    expect(createRes.body.actions[0].host).toEqual("https://github.com");
 
     // test update expectation
     const updateParam: UpdateExpectationReqBody = {

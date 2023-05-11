@@ -1,4 +1,5 @@
 import express from "express";
+import { v4 as uuId } from "uuid";
 
 export enum ActionType {
   PROXY = "PROXY",
@@ -22,12 +23,14 @@ interface TEXTResponseContentM {
 type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
 
 export interface ProxyActionM {
+  id:string;
   type: ActionType.PROXY;
   host: string;
   pathRewrite: Array<PathRewriteM>;
 }
 
 export interface CustomResponseActionM {
+  id:string;
   type: ActionType.CUSTOM_RESPONSE;
   headers: Array<[string, string]>;
   status: number;
@@ -61,6 +64,7 @@ export interface IAction {
 }
 export function createProxyAction(): ProxyActionM {
   return {
+    id:uuId(),
     host: "",
     pathRewrite: [],
     type: ActionType.PROXY,

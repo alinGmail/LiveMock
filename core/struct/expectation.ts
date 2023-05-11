@@ -1,6 +1,6 @@
-import {RequestMatcherM} from "./matcher";
-import {ActionM} from "./action";
 import { v4 as uuId } from "uuid";
+import { ActionM } from "./action";
+import { RequestMatcherM } from "./matcher";
 
 export interface ExpectationM {
     id: string;
@@ -9,13 +9,13 @@ export interface ExpectationM {
     priority: number;
     activate: boolean;
     matchers: Array<RequestMatcherM>;
-    action: ActionM | null;
+    actions: Array<ActionM>;
     createTime: Date;
 }
 
 export function createExpectation():ExpectationM{
     return {
-        action: null,
+        actions: [],
         activate: false,
         createTime: new Date(),
         delay: 0,
