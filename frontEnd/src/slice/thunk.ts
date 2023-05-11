@@ -7,7 +7,7 @@ export const getExpectationSuccess =
   async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
     const curProject = state.project.projectList[state.project.curProjectIndex];
-    if (curProject._id === projectId) {
+    if (curProject.id === projectId) {
       dispatch(setExpectationList(expectationList));
     }
   };

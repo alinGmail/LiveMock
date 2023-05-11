@@ -6,12 +6,13 @@ import {getMatcherRouter} from "./controller/matcherController";
 
 
 const server = express();
-server.use("/project", getProjectRouter("dev_db"));
-server.use("/expectation", getExpectationRouter("dev_db"));
-server.use("/matcher", getMatcherRouter("dev_db"));
-server.use(CustomErrorMiddleware);
+(async function (){
+    server.use("/project", await getProjectRouter("dev_db"));
+    server.use("/expectation", getExpectationRouter("dev_db"));
+    server.use("/matcher", getMatcherRouter("dev_db"));
+    server.use(CustomErrorMiddleware);
+    server.listen(9002,()=>{
+        console.log('server start on 9002');
+    });
+})();
 
-
-server.listen(9002,()=>{
-    console.log('server start on 9002');
-})

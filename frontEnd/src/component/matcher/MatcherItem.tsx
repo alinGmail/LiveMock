@@ -54,7 +54,7 @@ const MatcherItem: FC<{
       switch (type) {
         case RequestMatcherType.METHOD:
           let _matcher: RequestMatcherM = {
-            id: uuidv4(),
+            id: matcher.id,
             type: RequestMatcherType.METHOD,
             conditions: matcher.conditions,
             value: matcher.value,
@@ -63,7 +63,7 @@ const MatcherItem: FC<{
           break;
         case RequestMatcherType.PATH:
           let _pathMatcher: RequestMatcherM = {
-            id: uuidv4(),
+            id: matcher.id,
             type: RequestMatcherType.PATH,
             conditions: matcher.conditions,
             value: matcher.value,
@@ -72,7 +72,7 @@ const MatcherItem: FC<{
           break;
         case RequestMatcherType.QUERY:
           let _queryMatcher: QueryMatcherM = {
-            id: uuidv4(),
+            id: matcher.id,
             type: RequestMatcherType.QUERY,
             conditions: matcher.conditions,
             value: matcher.value,
@@ -82,7 +82,7 @@ const MatcherItem: FC<{
           break;
         case RequestMatcherType.HEADER:
           let _headerMatcher: HeaderMatcherM = {
-            id: uuidv4(),
+            id: matcher.id,
             type: RequestMatcherType.HEADER,
             conditions: matcher.conditions,
             value: matcher.value,
@@ -92,7 +92,7 @@ const MatcherItem: FC<{
           break;
         case RequestMatcherType.PARAM:
           let _paramMatcher: ParamMatcherM = {
-            id: uuidv4(),
+            id: matcher.id,
             type: RequestMatcherType.PARAM,
             conditions: matcher.conditions,
             value: matcher.value,

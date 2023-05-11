@@ -4,6 +4,7 @@ import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
   addMatcher,
+  modifyMatcher,
   removeMatcher,
   updateExpectationItem,
 } from "../../slice/expectationSlice";
@@ -20,17 +21,21 @@ import {
   MatcherCondition,
   RequestMatcherType,
 } from "core/struct/matcher";
-import { createMatcherReq, deleteMatcherReq } from "../../server/matcherServer";
+import {
+  createMatcherReq,
+  deleteMatcherReq,
+  updateMatcherReq,
+} from "../../server/matcherServer";
 
 async function updateExpectation(
   projectId: string,
   expectationId: string,
-  updateQuery: any
+  expectationUpdate: Partial<ExpectationM>
 ) {
   const updatePromise = updateExpectationReq(
     projectId,
     expectationId,
-    updateQuery
+    expectationUpdate
   );
   toastPromise(updatePromise);
   return updatePromise;
@@ -63,10 +68,8 @@ export const NameColumn = ({
             value: string;
           }>
         ) => {
-          run(projectId, expectation._id!, {
-            $set: {
-              name: event.target.value,
-            },
+          run(projectId, expectation.id, {
+            name: event.target.value,
           });
           dispatch(
             updateExpectationItem({
@@ -108,10 +111,8 @@ export const NumberColumn: React.FC<NumberColumnProps> = ({
   });
   const handleChange = (number: number | null) => {
     if (number === null) return;
-    run(projectId, expectation._id!, {
-      $set: {
-        [valueKey]: number,
-      },
+    run(projectId, expectation.id, {
+      [valueKey]: number,
     });
     dispatch(
       updateExpectationItem({
@@ -186,10 +187,8 @@ export const ActivateColumn = ({
       <Switch
         checked={expectation.activate}
         onChange={(value) => {
-          updateExpectation(projectId, expectation._id!, {
-            $set: {
-              activate: value,
-            },
+          updateExpectation(projectId, expectation.id, {
+            activate: value,
           });
           dispatch(
             updateExpectationItem({
@@ -229,18 +228,19 @@ export const MatcherColumn = ({
               matcherIndex: matcherIndex,
               onMatcherAdd: (matcher) => {},
               onMatcherModify: (matcher) => {
-                /*dispatch(
-                        modifyMatcher({
-                            expectationIndex: expectationIndex,
-                            matcherIndex: matcherIndex,
-                            matcher,
-                        })
-                    );
-                    matcherServer.updateMatcher(
-                        record._id!,
-                        matcherIndex,
-                        matcher
-                    );*/
+                dispatch(
+                  modifyMatcher({
+                    expectationIndex: index,
+                    matcherIndex: matcherIndex,
+                    matcher,
+                  })
+                );
+                const updatePromise = updateMatcherReq(matcher.id, {
+                  projectId: projectId,
+                  expectationId: expectation.id,
+                  matcherUpdate: matcher,
+                });
+                toastPromise(updatePromise);
               },
               onMatcherDel: (matcher) => {
                 dispatch(
@@ -252,7 +252,7 @@ export const MatcherColumn = ({
                 const deletePromise = deleteMatcherReq({
                   matcherId: matcher.id,
                   projectId: projectId,
-                  expectationId: expectation._id!,
+                  expectationId: expectation.id,
                 });
                 toastPromise(deletePromise);
               },
@@ -266,7 +266,7 @@ export const MatcherColumn = ({
         dispatch={dispatch}
         expectationIndex={index}
         projectId={projectId}
-        expectationId={expectation._id!}
+        expectationId={expectation.id}
       />
     </div>
   );

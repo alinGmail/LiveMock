@@ -1,17 +1,15 @@
-import {
-  CreateExpectationParam,
-  UpdateExpectationParam,
-} from "core/struct/params/ExpectationParams";
+
 import { ExpectationM } from "core/struct/expectation";
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
 import {CreateExpectationResponse, ListExpectationResponse} from "core/struct/response/ExpectationResponse";
+import {CreateExpectationReqBody, UpdateExpectationReqBody} from "core/struct/params/ExpectationParams";
 
 export const createExpectationReq = async (
   projectId: string,
   expectation: ExpectationM
 ): Promise<CreateExpectationResponse> => {
-  const param: CreateExpectationParam = {
+  const param: CreateExpectationReqBody = {
     projectId,
     expectation,
   };
@@ -22,11 +20,11 @@ export const createExpectationReq = async (
 export const updateExpectationReq = async (
   projectId: string,
   expectationId: string,
-  updateQuery: any
+  expectationUpdate: Partial<ExpectationM>
 ) => {
-  const param: UpdateExpectationParam = {
+  const param: UpdateExpectationReqBody = {
     projectId,
-    updateQuery,
+    expectationUpdate,
   };
   const res = await superagent
     .put(`${ServerUrl}/expectation/${expectationId}`)

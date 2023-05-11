@@ -24,10 +24,10 @@ const ExpectationPage = () => {
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const dispatch: AppDispatch = useDispatch();
   const getExpectationListQuery = useQuery(
-    ["getExpectationList", currentProject._id],
+    ["getExpectationList", currentProject.id],
     () => {
-      return getExpectationListReq(currentProject._id!).then((res) => {
-        dispatch(getExpectationSuccess(currentProject._id!, res));
+      return getExpectationListReq(currentProject.id).then((res) => {
+        dispatch(getExpectationSuccess(currentProject.id, res));
         return res;
       });
     }
@@ -43,7 +43,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
           <NameColumn
-            projectId={currentProject._id!}
+            projectId={currentProject.id}
             text={text}
             expectation={record}
             index={index}
@@ -59,7 +59,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
           <DelayColumn
-            projectId={currentProject._id!}
+            projectId={currentProject.id}
             text={text}
             expectation={record}
             index={index}
@@ -75,7 +75,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
           <PriorityColumn
-            projectId={currentProject._id!}
+            projectId={currentProject.id}
             text={text}
             expectation={record}
             index={index}
@@ -91,7 +91,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
             <ActivateColumn
-                projectId={currentProject._id!}
+                projectId={currentProject.id}
                 text={text}
                 expectation={record}
                 index={index}
@@ -107,7 +107,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
             <MatcherColumn
-                projectId={currentProject._id!}
+                projectId={currentProject.id}
                 text={text}
                 expectation={record}
                 index={index}
@@ -123,7 +123,7 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
             <OperationColumn
-                projectId={currentProject._id!}
+                projectId={currentProject.id}
                 text={text}
                 expectation={record}
                 index={index}
@@ -142,7 +142,7 @@ const ExpectationPage = () => {
           onClick={async () => {
             // send request to add new expectation
             const createPromise = createExpectationReq(
-              projectState.projectList[projectState.curProjectIndex]._id!,
+              projectState.projectList[projectState.curProjectIndex].id,
               createExpectation()
             );
             toastPromise(createPromise);
