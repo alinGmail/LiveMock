@@ -14,7 +14,17 @@ export const actionReducers = {
     let { action: actionM, expectationIndex } = action.payload;
     state.expectationList[expectationIndex].actions.push(actionM);
   },
-  removeAction: () => {
-
+  removeAction: (
+    state: Draft<ExpectationState>,
+    action: PayloadAction<{
+      expectationIndex: number;
+      actionId: string;
+    }>
+  ) => {
+    let { actionId, expectationIndex } = action.payload;
+    const expectation = state.expectationList[expectationIndex];
+    expectation.actions = expectation.actions.filter(
+      (item) => item.id !== actionId
+    );
   },
 };

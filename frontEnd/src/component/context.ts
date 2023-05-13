@@ -27,7 +27,7 @@ function useMatcherContext(): MatcherContextData {
 
 interface ActionContextData {
   onActionModify: (action: IAction) => void;
-  onActionRemove: () => void;
+  onActionRemove: (actionId:string) => void;
 }
 
 const ActionContext = createContext<ActionContextData>({

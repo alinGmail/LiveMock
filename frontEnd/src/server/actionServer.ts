@@ -1,5 +1,9 @@
 import * as superagent from "superagent";
-import {CreateActionReqBody, CreateActionReqQuery} from "core/struct/params/ActionParams";
+import {
+  CreateActionReqBody,
+  CreateActionReqQuery,
+  DeleteActionReqQuery,
+} from "core/struct/params/ActionParams";
 import { CreateActionResponse } from "core/struct/response/ActionResponse";
 import { ServerUrl } from "../config";
 
@@ -10,4 +14,12 @@ export const createActionReq = async (
   return res.body;
 };
 
-
+export const deleteActionReq = async (
+  actionId: string,
+  query: DeleteActionReqQuery
+) => {
+  const res = await superagent
+    .delete(`${ServerUrl}/action/${actionId}`)
+    .query(query);
+  return res.body;
+};

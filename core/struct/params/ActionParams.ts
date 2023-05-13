@@ -25,3 +25,20 @@ export interface UpdateActionReqBody {
 }
 
 export interface UpdateActionReqQuery {}
+
+
+/**
+ * delete action
+ */
+export interface DeleteActionPathParam{
+  actionId:string;
+}
+
+export interface DeleteActionReqBody{
+
+}
+
+export interface DeleteActionReqQuery{
+  projectId:string;
+  expectationId:string;
+}

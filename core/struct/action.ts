@@ -79,7 +79,7 @@ export function createCustomResponseAction(): CustomResponseActionM {
       type: ResponseType.JSON,
       value: "",
     },
-    status: 0,
+    status: 200,
     type: ActionType.CUSTOM_RESPONSE,
   };
 }

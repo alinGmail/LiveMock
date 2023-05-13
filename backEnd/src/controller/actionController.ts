@@ -7,12 +7,16 @@ import {
   CreateActionPathParam,
   CreateActionReqBody,
   CreateActionReqQuery,
+  DeleteActionPathParam,
+  DeleteActionReqBody,
+  DeleteActionReqQuery,
   UpdateActionPathParam,
   UpdateActionReqBody,
   UpdateActionReqQuery,
 } from "core/struct/params/ActionParams";
 import {
   CreateActionResponse,
+  DeleteActionResponse,
   UpdateActionResponse,
 } from "core/struct/response/ActionResponse";
 import { ExpectationM } from "core/struct/expectation";
@@ -91,6 +95,40 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       Object.assign(expectation.actions[0], actionUpdate);
       collection.update(expectation);
       res.json(expectation.actions[0]);
+    }
+  );
+
+  /**
+   * delete action
+   */
+  router.delete(
+    "/:actionId",
+    bodyParser.json(),
+    async (
+      req: Request<
+        DeleteActionPathParam,
+        DeleteActionResponse,
+        DeleteActionReqBody,
+        DeleteActionReqQuery
+      >,
+      res: Response<DeleteActionResponse>
+    ) => {
+      addCross(res);
+      let { expectationId, projectId } = req.query;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const collection = await getCollection(projectId, path);
+      const expectation = collection.findOne({ id: expectationId });
+      if (!expectation) {
+        throw new ServerError(500, "expectation not exist");
+      }
+
+      expectation.actions = expectation.actions.filter(
+        (item) => item.id !== req.params.actionId
+      );
+      collection.update(expectation);
+      res.json({ message: "success" });
     }
   );
 

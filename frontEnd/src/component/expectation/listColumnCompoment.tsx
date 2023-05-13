@@ -6,6 +6,7 @@ import {
   addAction,
   addMatcher,
   modifyMatcher,
+  removeAction,
   removeMatcher,
   updateExpectationItem,
 } from "../../slice/expectationSlice";
@@ -29,7 +30,7 @@ import {
   createCustomResponseAction,
   createProxyAction,
 } from "core/struct/action";
-import { createActionReq } from "../../server/actionServer";
+import { createActionReq, deleteActionReq } from "../../server/actionServer";
 
 async function updateExpectation(
   projectId: string,
@@ -342,7 +343,14 @@ export const ActionColumn = ({
       <ActionContext.Provider
         value={{
           onActionModify: (action) => {},
-          onActionRemove: () => {},
+          onActionRemove: (actionId) => {
+            dispatch(removeAction({ actionId, expectationIndex: index }));
+            const deletePromise = deleteActionReq(actionId, {
+              projectId,
+              expectationId: expectation.id,
+            });
+            toastPromise(deletePromise);
+          },
         }}
       >
         {expectation.actions.map((item) => {

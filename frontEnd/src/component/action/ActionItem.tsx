@@ -1,6 +1,8 @@
 import React from "react";
-import {ActionM} from "core/struct/action";
-
+import {ActionM, ActionType} from "core/struct/action";
+import mStyle from "./ActionItem.module.scss"
+import {CloseSquareOutlined} from "@ant-design/icons";
+import {useActionContext} from "../context";
 
 const ActionItem:React.FC<{
     action:ActionM,
@@ -8,8 +10,21 @@ const ActionItem:React.FC<{
 }> = ({
     action,onPropertyChange
 })=>{
+    const actionContext = useActionContext();
     return <div>
-        {action.type}
+        {action.type === ActionType.PROXY && <div />}
+        {action.type === ActionType.CUSTOM_RESPONSE &&
+            <div className={mStyle.actionWrap} >
+                response {action.status} with {action.responseContent.type}
+                &nbsp;&nbsp;
+                <CloseSquareOutlined
+                    className={mStyle.closeBtn}
+                    onClick={() => {
+                        actionContext.onActionRemove(action.id);
+                    }}
+                />
+            </div>
+        }
 
     </div>
 }
