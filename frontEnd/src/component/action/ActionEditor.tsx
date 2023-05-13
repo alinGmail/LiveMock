@@ -1,7 +1,9 @@
 import React, { useCallback, useState } from "react";
-import { ActionM, ActionType, getNewAction } from "core/struct/action";
+import {ActionM, ActionType, getNewAction, ProxyActionM} from "core/struct/action";
 import { Input, Select } from "antd";
 import { useActionContext } from "../context";
+import {useDebounceFn} from "ahooks";
+import {debounceWait} from "../../config";
 
 const ActionEditor: React.FC<{
   action: ActionM;
@@ -19,6 +21,21 @@ const ActionEditor: React.FC<{
     },
     [action]
   );
+
+  const {
+    run :updateHost,
+    cancel,
+    flush
+  } = useDebounceFn(
+      (action:ActionM,value:string)=>{
+        actionContext.onActionModify({
+          ...action,
+          host:value
+        } as ProxyActionM);
+      },
+      {wait:debounceWait}
+);
+
   return (
     <div>
       {action.type === ActionType.CUSTOM_RESPONSE && (
@@ -60,10 +77,7 @@ const ActionEditor: React.FC<{
           <div>host</div>
           <div>
             <Input value={action.host} onChange={(event) => {
-              actionContext.onActionModify({
-                ...action,
-                host:event.target.value
-              });
+              updateHost(action,event.target.value);
             }} />
           </div>
         </div>
