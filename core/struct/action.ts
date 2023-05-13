@@ -23,14 +23,14 @@ interface TEXTResponseContentM {
 type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
 
 export interface ProxyActionM {
-  id:string;
+  id: string;
   type: ActionType.PROXY;
   host: string;
   pathRewrite: Array<PathRewriteM>;
 }
 
 export interface CustomResponseActionM {
-  id:string;
+  id: string;
   type: ActionType.CUSTOM_RESPONSE;
   headers: Array<[string, string]>;
   status: number;
@@ -64,9 +64,22 @@ export interface IAction {
 }
 export function createProxyAction(): ProxyActionM {
   return {
-    id:uuId(),
+    id: uuId(),
     host: "",
     pathRewrite: [],
     type: ActionType.PROXY,
+  };
+}
+
+export function createCustomResponseAction(): CustomResponseActionM {
+  return {
+    headers: [],
+    id: uuId(),
+    responseContent: {
+      type: ResponseType.JSON,
+      value: "",
+    },
+    status: 0,
+    type: ActionType.CUSTOM_RESPONSE,
   };
 }

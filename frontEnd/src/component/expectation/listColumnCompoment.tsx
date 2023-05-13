@@ -3,6 +3,7 @@ import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
+  addAction,
   addMatcher,
   modifyMatcher,
   removeMatcher,
@@ -23,7 +24,12 @@ import {
   updateMatcherReq,
 } from "../../server/matcherServer";
 import ActionItem from "../action/ActionItem";
-import {ActionM, createProxyAction} from "core/struct/action";
+import {
+  ActionM,
+  createCustomResponseAction,
+  createProxyAction,
+} from "core/struct/action";
+import { createActionReq } from "../../server/actionServer";
 
 async function updateExpectation(
   projectId: string,
@@ -340,19 +346,31 @@ export const ActionColumn = ({
         }}
       >
         {expectation.actions.map((item) => {
-          return <div>
-              <ActionItem action={item} onPropertyChange={()=>{
-
-              }}/>
-          </div>;
+          return (
+            <div>
+              <ActionItem action={item} onPropertyChange={() => {}} />
+            </div>
+          );
         })}
       </ActionContext.Provider>
       {expectation.actions.length === 0 && (
         <div>
           <Button
             onClick={() => {
-                const action:ActionM = createProxyAction();
-
+              const action: ActionM = createCustomResponseAction();
+              dispatch(
+                addAction({
+                  action,
+                  expectationIndex: index,
+                })
+              );
+              // send the request
+              const createPromise = createActionReq({
+                projectId: projectId,
+                expectationId: expectation.id,
+                action,
+              });
+              toastPromise(createPromise);
             }}
             type={"text"}
             icon={

@@ -1,6 +1,7 @@
 import { ExpectationM } from "core/struct/expectation";
 import { createSlice, Draft, PayloadAction } from "@reduxjs/toolkit";
 import { matcherReducers } from "./matcherSlice";
+import { actionReducers } from "./actionSlice";
 
 export interface ExpectationState {
   expectationList: Array<ExpectationM>;
@@ -26,6 +27,7 @@ const expectationSlice = createSlice({
       Object.assign(item, action.payload.modifyValues);
     },
     ...matcherReducers,
+    ...actionReducers,
   },
 });
 
@@ -38,6 +40,7 @@ let {
   removeMatcher,
   setExpectationList,
   updateExpectationItem,
+    addAction,removeAction,
 } = actions;
 export {
   addMatcher,
@@ -45,5 +48,6 @@ export {
   removeMatcher,
   setExpectationList,
   updateExpectationItem,
+    addAction,removeAction,
   reducer,
 };

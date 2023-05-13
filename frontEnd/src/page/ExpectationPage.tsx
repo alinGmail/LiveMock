@@ -7,6 +7,7 @@ import {
 } from "../server/expectationServer";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
+  ActionColumn,
   ActivateColumn,
   DelayColumn, MatcherColumn,
   NameColumn, OperationColumn, PriorityColumn,
@@ -107,6 +108,22 @@ const ExpectationPage = () => {
       render: (text: string, record: ExpectationM, index: number) => {
         return (
             <MatcherColumn
+                projectId={currentProject.id}
+                text={text}
+                expectation={record}
+                index={index}
+                dispatch={dispatch}
+            />
+        );
+      },
+    },
+    {
+      title: "actions",
+      dataIndex: "actions",
+      key: "actions",
+      render: (text: string, record: ExpectationM, index: number) => {
+        return (
+            <ActionColumn
                 projectId={currentProject.id}
                 text={text}
                 expectation={record}
