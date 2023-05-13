@@ -40,7 +40,9 @@ let {
   removeMatcher,
   setExpectationList,
   updateExpectationItem,
-    addAction,removeAction,
+  addAction,
+  removeAction,
+  modifyAction,
 } = actions;
 export {
   addMatcher,
@@ -48,6 +50,8 @@ export {
   removeMatcher,
   setExpectationList,
   updateExpectationItem,
-    addAction,removeAction,
+  addAction,
+  removeAction,
+  modifyAction,
   reducer,
 };

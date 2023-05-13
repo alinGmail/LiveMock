@@ -12,7 +12,6 @@ import {
 import styles from "./MatcherItem.module.css";
 import { Dropdown } from "antd";
 import { useMatcherContext } from "../context";
-import { v4 as uuidv4 } from "uuid";
 import { NInput } from "../nui/NInput";
 import { CloseSquareOutlined, CloseSquareTwoTone } from "@ant-design/icons";
 import MatcherTypeSelector from "./MatcherTypeSelector";

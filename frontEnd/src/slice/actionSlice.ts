@@ -3,7 +3,15 @@ import { ActionM } from "core/struct/action";
 import { ExpectationState } from "./expectationSlice";
 
 export const actionReducers = {
-  modifyAction: () => {},
+  modifyAction: (state:Draft<ExpectationState>,action:PayloadAction<{
+      expectationIndex:number;
+      actionUpdate:ActionM;
+  }>) => {
+      let {actionUpdate: newAction, expectationIndex} = action.payload;
+      const actions = state.expectationList[expectationIndex].actions;
+      const index = actions.findIndex(item => item.id === newAction.id);
+      actions[index] = {...newAction};
+  },
   addAction: (
     state: Draft<ExpectationState>,
     action: PayloadAction<{

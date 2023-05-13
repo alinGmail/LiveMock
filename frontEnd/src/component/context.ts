@@ -1,6 +1,6 @@
-import {createContext, useContext} from "react";
-import {RequestMatcherM} from "core/struct/matcher";
-import {IAction} from "core/struct/action";
+import { createContext, useContext } from "react";
+import { RequestMatcherM } from "core/struct/matcher";
+import { ActionM } from "core/struct/action";
 
 const ExpectationContext = createContext(null);
 
@@ -26,8 +26,8 @@ function useMatcherContext(): MatcherContextData {
 }
 
 interface ActionContextData {
-  onActionModify: (action: IAction) => void;
-  onActionRemove: (actionId:string) => void;
+  onActionModify: (action: ActionM) => void;
+  onActionRemove: (actionId: string) => void;
 }
 
 const ActionContext = createContext<ActionContextData>({

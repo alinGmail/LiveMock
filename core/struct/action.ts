@@ -83,3 +83,17 @@ export function createCustomResponseAction(): CustomResponseActionM {
     type: ActionType.CUSTOM_RESPONSE,
   };
 }
+
+export function getNewAction(id: string, type: ActionType) {
+  let newAction: ActionM;
+  switch (type) {
+    case ActionType.PROXY:
+      newAction = createProxyAction();
+      newAction.id = id;
+      return newAction;
+    case ActionType.CUSTOM_RESPONSE:
+      newAction = createCustomResponseAction();
+      newAction.id = id;
+      return newAction;
+  }
+}

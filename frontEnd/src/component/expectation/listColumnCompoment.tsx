@@ -3,12 +3,12 @@ import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
-  addAction,
-  addMatcher,
-  modifyMatcher,
-  removeAction,
-  removeMatcher,
-  updateExpectationItem,
+    addAction,
+    addMatcher, modifyAction,
+    modifyMatcher,
+    removeAction,
+    removeMatcher,
+    updateExpectationItem,
 } from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
@@ -342,7 +342,12 @@ export const ActionColumn = ({
     <div>
       <ActionContext.Provider
         value={{
-          onActionModify: (action) => {},
+          onActionModify: (action) => {
+              dispatch(modifyAction({
+                  actionUpdate:action,
+                  expectationIndex:index
+              }))
+          },
           onActionRemove: (actionId) => {
             dispatch(removeAction({ actionId, expectationIndex: index }));
             const deletePromise = deleteActionReq(actionId, {
