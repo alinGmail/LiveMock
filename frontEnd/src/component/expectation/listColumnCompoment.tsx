@@ -3,12 +3,13 @@ import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
-    addAction,
-    addMatcher, modifyAction,
-    modifyMatcher,
-    removeAction,
-    removeMatcher,
-    updateExpectationItem,
+  addAction,
+  addMatcher,
+  modifyAction,
+  modifyMatcher,
+  removeAction,
+  removeMatcher,
+  updateExpectationItem,
 } from "../../slice/expectationSlice";
 import { useRequest } from "ahooks";
 import { debounceWait } from "../../config";
@@ -30,7 +31,11 @@ import {
   createCustomResponseAction,
   createProxyAction,
 } from "core/struct/action";
-import { createActionReq, deleteActionReq } from "../../server/actionServer";
+import {
+  createActionReq,
+  deleteActionReq,
+  updateActionReq,
+} from "../../server/actionServer";
 
 async function updateExpectation(
   projectId: string,
@@ -343,10 +348,18 @@ export const ActionColumn = ({
       <ActionContext.Provider
         value={{
           onActionModify: (action) => {
-              dispatch(modifyAction({
-                  actionUpdate:action,
-                  expectationIndex:index
-              }))
+            dispatch(
+              modifyAction({
+                actionUpdate: action,
+                expectationIndex: index,
+              })
+            );
+            const updatePromise = updateActionReq(action.id, {
+              expectationId: expectation.id,
+              projectId,
+              actionUpdate: action,
+            });
+            toastPromise(updatePromise);
           },
           onActionRemove: (actionId) => {
             dispatch(removeAction({ actionId, expectationIndex: index }));

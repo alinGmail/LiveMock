@@ -28,7 +28,11 @@ const ActionItem: React.FC<{
         }
       >
         <div>
-          {action.type === ActionType.PROXY && <div />}
+            {action.type === ActionType.PROXY && <div >
+                <div className={mStyle.actionWrap}>
+                    proxy to {action.host}
+                </div>
+            </div>}
           {action.type === ActionType.CUSTOM_RESPONSE && (
             <div className={mStyle.actionWrap}>
               response {action.status} with {action.responseContent.type}

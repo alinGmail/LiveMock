@@ -3,6 +3,7 @@ import {
   CreateActionReqBody,
   CreateActionReqQuery,
   DeleteActionReqQuery,
+  UpdateActionReqBody,
 } from "core/struct/params/ActionParams";
 import { CreateActionResponse } from "core/struct/response/ActionResponse";
 import { ServerUrl } from "../config";
@@ -21,5 +22,15 @@ export const deleteActionReq = async (
   const res = await superagent
     .delete(`${ServerUrl}/action/${actionId}`)
     .query(query);
+  return res.body;
+};
+
+export const updateActionReq = async (
+  actionId: string,
+  params: UpdateActionReqBody
+) => {
+  const res = await superagent
+    .put(`${ServerUrl}/action/${actionId}`)
+    .send(params);
   return res.body;
 };

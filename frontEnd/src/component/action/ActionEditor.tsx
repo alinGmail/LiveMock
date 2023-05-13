@@ -59,7 +59,12 @@ const ActionEditor: React.FC<{
           </div>
           <div>host</div>
           <div>
-            <Input />
+            <Input value={action.host} onChange={(event) => {
+              actionContext.onActionModify({
+                ...action,
+                host:event.target.value
+              });
+            }} />
           </div>
         </div>
       )}

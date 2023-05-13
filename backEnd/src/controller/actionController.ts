@@ -71,7 +71,7 @@ export async function getActionRouter(path: string): Promise<express.Router> {
    * update action
    */
   router.put(
-    "/",
+    "/:actionId",
     bodyParser.json(),
     async (
       req: Request<
@@ -92,9 +92,16 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
       }
-      Object.assign(expectation.actions[0], actionUpdate);
+
+      const actionIndex = expectation.actions.findIndex(
+        (item) => item.id === req.params.actionId
+      );
+      if (actionIndex === -1) {
+        throw new ServerError(500, "action not exist");
+      }
+      Object.assign(expectation.actions[actionIndex], actionUpdate);
       collection.update(expectation);
-      res.json(expectation.actions[0]);
+      res.json(expectation.actions[actionIndex]);
     }
   );
 

@@ -16,7 +16,9 @@ export interface CreateActionReqQuery {}
 /**
  * update action
  */
-export interface UpdateActionPathParam {}
+export interface UpdateActionPathParam {
+  actionId:string;
+}
 
 export interface UpdateActionReqBody {
   projectId: string;
