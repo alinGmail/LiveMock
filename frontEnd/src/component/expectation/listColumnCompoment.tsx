@@ -13,19 +13,17 @@ import { debounceWait } from "../../config";
 import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import * as React from "react";
-import { MatcherContext } from "../context";
+import { MatcherContext, ActionContext } from "../context";
 import MatcherItem from "../matcher/MatcherItem";
 import { PlusOutlined } from "@ant-design/icons";
-import {
-  createPathMatcher,
-  MatcherCondition,
-  RequestMatcherType,
-} from "core/struct/matcher";
+import { createPathMatcher } from "core/struct/matcher";
 import {
   createMatcherReq,
   deleteMatcherReq,
   updateMatcherReq,
 } from "../../server/matcherServer";
+import ActionItem from "../action/ActionItem";
+import {ActionM, createProxyAction} from "core/struct/action";
 
 async function updateExpectation(
   projectId: string,
@@ -317,6 +315,60 @@ export const MatcherAddBtn = ({
     >
       Add Matcher
     </Button>
+  );
+};
+
+export const ActionColumn = ({
+  projectId,
+  text,
+  expectation,
+  index,
+  dispatch,
+}: {
+  projectId: string;
+  text: string;
+  expectation: ExpectationM;
+  index: number;
+  dispatch: AppDispatch;
+}) => {
+  return (
+    <div>
+      <ActionContext.Provider
+        value={{
+          onActionModify: (action) => {},
+          onActionRemove: () => {},
+        }}
+      >
+        {expectation.actions.map((item) => {
+          return <div>
+              <ActionItem action={item} onPropertyChange={()=>{
+
+              }}/>
+          </div>;
+        })}
+      </ActionContext.Provider>
+      {expectation.actions.length === 0 && (
+        <div>
+          <Button
+            onClick={() => {
+                const action:ActionM = createProxyAction();
+
+            }}
+            type={"text"}
+            icon={
+              <PlusOutlined
+                style={{
+                  position: "absolute",
+                  top: "0px",
+                }}
+              />
+            }
+          >
+            Create Action
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 
