@@ -9,6 +9,7 @@ import { Input, InputNumber, Select } from "antd";
 import { useActionContext } from "../context";
 import { ResponseType } from "core/struct/action";
 import TextArea from "antd/es/input/TextArea";
+import HeaderEditor from "./HeaderEditor";
 
 const ActionEditor: React.FC<{
   action: ActionM;
@@ -83,6 +84,23 @@ const ActionEditor: React.FC<{
                   },
                 });
               }}
+            />
+          </div>
+          <div>headers</div>
+          <div>
+            <HeaderEditor
+              headers={action.responseContent.headers}
+              onHeaderModify={(headerIndex, value) => {}}
+              onAddHeader={(header) => {
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    headers: [...action.responseContent.headers, header],
+                  },
+                });
+              }}
+              onDeleteHeader={(headerEditor) => {}}
             />
           </div>
           <div>content</div>

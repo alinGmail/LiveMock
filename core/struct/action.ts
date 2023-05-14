@@ -12,10 +12,12 @@ export enum ResponseType {
 }
 
 interface JSONResponseContentM {
+  headers: Array<[string, string]>;
   type: ResponseType.JSON;
   value: string;
 }
 interface TEXTResponseContentM {
+  headers: Array<[string, string]>;
   type: ResponseType.TEXT;
   value: string;
 }
@@ -32,7 +34,6 @@ export interface ProxyActionM {
 export interface CustomResponseActionM {
   id: string;
   type: ActionType.CUSTOM_RESPONSE;
-  headers: Array<[string, string]>;
   status: number;
   responseContent: ResponseContentM;
 }
@@ -73,11 +74,11 @@ export function createProxyAction(): ProxyActionM {
 
 export function createCustomResponseAction(): CustomResponseActionM {
   return {
-    headers: [],
     id: uuId(),
     responseContent: {
       type: ResponseType.JSON,
       value: "",
+      headers:[]
     },
     status: 200,
     type: ActionType.CUSTOM_RESPONSE,
