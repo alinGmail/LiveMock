@@ -1,9 +1,14 @@
-import React, { useCallback, useState } from "react";
-import {ActionM, ActionType, getNewAction, ProxyActionM} from "core/struct/action";
-import { Input, Select } from "antd";
+import React, { ChangeEvent, useCallback } from "react";
+import {
+  ActionM,
+  ActionType,
+  getNewAction,
+  ProxyActionM,
+} from "core/struct/action";
+import { Input, InputNumber, Select } from "antd";
 import { useActionContext } from "../context";
-import {useDebounceFn} from "ahooks";
-import {debounceWait} from "../../config";
+import { ResponseType } from "core/struct/action";
+import TextArea from "antd/es/input/TextArea";
 
 const ActionEditor: React.FC<{
   action: ActionM;
@@ -22,20 +27,6 @@ const ActionEditor: React.FC<{
     [action]
   );
 
-  const {
-    run :updateHost,
-    cancel,
-    flush
-  } = useDebounceFn(
-      (action:ActionM,value:string)=>{
-        actionContext.onActionModify({
-          ...action,
-          host:value
-        } as ProxyActionM);
-      },
-      {wait:debounceWait}
-);
-
   return (
     <div>
       {action.type === ActionType.CUSTOM_RESPONSE && (
@@ -53,6 +44,60 @@ const ActionEditor: React.FC<{
                   label: ActionType.CUSTOM_RESPONSE,
                 },
               ]}
+            />
+          </div>
+          <div>http status</div>
+          <div>
+            <InputNumber
+              value={action.status}
+              onChange={(value) => {
+                if (value !== null) {
+                  actionContext.onActionModify({
+                    ...action,
+                    status: value,
+                  });
+                }
+              }}
+            />
+          </div>
+          <div>response type</div>
+          <div>
+            <Select
+              defaultValue={action.responseContent.type}
+              options={[
+                {
+                  value: ResponseType.TEXT,
+                  label: ResponseType.TEXT,
+                },
+                {
+                  value: ResponseType.JSON,
+                  label: ResponseType.JSON,
+                },
+              ]}
+              onChange={(value) => {
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    type: value,
+                  },
+                });
+              }}
+            />
+          </div>
+          <div>content</div>
+          <div>
+            <TextArea
+              value={action.responseContent.value}
+              onChange={(event: ChangeEvent<{ value: string }>) => {
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    value: event.target.value,
+                  },
+                });
+              }}
             />
           </div>
         </div>
@@ -76,9 +121,15 @@ const ActionEditor: React.FC<{
           </div>
           <div>host</div>
           <div>
-            <Input value={action.host} onChange={(event) => {
-              updateHost(action,event.target.value);
-            }} />
+            <Input
+              value={action.host}
+              onChange={(event) => {
+                actionContext.onActionModify({
+                  ...action,
+                  host: event.target.value,
+                } as ProxyActionM);
+              }}
+            />
           </div>
         </div>
       )}

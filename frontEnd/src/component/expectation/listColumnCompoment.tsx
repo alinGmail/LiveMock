@@ -11,7 +11,7 @@ import {
   removeMatcher,
   updateExpectationItem,
 } from "../../slice/expectationSlice";
-import { useRequest } from "ahooks";
+import { useDebounceFn, useRequest } from "ahooks";
 import { debounceWait } from "../../config";
 import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
@@ -343,6 +343,21 @@ export const ActionColumn = ({
   index: number;
   dispatch: AppDispatch;
 }) => {
+  const {
+    run: updateAction,
+    cancel,
+    flush,
+  } = useDebounceFn(
+    (action: ActionM, projectId: string, expectation: ExpectationM) => {
+      const updatePromise = updateActionReq(action.id, {
+        expectationId: expectation.id,
+        projectId,
+        actionUpdate: action,
+      });
+      toastPromise(updatePromise);
+    },
+    { wait: debounceWait }
+  );
   return (
     <div>
       <ActionContext.Provider
@@ -354,12 +369,7 @@ export const ActionColumn = ({
                 expectationIndex: index,
               })
             );
-            const updatePromise = updateActionReq(action.id, {
-              expectationId: expectation.id,
-              projectId,
-              actionUpdate: action,
-            });
-            toastPromise(updatePromise);
+            updateAction(action, projectId, expectation);
           },
           onActionRemove: (actionId) => {
             dispatch(removeAction({ actionId, expectationIndex: index }));
