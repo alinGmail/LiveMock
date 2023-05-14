@@ -1,7 +1,3 @@
-import Datastore from "nedb";
-import PromiseDatastore from "./promiseDatastore";
-import { ExpectationM } from "core/struct/expectation";
-import { LogM } from "core/struct/log";
 import lokijs from "lokijs";
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
