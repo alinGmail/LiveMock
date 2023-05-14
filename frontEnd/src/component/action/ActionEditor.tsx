@@ -91,7 +91,17 @@ const ActionEditor: React.FC<{
           <div>
             <HeaderEditor
               headers={action.responseContent.headers}
-              onHeaderModify={(headerIndex, value) => {}}
+              onHeaderModify={(headerIndex, value) => {
+                let _headers = [...action.responseContent.headers];
+                _headers[headerIndex] = value;
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent:{
+                    ...action.responseContent,
+                    headers:_headers
+                  }
+                })
+              }}
               onAddHeader={(header) => {
                 actionContext.onActionModify({
                   ...action,
@@ -101,7 +111,17 @@ const ActionEditor: React.FC<{
                   },
                 });
               }}
-              onDeleteHeader={(headerEditor) => {}}
+              onDeleteHeader={(headerIndex) => {
+                let _headers = [...action.responseContent.headers];
+                _headers.splice(headerIndex,1);
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent:{
+                    ...action.responseContent,
+                    headers:_headers
+                  }
+                })
+              }}
             />
           </div>
           <div>content</div>
