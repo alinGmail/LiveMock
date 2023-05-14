@@ -1,9 +1,14 @@
 import {
   MatcherCondition,
-  RequestMatcherM,
+  RequestMatcherM, RequestMatcherType,
   StringMatcherCondition,
 } from "core/struct/matcher";
 import _ from "lodash";
+import MethodMatcher from "./MethodMatcher";
+import PathMatcher from "./PathMatcher";
+import HeaderMatcher from "./HeaderMatcher";
+import QueryMatcher from "./QueryMatcher";
+import ParamMatcher from "./ParamMatcher";
 
 export const stringMatchCondition = (
   left: string,
@@ -67,3 +72,20 @@ export function matchAnyValue(
     return false;
   }
 }
+
+export const getMatcherImpl = (matcher: RequestMatcherM) => {
+  if (matcher.type == RequestMatcherType.METHOD) {
+    return new MethodMatcher(matcher);
+  } else if (matcher.type == RequestMatcherType.PATH) {
+    return new PathMatcher(matcher);
+  } else if (matcher.type == RequestMatcherType.HEADER) {
+    return new HeaderMatcher(matcher);
+  } else if (matcher.type == RequestMatcherType.QUERY) {
+    return new QueryMatcher(matcher);
+  } else if (matcher.type == RequestMatcherType.PARAM) {
+    return new ParamMatcher(matcher);
+  } else {
+    return null;
+  }
+};
+
