@@ -3,3 +3,19 @@
   text-align: center;
   margin-bottom: 3px;
 }
+.closeBtn{
+  color: #8c8c8c;
+  transition: color ease-in 200ms,transform ease-in 200ms;
+}
+
+.closeBtn:hover{
+  color: #cf1322;
+  transform: scale(1.4);
+}
+.headerRow{
+  border: 1px solid #f0f0f0;
+  border-bottom: none;
+}
+.headerItem{
+  padding: 3px;
+}

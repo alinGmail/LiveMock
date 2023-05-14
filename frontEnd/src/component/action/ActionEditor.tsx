@@ -10,6 +10,7 @@ import { useActionContext } from "../context";
 import { ResponseType } from "core/struct/action";
 import TextArea from "antd/es/input/TextArea";
 import HeaderEditor from "./HeaderEditor";
+import mStyle from "./ActionEditor.module.scss";
 
 const ActionEditor: React.FC<{
   action: ActionM;
@@ -29,7 +30,7 @@ const ActionEditor: React.FC<{
   );
 
   return (
-    <div className={"popper"}>
+    <div className={["popper",mStyle.actionEditor].join(" ")}>
       {action.type === ActionType.CUSTOM_RESPONSE && (
         <div>
           <div>type</div>

@@ -1,8 +1,7 @@
 import React from "react";
 import { Button, Col, Row } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { CloseSquareOutlined, PlusOutlined } from "@ant-design/icons";
 import mStyle from "./HeaderEditor.module.scss";
-import { useActionContext } from "../context";
 import { NInput } from "../nui/NInput";
 
 const HeaderEditor: React.FC<{
@@ -14,17 +13,24 @@ const HeaderEditor: React.FC<{
   return (
     <div>
       <Row>
-        <Col span={12}>key</Col>
-        <Col span={12}>value</Col>
+        <Col span={10}>key</Col>
+        <Col span={10}>value</Col>
+        <Col span={4}>&nbsp;</Col>
       </Row>
       {headers.map((header) => {
         return (
-          <Row>
-            <Col span={12}>
+          <Row className={mStyle.headerRow}>
+            <Col span={11} className={mStyle.headerItem}>
               <NInput value={header[0]} />
             </Col>
-            <Col span={12}>
+            <Col span={11} className={mStyle.headerItem}>
               <NInput value={header[1]} />
+            </Col>
+            <Col span={2} className={mStyle.headerItem} style={{textAlign:"center",paddingTop:"5px"}}>
+              <CloseSquareOutlined
+                className={mStyle.closeBtn}
+                onClick={() => {}}
+              />
             </Col>
           </Row>
         );
