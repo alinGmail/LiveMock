@@ -29,7 +29,7 @@ const ActionEditor: React.FC<{
   );
 
   return (
-    <div>
+    <div className={"popper"}>
       {action.type === ActionType.CUSTOM_RESPONSE && (
         <div>
           <div>type</div>
