@@ -1,10 +1,11 @@
-
+import { v4 as uuId } from "uuid";
 
 export interface LogM {
-  _id?: string;
-  req: RequestLogM;
+  id: string;
+  req: RequestLogM | null;
   res: ResponseLogM | null;
-  proxyInfo: ProxyInfoM;
+  proxyInfo: ProxyInfoM | null;
+  expectationId: string | null;
 }
 
 export interface ProxyInfoM {
@@ -13,8 +14,8 @@ export interface ProxyInfoM {
 }
 
 export interface RequestLogM {
-  body: any;
-  rawBody: string;
+  body: any | null;
+  rawBody: string | null;
   requestDate: Date;
   method: string;
   path: string;
@@ -27,10 +28,31 @@ type ResponseLogM = {
   headers: {
     [key: string]: string | undefined | null;
   };
-  body: any;
+  body: any | null;
   rawBody: string | null;
   status: number;
   statusMessage: string;
   duration: number;
   responseDate: Date;
 };
+
+export function createLog(): LogM {
+  return {
+    id: uuId(),
+    expectationId: null,
+    proxyInfo: null,
+    req: null,
+    res: null,
+  };
+}
+
+export function createRequestLog(): RequestLogM {
+  return {
+    body: null,
+    headers: {},
+    method: "get",
+    path: "",
+    rawBody: null,
+    requestDate: new Date(),
+  };
+}

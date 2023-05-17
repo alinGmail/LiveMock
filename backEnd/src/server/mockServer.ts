@@ -7,6 +7,7 @@ import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
+import { getLogCollection, insertReqLog } from "../log/logUtils";
 
 async function getExpectationCollection(
   projectId: string,
@@ -15,6 +16,8 @@ async function getExpectationCollection(
   const db = await getExpectationDb(projectId, path);
   return db.getCollection("expectation");
 }
+// default is 10mb
+const MaxRawBodySize = 10 * 1024 * 1024;
 
 const getMockRouter: (
   path: string,
@@ -22,7 +25,28 @@ const getMockRouter: (
 ) => Promise<express.Router> = async (path, projectId) => {
   let router = express.Router();
   const expectationCollection = await getExpectationCollection(projectId, path);
-  router.all("*", bodyParser(), async (req: Request, res: Response) => {
+  const logCollection = await getLogCollection(projectId, path);
+
+  router.use((req: Request, res, next) => {
+    const contentLength = req.headers["content-length"];
+    try {
+      if (typeof contentLength === "string") {
+        const bodyLength = parseInt(contentLength);
+        if (bodyLength < MaxRawBodySize) {
+          // @ts-ignore
+          req.rawBody = "";
+          req.on("data", function (chunk) {
+            // @ts-ignore
+            req.rawBody += chunk;
+          });
+        }
+      }
+    } catch (e) {}
+    next();
+  });
+
+  router.use(bodyParser);
+  router.all("*", async (req: Request, res: Response) => {
     const expectations = expectationCollection
       .chain()
       .find({ activate: true })
@@ -51,6 +75,7 @@ const getMockRouter: (
               expectation.actions[0],
               expectation.delay
             );
+            insertReqLog(logCollection, req, res, expectation.id);
             await actionImpl?.process(req, res);
             return true;
           }

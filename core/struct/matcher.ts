@@ -88,7 +88,7 @@ export type ArrayMatcherCondition = Extract<
   | MatcherCondition.CONTAINS
   | MatcherCondition.NOT_CONTAINS
   | MatcherCondition.SHOWED
-  | MatcherCondition.NOT_CONTAINS
+  | MatcherCondition.NOT_SHOWED
 >;
 
 export interface IMatcher {
