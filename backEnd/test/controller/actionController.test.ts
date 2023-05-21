@@ -66,13 +66,13 @@ describe("action controller", () => {
     };
 
     const updateAction = async () => {
-      await request(server)
-          .put(`/action/`)
+      const res = await request(server)
+          .put(`/action/${action.id}`)
           .send({
             projectId: projectM.id,
             expectationId: expectationM.id,
             actionUpdate: { host: "https://www.google.com" },
-          } as UpdateActionReqBody);
+          } as UpdateActionReqBody).expect(200);
     };
 
     const expectAction = async (host) => {
