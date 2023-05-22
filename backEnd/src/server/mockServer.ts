@@ -8,6 +8,8 @@ import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
 import { getLogCollection, insertReqLog } from "../log/logUtils";
+import * as http from "http";
+import * as buffer from "buffer";
 
 async function getExpectationCollection(
   projectId: string,
@@ -26,27 +28,37 @@ const getMockRouter: (
   let router = express.Router();
   const expectationCollection = await getExpectationCollection(projectId, path);
   const logCollection = await getLogCollection(projectId, path);
+    // request raw body
+    /*
+    router.use((req: Request, res, next) => {
+      const bodyChunks:Array<Buffer> = [];
+      let bodySize = 0;
+      req.on("data", function(chunk) {
+          bodySize += chunk.length;
+          if (bodySize > MaxRawBodySize) {
+          } else {
+              bodyChunks.push(chunk);
+          }
+      });
+      req.on("end", function() {
+          if(bodySize <= MaxRawBodySize){
+              // @ts-ignore
+              req.rawBody = Buffer.concat(bodyChunks).toString();
+          }
+          next();
+      });
 
-  router.use((req: Request, res, next) => {
-    const contentLength = req.headers["content-length"];
-    try {
-      if (typeof contentLength === "string") {
-        const bodyLength = parseInt(contentLength);
-        if (bodyLength < MaxRawBodySize) {
-          // @ts-ignore
-          req.rawBody = "";
-          req.on("data", function (chunk) {
-            // @ts-ignore
-            req.rawBody += chunk;
-          });
-        }
-      }
-    } catch (e) {}
-    next();
   });
+   */
 
-  router.use(bodyParser);
-  router.all("*", async (req: Request, res: Response) => {
+  router.use(bodyParser({
+      verify(req: http.IncomingMessage, res: http.ServerResponse, buf: Buffer, encoding: string) {
+          if(buf.length < MaxRawBodySize){
+              (req as unknown as {rawBody:string}).rawBody = buf.toString(encoding as BufferEncoding);
+          }
+      }
+  }));
+  router.all("*",async (req: Request, res: Response) => {
     const expectations = expectationCollection
       .chain()
       .find({ activate: true })

@@ -32,6 +32,7 @@ export function insertReqLog(
     return acc;
   }, {});
   requestLogM.method = req.method;
+  logM.req = requestLogM;
   logCollection.insert(logM);
   // requestLogM.headers = req.headers;
 }
