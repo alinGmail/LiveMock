@@ -56,3 +56,16 @@ export function createRequestLog(): RequestLogM {
     requestDate: new Date(),
   };
 }
+
+export function createResponseLog():ResponseLogM{
+  const _now = new Date();
+  return {
+    body: undefined,
+    duration: 0,
+    headers: {},
+    rawBody: "",
+    responseDate: _now,
+    status: 0,
+    statusMessage: ""
+  }
+}

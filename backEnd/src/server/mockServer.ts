@@ -7,7 +7,7 @@ import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
-import { getLogCollection, insertReqLog } from "../log/logUtils";
+import {getLogCollection, insertReqLog, insertResLog} from "../log/logUtils";
 import * as http from "http";
 import * as buffer from "buffer";
 
@@ -87,8 +87,9 @@ const getMockRouter: (
               expectation.actions[0],
               expectation.delay
             );
-            insertReqLog(logCollection, req, res, expectation.id);
+            const logM = insertReqLog(logCollection, req, res, expectation.id);
             await actionImpl?.process(req, res);
+            logM && insertResLog(logCollection,req,res,expectation.id,logM);
             return true;
           }
         }

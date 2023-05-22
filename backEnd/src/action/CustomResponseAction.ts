@@ -23,13 +23,20 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "application/json");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      res.end(this.action.responseContent.value);
+      const responseVal = this.action.responseContent.value;
+      res.end(responseVal);
+      // set the body and raw body
+      (res as any).body = JSON.parse(responseVal);
+      (res as any).rawBody = responseVal;
     } else if (this.action.responseContent.type === ResponseType.TEXT) {
       //addCross(res);
       res.setHeader("Content-Type", "text/plain");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      res.end(this.action.responseContent.value);
+      const responseVal = this.action.responseContent.value;
+      res.end(responseVal);
+      (res as any).body = responseVal;
+      (res as any).rawBody = responseVal;
     }
   }
 }
