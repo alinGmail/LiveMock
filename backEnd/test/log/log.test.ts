@@ -29,7 +29,7 @@ describe('test log',()=>{
     // matcher
     const pathMatcher = createPathMatcher();
     pathMatcher.conditions =  MatcherCondition.START_WITH;
-    pathMatcher.value = "";
+    pathMatcher.value = "/testResponse";
     expectationM.matchers.push(pathMatcher);
 
     const routerSetup = async () => {
@@ -62,7 +62,7 @@ describe('test log',()=>{
         await projectCreation();
         await expectationCreation();
         // server
-        mockServer.use("*",await getMockRouter("test_db",projectM.id));
+        mockServer.all("*",await getMockRouter("test_db",projectM.id));
     });
 
     afterAll(async () => {
@@ -70,7 +70,7 @@ describe('test log',()=>{
     });
 
     test('custom response test',async ()=>{
-        const res = await request(mockServer).post("/test?testParam=paramVal")
+        const res = await request(mockServer).post("/testResponse?testParam=paramVal")
             .send("request body test")//.expect(200);
 
         expect(res.text).toEqual("test response");
@@ -81,6 +81,10 @@ describe('test log',()=>{
         const lastLog = logCollection.findOne({});
         expect(lastLog!.req!.method).toBe("POST");
         expect(lastLog!.req!.rawBody).toBe("request body test");
+
+        expect(lastLog!.res!.status).toBe(200);
+        expect(lastLog!.res!.body).toBe("test response");
+        expect(lastLog!.res!.rawBody).toBe("test response");
     });
 
 
