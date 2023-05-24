@@ -15,6 +15,7 @@ export interface ProjectM{
 export enum ProjectStatus {
     STARTED = "STARTED",
     STOPPED = "STOPPED",
+    STARTING = "STARTING",
 }
 
 export function createProject():ProjectM{

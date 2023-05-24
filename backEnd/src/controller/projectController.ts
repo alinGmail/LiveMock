@@ -1,29 +1,22 @@
-import express, { Request, Response } from "express";
-import { addCross, ServerError, toAsyncRouter } from "./common";
-import { getProjectDb } from "../db/dbManager";
+import express, {Request, Response} from "express";
+import {addCross, ServerError, toAsyncRouter} from "./common";
+import {getProjectDb} from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
   CreateProjectPathParam,
   CreateProjectReqBody,
   CreateProjectReqQuery,
-  GetProjectPathParam,
-  GetProjectReqBody,
-  GetProjectReqQuery,
   ListProjectPathParam,
   ListProjectReqBody,
   ListProjectReqQuery,
   UpdateProjectPathParam,
   UpdateProjectReqBody,
 } from "core/struct/params/ProjectParams";
-import { isNotEmptyString } from "../common/utils";
-import {
-  CreateProjectResponse,
-  GetProjectResponse,
-  ListProjectResponse,
-  UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
-import { ProjectM } from "core/struct/project";
-import { Collection } from "lokijs";
+import {isNotEmptyString} from "../common/utils";
+import {CreateProjectResponse, ListProjectResponse, UpdateProjectResponse,} from "core/struct/response/ProjectResponse";
+import {ProjectM, ProjectStatus} from "core/struct/project";
+import {Collection} from "lokijs";
+import {getProjectServer, getProjectStatus} from "../server/projectStatusManage";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
@@ -116,6 +109,30 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     // todo remove log
     res.end("success");
   });
+
+
+  /**
+   * start the project
+   */
+  router.post("/start/:projectId",bodyParser.json(),async (req,res)=>{
+    const projectId = req.params.projectId;
+    const projectStatus = getProjectStatus(projectId);
+    if(projectStatus === ProjectStatus.STARTING){
+      throw new ServerError(500,"project is starting");
+    }else if(projectStatus === ProjectStatus.STARTED){
+      throw new ServerError(500,"project is already started");
+    }
+    addCross(res);
+    const project = collection.findOne({ id: req.params.projectId });
+    const server = await getProjectServer(projectId,path);
+    server.listen(project?.port,()=>{
+      res.json({
+        message:"success"
+      });
+    });
+  });
+
+
   return router;
 }
 
