@@ -129,27 +129,32 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
     addCross(res);
     const project = collection.findOne({ id: req.params.projectId });
-    const server = await getProjectServer(projectId,path);
+    let server = await getProjectServer(projectId,path);
     setProjectStatus(projectId,ProjectStatus.STARTING);
     if(server == null){
       let expServer = express();
       expServer.all("*",await getMockRouter(path,projectId));
-      const newServer = expServer.listen(project?.port,()=>{
+      server = expServer.listen(project?.port,()=>{
+        server!.removeAllListeners("error");
         setProjectStatus(projectId,ProjectStatus.STARTED);
         res.json({
           message:"success"
         });
       });
-      setProjectServer(projectId,newServer);
+      setProjectServer(projectId,server);
     }else{
       server.listen(project?.port,()=>{
+        server!.removeAllListeners("error");
         setProjectStatus(projectId,ProjectStatus.STARTED);
         res.json({
           message:"success"
         });
       });
     }
-
+    server.once("error",(error)=>{
+      res.status(500);
+      res.end("server start fail")
+    });
 
 
   });

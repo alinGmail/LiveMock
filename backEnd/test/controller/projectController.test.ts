@@ -81,21 +81,26 @@ test('start project',async ()=>{
   const projectStatus = getProjectStatus(projectM.id);
   expect(projectStatus).toEqual(ProjectStatus.STARTED);
 
+  // close project
+  const stopRes = await supertest(server).post("/project/stop/"+projectM.id).expect(200);
+  // test the port is running
+  const portIsRunning2 = await checkPort(projectM.port);
+  expect(portIsRunning2).toBe(false);
+  const projectStatus2 = getProjectStatus(projectM.id);
+  expect(projectStatus2).toEqual(ProjectStatus.STOPPED);
+
+  // start fail
+  projectM.port = "1000";
+  projectCollection.update(projectM);
+  // start project
+  const startFail = await supertest(server).post("/project/start/"+ projectM.id).expect(500);
+
 
   deleteFolderRecursive("test_db");
 });
 
 
-test("checkPort",async ()=>{
-  const portvalue1 = await checkPort(9000);
-  expect(portvalue1).toBe(false);
-  const server2 = express();
-  server2.listen(1000,async ()=>{
-    const portvalue2 = await checkPort(6799);
-    expect(portvalue2).toBe(true);
-  });
 
-})
 
 
 
