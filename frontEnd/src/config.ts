@@ -1,4 +1,4 @@
 
-export const ServerUrl = "http://localhost:8088";
+export const ServerUrl = "http://localhost:9002";
 
 export const debounceWait = 1000;

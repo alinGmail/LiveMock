@@ -16,6 +16,7 @@ export enum ProjectStatus {
     STARTED = "STARTED",
     STOPPED = "STOPPED",
     STARTING = "STARTING",
+    CLOSING = "CLOSING"
 }
 
 export function createProject():ProjectM{

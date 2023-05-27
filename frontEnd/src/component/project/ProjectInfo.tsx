@@ -1,19 +1,19 @@
 import mStyle from "./ProjectInfo.module.scss";
 import {ReactComponent as StartIcon} from "../../assets/svg/play2.svg";
-import StopIcon from "../svg/stop.svg";
-import Icon, {PlusOutlined} from "@ant-design/icons";
+import {ReactComponent as StopIcon } from "../../assets/svg/stop.svg";
+import Icon, {LoadingOutlined, PlusOutlined} from "@ant-design/icons";
 import {Dropdown, Modal} from "antd";
 import {useEffect, useState} from "react";
 import {Updater, useImmer} from "use-immer";
 import {createProject, ProjectM} from "core/struct/project";
 import ProjectEditor from "./ProjectEditor";
 import {EditorType} from "../../struct/common";
-import {createProjectReq} from "../../server/projectServer";
+import {createProjectReq, getProjectListReq, startProjectReq} from "../../server/projectServer";
 import toast from "react-hot-toast";
-import {getErrorMessage} from "../common";
+import {getErrorMessage, toastPromise} from "../common";
 import {useAppSelector} from "../../store";
 import {useDispatch} from "react-redux";
-import {setCurProjectIndex} from "../../slice/projectSlice";
+import {setCurProjectIndex, setProjectList} from "../../slice/projectSlice";
 
 const ProjectInfo = () => {
     const projectState = useAppSelector(state => state.project);
@@ -100,10 +100,33 @@ const ProjectInfo = () => {
                             <div className={mStyle.projectStatus}>running on port 8080</div>
                         </div>
                         <div className={mStyle.rowRight}>
+                            <LoadingOutlined style={{
+                                color: "#ffec3d",
+                                fontSize: "36px",
+                            }}/>
                             <Icon
                                 component={StartIcon}
                                 style={{
                                     color: "#98FF98",
+                                    fontSize: "36px",
+                                }}
+                                className={mStyle.startIcon}
+                                onClick={(event) => {
+                                    // start the project
+                                    const startProjectPromise = startProjectReq(project!.id);
+                                    toastPromise(startProjectPromise);
+                                    startProjectPromise.then(async res =>{
+                                        // refresh project list
+                                        let projectLists = await getProjectListReq();
+                                        dispatch(setProjectList(projectLists));
+                                    })
+                                }}
+                                spin={false}
+                            />
+                            <Icon
+                                component={StopIcon}
+                                style={{
+                                    color: "#f5222d",
                                     fontSize: "36px",
                                 }}
                                 className={mStyle.startIcon}

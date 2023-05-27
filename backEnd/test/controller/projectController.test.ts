@@ -1,10 +1,14 @@
 import express from "express";
 import { getProjectRouter } from "../../src/controller/projectController";
 import request from "supertest";
-import { createProject } from "core/struct/project";
+import {createProject, ProjectStatus} from "core/struct/project";
 import { deleteFolderRecursive } from "../../src/common/utils";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { UpdateProjectReqBody } from "core/struct/params/ProjectParams";
+import {getProjectDb} from "../../src/db/dbManager";
+import supertest from "supertest";
+import {getProjectStatus} from "../../src/server/projectStatusManage";
+import { checkPort } from "../../src/util/commonUtils";
 
 test("project controller", async () => {
   const server = express(); //创建服务器
@@ -55,3 +59,45 @@ test("project controller", async () => {
 
   deleteFolderRecursive("test_db");
 });
+
+
+test('start project',async ()=>{
+  const server = express(); //创建服务器
+  server.use("/project", await getProjectRouter("test_db"));
+  server.use(CustomErrorMiddleware);
+  // inset project
+  const projectM = createProject();
+  projectM.name = 'test proejct';
+  projectM.port = "5123";
+  const projectDb = await getProjectDb("test_db");
+  const projectCollection = projectDb.getCollection("project");
+  projectCollection.insert(projectM);
+
+  // start project
+  const startRes = await supertest(server).post("/project/start/"+ projectM.id).expect(200);
+  // test the port is running
+  const portIsRunning = await checkPort(projectM.port);
+  expect(portIsRunning).toBe(true);
+  const projectStatus = getProjectStatus(projectM.id);
+  expect(projectStatus).toEqual(ProjectStatus.STARTED);
+
+
+  deleteFolderRecursive("test_db");
+});
+
+
+test("checkPort",async ()=>{
+  const portvalue1 = await checkPort(9000);
+  expect(portvalue1).toBe(false);
+  const server2 = express();
+  server2.listen(1000,async ()=>{
+    const portvalue2 = await checkPort(6799);
+    expect(portvalue2).toBe(true);
+  });
+
+})
+
+
+
+
+
