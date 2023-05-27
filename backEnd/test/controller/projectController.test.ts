@@ -1,14 +1,15 @@
 import express from "express";
-import { getProjectRouter } from "../../src/controller/projectController";
+import {getProjectRouter} from "../../src/controller/projectController";
 import request from "supertest";
-import {createProject, ProjectStatus} from "core/struct/project";
-import { deleteFolderRecursive } from "../../src/common/utils";
-import { CustomErrorMiddleware } from "../../src/controller/common";
-import { UpdateProjectReqBody } from "core/struct/params/ProjectParams";
-import {getProjectDb} from "../../src/db/dbManager";
 import supertest from "supertest";
+import {createProject, ProjectM, ProjectStatus} from "core/struct/project";
+import {deleteFolderRecursive} from "../../src/common/utils";
+import {CustomErrorMiddleware} from "../../src/controller/common";
+import {UpdateProjectReqBody} from "core/struct/params/ProjectParams";
+import {getProjectDb} from "../../src/db/dbManager";
 import {getProjectStatus} from "../../src/server/projectStatusManage";
-import { checkPort } from "../../src/util/commonUtils";
+import {checkPort} from "../../src/util/commonUtils";
+import * as net from "net";
 
 test("project controller", async () => {
   const server = express(); //创建服务器
@@ -65,6 +66,15 @@ test('start project',async ()=>{
   const server = express(); //创建服务器
   server.use("/project", await getProjectRouter("test_db"));
   server.use(CustomErrorMiddleware);
+
+
+
+  async function testProjectList(status:ProjectStatus){
+    const listRes = await supertest(server).get("/project").expect(200);
+    const projectList:Array<ProjectM> =  listRes.body;
+    expect(projectList[0].status).toBe(status);
+  }
+
   // inset project
   const projectM = createProject();
   projectM.name = 'test proejct';
@@ -80,7 +90,7 @@ test('start project',async ()=>{
   expect(portIsRunning).toBe(true);
   const projectStatus = getProjectStatus(projectM.id);
   expect(projectStatus).toEqual(ProjectStatus.STARTED);
-
+  await testProjectList(ProjectStatus.STARTED);
   // close project
   const stopRes = await supertest(server).post("/project/stop/"+projectM.id).expect(200);
   // test the port is running
@@ -88,9 +98,12 @@ test('start project',async ()=>{
   expect(portIsRunning2).toBe(false);
   const projectStatus2 = getProjectStatus(projectM.id);
   expect(projectStatus2).toEqual(ProjectStatus.STOPPED);
+  await testProjectList(ProjectStatus.STOPPED);
 
+  const tmpServer = net.createServer();
+  tmpServer.listen(2345);
   // start fail
-  projectM.port = "1000";
+  projectM.port = "2345";
   projectCollection.update(projectM);
   // start project
   const startFail = await supertest(server).post("/project/start/"+ projectM.id).expect(500);
@@ -98,8 +111,6 @@ test('start project',async ()=>{
 
   deleteFolderRecursive("test_db");
 });
-
-
 
 
 

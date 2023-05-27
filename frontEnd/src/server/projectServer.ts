@@ -18,6 +18,6 @@ export const createProjectReq = async (
 
 
 export const startProjectReq = async (projectId:string)=>{
-  const res = await superagent.post(`${ServerUrl}/project/start/:${projectId}`);
+  const res = await superagent.post(`${ServerUrl}/project/start/${projectId}`);
   return res.body;
 }
