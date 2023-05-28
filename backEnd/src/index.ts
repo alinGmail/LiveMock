@@ -16,3 +16,8 @@ const server = express();
     console.log("server start on 9002");
   });
 })();
+
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});

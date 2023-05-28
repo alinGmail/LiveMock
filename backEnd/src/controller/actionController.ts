@@ -126,6 +126,7 @@ export async function getActionRouter(path: string): Promise<express.Router> {
         throw new ServerError(400, "project id not exist!");
       }
       const collection = await getCollection(projectId, path);
+      // collection.addDynamicView("aa").data()
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");

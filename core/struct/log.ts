@@ -69,3 +69,34 @@ export function createResponseLog():ResponseLogM{
     statusMessage: ""
   }
 }
+
+export enum FilterType {
+  SIMPLE_FILTER = "SIMPLE_FILTER",
+  GROUP_FILTER = "GROUP_FILTER",
+}
+
+interface SimpleFilterM {
+  type: FilterType.SIMPLE_FILTER;
+  id: string;
+  property: string;
+  value: string;
+  condition: LogFilterCondition;
+  activate: boolean;
+}
+interface GroupFilter {
+    type: FilterType.GROUP_FILTER;
+    id: string;
+    conjunction: "AND" | "OR";
+    subGroup: Array<SimpleFilterM>;
+    activate: boolean;
+}
+export type LogFilterM =  SimpleFilterM |GroupFilter;
+
+export enum LogFilterCondition{
+    EQUAL="$eq",
+    NOT_EQUAL="$neq",
+    CONTAINS="$contains",
+    GREATER="$gt",
+    LESS="$less"
+}
+
