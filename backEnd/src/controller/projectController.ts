@@ -163,6 +163,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
    *
    */
   router.post("/stop/:projectId",bodyParser.json(),async (req,res)=>{
+    addCross(res);
     const projectId = req.params.projectId;
     const projectStatus = getProjectStatus(projectId);
 

@@ -12,6 +12,7 @@ import {
   createProjectReq,
   getProjectListReq,
   startProjectReq,
+  stopProjectReq,
 } from "../../server/projectServer";
 import toast from "react-hot-toast";
 import { getErrorMessage, toastPromise } from "../common";
@@ -38,6 +39,33 @@ const ProjectInfo = () => {
     });
     setProjectModalShow(false);
   }
+
+  const ProjectStatusComponent = ({
+    port,
+    projectStatus,
+  }: {
+    projectStatus: ProjectStatus;
+    port: string;
+  }) => {
+    switch (projectStatus) {
+      case ProjectStatus.STARTED:
+        return (
+          <div className={mStyle.projectStatus}>running on port {port}</div>
+        );
+      case ProjectStatus.STOPPED:
+        return (
+          <div className={mStyle.projectStatus}>stopped on port {port}</div>
+        );
+      case ProjectStatus.STARTING:
+        return (
+          <div className={mStyle.projectStatus}>starting on port {port}</div>
+        );
+      case ProjectStatus.CLOSING:
+        return (
+          <div className={mStyle.projectStatus}>stopping on port {port}</div>
+        );
+    }
+  };
 
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const dispatch = useDispatch();
@@ -120,10 +148,13 @@ const ProjectInfo = () => {
           <div className={mStyle.curProjectRow}>
             <div className={mStyle.rowLeft}>
               <div className={mStyle.projectName}>{currentProject.name}</div>
-              <div className={mStyle.projectStatus}>running on port 8080</div>
+              <ProjectStatusComponent
+                projectStatus={currentProject.status}
+                port={currentProject.port}
+              />
             </div>
             <div className={mStyle.rowRight}>
-              {project?.status === ProjectStatus.STARTED && (
+              {currentProject.status === ProjectStatus.STARTED && (
                 <Icon
                   component={StopIcon}
                   style={{
@@ -131,11 +162,19 @@ const ProjectInfo = () => {
                     fontSize: "36px",
                   }}
                   className={mStyle.startIcon}
-                  onClick={(event) => {}}
+                  onClick={(event) => {
+                    const stopPromise = stopProjectReq(currentProject.id);
+                    toastPromise(stopPromise);
+                    stopPromise.then(async (res) => {
+                      // refresh project list
+                      let projectLists = await getProjectListReq();
+                      dispatch(setProjectList(projectLists));
+                    });
+                  }}
                   spin={false}
                 />
               )}
-              {project?.status === ProjectStatus.STOPPED && (
+              {currentProject.status === ProjectStatus.STOPPED && (
                 <Icon
                   component={StartIcon}
                   style={{
@@ -145,7 +184,9 @@ const ProjectInfo = () => {
                   className={mStyle.startIcon}
                   onClick={(event) => {
                     // start the project
-                    const startProjectPromise = startProjectReq(project!.id);
+                    const startProjectPromise = startProjectReq(
+                      currentProject!.id
+                    );
                     toastPromise(startProjectPromise);
                     startProjectPromise.then(async (res) => {
                       // refresh project list
@@ -156,8 +197,8 @@ const ProjectInfo = () => {
                   spin={false}
                 />
               )}
-              {(project?.status === ProjectStatus.STARTING ||
-                project?.status === ProjectStatus.CLOSING) && (
+              {(currentProject.status === ProjectStatus.STARTING ||
+                currentProject.status === ProjectStatus.CLOSING) && (
                 <LoadingOutlined
                   style={{
                     color: "#ffec3d",
