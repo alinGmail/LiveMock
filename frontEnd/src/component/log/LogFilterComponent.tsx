@@ -3,8 +3,29 @@ import { FilterType, LogFilterM } from "core/struct/log";
 import mStyle from "./LogFilterComponent.module.scss";
 import { Button, Dropdown } from "antd";
 import { getStringConditionWord } from "./utils";
-import { DownOutlined } from "@ant-design/icons";
+import {CloseSquareOutlined, DownOutlined} from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
+
+function ChevronDown({ fill }: { fill: string }) {
+  return (
+    <svg
+      viewBox="0 0 30 30"
+      className={mStyle.chevronDown}
+      style={{
+        width: "10px",
+        height: "100%",
+        display: "block",
+        fill: fill,
+        flexShrink: "0",
+        backfaceVisibility: "hidden",
+        marginLeft: "4px",
+        marginTop: "1px",
+      }}
+    >
+      <polygon points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
+    </svg>
+  );
+}
 
 const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
   if (filter.type === FilterType.SIMPLE_FILTER) {
@@ -29,22 +50,7 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
               >
                 <div className={mStyle.conditionWrap}>
                   {getStringConditionWord(filter.condition)}
-                  <svg
-                    viewBox="0 0 30 30"
-                    className={mStyle.chevronDown}
-                    style={{
-                      width: "10px",
-                      height: "100%",
-                      display: "block",
-                      fill: "rgba(55,53,47,0.35)",
-                      flexShrink: "0",
-                      backfaceVisibility: "hidden",
-                      marginLeft: "4px",
-                      marginTop: "1px",
-                    }}
-                  >
-                    <polygon points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
-                  </svg>
+                  <ChevronDown fill={"rgba(55,53,47,0.35)"} />
                 </div>
               </div>
             </Dropdown>
@@ -58,6 +64,11 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
             >
               <NInput value={filter.value} onChange={() => {}} />
             </div>
+              <CloseSquareOutlined
+                  className={mStyle.closeBtn}
+                  onClick={() => {
+                  }}
+              />
           </div>
         }
       >
@@ -84,21 +95,7 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
             ) : (
               <span className={mStyle.placeHolder}>empty&nbsp;</span>
             )}
-            <svg
-              viewBox="0 0 30 30"
-              className={mStyle.chevronDown}
-              style={{
-                width: "10px",
-                height: "100%",
-                display: "block",
-                flexShrink: "0",
-                backfaceVisibility: "hidden",
-                marginLeft: "4px",
-                marginTop: "1px",
-              }}
-            >
-              <polygon points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
-            </svg>
+            <ChevronDown fill={"rgba(55,53,47,0.35)"} />
           </Button>
           {/******* button end ******/}
         </div>
