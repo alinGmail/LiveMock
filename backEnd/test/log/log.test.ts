@@ -25,6 +25,7 @@ describe('test log',()=>{
     action.status = 200;
     action.responseContent.type = ResponseType.TEXT;
     action.responseContent.value = "test response";
+    action.responseContent.headers = [["respHeader","test header value"]]
     expectationM.actions = [action];
     // matcher
     const pathMatcher = createPathMatcher();
@@ -71,7 +72,7 @@ describe('test log',()=>{
 
     test('custom response test',async ()=>{
         const res = await request(mockServer).post("/testResponse?testParam=paramVal")
-            .send("request body test")//.expect(200);
+            .send("request body test").set("token","abc_token").expect(200);
 
         expect(res.text).toEqual("test response");
 
@@ -79,12 +80,17 @@ describe('test log',()=>{
         const logDb = await getLogDb(projectM.id,"test_db");
         const logCollection = await getLogCollection(projectM.id,"test_db");
         const lastLog = logCollection.findOne({});
+        // request log
         expect(lastLog!.req!.method).toBe("POST");
         expect(lastLog!.req!.rawBody).toBe("request body test");
+        expect(lastLog!.req!.headers["token"]).toEqual("abc_token");
 
+        // response log
         expect(lastLog!.res!.status).toBe(200);
         expect(lastLog!.res!.body).toBe("test response");
         expect(lastLog!.res!.rawBody).toBe("test response");
+        expect(lastLog!.res!.headers["respheader"]).toEqual("test header value");
+
     });
 
 

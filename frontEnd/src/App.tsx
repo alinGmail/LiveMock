@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import {Spin} from "antd";
 import {Route, Routes } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
+import LogPage from "./page/LogPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -33,6 +34,7 @@ function App() {
             <Layout >
               <Routes>
                 <Route path={"expectation"} element={<ExpectationPage />} />
+                <Route path={"requestLog"} element={<LogPage />} />
               </Routes>
             </Layout>
         )

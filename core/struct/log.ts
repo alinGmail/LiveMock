@@ -100,3 +100,14 @@ export enum LogFilterCondition{
     LESS="$less"
 }
 
+export function createSimpleFilter():SimpleFilterM{
+  return {
+    activate: true,
+    condition: LogFilterCondition.EQUAL,
+    id: uuId(),
+    property: "",
+    type: FilterType.SIMPLE_FILTER,
+    value: ""
+  }
+}
+
