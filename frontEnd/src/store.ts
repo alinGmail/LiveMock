@@ -2,11 +2,13 @@ import {Action, configureStore, ThunkAction} from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { reducer as projectReducer } from "./slice/projectSlice";
 import { reducer as expectationReducer } from "./slice/expectationSlice";
+import { reducer as logReducer } from "./slice/logSlice";
 
 export const store = configureStore({
   reducer: {
     project: projectReducer,
     expectation: expectationReducer,
+    log:logReducer
   },
 });
 
