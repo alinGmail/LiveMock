@@ -28,7 +28,7 @@ const getMockRouter: (
   let router = express.Router();
   const expectationCollection = await getExpectationCollection(projectId, path);
   const logCollection = await getLogCollection(projectId, path);
-  let newestLogIndex = 100001;
+  let newestLogIndex = 100000;
   // set the newest log number;
     const logMs:Array<LogM> = logCollection
         .chain().find({}).simplesort("id",{desc:true}).limit(1).data();

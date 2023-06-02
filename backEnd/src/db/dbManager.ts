@@ -96,7 +96,7 @@ const logIndexMap = new Map<string,number>();
  */
 export function getNewLogNumber(projectId:string,path:string):number{
   const number = logIndexMap.get(`${path}/${projectId}`);
-  let resIndex = 10001;
+  let resIndex = 100001;
   if(number){
     resIndex = number + 1;
   }

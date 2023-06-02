@@ -1,4 +1,4 @@
-import {getExpectationDb, getProjectDb} from "../../src/db/dbManager";
+import {getExpectationDb, getLogDb, getProjectDb} from "../../src/db/dbManager";
 import {createProject} from "core/struct/project";
 import {createExpectation, ExpectationM} from "core/struct/expectation";
 import {createPathMatcher, MatcherCondition} from "core/struct/matcher";
@@ -7,6 +7,7 @@ import {createCustomResponseAction, ResponseType} from "core/struct/action";
 import express from "express";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
+import {getLogCollection} from "../../src/log/logUtils";
 
 
 describe('test custom response action', ()=>{
@@ -49,13 +50,28 @@ describe('test custom response action', ()=>{
         expectationCur.actions = [customResponseAction];
         expectationCollection.update(expectationCur);
 
-        const testRes = await request(server).get("/test").expect(400);
+        const testRes = await request(server).get("/test/asdf/ccsdf").expect(400);
         expect(testRes.get('content-type')).toEqual("text/plain");
         expect(testRes.text).toEqual("some error happen!")
 
+
+        // test the log
+        const logCollection = await getLogCollection(project.id, "test_db");
+        const logs = logCollection.chain().find({})
+            .simplesort("id",{desc:true}).data();
+        //expect(logs.length).toBe(1);
+        expect(logs[0].id).toBe(100001);
+        expect(logs[0].req!.path).toEqual("/test");
     });
 
     test('test response json',async ()=>{
+        // test the log
+        const logCollection = await getLogCollection(project.id, "test_db");
+        const logs1 = logCollection.find({});
+        expect(logs1.length === 1);
+        expect(logs1[0].id).toBe(100001);
+
+
         const expectationCur = expectationCollection.findOne({id:expectation.id});
         if(expectationCur === null){
             throw new Error("expectationCur is null");
@@ -70,6 +86,13 @@ describe('test custom response action', ()=>{
         const testRes = await request(server).get("/test").expect(200);
         expect(testRes.get('content-type')).toEqual("application/json");
         expect(testRes.body.name).toEqual("john");
+
+
+        const logs = logCollection.find({});
+        console.log(logs.length);
+
+        expect(logs.length).toBe(2);
+        expect(logs[0].id).toBe(100001);
 
     });
 
