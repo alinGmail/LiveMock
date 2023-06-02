@@ -86,3 +86,24 @@ export async function getLogDb(
     return logDbP;
   }
 }
+
+const logIndexMap = new Map<string,number>();
+
+/**
+ * get the newest log index
+ * @param projectId
+ * @param path
+ */
+export function getNewLogNumber(projectId:string,path:string):number{
+  const number = logIndexMap.get(`${path}/${projectId}`);
+  let resIndex = 10001;
+  if(number){
+    resIndex = number + 1;
+  }
+  logIndexMap.set(`${path}/${projectId}`,resIndex);
+  return resIndex;
+}
+
+export function setNewestLogNumber(projectId:string,path:string,newestLogIndex:number){
+  logIndexMap.set(`${path}/${projectId}`,newestLogIndex);
+}

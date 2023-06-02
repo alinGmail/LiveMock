@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getLogDb } from "../db/dbManager";
+import {getLogDb, getNewLogNumber} from "../db/dbManager";
 import { Collection } from "lokijs";
 import {createLog, createRequestLog, createResponseLog, LogM} from "core/struct/log";
 import {keys} from "lodash";
@@ -16,9 +16,11 @@ export function insertReqLog(
   logCollection: Collection<LogM>,
   req: Request,
   res: Response,
-  expectationId: string
+  expectationId: string,
+  projectId:string,
+  path:string,
 ):LogM | undefined {
-  const logM = createLog();
+  const logM = createLog(getNewLogNumber(projectId,path));
   logM.expectationId = expectationId;
 
   const requestLogM = createRequestLog();

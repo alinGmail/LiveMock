@@ -2,14 +2,14 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
-import { getExpectationDb } from "../db/dbManager";
+import {getExpectationDb, setNewestLogNumber} from "../db/dbManager";
 import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
 import {getLogCollection, insertReqLog, insertResLog} from "../log/logUtils";
 import * as http from "http";
-import * as buffer from "buffer";
+import {LogM} from "core/struct/log";
 
 async function getExpectationCollection(
   projectId: string,
@@ -28,6 +28,14 @@ const getMockRouter: (
   let router = express.Router();
   const expectationCollection = await getExpectationCollection(projectId, path);
   const logCollection = await getLogCollection(projectId, path);
+  let newestLogIndex = 100001;
+  // set the newest log number;
+    const logMs:Array<LogM> = logCollection
+        .chain().find({}).simplesort("id",{desc:true}).limit(1).data();
+    if(logMs.length >= 1){
+        newestLogIndex = logMs[0].id + 1;
+    }
+    setNewestLogNumber(projectId,path,newestLogIndex);
     // request raw body
     /*
     router.use((req: Request, res, next) => {
@@ -87,7 +95,7 @@ const getMockRouter: (
               expectation.actions[0],
               expectation.delay
             );
-            const logM = insertReqLog(logCollection, req, res, expectation.id);
+            const logM = insertReqLog(logCollection, req, res, expectation.id,projectId,path);
             await actionImpl?.process(req, res);
             logM && insertResLog(logCollection,req,res,expectation.id,logM);
             return true;

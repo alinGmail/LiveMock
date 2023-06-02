@@ -1,7 +1,7 @@
 import { v4 as uuId } from "uuid";
 
 export interface LogM {
-  id: string;
+  id: number;
   req: RequestLogM | null;
   res: ResponseLogM | null;
   proxyInfo: ProxyInfoM | null;
@@ -36,9 +36,9 @@ type ResponseLogM = {
   responseDate: Date;
 };
 
-export function createLog(): LogM {
+export function createLog(id:number): LogM {
   return {
-    id: uuId(),
+    id: id,
     expectationId: null,
     proxyInfo: null,
     req: null,
