@@ -4,6 +4,7 @@ import { getExpectationRouter } from "./controller/expectationController";
 import { CustomErrorMiddleware } from "./controller/common";
 import { getMatcherRouter } from "./controller/matcherController";
 import { getActionRouter } from "./controller/actionController";
+import {addLogListener} from "./controller/logController";
 const { Server } = require("socket.io");
 
 const server = express();
@@ -21,6 +22,7 @@ const io = new Server(http,{
   server.use("/expectation", getExpectationRouter("dev_db"));
   server.use("/matcher", getMatcherRouter("dev_db"));
   server.use("/action", await getActionRouter("dev_db"));
+  await addLogListener(io,"dev_db");
   server.use(CustomErrorMiddleware);
   http.listen(9002, () => {
     console.log("server start on 9002");

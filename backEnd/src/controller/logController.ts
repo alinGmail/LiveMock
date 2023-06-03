@@ -4,7 +4,9 @@ import {getExpectationDb, getLogDb} from "../db/dbManager";
 import express, {Request, Response} from "express";
 import {addCross, ServerError, toAsyncRouter} from "./common";
 import {ListLogPathParam, ListLogReqBody, ListLogReqQuery} from "core/struct/params/LogParams";
-import {LogM} from "../../../core/struct/log";
+import {LogM} from "core/struct/log";
+import {Server, Socket} from "socket.io";
+import {getLogCollection} from "../log/logUtils";
 
 const PAGE_SIZE = 100;
 
@@ -49,8 +51,38 @@ export async function getLogRouter(path:string):Promise<express.Router>{
         const logs = chain.find({}).simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
         res.json(logs);
     });
-
-
-
     return router;
+}
+
+
+
+
+
+
+export async function addLogListener(io:Server,path:string){
+    io.on('connection',async (socket)=>{
+        //console.log("connect");
+        //console.log(socket.id);
+        const { projectId } = socket.handshake.query;
+        const logDb = await getLogDb(projectId as string, path);
+        const logCollection = await getLogCollection(projectId as string, path);
+
+        //console.log(projectId);
+        socket.on('disconnect', () => {
+            console.log(` disconnected`);
+        });
+        const chain = logCollection.chain();
+        const logs = chain.find({}).simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
+        socket.on('initLogsReq',(args)=>{
+            socket.emit('initLogsRes',logs);
+        });
+
+
+    });
+    io.on("disconnect",(socket)=>{
+        console.log("disconnect");
+    })
+    io.on('setProjectId',(args => {
+
+    }));
 }
