@@ -113,7 +113,7 @@ const ProjectInfo = () => {
               <div className={"menu"}>
                 {projectState.projectList.map((project, index) => {
                   return (
-                    <div
+                    <div key={project.id}
                       onClick={() => {
                         dispatch(setCurProjectIndex(index));
                         setProjectListDropdown(false);
