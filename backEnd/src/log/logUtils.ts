@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {getLogDb, getNewLogNumber} from "../db/dbManager";
 import { Collection } from "lokijs";
 import {createLog, createRequestLog, createResponseLog, LogM} from "core/struct/log";
-import {keys} from "lodash";
+
 
 export async function getLogCollection(
   projectId: string,
@@ -28,17 +28,15 @@ export function insertReqLog(
   requestLogM.body = req.body;
   // @ts-ignore
   requestLogM.rawBody = req.rawBody;
-  requestLogM.headers = req.rawHeaders.reduce((acc, current, index, array) => {
+  requestLogM.headers = req.rawHeaders.reduce((header, current, index, array) => {
     if (index % 2 === 0) {
-      acc[current.toLowerCase()] = array[index + 1];
+      header[current.toLowerCase()] = array[index + 1];
     }
-    return acc;
+    return header;
   }, {});
   requestLogM.method = req.method;
   logM.req = requestLogM;
   return logCollection.insert(logM);
-
-  // requestLogM.headers = req.headers;
 }
 
 
@@ -55,7 +53,7 @@ export function insertResLog(
       responseLogM.responseDate.getTime() - logM.req.requestDate.getTime() );
   responseLogM.headers = getResponseHeaderMap(res);
   responseLogM.body = (res as any).body;
-  responseLogM.rawBody = (res as any).body;
+  responseLogM.rawBody = (res as any).rawBody;
   responseLogM.status = res.statusCode;
   responseLogM.statusMessage = res.statusMessage;
   logM.res = responseLogM;

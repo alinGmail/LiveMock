@@ -56,7 +56,7 @@ describe("test custom response action", () => {
     expectationCollection.update(expectationCur);
 
     const testRes = await request(server)
-      .get("/test")
+      .get("/testText")
       .set("test-header", "test header value")
       .expect(400);
     expect(testRes.get("content-type")).toEqual("text/plain");
@@ -72,7 +72,7 @@ describe("test custom response action", () => {
     //expect(logs.length).toBe(1);
     const log = logs[0];
     expect(log.id).toBe(100001);
-    expect(log.req!.path).toEqual("/test");
+    expect(log.req!.path).toEqual("/testText");
     expect(log.req!.method).toBe("GET");
     expect(log.req!.headers["test-header"]).toBe("test header value");
 
@@ -104,7 +104,7 @@ describe("test custom response action", () => {
 
     // test the log
     const logCollection = await getLogCollection(project.id, "test_db");
-    const logs = logCollection.find({});
+    const logs = logCollection.chain().find({}).simplesort("id",{desc:true}).data();
 
     const lastLog = logs[0];
     expect(lastLog.req!.path).toBe("/testJson");
