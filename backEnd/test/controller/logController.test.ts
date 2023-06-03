@@ -48,7 +48,7 @@ describe('test log controller', ()=>{
         expect(allLogRes.body[0].req.path).toBe("log4_path");
 
         const halfLogRes = await supertest(server).get("/log/")
-            .query({projectId:projectM.id,maxLogId:3} as ListLogReqQuery).expect(200);
+            .query({projectId:projectM.id,maxLogId:log3.id} as ListLogReqQuery).expect(200);
         expect(halfLogRes.body.length).toBe(2);
         expect(halfLogRes.body[0].req.path).toBe("log2_path");
     });
