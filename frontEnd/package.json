@@ -32,7 +32,7 @@
     "socket.io-client": "^4.6.2",
     "superagent": "^8.0.9",
     "use-immer": "^0.9.0",
-    "vite-plugin-svgr": "^2.4.0"
+    "vite-plugin-svgr": "^3.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",

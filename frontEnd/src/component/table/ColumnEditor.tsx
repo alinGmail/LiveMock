@@ -6,7 +6,7 @@ import Icon, {
   RightOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Input, Typography } from "antd";
-import BracketIcon from "../../svg/brackets-curly.svg";
+import {ReactComponent as BracketIcon} from "../../svg/brackets-curly.svg";
 import { useClickAway, useDebounce, useUpdateEffect } from "ahooks";
 import {
   ColumnDisplayType,
@@ -119,8 +119,9 @@ export const ColumnEditor: react.FC<{
                     setDisplayTypeShow(false);
                   }}
                 >
-                  <AlignLeftOutlined />
-                  &nbsp;Text
+                  <AlignLeftOutlined style={{verticalAlign:"middle"}}/>
+                  &nbsp;
+                  <span style={{verticalAlign:"middle"}}>Text</span>
                 </div>
                 <div
                   className="menuItem"
@@ -131,9 +132,9 @@ export const ColumnEditor: react.FC<{
                     setDisplayTypeShow(false);
                   }}
                 >
-                  {/* todo */}
-                  {/*<Icon component={BracketIcon}></Icon>*/}
-                  &nbsp;JSON
+                  <BracketIcon style={{width:"16px",verticalAlign:"middle"}}  />
+                  &nbsp;
+                  <span style={{verticalAlign:"middle"}}>Json</span>
                 </div>
               </div>
             </div>
@@ -150,17 +151,19 @@ export const ColumnEditor: react.FC<{
           <div className={styles.typeCur}>
             {columnImmerItem.displayType == ColumnDisplayType.TEXT && (
               <>
-                <AlignLeftOutlined />
-                Text
+                <AlignLeftOutlined style={{verticalAlign:"middle"}}/>
+                &nbsp;
+                <span style={{verticalAlign:"middle"}}>Text</span>
               </>
             )}
             {columnImmerItem.displayType == ColumnDisplayType.JSON && (
               <>
-                {/* todo */}
-                {/*<Icon component={BracketIcon}></Icon>*/}
-                Json
+                <BracketIcon style={{width:"16px",verticalAlign:"middle"}}  />
+                &nbsp;
+                <span style={{verticalAlign:"middle"}}>Json</span>
               </>
             )}
+            &nbsp;
             <RightOutlined
               rotate={showDisplayType ? 90 : 0}
               className={styles.arrow}

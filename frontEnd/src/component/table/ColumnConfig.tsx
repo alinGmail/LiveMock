@@ -6,9 +6,9 @@ import Icon, {
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
-import Eye from "../../svg/eye.svg";
-import EyeBlock from "../../svg/eye-blocked.svg";
-import BracketsIcon from "../../svg/brackets-curly.svg";
+import { ReactComponent as Eye } from "../../svg/eye.svg";
+import { ReactComponent as EyeBlock } from "../../svg/eye-blocked.svg";
+import { ReactComponent as BracketsIcon } from "../../svg/brackets-curly.svg";
 import classNames from "classnames";
 import {
   ColumnDisplayType,
@@ -19,7 +19,7 @@ import {
 } from "../../slice/logSlice";
 import { useClickAway } from "ahooks";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
-import {getDefaultColumnTitles} from "../log/utils";
+import { getDefaultColumnTitles } from "../log/utils";
 
 const ColumnConfig: React.FC<{
   show: boolean;
@@ -163,10 +163,8 @@ const ConfigRow = ({
     <div className={styles.configRow}>
       <div className={styles.configRowLeft}>
         {displayType == ColumnDisplayType.JSON ? (
-          ""
+            <BracketsIcon />
         ) : (
-          // todo
-          // <Icon component={BracketsIcon} />
           <AlignLeftOutlined />
         )}
         &nbsp;{title}
@@ -193,8 +191,7 @@ const ConfigRow = ({
             }
           }}
         >
-          {/* todo */}
-          {/*<Icon component={visible ? Eye : EyeBlock} />*/}
+          {visible?<Eye />:<EyeBlock />}
         </div>
       </div>
     </div>
