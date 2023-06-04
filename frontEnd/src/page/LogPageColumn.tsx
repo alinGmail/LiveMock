@@ -16,6 +16,7 @@ import mStyle from "./LogPageColumn.module.scss"
 import Equalizer from "../svg/equalizer.svg";
 import Eye from "../svg/eye.svg";
 import _ from "lodash";
+import ReactJson from "react-json-view";
 
 
 export const configColumn = [
@@ -97,11 +98,11 @@ export function getDefaultColumn(
                             wordBreak: "break-all",
                         }}
                     >
-                        {/*<ReactJson
+                        <ReactJson
                             collapseStringsAfterLength={1000}
                             src={record.res.body}
                             collapsed={true}
-                        />*/}
+                        />
                     </div>
                 );
             },
@@ -119,6 +120,7 @@ export function getDefaultColumn(
                             wordBreak: "break-all",
                         }}
                     >
+                        <ReactJson src={record} collapseStringsAfterLength={1000}/>
                         {/*<ReactJson
                             src={record}
                             collapseStringsAfterLength={1000}
@@ -317,18 +319,18 @@ function JsonRender(item: TableColumnItem, log: LogM) {
                 wordBreak: "break-all",
             }}
         >
-           {/* <ReactJson
+           <ReactJson
                 collapseStringsAfterLength={1000}
                 collapsed={true}
                 src={root}
-            />*/}
+            />
         </div>
     );
 }
 
 function TextRender(item: TableColumnItem, log: LogM) {
     let root = _.get(log, item.path, {});
-    let content = <div></div>;
+    let content = <div />;
     switch (typeof root) {
         case "undefined":
             break;

@@ -383,7 +383,7 @@ export const ActionColumn = ({
       >
         {expectation.actions.map((item) => {
           return (
-            <div>
+            <div key={item.id}>
               <ActionItem action={item} onPropertyChange={() => {}} />
             </div>
           );
