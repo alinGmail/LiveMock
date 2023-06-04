@@ -6,9 +6,19 @@ import {io, Socket} from "socket.io-client";
 import {useAppSelector} from "../store";
 import {useDispatch} from "react-redux";
 import {Table} from "antd";
-import {configColumn, getCustomColumn, getDefaultColumn} from "./LogPageColumn";
+import {getConfigColumn, getCustomColumn, getDefaultColumn} from "./LogPageColumn";
+import {ColumnEditor} from "../component/table/ColumnEditor";
+import {ColumnDisplayType, hideColumnEditor, TableColumnItem} from "../slice/logSlice";
+import ColumnConfig from "../component/table/ColumnConfig";
 
-
+const placeHolderColumn: TableColumnItem = {
+    id: uuId(),
+    name: "",
+    label: "",
+    path: "",
+    displayType: ColumnDisplayType.TEXT,
+    visible: true,
+};
 // const pageId:string = uuId();
 
 const LogPage:React.FC = ()=>{
@@ -24,8 +34,8 @@ const LogPage:React.FC = ()=>{
         logList,
         tableColumns
     } = logState;
+    let currentEditColumn = tableColumns[currentColumnEditIndex];
     const dispatch = useDispatch();
-
     const projectState = useAppSelector((state) => state.project);
     const currentProject = projectState.projectList[projectState.curProjectIndex];
     const [socketInstance,setSocketInstance] = useState<Socket|null>(null);
@@ -38,7 +48,7 @@ const LogPage:React.FC = ()=>{
     const logColumn = getDefaultColumn(dispatch)
         .filter((item, index) => defaultColumnVisible[index])
         .concat(customColumns)
-        .concat(configColumn);
+        .concat(getConfigColumn(dispatch));
 
 
     useEffect(() =>{
@@ -75,6 +85,14 @@ const LogPage:React.FC = ()=>{
                 rowKey={"id"}
             />
         </div>
+        <ColumnEditor
+            onClose={() => {
+                dispatch(hideColumnEditor());
+            }}
+            show={columnEditorShow}
+            tableColumnItem={currentEditColumn || placeHolderColumn}
+        />
+        <ColumnConfig show={columnConfigShow} />
     </div>
 }
 
