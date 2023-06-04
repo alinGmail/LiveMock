@@ -1,0 +1,10 @@
+.defaultColumnHead {
+    padding: 5px 8px;
+    transition: background-color 300ms ease-in;
+    cursor: pointer;
+    min-height: 1.5em;
+    box-sizing: content-box;
+}
+.defaultColumnHead:hover {
+    background: rgba(0, 0, 0, 0.09);
+}
