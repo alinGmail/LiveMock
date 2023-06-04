@@ -163,11 +163,11 @@ const ConfigRow = ({
     <div className={styles.configRow}>
       <div className={styles.configRowLeft}>
         {displayType == ColumnDisplayType.JSON ? (
-            <BracketsIcon />
+          <BracketsIcon style={{ width: "16px", verticalAlign: "middle" }} />
         ) : (
-          <AlignLeftOutlined />
+          <AlignLeftOutlined style={{verticalAlign:"middle"}}/>
         )}
-        &nbsp;{title}
+        &nbsp;<span style={{ verticalAlign: "middle" }}>{title}</span>
       </div>
       <div className={styles.configRowRight}>
         <div
@@ -191,7 +191,11 @@ const ConfigRow = ({
             }
           }}
         >
-          {visible?<Eye />:<EyeBlock />}
+          {visible ? (
+            <EyeBlock style={{ width: "16px",verticalAlign:"middle" }} />
+          ) : (
+            <Eye style={{ width: "16px" ,verticalAlign:"middle"}} />
+          )}
         </div>
       </div>
     </div>

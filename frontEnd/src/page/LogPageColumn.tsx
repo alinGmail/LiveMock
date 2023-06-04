@@ -5,18 +5,19 @@ import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
 import {
-    addTableColumn,
-    ColumnDisplayType,
-    modifyTableColumn,
-    setColumnEdit,
-    setDefaultColumnVisible, showColumnConfig,
-    showColumnEditor,
-    TableColumnItem,
+  addTableColumn,
+  ColumnDisplayType,
+  modifyTableColumn,
+  setColumnEdit,
+  setDefaultColumnVisible,
+  showColumnConfig,
+  showColumnEditor,
+  TableColumnItem,
 } from "../slice/logSlice";
 import mStyle from "./LogPageColumn.module.scss";
-import Equalizer from "../svg/equalizer.svg";
-import { ReactComponent as Eye} from "../svg/eye.svg";
-import { ReactComponent as EyeBlocked} from "../svg/eye-blocked.svg";
+import { ReactComponent as Equalizer } from "../svg/equalizer.svg";
+import { ReactComponent as Eye } from "../svg/eye.svg";
+import { ReactComponent as EyeBlocked } from "../svg/eye-blocked.svg";
 import _ from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
@@ -205,8 +206,13 @@ function getDefaultColumnHead(
                 );
               }}
             >
-                <EyeBlocked style={{display:"inline-block",verticalAlign:"middle"}} width={"20px"} />
-                <span style={{verticalAlign:"middle"}}>&nbsp;&nbsp;Hide In View</span>
+              <EyeBlocked
+                style={{ display: "inline-block", verticalAlign: "middle" }}
+                width={"20px"}
+              />
+              <span style={{ verticalAlign: "middle" }}>
+                &nbsp;&nbsp;Hide In View
+              </span>
             </div>
           </div>
         </div>
@@ -246,8 +252,9 @@ const CustomColumnHead = ({
                 setMenuDisplay(false);
               }}
             >
-              <Equalizer />
-              &nbsp;&nbsp;Edit Property
+              <Equalizer style={{ width: "16px", verticalAlign: "middle" }} />
+              &nbsp;&nbsp;
+              <span style={{ verticalAlign: "middle" }}>Edit Property</span>
             </div>
             <div
               className="menuItem"
@@ -261,8 +268,9 @@ const CustomColumnHead = ({
                 );
               }}
             >
-              <Eye />
-              &nbsp;&nbsp;Hide In View
+              <Eye style={{ width: "16px", verticalAlign: "middle" }} />
+              &nbsp;&nbsp;
+              <span style={{ verticalAlign: "middle" }}>Hide In View</span>
             </div>
           </div>
         </div>
