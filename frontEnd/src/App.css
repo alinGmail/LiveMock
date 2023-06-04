@@ -79,3 +79,7 @@
 .ant-btn-text:hover, .ant-btn-text:focus{
     background: rgba(55,53,47,0.08);
 }
+body{
+    background: linear-gradient(to bottom, rgb(36, 41, 47) 0, rgb(36, 41, 47) 70px, white 70px) no-repeat;
+
+}
