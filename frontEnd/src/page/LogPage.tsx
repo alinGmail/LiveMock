@@ -72,6 +72,7 @@ const LogPage:React.FC = ()=>{
                 dataSource={logs}
                 size={"small"}
                 tableLayout={"fixed"}
+                rowKey={"id"}
             />
         </div>
     </div>
