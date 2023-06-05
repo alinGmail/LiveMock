@@ -6,7 +6,7 @@ import { getStringConditionWord } from "./utils";
 import { CloseSquareOutlined, DownOutlined } from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
 import { useDispatch } from "react-redux";
-import { modifyLogFilter } from "../../slice/logSlice";
+import {modifyLogFilter, removeLogFilter} from "../../slice/logSlice";
 
 function ChevronDown({ fill }: { fill: string }) {
   return (
@@ -45,7 +45,12 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
                 marginLeft: "4px",
               }}
             >
-              <NInput value={filter.property} onChange={(value) => {}} />
+              <NInput value={filter.property} onChange={(value) => {
+                  const modifiedFilter = Object.assign({}, filter, {
+                      property: value,
+                  } as Partial<LogFilterM>);
+                  dispatch(modifyLogFilter(modifiedFilter));
+              }} />
             </div>
             <Dropdown
                 visible={conditionShow}
@@ -96,12 +101,19 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
                 verticalAlign: "middle",
               }}
             >
-              <NInput value={filter.value} onChange={() => {}} />
+              <NInput value={filter.value} onChange={(value) => {
+                  const modifiedFilter = Object.assign({}, filter, {
+                      value: value,
+                  } as Partial<LogFilterM>);
+                  dispatch(modifyLogFilter(modifiedFilter));
+              }} />
             </div>
             <CloseSquareOutlined
               style={{ display: "inline-block", verticalAlign: "middle" }}
               className={mStyle.closeBtn}
-              onClick={() => {}}
+              onClick={() => {
+                  dispatch(removeLogFilter(filter.id))
+              }}
             />
           </div>
         }

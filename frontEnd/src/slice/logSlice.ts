@@ -50,7 +50,7 @@ export const logSlice = createSlice({
       );
     },
     modifyLogFilter(state,action:PayloadAction<LogFilterM>){
-      const index = state.logFilter.findIndex((item)=> item.id = action.payload.id);
+      const index = state.logFilter.findIndex((item)=> item.id === action.payload.id);
       if(index === -1){
         return;
       }
@@ -68,8 +68,7 @@ export const logSlice = createSlice({
         state.tableColumns,
         (item) => item.id == action.payload.id
       );
-      console.log(action.payload.id);
-      console.log(index);
+
       if (index != -1) {
         state.tableColumns[index] = action.payload;
       }
@@ -87,7 +86,7 @@ export const logSlice = createSlice({
       }
     },
     showColumnEditor: (state, action: PayloadAction<void>) => {
-      console.log("show column editor");
+
       state.columnEditorShow = true;
     },
     hideColumnEditor: (state, action: PayloadAction<void>) => {
