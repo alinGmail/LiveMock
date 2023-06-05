@@ -1,10 +1,12 @@
-import React from "react";
-import { FilterType, LogFilterM } from "core/struct/log";
+import React, {useState} from "react";
+import { FilterType, LogFilterCondition, LogFilterM } from "core/struct/log";
 import mStyle from "./LogFilterComponent.module.scss";
 import { Button, Dropdown } from "antd";
 import { getStringConditionWord } from "./utils";
-import {CloseSquareOutlined, DownOutlined} from "@ant-design/icons";
+import { CloseSquareOutlined, DownOutlined } from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
+import { useDispatch } from "react-redux";
+import { modifyLogFilter } from "../../slice/logSlice";
 
 function ChevronDown({ fill }: { fill: string }) {
   return (
@@ -28,19 +30,51 @@ function ChevronDown({ fill }: { fill: string }) {
 }
 
 const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
+    const [conditionShow,setConditionShow] = useState(false);
+  const dispatch = useDispatch();
   if (filter.type === FilterType.SIMPLE_FILTER) {
     return (
       <Dropdown
+        trigger={["click"]}
         overlay={
-          <div>
+          <div className={"popper"}>
             <div
               style={{
                 display: "inline-block",
+                verticalAlign: "middle",
+                marginLeft: "4px",
               }}
             >
               <NInput value={filter.property} onChange={(value) => {}} />
             </div>
-            <Dropdown overlay={<div>fff</div>}>
+            <Dropdown
+                visible={conditionShow}
+                onVisibleChange={visible =>{
+                    setConditionShow(visible);
+                }}
+              overlay={
+                <div className={"menuWrap"}>
+                  <div className={"menu"}>
+                    {Object.keys(LogFilterCondition).map((item) => {
+                      return (
+                        <div
+                          onClick={() => {
+                            const modifiedFilter = Object.assign({}, filter, {
+                              condition: item,
+                            } as Partial<LogFilterM>);
+                            dispatch(modifyLogFilter(modifiedFilter));
+                            setConditionShow(false);
+                          }}
+                          className={"menuItem"}
+                        >
+                          {item}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              }
+            >
               <div
                 className={[mStyle.textBtn, mStyle.conditionSpan].join(" ")}
                 onClick={() => {
@@ -56,24 +90,24 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
             </Dropdown>
             <div
               style={{
-                marginTop: "6px",
                 marginBottom: "1px",
                 minWidth: "100px",
                 display: "inline-block",
+                verticalAlign: "middle",
               }}
             >
               <NInput value={filter.value} onChange={() => {}} />
             </div>
-              <CloseSquareOutlined
-                  className={mStyle.closeBtn}
-                  onClick={() => {
-                  }}
-              />
+            <CloseSquareOutlined
+              style={{ display: "inline-block", verticalAlign: "middle" }}
+              className={mStyle.closeBtn}
+              onClick={() => {}}
+            />
           </div>
         }
       >
         <div
-          style={{ marginRight: "10px" }}
+          style={{ marginRight: "10px", display: "inline-block" }}
           className={[filter.activate ? mStyle.filterActivate : ""].join("")}
         >
           {/******* button ******/}

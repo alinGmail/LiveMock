@@ -2,7 +2,16 @@ import { LogFilterCondition } from "core/struct/log";
 import {ColumnDisplayType} from "../../slice/logSlice";
 
 export function getStringConditionWord(condition: LogFilterCondition) {
-    return condition;
+    switch (condition) {
+
+        case LogFilterCondition.NOT_EQUAL:
+            return "not equal";
+        case LogFilterCondition.EQUAL:
+        case LogFilterCondition.CONTAINS:
+        case LogFilterCondition.GREATER:
+        case LogFilterCondition.LESS:
+            return condition.toLowerCase();
+    }
 }
 
 

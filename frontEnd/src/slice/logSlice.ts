@@ -49,6 +49,13 @@ export const logSlice = createSlice({
         (item) => item.id !== action.payload
       );
     },
+    modifyLogFilter(state,action:PayloadAction<LogFilterM>){
+      const index = state.logFilter.findIndex((item)=> item.id = action.payload.id);
+      if(index === -1){
+        return;
+      }
+      state.logFilter[index] = action.payload;
+    },
     setTableColumns: (state, action: PayloadAction<Array<TableColumnItem>>) => {
       state.tableColumns = action.payload;
     },
@@ -127,6 +134,7 @@ let {
   modifyTableColumn,
   showColumnEditor,
   hideColumnEditor,
+  modifyLogFilter
 } = actions;
 
 export {
@@ -144,4 +152,5 @@ export {
   showColumnEditor,
   hideColumnEditor,
   modifyTableColumnVisible,
+  modifyLogFilter
 };

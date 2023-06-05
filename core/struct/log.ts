@@ -93,12 +93,29 @@ interface GroupFilter {
 export type LogFilterM =  SimpleFilterM |GroupFilter;
 
 export enum LogFilterCondition{
-    EQUAL="$eq",
-    NOT_EQUAL="$neq",
-    CONTAINS="$contains",
-    GREATER="$gt",
-    LESS="$less"
+    EQUAL="EQUAL",
+    NOT_EQUAL="NOT_EQUAL",
+    CONTAINS="CONTAINS",
+    GREATER="GREATER",
+    LESS="LESS"
 }
+
+export const LogFilterConditionMap:{
+  [keys in LogFilterCondition]:string
+} = {
+  EQUAL:"$eq",
+  NOT_EQUAL:"$neq",
+  CONTAINS:"$contains",
+  GREATER:"$gt",
+  LESS:"$less"
+}
+
+function getKeyByValue<T extends Record<string, string>>(enumObject: T, value: string): keyof T | undefined {
+  const entries = Object.entries(enumObject);
+  const foundEntry = entries.find(([key, val]) => val === value);
+  return foundEntry ? foundEntry[0] as keyof T : undefined;
+}
+
 
 export function createSimpleFilter():SimpleFilterM{
   return {
