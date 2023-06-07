@@ -1,12 +1,19 @@
 import {Collection} from "lokijs";
 import {ExpectationM} from "core/struct/expectation";
-import {getExpectationDb, getLogDb} from "../db/dbManager";
+import {getDb, getExpectationDb, getLogDb} from "../db/dbManager";
 import express, {Request, Response} from "express";
 import {addCross, ServerError, toAsyncRouter} from "./common";
-import {ListLogPathParam, ListLogReqBody, ListLogReqQuery} from "core/struct/params/LogParams";
+import {
+    ListLogPathParam,
+    ListLogReqBody,
+    ListLogReqQuery,
+    ListLogViewParam,
+    ListLogViewReqBody, ListLogViewReqQuery
+} from "core/struct/params/LogParams";
 import {LogM} from "core/struct/log";
 import {Server, Socket} from "socket.io";
 import {getLogCollection} from "../log/logUtils";
+import {ListLogViewResponse} from "core/struct/response/LogResponse";
 
 const PAGE_SIZE = 100;
 
@@ -51,6 +58,34 @@ export async function getLogRouter(path:string):Promise<express.Router>{
         const logs = chain.find({}).simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
         res.json(logs);
     });
+
+
+    /**
+     * list the log view
+     */
+    router.get("/logView",async (
+        req:Request<
+            ListLogViewParam,
+            ListLogViewResponse,
+            ListLogViewReqBody,
+            ListLogViewReqQuery
+            >,
+        res:Response<ListLogViewResponse>
+    )=>{
+        addCross(res);
+        const projectId = req.query.projectId;
+        if(!projectId){
+            throw new ServerError(400, "project id not exist!");
+        }
+        const logViewDb = await getDb(projectId,path,"log");
+        const logViewCollection = logViewDb.getCollection('logView');
+        const logViews = logViewCollection.find({});
+        res.json(logViews);
+    });
+
+
+
+
     return router;
 }
 

@@ -1,6 +1,8 @@
 import lokijs from "lokijs";
 
+
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
+
 
 export async function getProjectDb(path: string): Promise<Loki> {
   let projectDbP = projectDbPromiseMap.get(path);
@@ -57,6 +59,43 @@ export async function getExpectationDb(
   }
 }
 
+const allMapDbMap = new Map<string,Map<string,Promise<Loki>>>();
+
+export async function getDb(projectId:string,path:string,name:string):Promise<Loki>{
+  let dbMap = allMapDbMap.get(name);
+  if(dbMap == null){
+    dbMap = new Map<string, Promise<Loki>>();
+    allMapDbMap.set(name,dbMap);
+  }
+  const db = dbMap.get(`${path}/${projectId}`);
+  if(!db){
+    let newDbP = new Promise<Loki>((resolve, reject) => {
+      let expectationDb = new lokijs(`${path}/${projectId}_${name}.db`, {
+        autoload: true,
+        autosave: true,
+        autosaveInterval: 4000,
+        autoloadCallback: databaseInitialize,
+      });
+      function databaseInitialize() {
+        let entries = expectationDb.getCollection(name);
+        if (entries === null) {
+          entries = expectationDb.addCollection(name);
+        }
+        resolve(expectationDb);
+      }
+    });
+    dbMap.set(`${path}/${projectId}`, newDbP);
+    return newDbP;
+  }else {
+    return db;
+  }
+}
+
+export async function getLogViewDb(projectId:string,path:string){
+  return getDb(projectId,path,"logView");
+}
+
+
 const logDbMap = new Map<string, Promise<Loki>>();
 
 export async function getLogDb(
@@ -86,6 +125,10 @@ export async function getLogDb(
     return logDbP;
   }
 }
+
+
+
+
 
 const logIndexMap = new Map<string,number>();
 

@@ -1,6 +1,6 @@
 import express, {Request, Response} from "express";
 import {addCross, ServerError, toAsyncRouter} from "./common";
-import {getProjectDb} from "../db/dbManager";
+import {getDb, getLogViewDb, getProjectDb} from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
   CreateProjectPathParam,
@@ -18,6 +18,7 @@ import {ProjectM, ProjectStatus} from "core/struct/project";
 import {Collection} from "lokijs";
 import {getProjectServer, getProjectStatus, setProjectServer, setProjectStatus} from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
+import {createLogView, LogViewM} from "../../../core/struct/logView";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
@@ -75,6 +76,11 @@ async function getProjectRouter(path: string): Promise<express.Router> {
         }
         const project = collection
           .insert(req.body.project);
+
+        const logViewDb = await getLogViewDb(project!.id,path);
+        const logViewMCollection = logViewDb.getCollection<LogViewM>('logView');
+        logViewMCollection.insert(createLogView());
+        // create the log view
         res.json(project);
       } else {
         throw new ServerError(400, "invalid request param");
