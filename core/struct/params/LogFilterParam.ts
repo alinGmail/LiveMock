@@ -44,11 +44,11 @@ export interface DeleteLogFilterParam{
 }
 
 export interface DeleteLogFilterReqBody{
-    projectId:string;
-    logViewId:string;
-    filterId:string;
+
 }
 
 export interface DeleteLogFilterReqQuery{
-
+    projectId:string;
+    logViewId:string;
+    filterId:string;
 }
