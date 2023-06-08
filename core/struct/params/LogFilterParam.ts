@@ -22,7 +22,7 @@ export interface AddLogFilterReqQuery{
  * update log filter
  */
 export interface UpdateLogFilterParam{
-
+    logFilterId:string;
 }
 
 export interface UpdateLogFilterReqBody{
@@ -40,7 +40,7 @@ export interface UpdateLogFilterReqQuery{
  * delete log filter
  */
 export interface DeleteLogFilterParam{
-
+    logFilterId:string;
 }
 
 export interface DeleteLogFilterReqBody{
@@ -50,5 +50,4 @@ export interface DeleteLogFilterReqBody{
 export interface DeleteLogFilterReqQuery{
     projectId:string;
     logViewId:string;
-    filterId:string;
 }

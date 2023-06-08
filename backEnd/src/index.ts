@@ -5,6 +5,7 @@ import { CustomErrorMiddleware } from "./controller/common";
 import { getMatcherRouter } from "./controller/matcherController";
 import { getActionRouter } from "./controller/actionController";
 import {addLogListener} from "./controller/logController";
+import {getLogFilterRouter} from "./controller/logFilterController";
 const { Server } = require("socket.io");
 
 const server = express();
@@ -22,6 +23,8 @@ const io = new Server(http,{
   server.use("/expectation", getExpectationRouter("dev_db"));
   server.use("/matcher", getMatcherRouter("dev_db"));
   server.use("/action", await getActionRouter("dev_db"));
+  server.use("/logFilter", await getLogFilterRouter("dev_db"));
+
   await addLogListener(io,"dev_db");
   server.use(CustomErrorMiddleware);
   http.listen(9002, () => {
