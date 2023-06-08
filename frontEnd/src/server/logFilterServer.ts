@@ -2,7 +2,7 @@ import {AddLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} fr
 import * as superagent from "superagent";
 import {ServerUrl} from "../config";
 
-export const AddLogFilterReq = async (param:AddLogFilterReqBody)=>{
+export const addLogFilterReq = async (param:AddLogFilterReqBody)=>{
     const response = await superagent.post(`${ServerUrl}/logFilter/`)
         .send(param);
     return response.body;

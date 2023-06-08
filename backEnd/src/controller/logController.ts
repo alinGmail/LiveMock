@@ -77,7 +77,7 @@ export async function getLogRouter(path:string):Promise<express.Router>{
         if(!projectId){
             throw new ServerError(400, "project id not exist!");
         }
-        const logViewDb = await getDb(projectId,path,"log");
+        const logViewDb = await getDb(projectId,path,"logView");
         const logViewCollection = logViewDb.getCollection('logView');
         const logViews = logViewCollection.find({});
         res.json(logViews);

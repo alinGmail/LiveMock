@@ -20,6 +20,11 @@ import {
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
+import {useQuery} from "@tanstack/react-query";
+import {getLogViewReq} from "../server/logServer";
+import {addLogFilterReq} from "../server/logFilterServer";
+import {toastPromise} from "../component/common";
+import {add} from "lodash";
 
 const placeHolderColumn: TableColumnItem = {
   id: uuId(),
@@ -48,6 +53,10 @@ const LogPage: React.FC = () => {
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useState<Array<LogM>>([]);
+
+  const getLogViewQuery = useQuery([currentProject.id],()=>{
+    return getLogViewReq({projectId:currentProject.id});
+  });
 
   const customColumns = getCustomColumn(
     tableColumns.filter((item, index) => item.visible),
@@ -82,10 +91,15 @@ const LogPage: React.FC = () => {
   }, []);
   return (
     <div>
+      <div>
+        {getLogViewQuery.isSuccess && getLogViewQuery.data[0].filters.map(filter =>{
+          return <LogFilterComponent filter={filter} key={filter.id}/>
+        })}
+      </div>
       {logState.logFilter.map(filter =>{
         return <LogFilterComponent filter={filter} key={filter.id}/>
       })}
-      <AddLogFilterBtn />
+      { getLogViewQuery.isSuccess && <AddLogFilterBtn projectId={currentProject.id} logViewId={getLogViewQuery.data[0]?.id }/>}
       <div>
         <Table
           columns={logColumn}
@@ -107,12 +121,15 @@ const LogPage: React.FC = () => {
   );
 };
 
-function AddLogFilterBtn() {
+function AddLogFilterBtn({logViewId,projectId}:{logViewId:string,projectId:string}) {
   const dispatch = useDispatch();
   return (
     <Button
       onClick={() => {
-        dispatch(addLogFilter(createSimpleFilter()));
+        const simpleFilterM = createSimpleFilter();
+        dispatch(addLogFilter(simpleFilterM));
+        const addPromise = addLogFilterReq({filter: simpleFilterM, logViewId: logViewId, projectId: projectId});
+        toastPromise(addPromise);
       }}
       size={"small"}
       type={"text"}
