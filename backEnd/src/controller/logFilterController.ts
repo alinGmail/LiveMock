@@ -9,6 +9,7 @@ import {addCross, ServerError, toAsyncRouter} from "./common";
 import {getLogViewDb} from "../db/dbManager";
 import {LogViewM} from "core/struct/logView";
 import {DeleteLogFilterResponse, UpdateLogFilterResponse,AddLogFilterResponse} from "core/struct/response/LogFilterResponse";
+import bodyParser from "body-parser";
 
 
 
@@ -99,17 +100,17 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
     /**
      * add log filter
      */
-    router.post("/",addLogFilter);
+    router.post("/",bodyParser.json(),addLogFilter);
 
     /**
      * update log filter
      */
-    router.post("/:logFilterId",updateLogFilter);
+    router.post("/:logFilterId",bodyParser.json(),updateLogFilter);
 
     /**
      * delete log filter
      */
-    router.delete("/:logFilterId",deleteLogFilter);
+    router.delete("/:logFilterId",bodyParser.json(),deleteLogFilter);
 
     return router;
 }

@@ -75,7 +75,7 @@ export enum FilterType {
   GROUP_FILTER = "GROUP_FILTER",
 }
 
-interface SimpleFilterM {
+export interface SimpleFilterM {
   type: FilterType.SIMPLE_FILTER;
   id: string;
   property: string;
@@ -83,7 +83,7 @@ interface SimpleFilterM {
   condition: LogFilterCondition;
   activate: boolean;
 }
-interface GroupFilter {
+export interface GroupFilter {
     type: FilterType.GROUP_FILTER;
     id: string;
     conjunction: "AND" | "OR";

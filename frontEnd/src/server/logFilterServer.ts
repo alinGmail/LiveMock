@@ -8,11 +8,15 @@ export const AddLogFilterReq = async (param:AddLogFilterReqBody)=>{
     return response.body;
 }
 
-export const updateLofFilterReq = async (logFilterId:string,param:UpdateLogFilterReqBody)=>{
-    const response = await superagent.post(`${ServerUrl}/logFilter/${logFilterId}`)
-        .send(param);
-    return response.body;
-}
+export const updateLofFilterReq = async (
+  logFilterId: string,
+  param: UpdateLogFilterReqBody
+) => {
+  const response = await superagent
+    .post(`${ServerUrl}/logFilter/${logFilterId}`)
+    .send(param);
+  return response.body;
+};
 
 
 export const deleteLogFilterReq = async (logFilterId:string,param:DeleteLogFilterReqQuery)=>{
