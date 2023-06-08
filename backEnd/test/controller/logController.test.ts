@@ -7,7 +7,7 @@ import {getLogCollection} from "../../src/log/logUtils";
 import {createLog} from "core/struct/log";
 import {deleteFolderRecursive} from "../../src/common/utils";
 import supertest from "supertest";
-import {ListLogReqQuery} from "../../../core/struct/params/LogParams";
+import {ListLogReqQuery} from "core/struct/params/LogParams";
 
 
 describe('test log controller', ()=>{

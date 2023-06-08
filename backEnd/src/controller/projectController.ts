@@ -18,7 +18,7 @@ import {ProjectM, ProjectStatus} from "core/struct/project";
 import {Collection} from "lokijs";
 import {getProjectServer, getProjectStatus, setProjectServer, setProjectStatus} from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
-import {createLogView, LogViewM} from "../../../core/struct/logView";
+import {createLogView, LogViewM} from "core/struct/logView";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
