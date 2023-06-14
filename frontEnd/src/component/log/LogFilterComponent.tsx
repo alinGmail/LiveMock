@@ -7,6 +7,7 @@ import { CloseSquareOutlined, DownOutlined } from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
 import { useDispatch } from "react-redux";
 import {modifyLogFilter, removeLogFilter} from "../../slice/logSlice";
+import {deleteLogFilterReq} from "../../server/logFilterServer";
 
 function ChevronDown({ fill }: { fill: string }) {
   return (
@@ -112,7 +113,8 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
               style={{ display: "inline-block", verticalAlign: "middle" }}
               className={mStyle.closeBtn}
               onClick={() => {
-                  dispatch(removeLogFilter(filter.id))
+                  dispatch(removeLogFilter(filter.id));
+                  // deleteLogFilterReq(filter.id,{logViewId: , projectId: })
               }}
             />
           </div>

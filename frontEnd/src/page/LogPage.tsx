@@ -15,7 +15,7 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   addLogFilter,
   ColumnDisplayType,
-  hideColumnEditor,
+  hideColumnEditor, resetLogFilter,
   TableColumnItem,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
@@ -55,7 +55,10 @@ const LogPage: React.FC = () => {
   const [logs, setLogs] = useState<Array<LogM>>([]);
 
   const getLogViewQuery = useQuery([currentProject.id],()=>{
-    return getLogViewReq({projectId:currentProject.id});
+    return getLogViewReq({projectId:currentProject.id}).then(res =>{
+      dispatch(resetLogFilter(res[0].filters));
+      return res;
+    });
   });
 
   const customColumns = getCustomColumn(
@@ -91,11 +94,6 @@ const LogPage: React.FC = () => {
   }, []);
   return (
     <div>
-      <div>
-        {getLogViewQuery.isSuccess && getLogViewQuery.data[0].filters.map(filter =>{
-          return <LogFilterComponent filter={filter} key={filter.id}/>
-        })}
-      </div>
       {logState.logFilter.map(filter =>{
         return <LogFilterComponent filter={filter} key={filter.id}/>
       })}

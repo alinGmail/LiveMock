@@ -49,12 +49,17 @@ export const logSlice = createSlice({
         (item) => item.id !== action.payload
       );
     },
-    modifyLogFilter(state,action:PayloadAction<LogFilterM>){
-      const index = state.logFilter.findIndex((item)=> item.id === action.payload.id);
-      if(index === -1){
+    modifyLogFilter(state, action: PayloadAction<LogFilterM>) {
+      const index = state.logFilter.findIndex(
+        (item) => item.id === action.payload.id
+      );
+      if (index === -1) {
         return;
       }
       state.logFilter[index] = action.payload;
+    },
+    resetLogFilter(state, action: PayloadAction<Array<LogFilterM>>) {
+      state.logFilter = action.payload;
     },
     setTableColumns: (state, action: PayloadAction<Array<TableColumnItem>>) => {
       state.tableColumns = action.payload;
@@ -86,7 +91,6 @@ export const logSlice = createSlice({
       }
     },
     showColumnEditor: (state, action: PayloadAction<void>) => {
-
       state.columnEditorShow = true;
     },
     hideColumnEditor: (state, action: PayloadAction<void>) => {
@@ -122,6 +126,7 @@ let { actions, caseReducers, getInitialState, name, reducer } = logSlice;
 let {
   addLogFilter,
   removeLogFilter,
+  resetLogFilter,
   setLogList,
   addTableColumn,
   setColumnEdit,
@@ -133,12 +138,13 @@ let {
   modifyTableColumn,
   showColumnEditor,
   hideColumnEditor,
-  modifyLogFilter
+  modifyLogFilter,
 } = actions;
 
 export {
   addLogFilter,
   removeLogFilter,
+  resetLogFilter,
   setLogList,
   reducer,
   addTableColumn,
@@ -151,5 +157,5 @@ export {
   showColumnEditor,
   hideColumnEditor,
   modifyTableColumnVisible,
-  modifyLogFilter
+  modifyLogFilter,
 };
