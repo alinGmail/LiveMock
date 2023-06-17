@@ -180,15 +180,18 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     logViews.forEach((logView) => {
       const dynamicView = logViewCollection.addDynamicView(logView.id);
       logView.filters.forEach(filter=>{
-          const applyFilter = changeFilter(filter);
+          const applyFilter = changeToLokijsFilter(filter);
           dynamicView.applyFind(applyFilter,filter.id);
       });
+      dynamicView.on("insert",()=>{
+        // send the event
 
+      })
     });
   }
 
   // change filter to mongo-style query
-  function changeFilter(filter: LogFilterM) {
+  function changeToLokijsFilter(filter: LogFilterM) {
     if (filter.type === FilterType.SIMPLE_FILTER) {
       switch (filter.condition) {
         case LogFilterCondition.EQUAL:
