@@ -1,7 +1,16 @@
 import { Request, Response } from "express";
-import { getNewLogNumber} from "../db/dbManager";
+import {getLogCollection, getLogViewCollection, getNewLogNumber} from "../db/dbManager";
 import { Collection } from "lokijs";
-import {createLog, createRequestLog, createResponseLog, LogM} from "core/struct/log";
+import {
+  createLog,
+  createRequestLog,
+  createResponseLog,
+  FilterType,
+  LogFilterCondition,
+  LogFilterM,
+  LogM
+} from "core/struct/log";
+import {logViewEventEmitter} from "../common/logViewEvent";
 
 
 
@@ -78,4 +87,62 @@ export function getResponseHeaderMap(res:Response):{
     }
   });
   return headers;
+}
+
+// change filter to mongo-style query
+export function changeToLokijsFilter(filter: LogFilterM) {
+  if (filter.type === FilterType.SIMPLE_FILTER) {
+    switch (filter.condition) {
+      case LogFilterCondition.EQUAL:
+        return {
+          [filter.property]: {
+            $eq: filter.value,
+          },
+        };
+      case LogFilterCondition.NOT_EQUAL:
+        return {
+          [filter.property]: {
+            $ne: filter.value,
+          },
+        };
+      case LogFilterCondition.CONTAINS:
+        return { [filter.property]: { $contains: filter.value } };
+      case LogFilterCondition.GREATER:
+        return { [filter.property]: { $gt: filter.value } };
+      case LogFilterCondition.LESS:
+        return { [filter.property]: { $lt: filter.value } };
+    }
+  } else {
+    // todo
+  }
+}
+
+export async function getLogDynamicView(projectId: string, viewId: string,path:string) {
+  const logViewCollection = await getLogViewCollection(projectId, path);
+  let dynamicView = logViewCollection.getDynamicView(viewId);
+  const logCollection = await getLogCollection(projectId, path);
+  const logView = logViewCollection.findOne({ id: viewId });
+  if(!logView){
+    throw new Error("");
+  }
+  if (dynamicView === null) {
+    // init the dynamicView
+    dynamicView = logCollection.addDynamicView(viewId);
+    logView.filters.forEach(filter=>{
+      const applyFilter = changeToLokijsFilter(filter);
+      dynamicView!.applyFind(applyFilter,filter.id);
+    });
+
+    dynamicView.on("insert",(log:LogM)=>{
+      // send the event
+      logViewEventEmitter.emit("insert",{log,logViewId:logView.id})
+    });
+    dynamicView.on('update',(log:LogM)=>{
+      logViewEventEmitter.emit('update',{log,logViewId:logView.id})
+    });
+    dynamicView.on('delete',(log:LogM)=>{
+      logViewEventEmitter.emit('delete',{log,logViewId:logView.id})
+    });
+  }
+  return dynamicView;
 }

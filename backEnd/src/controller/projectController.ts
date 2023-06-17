@@ -36,6 +36,8 @@ import getMockRouter from "../server/mockServer";
 import { createLogView, LogViewM } from "core/struct/logView";
 import {FilterType, LogFilterCondition, LogFilterM, LogM} from "core/struct/log";
 import {logViewEventEmitter} from "../common/logViewEvent";
+import {changeToLokijsFilter, getLogDynamicView} from "../log/logUtils";
+import {assignWith} from "lodash";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
@@ -187,53 +189,12 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     const logCollection = await getLogCollection(project.id,path);
     const logViews = logViewCollection.find({});
 
-    logViews.forEach((logView) => {
-      const dynamicView = logCollection.addDynamicView(logView.id);
-      logView.filters.forEach(filter=>{
-          const applyFilter = changeToLokijsFilter(filter);
-          dynamicView.applyFind(applyFilter,filter.id);
-      });
-
-      dynamicView.on("insert",(log:LogM)=>{
-        // send the event
-        logViewEventEmitter.emit("insert",{log,logViewId:logView.id})
-      });
-      dynamicView.on('update',(log:LogM)=>{
-        logViewEventEmitter.emit('update',{log,logViewId:logView.id})
-      });
-      dynamicView.on('delete',(log:LogM)=>{
-        logViewEventEmitter.emit('delete',{log,logViewId:logView.id})
-      });
-    });
-  }
-
-  // change filter to mongo-style query
-  function changeToLokijsFilter(filter: LogFilterM) {
-    if (filter.type === FilterType.SIMPLE_FILTER) {
-      switch (filter.condition) {
-        case LogFilterCondition.EQUAL:
-          return {
-            [filter.property]: {
-              $eq: filter.value,
-            },
-          };
-        case LogFilterCondition.NOT_EQUAL:
-          return {
-            [filter.property]: {
-              $ne: filter.value,
-            },
-          };
-        case LogFilterCondition.CONTAINS:
-          return { [filter.property]: { $contains: filter.value } };
-        case LogFilterCondition.GREATER:
-          return { [filter.property]: { $gt: filter.value } };
-        case LogFilterCondition.LESS:
-          return { [filter.property]: { $lt: filter.value } };
-      }
-    } else {
-      // todo
+    for (const logView of logViews) {
+      await getLogDynamicView(project.id,logView.id,path);
     }
   }
+
+
 
   /**
    * stop the project

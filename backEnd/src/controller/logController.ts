@@ -1,8 +1,10 @@
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
 import {
-  getExpectationDb, getLogCollection,
-  getLogDb, getLogViewCollection,
+  getExpectationDb,
+  getLogCollection,
+  getLogDb,
+  getLogViewCollection,
   getLogViewDb,
 } from "../db/dbManager";
 import express, { Request, Response } from "express";
@@ -26,9 +28,9 @@ import {
 } from "core/struct/response/LogResponse";
 import { LogViewM } from "core/struct/logView";
 import { logViewEventEmitter } from "../common/logViewEvent";
+import {changeToLokijsFilter, getLogDynamicView} from "../log/logUtils";
 
 const PAGE_SIZE = 100;
-
 
 export async function getLogRouter(path: string): Promise<express.Router> {
   let router = toAsyncRouter(express());
@@ -92,7 +94,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
         throw new ServerError(400, "project id not exist!");
       }
 
-      const logViewCollection = await getLogViewCollection(projectId,path);
+      const logViewCollection = await getLogViewCollection(projectId, path);
       const logViews = logViewCollection.find({});
       res.json(logViews);
     }
@@ -112,21 +114,29 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListLogViewLogsResponse>
     ) => {
-        let {lovViewId, maxLogId, projectId} = req.query;
-        if (!projectId) {
-            throw new ServerError(400, "project id not exist!");
-        }
+      let { lovViewId, maxLogId, projectId } = req.query;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const logViewCollection = await getLogViewCollection(projectId, path);
+      const logView = logViewCollection.findOne({});
+      if (!logView) {
+        throw new ServerError(500, "logView did not exist!");
+      }
+      const logCollection = await getLogCollection(projectId, path);
+      const dynamicView = await getLogDynamicView(projectId,logView.id,path);
 
-        const logViewCollection = await getLogViewCollection(projectId,path);
-        const logView = logViewCollection.findOne({});
-        if(!logView){
-            throw new ServerError(500, "logView did not exist!");
-        }
-        const logCollection = await getLogCollection(projectId, path);
-        const dynamicView = logCollection.getDynamicView(logView.id);
-        // todo
+      let resultset = dynamicView.branchResultset();//.limit(PAGE_SIZE).data();
+      if (maxLogId === undefined || maxLogId === null) {
+      } else {
+        resultset = resultset.find({ id: { $lt: maxLogId } });
+      }
+      const logs = resultset.limit(PAGE_SIZE).data();
+      res.json(logs);
     }
   );
+
+
 
   return router;
 }
@@ -136,7 +146,10 @@ export async function addLogListener(io: Server, path: string) {
     const { projectId } = socket.handshake.query;
     const logDb = await getLogDb(projectId as string, path);
     const logCollection = await getLogCollection(projectId as string, path);
-    const logViewMCollection = await getLogViewCollection(projectId as string,path);
+    const logViewMCollection = await getLogViewCollection(
+      projectId as string,
+      path
+    );
     const logView = logViewMCollection.findOne({});
     if (!logView) {
       console.error("log view is null,projectId:" + projectId);
