@@ -29,10 +29,7 @@ const io = new Server(http,{
   server.use("/log", await getLogRouter("dev_db"));
   await addLogListener(io,"dev_db");
 
-  logViewEventEmitter.on("insert",(arg:{log:LogM,logViewId:string})=>{
-    let {log, logViewId} = arg;
-    io.to(logViewId).emit("insert",log);
-  });
+
 
   server.use(CustomErrorMiddleware);
   http.listen(9002, () => {

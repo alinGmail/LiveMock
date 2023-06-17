@@ -15,6 +15,7 @@ import {Server, Socket} from "socket.io";
 import {getLogCollection} from "../log/logUtils";
 import {ListLogViewResponse} from "core/struct/response/LogResponse";
 import {LogViewM} from "../../../core/struct/logView";
+import {logViewEventEmitter} from "../common/logViewEvent";
 
 const PAGE_SIZE = 100;
 
@@ -108,7 +109,6 @@ export async function addLogListener(io:Server,path:string){
             return;
         }
         socket.join(logView?.id);
-        //console.log(projectId);
         //socket.on('disconnect', () => {
             // console.log(` disconnected`);
         //});
@@ -121,4 +121,20 @@ export async function addLogListener(io:Server,path:string){
     io.on("disconnect",(socket)=>{
         console.log("disconnect");
     });
+
+    logViewEventEmitter.on("insert",(arg:{log:LogM,logViewId:string})=>{
+        let {log, logViewId} = arg;
+        io.to(logViewId).emit("insert",log);
+    });
+
+    logViewEventEmitter.on("update",(arg:{log:LogM,logViewId:string})=>{
+        let {log, logViewId} = arg;
+        io.to(logViewId).emit("update",log);
+    });
+
+    logViewEventEmitter.on("delete",(arg:{log:LogM,logViewId:string})=>{
+        let {log, logViewId} = arg;
+        io.to(logViewId).emit("delete",log);
+    });
+
 }
