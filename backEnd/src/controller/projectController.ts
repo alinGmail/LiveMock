@@ -152,7 +152,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     setProjectStatus(projectId, ProjectStatus.STARTING);
     if (server == null) {
       let expServer = express();
-      expServer.all("*", await getMockRouter(path, projectId));
+      expServer.use("*", await getMockRouter(path, projectId));
       server = expServer.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);

@@ -32,3 +32,21 @@ export interface ListLogViewReqQuery{
     projectId:string;
 }
 
+
+/**
+ * list logs by logView
+ */
+
+export interface ListLogViewLogsParam{
+
+}
+
+export interface ListLogViewLogsReqBody{
+
+}
+
+export interface ListLogViewLogsReqQuery{
+    projectId:string;
+    lovViewId:string;
+    maxLogId:string|null;
+}
