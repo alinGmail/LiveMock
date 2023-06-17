@@ -19,7 +19,6 @@ import {
   UpdateExpectationReqBody,
   UpdateExpectationReqQuery,
 } from "core/struct/params/ExpectationParams";
-import { ExpectationM } from "core/struct/expectation";
 import {
   CreateExpectationResponse,
   DeleteExpectationResponse,
@@ -27,8 +26,6 @@ import {
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
-import { Collection } from "lokijs";
-
 
 
 export function getExpectationRouter(path: string): express.Router {

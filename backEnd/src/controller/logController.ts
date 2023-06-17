@@ -137,8 +137,7 @@ export async function addLogListener(io: Server, path: string) {
     const { projectId } = socket.handshake.query;
     const logDb = await getLogDb(projectId as string, path);
     const logCollection = await getLogCollection(projectId as string, path);
-    const logViewDb = await getLogViewDb(projectId as string, path);
-    const logViewMCollection = logViewDb.getCollection<LogViewM>("logView");
+    const logViewMCollection = await getLogViewCollection(projectId as string,path);
     const logView = logViewMCollection.findOne({});
     if (!logView) {
       console.error("log view is null,projectId:" + projectId);

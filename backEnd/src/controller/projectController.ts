@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
-import { getLogViewDb, getProjectDb } from "../db/dbManager";
+import {getLogViewCollection, getLogViewDb, getProjectCollection, getProjectDb} from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
   CreateProjectPathParam,
@@ -34,7 +34,7 @@ import {logViewEventEmitter} from "../common/logViewEvent";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
-  const collection: Collection<ProjectM> = projectDbP.getCollection("project");
+  const collection: Collection<ProjectM> = await getProjectCollection(path);
   let router = toAsyncRouter(express());
 
   router.options("*", (req, res) => {
@@ -87,9 +87,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
           throw new ServerError(400, "project name can not be empty!");
         }
         const project = collection.insert(req.body.project);
-
-        const logViewDb = await getLogViewDb(project!.id, path);
-        const logViewMCollection = logViewDb.getCollection<LogViewM>("logView");
+        const logViewMCollection = await getLogViewCollection(project!.id,path);
         logViewMCollection.insert(createLogView());
         // create the log view
         res.json(project);
@@ -180,9 +178,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
   async function onProjectStart(project: ProjectM) {
     // create lokij view
-
-    const logViewDb = await getLogViewDb(project.id, path);
-    const logViewCollection = logViewDb.getCollection<LogViewM>("logView");
+    const logViewCollection = await getLogViewCollection(project.id,path);
     const logCollection = await getLogCollection(project.id,path);
     const logViews = logViewCollection.find({});
 

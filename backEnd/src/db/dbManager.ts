@@ -4,6 +4,7 @@ import { ProjectM } from "core/struct/project";
 import { ExpectationM } from "core/struct/expectation";
 import { LogViewM } from "core/struct/logView";
 import { LogM } from "core/struct/log";
+import e from "express";
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
 
@@ -49,6 +50,7 @@ export async function getProjectCollection(path: string) {
   if (entries === null) {
     entries = projectDb.addCollection<ProjectM>("project");
   }
+  return entries;
 }
 
 export async function getExpectationCollection(
