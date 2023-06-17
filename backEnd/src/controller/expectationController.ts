@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import { getExpectationDb } from "../db/dbManager";
+import {getExpectationCollection, getExpectationDb} from "../db/dbManager";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
@@ -29,13 +29,7 @@ import {
 } from "core/struct/response/ExpectationResponse";
 import { Collection } from "lokijs";
 
-async function getCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<ExpectationM>> {
-  const db = await getExpectationDb(projectId, path);
-  return db.getCollection("expectation");
-}
+
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -63,7 +57,7 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       if (req.body.expectation) {
         const resExp = collection.insert(req.body.expectation);
         res.json(resExp);
@@ -92,7 +86,7 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectations = collection.find({});
       res.json(expectations);
     }
@@ -119,7 +113,7 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
@@ -149,7 +143,7 @@ export function getExpectationRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectationId = req.params.expectationId;
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
@@ -182,7 +176,7 @@ export function getExpectationRouter(path: string): express.Router {
         throw new ServerError(400, "project id not exist!");
       }
       const expectationId = req.params.expectationId;
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");

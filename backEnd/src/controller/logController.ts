@@ -1,9 +1,8 @@
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
 import {
-  getDb,
   getExpectationDb,
-  getLogDb,
+  getLogDb, getLogViewCollection,
   getLogViewDb,
 } from "../db/dbManager";
 import express, { Request, Response } from "express";
@@ -31,13 +30,6 @@ import { logViewEventEmitter } from "../common/logViewEvent";
 
 const PAGE_SIZE = 100;
 
-async function getCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<LogM>> {
-  const db = await getLogDb(projectId, path);
-  return db.getCollection("log");
-}
 
 export async function getLogRouter(path: string): Promise<express.Router> {
   let router = toAsyncRouter(express());
@@ -65,7 +57,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getLogCollection(projectId, path);
       const chain = collection.chain();
       const maxLogId = req.query.maxLogId;
       if (maxLogId === undefined || maxLogId === null) {
@@ -100,8 +92,8 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const logViewDb = await getDb(projectId, path, "logView");
-      const logViewCollection = logViewDb.getCollection("logView");
+
+      const logViewCollection = await getLogViewCollection(projectId,path);
       const logViews = logViewCollection.find({});
       res.json(logViews);
     }
@@ -125,8 +117,8 @@ export async function getLogRouter(path: string): Promise<express.Router> {
         if (!projectId) {
             throw new ServerError(400, "project id not exist!");
         }
-        const logViewDb = await getDb(projectId, path, "logView");
-        const logViewCollection = logViewDb.getCollection<LogViewM>("logView");
+
+        const logViewCollection = await getLogViewCollection(projectId,path);
         const logView = logViewCollection.findOne({});
         if(!logView){
             throw new ServerError(500, "logView did not exist!");

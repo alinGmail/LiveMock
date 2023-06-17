@@ -16,17 +16,8 @@ import {
   DeleteMatcherResponse,
   UpdateMatcherResponse,
 } from "core/struct/response/MatcherResponse";
-import { getExpectationDb } from "../db/dbManager";
-import { Collection } from "lokijs";
-import { ExpectationM } from "core/struct/expectation";
+import {getExpectationCollection} from "../db/dbManager";
 
-async function getCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<ExpectationM>> {
-  const db = await getExpectationDb(projectId, path);
-  return db.getCollection("expectation");
-}
 
 export function getMatcherRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -56,7 +47,7 @@ export function getMatcherRouter(path: string): express.Router {
       if (!matcher) {
         throw new ServerError(400, "invalid params!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
@@ -87,7 +78,7 @@ export function getMatcherRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
@@ -121,7 +112,7 @@ export function getMatcherRouter(path: string): express.Router {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");

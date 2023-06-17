@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import { Collection } from "lokijs";
-import { getExpectationDb } from "../db/dbManager";
+import {getExpectationCollection, getExpectationDb} from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
   CreateActionPathParam,
@@ -21,13 +21,7 @@ import {
 } from "core/struct/response/ActionResponse";
 import { ExpectationM } from "core/struct/expectation";
 
-async function getCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<ExpectationM>> {
-  const db = await getExpectationDb(projectId, path);
-  return db.getCollection("expectation");
-}
+
 
 export async function getActionRouter(path: string): Promise<express.Router> {
   let router = toAsyncRouter(express());
@@ -56,7 +50,7 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
@@ -87,7 +81,7 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {
         throw new ServerError(500, "expectation not exist");
@@ -125,7 +119,7 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getCollection(projectId, path);
+      const collection = await getExpectationCollection(projectId, path);
       // collection.addDynamicView("aa").data()
       const expectation = collection.findOne({ id: expectationId });
       if (!expectation) {

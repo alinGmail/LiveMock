@@ -1,8 +1,11 @@
 import lokijs from "lokijs";
-
+import { getCollection, getDb } from "./dbUtils";
+import { ProjectM } from "core/struct/project";
+import { ExpectationM } from "core/struct/expectation";
+import { LogViewM } from "core/struct/logView";
+import { LogM } from "core/struct/log";
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
-
 
 export async function getProjectDb(path: string): Promise<Loki> {
   let projectDbP = projectDbPromiseMap.get(path);
@@ -15,10 +18,6 @@ export async function getProjectDb(path: string): Promise<Loki> {
         autoloadCallback: databaseInitialize,
       });
       function databaseInitialize() {
-        let entries = projectDb.getCollection("project");
-        if (entries === null) {
-          entries = projectDb.addCollection("project");
-        }
         resolve(projectDb);
       }
     });
@@ -29,124 +28,65 @@ export async function getProjectDb(path: string): Promise<Loki> {
   }
 }
 
-const expectationDbMap = new Map<string, Promise<Loki>>();
-
 export async function getExpectationDb(
   projectId: string,
   path: string
 ): Promise<Loki> {
-  const expectationDbP = expectationDbMap.get(`${path}/${projectId}`);
-  if (!expectationDbP) {
-    let newDbP = new Promise<Loki>((resolve, reject) => {
-      let expectationDb = new lokijs(`${path}/${projectId}_Exp.db`, {
-        autoload: true,
-        autosave: true,
-        autosaveInterval: 4000,
-        autoloadCallback: databaseInitialize,
-      });
-      function databaseInitialize() {
-        let entries = expectationDb.getCollection("expectation");
-        if (entries === null) {
-          entries = expectationDb.addCollection("expectation");
-        }
-        resolve(expectationDb);
-      }
-    });
-    expectationDbMap.set(`${path}/${projectId}`, newDbP);
-    return newDbP;
-  } else {
-    return expectationDbP;
+  return getDb(projectId, path, "expectation");
+}
+
+export async function getLogViewDb(projectId: string, path: string) {
+  return getDb(projectId, path, "logView");
+}
+
+export async function getLogDb(projectId: string, path: string): Promise<Loki> {
+  return getDb(projectId, path, "log");
+}
+
+export async function getProjectCollection(path: string) {
+  const projectDb = await getProjectDb(path);
+  let entries = projectDb.getCollection<ProjectM>("project");
+  if (entries === null) {
+    entries = projectDb.addCollection<ProjectM>("project");
   }
 }
 
-const allMapDbMap = new Map<string,Map<string,Promise<Loki>>>();
-
-export async function getDb(projectId:string,path:string,name:string):Promise<Loki>{
-  let dbMap = allMapDbMap.get(name);
-  if(dbMap == null){
-    dbMap = new Map<string, Promise<Loki>>();
-    allMapDbMap.set(name,dbMap);
-  }
-  const db = dbMap.get(`${path}/${projectId}`);
-  if(!db){
-    let newDbP = new Promise<Loki>((resolve, reject) => {
-      let expectationDb = new lokijs(`${path}/${projectId}_${name}.db`, {
-        autoload: true,
-        autosave: true,
-        autosaveInterval: 4000,
-        autoloadCallback: databaseInitialize,
-      });
-      function databaseInitialize() {
-        let entries = expectationDb.getCollection(name);
-        if (entries === null) {
-          entries = expectationDb.addCollection(name);
-        }
-        resolve(expectationDb);
-      }
-    });
-    dbMap.set(`${path}/${projectId}`, newDbP);
-    return newDbP;
-  }else {
-    return db;
-  }
-}
-
-export async function getLogViewDb(projectId:string,path:string){
-  return getDb(projectId,path,"logView");
-}
-
-
-const logDbMap = new Map<string, Promise<Loki>>();
-
-export async function getLogDb(
+export async function getExpectationCollection(
   projectId: string,
   path: string
-): Promise<Loki> {
-  const logDbP = logDbMap.get(`${path}/${projectId}`);
-  if (!logDbP) {
-    let newDbP = new Promise<Loki>((resolve, reject) => {
-      let logDb = new lokijs(`${path}/${projectId}_Log.db`, {
-        autoload: true,
-        autosave: true,
-        autosaveInterval: 4000,
-        autoloadCallback: databaseInitialize,
-      });
-      function databaseInitialize() {
-        let entries = logDb.getCollection("log");
-        if (entries === null) {
-          entries = logDb.addCollection("log");
-        }
-        resolve(logDb);
-      }
-    })
-    logDbMap.set(`${path}/${projectId}`, newDbP);
-    return newDbP;
-  } else {
-    return logDbP;
-  }
+) {
+  return getCollection<ExpectationM>(projectId, path, "expectation");
 }
 
+export async function getLogViewCollection(projectId: string, path: string) {
+  return getCollection<LogViewM>(projectId, path, "logView");
+}
 
+export async function getLogCollection(projectId: string, path: string) {
+  return getCollection<LogM>(projectId, path, "log");
+}
 
-
-
-const logIndexMap = new Map<string,number>();
+const logIndexMap = new Map<string, number>();
 
 /**
  * get the newest log index
  * @param projectId
  * @param path
  */
-export function getNewLogNumber(projectId:string,path:string):number{
+export function getNewLogNumber(projectId: string, path: string): number {
   const number = logIndexMap.get(`${path}/${projectId}`);
   let resIndex = 100001;
-  if(number){
+  if (number) {
     resIndex = number + 1;
   }
-  logIndexMap.set(`${path}/${projectId}`,resIndex);
+  logIndexMap.set(`${path}/${projectId}`, resIndex);
   return resIndex;
 }
 
-export function setNewestLogNumber(projectId:string,path:string,newestLogIndex:number){
-  logIndexMap.set(`${path}/${projectId}`,newestLogIndex);
+export function setNewestLogNumber(
+  projectId: string,
+  path: string,
+  newestLogIndex: number
+) {
+  logIndexMap.set(`${path}/${projectId}`, newestLogIndex);
 }

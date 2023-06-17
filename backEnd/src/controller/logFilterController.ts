@@ -6,7 +6,7 @@ import {
     UpdateLogFilterParam, UpdateLogFilterReqBody, UpdateLogFilterReqQuery
 } from "core/struct/params/LogFilterParam";
 import {addCross, ServerError, toAsyncRouter} from "./common";
-import {getLogViewDb} from "../db/dbManager";
+import {getLogViewCollection, getLogViewDb} from "../db/dbManager";
 import {LogViewM} from "core/struct/logView";
 import {DeleteLogFilterResponse, UpdateLogFilterResponse,AddLogFilterResponse} from "core/struct/response/LogFilterResponse";
 import bodyParser from "body-parser";
@@ -26,8 +26,8 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
         if (!projectId) {
             throw new ServerError(400, "project id not exist!");
         }
-        const logViewDb = await getLogViewDb(projectId, path);
-        const collection = logViewDb.getCollection<LogViewM>("logView");
+
+        const collection = await getLogViewCollection(projectId,path);
         const logView = collection.findOne({id:logViewId});
         if(!logView){
             throw new ServerError(400, "logView not exist!");
