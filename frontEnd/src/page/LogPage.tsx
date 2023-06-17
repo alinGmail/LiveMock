@@ -84,9 +84,13 @@ const LogPage: React.FC = () => {
       //console.log(socket.id); // x8WIv7-mJelg7on_ALbx
     });
     socket.on("initLogsRes", (logs) => {
-      console.log(logs);
+      // console.log(logs);
       setLogs(logs);
     });
+    socket.on('insert',(log)=>{
+      console.log(`receive log:`);
+      console.log(JSON.stringify(log));
+    })
     setSocketInstance(socket);
     return () => {
       socket.disconnect();

@@ -28,7 +28,9 @@ import {
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
 import { createLogView, LogViewM } from "core/struct/logView";
-import { FilterType, LogFilterCondition, LogFilterM } from "core/struct/log";
+import {FilterType, LogFilterCondition, LogFilterM, LogM} from "core/struct/log";
+import {getLogCollection} from "../log/logUtils";
+import {logViewEventEmitter} from "../common/logViewEvent";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const projectDbP = await getProjectDb(path);
@@ -143,6 +145,9 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
     addCross(res);
     const project = collection.findOne({ id: req.params.projectId });
+    if(!project){
+      throw new ServerError(500, "project not exist");
+    }
     let server = await getProjectServer(projectId, path);
     setProjectStatus(projectId, ProjectStatus.STARTING);
     if (server == null) {
@@ -151,6 +156,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       server = expServer.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);
+        onProjectStart(project);
         res.json({
           message: "success",
         });
@@ -160,6 +166,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       server.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);
+        onProjectStart(project);
         res.json({
           message: "success",
         });
@@ -176,17 +183,26 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
     const logViewDb = await getLogViewDb(project.id, path);
     const logViewCollection = logViewDb.getCollection<LogViewM>("logView");
+    const logCollection = await getLogCollection(project.id,path);
     const logViews = logViewCollection.find({});
+
     logViews.forEach((logView) => {
-      const dynamicView = logViewCollection.addDynamicView(logView.id);
+      const dynamicView = logCollection.addDynamicView(logView.id);
       logView.filters.forEach(filter=>{
           const applyFilter = changeToLokijsFilter(filter);
           dynamicView.applyFind(applyFilter,filter.id);
       });
-      dynamicView.on("insert",()=>{
-        // send the event
 
-      })
+      dynamicView.on("insert",(log:LogM)=>{
+        // send the event
+        logViewEventEmitter.emit("insert",{log,logViewId:logView.id})
+      });
+      dynamicView.on('update',(log:LogM)=>{
+        logViewEventEmitter.emit('update',{log,logViewId:logView.id})
+      });
+      dynamicView.on('delete',(log:LogM)=>{
+        logViewEventEmitter.emit('delete',{log,logViewId:logView.id})
+      });
     });
   }
 

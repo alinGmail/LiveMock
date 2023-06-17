@@ -112,11 +112,11 @@ export async function addLogListener(io:Server,path:string){
         //socket.on('disconnect', () => {
             // console.log(` disconnected`);
         //});
-        //const chain = logCollection.chain();
-        // const logs = chain.find({}).simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
-        //socket.on('initLogsReq',(args)=>{
-        //    socket.emit('initLogsRes',logs);
-        //});
+        const chain = logCollection.chain();
+        const logs = chain.find({}).simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
+        socket.on('initLogsReq',(args)=>{
+            socket.emit('initLogsRes',logs);
+        });
     });
     io.on("disconnect",(socket)=>{
         console.log("disconnect");

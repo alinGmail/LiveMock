@@ -39,7 +39,7 @@
     "fs": "^0.0.1-security",
     "http-proxy": "^1.18.1",
     "lodash": "^4.17.21",
-    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#cfd513ddbcf603ebcc7b0951c426022a346dc92b",
+    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3",
     "nedb": "^1.8.0",
     "node-mocks-http": "^1.12.2",
     "requires-port": "^1.0.0",

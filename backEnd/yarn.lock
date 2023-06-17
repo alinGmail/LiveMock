@@ -2975,9 +2975,9 @@ lodash@^4.16.4, lodash@^4.17.14, lodash@^4.17.21:
   resolved "https://registry.npmmirror.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
-"lokijs@git+https://github.com/alinGmail/LokiJS.git#cfd513ddbcf603ebcc7b0951c426022a346dc92b":
+"lokijs@git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3":
   version "1.5.12"
-  resolved "git+https://github.com/alinGmail/LokiJS.git#cfd513ddbcf603ebcc7b0951c426022a346dc92b"
+  resolved "git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3"
 
 lowercase-keys@^1.0.0, lowercase-keys@^1.0.1:
   version "1.0.1"
