@@ -2,8 +2,7 @@ import express from "express";
 import {getLogRouter} from "../../src/controller/logController";
 import {CustomErrorMiddleware} from "../../src/controller/common";
 import {createProject} from "core/struct/project";
-import {getNewLogNumber, getProjectDb} from "../../src/db/dbManager";
-import {getLogCollection} from "../../src/log/logUtils";
+import {getLogCollection, getNewLogNumber, getProjectCollection, getProjectDb} from "../../src/db/dbManager";
 import {createLog} from "core/struct/log";
 import {deleteFolderRecursive} from "../../src/common/utils";
 import supertest from "supertest";
@@ -26,8 +25,7 @@ describe('test log controller', ()=>{
 
     beforeAll(async ()=>{
         server.use("/log", await getLogRouter("test_db"));
-        const projectDb = await getProjectDb("test_db");
-        const projectCollection = projectDb.getCollection("project");
+        const projectCollection = await getProjectCollection("test_db");
         projectCollection.insert(projectM);
         const logCollection = await getLogCollection(projectM.id, "test_db");
         logCollection.insert(log1);

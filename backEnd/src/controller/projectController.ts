@@ -1,6 +1,12 @@
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
-import {getLogViewCollection, getLogViewDb, getProjectCollection, getProjectDb} from "../db/dbManager";
+import {
+  getLogCollection,
+  getLogViewCollection,
+  getLogViewDb,
+  getProjectCollection,
+  getProjectDb
+} from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
   CreateProjectPathParam,
@@ -29,7 +35,6 @@ import {
 import getMockRouter from "../server/mockServer";
 import { createLogView, LogViewM } from "core/struct/logView";
 import {FilterType, LogFilterCondition, LogFilterM, LogM} from "core/struct/log";
-import {getLogCollection} from "../log/logUtils";
 import {logViewEventEmitter} from "../common/logViewEvent";
 
 async function getProjectRouter(path: string): Promise<express.Router> {

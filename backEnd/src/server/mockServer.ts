@@ -2,12 +2,12 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
-import {getExpectationDb, setNewestLogNumber} from "../db/dbManager";
+import {getExpectationDb, getLogCollection, setNewestLogNumber} from "../db/dbManager";
 import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
-import {getLogCollection, insertReqLog, insertResLog} from "../log/logUtils";
+import {insertReqLog, insertResLog} from "../log/logUtils";
 import * as http from "http";
 import {LogM} from "core/struct/log";
 

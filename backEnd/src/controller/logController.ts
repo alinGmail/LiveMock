@@ -1,7 +1,7 @@
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
 import {
-  getExpectationDb,
+  getExpectationDb, getLogCollection,
   getLogDb, getLogViewCollection,
   getLogViewDb,
 } from "../db/dbManager";
@@ -20,7 +20,6 @@ import {
 } from "core/struct/params/LogParams";
 import { LogM } from "core/struct/log";
 import { Server, Socket } from "socket.io";
-import { getLogCollection } from "../log/logUtils";
 import {
   ListLogViewLogsResponse,
   ListLogViewResponse,

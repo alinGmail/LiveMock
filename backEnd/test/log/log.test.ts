@@ -10,8 +10,7 @@ import request from "supertest";
 import {deleteFolderRecursive} from "../../src/common/utils";
 import getMockRouter from "../../src/server/mockServer";
 import {createPathMatcher, MatcherCondition} from "core/struct/matcher";
-import {getLogDb} from "../../src/db/dbManager";
-import {getLogCollection} from "../../src/log/logUtils";
+import {getLogCollection, getLogDb} from "../../src/db/dbManager";
 
 
 describe('test log',()=>{
@@ -77,7 +76,6 @@ describe('test log',()=>{
         expect(res.text).toEqual("test response");
 
         // get the log
-        const logDb = await getLogDb(projectM.id,"test_db");
         const logCollection = await getLogCollection(projectM.id,"test_db");
         const lastLog = logCollection.findOne({});
         // request log

@@ -1,16 +1,10 @@
 import { Request, Response } from "express";
-import {getLogDb, getNewLogNumber} from "../db/dbManager";
+import { getNewLogNumber} from "../db/dbManager";
 import { Collection } from "lokijs";
 import {createLog, createRequestLog, createResponseLog, LogM} from "core/struct/log";
 
 
-export async function getLogCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<LogM>> {
-  const logDb = await getLogDb(projectId, path);
-  return logDb.getCollection("log");
-}
+
 
 export function insertReqLog(
   logCollection: Collection<LogM>,
