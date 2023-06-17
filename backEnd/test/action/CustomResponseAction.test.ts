@@ -1,6 +1,7 @@
 import {
-  getExpectationDb,
-  getLogDb,
+  getExpectationCollection,
+  getExpectationDb, getLogCollection,
+  getLogDb, getProjectCollection,
   getProjectDb,
 } from "../../src/db/dbManager";
 import { createProject } from "core/struct/project";
@@ -11,7 +12,6 @@ import { createCustomResponseAction, ResponseType } from "core/struct/action";
 import express from "express";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
-import { getLogCollection } from "../../src/log/logUtils";
 
 describe("test custom response action", () => {
   let projectDb: Loki;
@@ -25,16 +25,14 @@ describe("test custom response action", () => {
   beforeAll(async () => {
     projectDb = await getProjectDb("test_db");
     project.name = "test custom response";
-    const projectCollection = projectDb.getCollection("project");
+    const projectCollection = await getProjectCollection('test_db');
     projectCollection.insert(project);
-
     // matcher
     const pathMatcher = createPathMatcher();
     pathMatcher.conditions = MatcherCondition.START_WITH;
     pathMatcher.value = "/";
     expectation.matchers.push(pathMatcher);
-    const expectationDb = await getExpectationDb(project.id, "test_db");
-    expectationCollection = expectationDb.getCollection("expectation");
+    expectationCollection = await getExpectationCollection(project.id,'test_db');
     expectationCollection.insert(expectation);
 
     // server
