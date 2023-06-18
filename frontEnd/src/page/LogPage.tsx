@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import LogFilterComponent from "../component/log/LogFilterComponent";
@@ -25,6 +25,27 @@ import { useQuery } from "@tanstack/react-query";
 import { getLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
+import { Updater, useImmer } from "use-immer";
+
+function onLogsInsert(
+  insertLog: LogM,
+  logViewId: string,
+  currentLogViewId: string | undefined,
+  setLogs: Updater<Array<LogM>>
+) {
+  if (logViewId !== currentLogViewId) {
+    return;
+  }
+  setLogs((logs) => {
+    for (let i = 0; i < logs.length; i++) {
+      const curLog = logs.at(i);
+      if (curLog!.id < insertLog.id) {
+        logs.splice(i, 0, insertLog);
+        return;
+      }
+    }
+  });
+}
 
 const placeHolderColumn: TableColumnItem = {
   id: uuId(),
@@ -38,6 +59,7 @@ const placeHolderColumn: TableColumnItem = {
 
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
+  const logViewIdRef = useRef<string>();
   let {
     columnConfigShow,
     columnEditorShow,
@@ -52,10 +74,11 @@ const LogPage: React.FC = () => {
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
-  const [logs, setLogs] = useState<Array<LogM>>([]);
+  const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
     return getLogViewReq({ projectId: currentProject.id }).then((res) => {
+      logViewIdRef.current = res.at(0)?.id;
       dispatch(resetLogFilter(res[0].filters));
       return res;
     });
@@ -71,6 +94,7 @@ const LogPage: React.FC = () => {
         projectId: currentProject.id,
       }).then((res) => {
         setLogs(res);
+        return res;
       });
     },
     {
@@ -104,7 +128,10 @@ const LogPage: React.FC = () => {
     socket.on(
       "insert",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        //console.log(`receive log:`);
+        console.log(`receive insert log:`);
+        console.log(logViewIdRef.current);
+        console.log("logid:" + log.id);
+        onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
         //console.log(JSON.stringify(log));
       }
     );

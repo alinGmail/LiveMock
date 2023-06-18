@@ -104,7 +104,7 @@ export function getDefaultColumn(
           >
             <ReactJson
               collapseStringsAfterLength={1000}
-              src={record.res.body}
+              src={record.res?.body}
               collapsed={true}
             />
           </div>
@@ -124,7 +124,7 @@ export function getDefaultColumn(
               wordBreak: "break-all",
             }}
           >
-            <ReactJson src={record} collapseStringsAfterLength={1000} />
+            <ReactJson src={record} collapseStringsAfterLength={1000} collapsed={true} />
             {/*<ReactJson
                             src={record}
                             collapseStringsAfterLength={1000}

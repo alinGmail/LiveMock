@@ -134,7 +134,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       } else {
         resultset = resultset.find({ id: { $lt: maxLogId } });
       }
-      const logs = resultset.limit(PAGE_SIZE).data();
+      const logs = resultset.simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
       res.json(logs);
     }
   );

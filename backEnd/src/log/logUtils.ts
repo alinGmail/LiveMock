@@ -119,9 +119,9 @@ export function changeToLokijsFilter(filter: LogFilterM) {
 
 export async function getLogDynamicView(projectId: string, viewId: string,path:string) {
   const logViewCollection = await getLogViewCollection(projectId, path);
-  let dynamicView = logViewCollection.getDynamicView(viewId);
   const logCollection = await getLogCollection(projectId, path);
   const logView = logViewCollection.findOne({ id: viewId });
+  let dynamicView = logCollection.getDynamicView(viewId);
   if(!logView){
     throw new Error("");
   }
@@ -136,6 +136,7 @@ export async function getLogDynamicView(projectId: string, viewId: string,path:s
     });
 
     dynamicView.on("insert",(log:LogM)=>{
+      console.log(`dynamic view insert event log:${log.id}`)
       // send the event
       logViewEventEmitter.emit("insert",{log,logViewId:logView.id})
     });
@@ -146,5 +147,8 @@ export async function getLogDynamicView(projectId: string, viewId: string,path:s
       logViewEventEmitter.emit('delete',{log,logViewId:logView.id})
     });
   }
+  // todo
+
+
   return dynamicView;
 }
