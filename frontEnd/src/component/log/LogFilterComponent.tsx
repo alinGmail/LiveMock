@@ -49,21 +49,11 @@ const LogFilterComponent: React.FC<{
 
   const {
     run: updateFilter,
-    cancel,
-    flush,
   } = useDebounceFn(
     (logFilterId: string, param: UpdateLogFilterReqBody) => {
       // update filter
       const updatePromise = updateLogFilterReq(logFilterId, param);
       toastPromise(updatePromise);
-    },
-    { wait: debounceWait }
-  );
-
-  const { run: deleteFilter } = useDebounceFn(
-    (logFilterId: string, param: DeleteLogFilterReqQuery) => {
-      const deletePromise = deleteLogFilterReq(logFilterId, param);
-      toastPromise(deletePromise);
     },
     { wait: debounceWait }
   );
@@ -170,9 +160,12 @@ const LogFilterComponent: React.FC<{
               style={{ display: "inline-block", verticalAlign: "middle" }}
               className={mStyle.closeBtn}
               onClick={() => {
+                const deletePromise = deleteLogFilterReq(filter.id, {
+                  logViewId,
+                  projectId,
+                });
+                toastPromise(deletePromise);
                 dispatch(removeLogFilter(filter.id));
-                deleteFilter(filter.id, { logViewId, projectId });
-                // deleteLogFilterReq(filter.id,{logViewId: , projectId: })
               }}
             />
           </div>
