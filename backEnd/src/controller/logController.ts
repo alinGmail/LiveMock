@@ -26,10 +26,8 @@ import {
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
-import { LogViewM } from "core/struct/logView";
 import { logViewEventEmitter } from "../common/logViewEvent";
-import { changeToLokijsFilter, getLogDynamicView } from "../log/logUtils";
-import bodyParser from "body-parser";
+import {  getLogDynamicView } from "../log/logUtils";
 
 const PAGE_SIZE = 100;
 

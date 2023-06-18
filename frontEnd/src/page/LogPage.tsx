@@ -52,7 +52,7 @@ function onLogsUpdate(
   logViewId: string,
   currentLogViewId: string | undefined,
   setLogs: Updater<Array<LogM>>,
-  isDelete:boolean,
+  isDelete: boolean
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -70,14 +70,13 @@ function onLogsUpdate(
     if (updateLogIndex === -1) {
       return;
     }
-    if(isDelete){
-      logs.splice(updateLogIndex,1);
-    }else{
+    if (isDelete) {
+      logs.splice(updateLogIndex, 1);
+    } else {
       logs[updateLogIndex] = updateLog;
     }
   });
 }
-
 
 const placeHolderColumn: TableColumnItem = {
   id: uuId(),
@@ -150,8 +149,7 @@ const LogPage: React.FC = () => {
       },
     });
 
-    socket.on("connect", () => {
-    });
+    socket.on("connect", () => {});
 
     socket.on(
       "insert",
@@ -162,13 +160,13 @@ const LogPage: React.FC = () => {
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log,logViewId,logViewIdRef.current,setLogs,false);
+        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
       }
     );
     socket.on(
       "delete",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log,logViewId,logViewIdRef.current,setLogs,true);
+        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
       }
     );
     setSocketInstance(socket);
@@ -178,9 +176,17 @@ const LogPage: React.FC = () => {
   }, []);
   return (
     <div>
-      {logState.logFilter.map((filter) => {
-        return <LogFilterComponent filter={filter} key={filter.id} />;
-      })}
+      {logViewId &&
+        logState.logFilter.map((filter) => {
+          return (
+            <LogFilterComponent
+              filter={filter}
+              key={filter.id}
+              projectId={currentProject.id}
+              logViewId={logViewId}
+            />
+          );
+        })}
       {getLogViewQuery.isSuccess && (
         <AddLogFilterBtn
           projectId={currentProject.id}

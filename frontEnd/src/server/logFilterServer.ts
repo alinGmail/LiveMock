@@ -8,7 +8,7 @@ export const addLogFilterReq = async (param:AddLogFilterReqBody)=>{
     return response.body;
 }
 
-export const updateLofFilterReq = async (
+export const updateLogFilterReq = async (
   logFilterId: string,
   param: UpdateLogFilterReqBody
 ) => {

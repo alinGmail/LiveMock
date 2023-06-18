@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { FilterType, LogFilterCondition, LogFilterM } from "core/struct/log";
 import mStyle from "./LogFilterComponent.module.scss";
 import { Button, Dropdown } from "antd";
@@ -6,8 +6,18 @@ import { getStringConditionWord } from "./utils";
 import { CloseSquareOutlined, DownOutlined } from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
 import { useDispatch } from "react-redux";
-import {modifyLogFilter, removeLogFilter} from "../../slice/logSlice";
-import {deleteLogFilterReq} from "../../server/logFilterServer";
+import { modifyLogFilter, removeLogFilter } from "../../slice/logSlice";
+import {
+  deleteLogFilterReq,
+  updateLogFilterReq,
+} from "../../server/logFilterServer";
+import { useDebounceFn } from "ahooks";
+import { debounceWait } from "../../config";
+import {
+  DeleteLogFilterReqQuery,
+  UpdateLogFilterReqBody,
+} from "core/struct/params/LogFilterParam";
+import { toastPromise } from "../common";
 
 function ChevronDown({ fill }: { fill: string }) {
   return (
@@ -30,8 +40,34 @@ function ChevronDown({ fill }: { fill: string }) {
   );
 }
 
-const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
-    const [conditionShow,setConditionShow] = useState(false);
+const LogFilterComponent: React.FC<{
+  filter: LogFilterM;
+  logViewId: string;
+  projectId: string;
+}> = ({ filter, logViewId, projectId }) => {
+  const [conditionShow, setConditionShow] = useState(false);
+
+  const {
+    run: updateFilter,
+    cancel,
+    flush,
+  } = useDebounceFn(
+    (logFilterId: string, param: UpdateLogFilterReqBody) => {
+      // update filter
+      const updatePromise = updateLogFilterReq(logFilterId, param);
+      toastPromise(updatePromise);
+    },
+    { wait: debounceWait }
+  );
+
+  const { run: deleteFilter } = useDebounceFn(
+    (logFilterId: string, param: DeleteLogFilterReqQuery) => {
+      const deletePromise = deleteLogFilterReq(logFilterId, param);
+      toastPromise(deletePromise);
+    },
+    { wait: debounceWait }
+  );
+
   const dispatch = useDispatch();
   if (filter.type === FilterType.SIMPLE_FILTER) {
     return (
@@ -46,18 +82,26 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
                 marginLeft: "4px",
               }}
             >
-              <NInput value={filter.property} onChange={(value) => {
+              <NInput
+                value={filter.property}
+                onChange={(value) => {
                   const modifiedFilter = Object.assign({}, filter, {
-                      property: value,
+                    property: value,
                   } as Partial<LogFilterM>);
                   dispatch(modifyLogFilter(modifiedFilter));
-              }} />
+                  updateFilter(filter.id, {
+                    filter: modifiedFilter,
+                    projectId: projectId,
+                    logViewId: logViewId,
+                  });
+                }}
+              />
             </div>
             <Dropdown
-                visible={conditionShow}
-                onVisibleChange={visible =>{
-                    setConditionShow(visible);
-                }}
+              visible={conditionShow}
+              onVisibleChange={(visible) => {
+                setConditionShow(visible);
+              }}
               overlay={
                 <div className={"menuWrap"}>
                   <div className={"menu"}>
@@ -69,6 +113,11 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
                               condition: item,
                             } as Partial<LogFilterM>);
                             dispatch(modifyLogFilter(modifiedFilter));
+                            updateFilter(filter.id, {
+                              filter: modifiedFilter,
+                              projectId: projectId,
+                              logViewId: logViewId,
+                            });
                             setConditionShow(false);
                           }}
                           className={"menuItem"}
@@ -102,19 +151,28 @@ const LogFilterComponent: React.FC<{ filter: LogFilterM }> = ({ filter }) => {
                 verticalAlign: "middle",
               }}
             >
-              <NInput value={filter.value} onChange={(value) => {
+              <NInput
+                value={filter.value}
+                onChange={(value) => {
                   const modifiedFilter = Object.assign({}, filter, {
-                      value: value,
+                    value: value,
                   } as Partial<LogFilterM>);
                   dispatch(modifyLogFilter(modifiedFilter));
-              }} />
+                  updateFilter(filter.id, {
+                    filter: modifiedFilter,
+                    projectId: projectId,
+                    logViewId: logViewId,
+                  });
+                }}
+              />
             </div>
             <CloseSquareOutlined
               style={{ display: "inline-block", verticalAlign: "middle" }}
               className={mStyle.closeBtn}
               onClick={() => {
-                  dispatch(removeLogFilter(filter.id));
-                  // deleteLogFilterReq(filter.id,{logViewId: , projectId: })
+                dispatch(removeLogFilter(filter.id));
+                deleteFilter(filter.id, { logViewId, projectId });
+                // deleteLogFilterReq(filter.id,{logViewId: , projectId: })
               }}
             />
           </div>
