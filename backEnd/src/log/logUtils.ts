@@ -128,6 +128,8 @@ export async function getLogDynamicView(projectId: string, viewId: string,path:s
   if (dynamicView === null) {
     // init the dynamicView
     dynamicView = logCollection.addDynamicView(viewId);
+    dynamicView.applyFind({});
+    dynamicView.applySimpleSort('id',{desc:true});
     logView.filters.forEach(filter=>{
       const applyFilter = changeToLokijsFilter(filter);
       dynamicView!.applyFind(applyFilter,filter.id);

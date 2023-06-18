@@ -28,7 +28,8 @@ import {
 } from "core/struct/response/LogResponse";
 import { LogViewM } from "core/struct/logView";
 import { logViewEventEmitter } from "../common/logViewEvent";
-import {changeToLokijsFilter, getLogDynamicView} from "../log/logUtils";
+import { changeToLokijsFilter, getLogDynamicView } from "../log/logUtils";
+import bodyParser from "body-parser";
 
 const PAGE_SIZE = 100;
 
@@ -114,20 +115,22 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListLogViewLogsResponse>
     ) => {
-      let { lovViewId, maxLogId, projectId } = req.query;
+      addCross(res);
+      let { maxLogId, projectId } = req.query;
+      const lovViewId = req.params.logViewId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
       }
       const logViewCollection = await getLogViewCollection(projectId, path);
-      const logView = logViewCollection.findOne({});
+      const logView = logViewCollection.findOne({ id: lovViewId });
       if (!logView) {
         throw new ServerError(500, "logView did not exist!");
       }
       const logCollection = await getLogCollection(projectId, path);
-      const dynamicView = await getLogDynamicView(projectId,logView.id,path);
+      const dynamicView = await getLogDynamicView(projectId, logView.id, path);
 
-      let resultset = dynamicView.branchResultset();//.limit(PAGE_SIZE).data();
-      if (maxLogId === undefined || maxLogId === null) {
+      let resultset = dynamicView.branchResultset(); //.limit(PAGE_SIZE).data();
+      if (maxLogId === undefined || maxLogId === null || maxLogId === "") {
       } else {
         resultset = resultset.find({ id: { $lt: maxLogId } });
       }
@@ -135,8 +138,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       res.json(logs);
     }
   );
-
-
 
   return router;
 }
@@ -175,16 +176,16 @@ export async function addLogListener(io: Server, path: string) {
 
   logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("insert", log);
+    io.to(logViewId).emit("insert", { log, logViewId });
   });
 
   logViewEventEmitter.on("update", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("update", log);
+    io.to(logViewId).emit("update", { log, logViewId });
   });
 
   logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("delete", log);
+    io.to(logViewId).emit("delete", { log, logViewId });
   });
 }

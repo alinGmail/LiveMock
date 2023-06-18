@@ -9,7 +9,7 @@ import {UpdateProjectReqBody} from "core/struct/params/ProjectParams";
 import {getProjectStatus} from "../../src/server/projectStatusManage";
 import {checkPort} from "../../src/util/commonUtils";
 import * as net from "net";
-import {getProjectCollection} from "../../src/db/dbManager";
+import {getLogViewCollection, getProjectCollection} from "../../src/db/dbManager";
 
 describe('test project',()=>{
   const server = express(); //创建服务器
@@ -40,6 +40,14 @@ describe('test project',()=>{
         .expect("Content-Type", /json/);
     expect(res.body.name === projectM.name).toBe(true);
     expect(res.body.id).toBeTruthy();
+
+
+    // test the log view
+    const logViewCollection =await getLogViewCollection(projectM.id,'test_db');
+    const logViews = logViewCollection.find({});
+    expect(logViews.length).toBe(1);
+
+    // end test log view
 
     const projectListRes = await request(server).get("/project/").expect(200);
     expect(projectListRes.body.length === 1);

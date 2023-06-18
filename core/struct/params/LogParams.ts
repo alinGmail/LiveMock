@@ -38,7 +38,7 @@ export interface ListLogViewReqQuery{
  */
 
 export interface ListLogViewLogsParam{
-
+    logViewId:string;
 }
 
 export interface ListLogViewLogsReqBody{
@@ -47,6 +47,5 @@ export interface ListLogViewLogsReqBody{
 
 export interface ListLogViewLogsReqQuery{
     projectId:string;
-    lovViewId:string;
     maxLogId:string|null;
 }

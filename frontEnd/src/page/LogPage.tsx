@@ -15,16 +15,16 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   addLogFilter,
   ColumnDisplayType,
-  hideColumnEditor, resetLogFilter,
+  hideColumnEditor,
+  resetLogFilter,
   TableColumnItem,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
-import {useQuery} from "@tanstack/react-query";
-import {getLogViewReq} from "../server/logServer";
-import {addLogFilterReq} from "../server/logFilterServer";
-import {toastPromise} from "../component/common";
-import {add} from "lodash";
+import { useQuery } from "@tanstack/react-query";
+import { getLogViewReq, listLogViewLogs } from "../server/logServer";
+import { addLogFilterReq } from "../server/logFilterServer";
+import { toastPromise } from "../component/common";
 
 const placeHolderColumn: TableColumnItem = {
   id: uuId(),
@@ -54,12 +54,29 @@ const LogPage: React.FC = () => {
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useState<Array<LogM>>([]);
 
-  const getLogViewQuery = useQuery([currentProject.id],()=>{
-    return getLogViewReq({projectId:currentProject.id}).then(res =>{
+  const getLogViewQuery = useQuery([currentProject.id], () => {
+    return getLogViewReq({ projectId: currentProject.id }).then((res) => {
       dispatch(resetLogFilter(res[0].filters));
       return res;
     });
   });
+
+  const logViewId = getLogViewQuery.data?.at(0)?.id;
+
+  useQuery(
+    [currentProject.id, logViewId],
+    () => {
+      return listLogViewLogs(logViewId as string, {
+        maxLogId: null,
+        projectId: currentProject.id,
+      }).then((res) => {
+        setLogs(res);
+      });
+    },
+    {
+      enabled: !!logViewId,
+    }
+  );
 
   const customColumns = getCustomColumn(
     tableColumns.filter((item, index) => item.visible),
@@ -80,17 +97,31 @@ const LogPage: React.FC = () => {
     // client-side
     socket.on("connect", () => {
       // socket.emit('setProjectId',currentProject.id);
-      socket.emit("initLogsReq");
+      //socket.emit("initLogsReq");
       //console.log(socket.id); // x8WIv7-mJelg7on_ALbx
     });
-    socket.on("initLogsRes", (logs) => {
-      // console.log(logs);
-      setLogs(logs);
-    });
-    socket.on('insert',(log)=>{
-      console.log(`receive log:`);
-      console.log(JSON.stringify(log));
-    })
+
+    socket.on(
+      "insert",
+      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
+        //console.log(`receive log:`);
+        //console.log(JSON.stringify(log));
+      }
+    );
+    socket.on(
+      "update",
+      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
+        //console.log(`receive log:`);
+        //console.log(JSON.stringify(log));
+      }
+    );
+    socket.on(
+      "delete",
+      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
+        //console.log(`receive log:`);
+        //console.log(JSON.stringify(log));
+      }
+    );
     setSocketInstance(socket);
     return () => {
       socket.disconnect();
@@ -98,10 +129,15 @@ const LogPage: React.FC = () => {
   }, []);
   return (
     <div>
-      {logState.logFilter.map(filter =>{
-        return <LogFilterComponent filter={filter} key={filter.id}/>
+      {logState.logFilter.map((filter) => {
+        return <LogFilterComponent filter={filter} key={filter.id} />;
       })}
-      { getLogViewQuery.isSuccess && <AddLogFilterBtn projectId={currentProject.id} logViewId={getLogViewQuery.data[0]?.id }/>}
+      {getLogViewQuery.isSuccess && (
+        <AddLogFilterBtn
+          projectId={currentProject.id}
+          logViewId={getLogViewQuery.data[0]?.id}
+        />
+      )}
       <div>
         <Table
           columns={logColumn}
@@ -123,14 +159,24 @@ const LogPage: React.FC = () => {
   );
 };
 
-function AddLogFilterBtn({logViewId,projectId}:{logViewId:string,projectId:string}) {
+function AddLogFilterBtn({
+  logViewId,
+  projectId,
+}: {
+  logViewId: string;
+  projectId: string;
+}) {
   const dispatch = useDispatch();
   return (
     <Button
       onClick={() => {
         const simpleFilterM = createSimpleFilter();
         dispatch(addLogFilter(simpleFilterM));
-        const addPromise = addLogFilterReq({filter: simpleFilterM, logViewId: logViewId, projectId: projectId});
+        const addPromise = addLogFilterReq({
+          filter: simpleFilterM,
+          logViewId: logViewId,
+          projectId: projectId,
+        });
         toastPromise(addPromise);
       }}
       size={"small"}
