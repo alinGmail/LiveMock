@@ -27,3 +27,13 @@ export function checkPort(port):Promise<boolean> {
 }
 
 
+
+const runMap = {}
+
+export function once(key:string,fn:Function){
+    if(runMap[key]){
+        return;
+    }
+    runMap[key] = true;
+    fn();
+}

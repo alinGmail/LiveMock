@@ -26,7 +26,8 @@ describe('test lokijs',()=>{
         collection.insert(projectM2);
         collection.insert(projectM3);
         expect(insertCount).toBe(1);
+    });
 
-
-    })
 });
+
+

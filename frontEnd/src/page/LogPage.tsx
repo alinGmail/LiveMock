@@ -24,7 +24,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
-import { toastPromise } from "../component/common";
+import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 
 function onLogsInsert(
@@ -46,6 +46,38 @@ function onLogsInsert(
     }
   });
 }
+
+function onLogsUpdate(
+  updateLog: LogM,
+  logViewId: string,
+  currentLogViewId: string | undefined,
+  setLogs: Updater<Array<LogM>>,
+  isDelete:boolean,
+) {
+  if (logViewId !== currentLogViewId) {
+    return;
+  }
+  setLogs((logs) => {
+    const updateLogIndex = binarySearch(logs, updateLog, (a, b) => {
+      if (a.id === b.id) {
+        return 0;
+      }
+      if (a.id > b.id) {
+        return -1;
+      }
+      return 1;
+    });
+    if (updateLogIndex === -1) {
+      return;
+    }
+    if(isDelete){
+      logs.splice(updateLogIndex,1);
+    }else{
+      logs[updateLogIndex] = updateLog;
+    }
+  });
+}
+
 
 const placeHolderColumn: TableColumnItem = {
   id: uuId(),
@@ -118,35 +150,25 @@ const LogPage: React.FC = () => {
       },
     });
 
-    // client-side
     socket.on("connect", () => {
-      // socket.emit('setProjectId',currentProject.id);
-      //socket.emit("initLogsReq");
-      //console.log(socket.id); // x8WIv7-mJelg7on_ALbx
     });
 
     socket.on(
       "insert",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        console.log(`receive insert log:`);
-        console.log(logViewIdRef.current);
-        console.log("logid:" + log.id);
         onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-        //console.log(JSON.stringify(log));
       }
     );
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        //console.log(`receive log:`);
-        //console.log(JSON.stringify(log));
+        onLogsUpdate(log,logViewId,logViewIdRef.current,setLogs,false);
       }
     );
     socket.on(
       "delete",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        //console.log(`receive log:`);
-        //console.log(JSON.stringify(log));
+        onLogsUpdate(log,logViewId,logViewIdRef.current,setLogs,true);
       }
     );
     setSocketInstance(socket);
