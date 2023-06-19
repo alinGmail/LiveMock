@@ -121,6 +121,14 @@ export function changeToLokijsFilter(filter: LogFilterM) {
   }
 }
 
+export function applyDynamicViewFilter(dynamicView:DynamicView<LogM>,filter:LogFilterM){
+  const applyFilter = changeToLokijsFilter(filter);
+  dynamicView.applyFind(applyFilter, filter.id);
+}
+export function removeDynamicViewFilter(dynamicView:DynamicView<LogM>,filterId:string){
+  dynamicView.removeFilter(filterId);
+}
+
 export async function getLogDynamicView(
   projectId: string,
   viewId: string,
@@ -139,8 +147,7 @@ export async function getLogDynamicView(
     dynamicView.applyFind({});
     dynamicView.applySimpleSort("id", { desc: true });
     logView.filters.forEach((filter) => {
-      const applyFilter = changeToLokijsFilter(filter);
-      dynamicView!.applyFind(applyFilter, filter.id);
+      applyDynamicViewFilter(dynamicView!,filter);
     });
   }
 

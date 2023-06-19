@@ -1,5 +1,6 @@
 import {getProjectDb} from "../../src/db/dbManager";
 import {createProject} from "core/struct/project";
+import lokijs from "lokijs";
 
 describe('test lokijs',()=>{
     test('test dynamicView',async ()=>{
@@ -27,7 +28,28 @@ describe('test lokijs',()=>{
         collection.insert(projectM3);
         expect(insertCount).toBe(1);
     });
+    test("lokijs",()=>{
+        const db = new lokijs('test_db/example.db');
+        const users = db.addCollection("book");
+        users.insert({
+            name: 'Odin',
+            age: 50,
+            address: 'Asgard',
+            teacher:[{
+                name:"john"
+            },{
+                name:"cat"
+            }]
+        });
 
+        const findUsers = users.find({
+            ['teacher.name']:{
+                "$in":["john"]
+            }
+        });
+        expect(findUsers.length).toBe(1);
+
+    })
 });
 
 

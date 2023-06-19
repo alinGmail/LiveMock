@@ -9,6 +9,7 @@ import {addCross, ServerError, toAsyncRouter} from "./common";
 import {getLogViewCollection, getLogViewDb} from "../db/dbManager";
 import {DeleteLogFilterResponse, UpdateLogFilterResponse,AddLogFilterResponse} from "core/struct/response/LogFilterResponse";
 import bodyParser from "body-parser";
+import {applyDynamicViewFilter, getLogDynamicView, removeDynamicViewFilter} from "../log/logUtils";
 
 
 
@@ -32,6 +33,8 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
             throw new ServerError(400, "logView not exist!");
         }
         logView.filters.push(filter);
+        const dynamicView = await getLogDynamicView(projectId, logView.id, path);
+        applyDynamicViewFilter(dynamicView,filter);
         res.json({message:"success"});
     }
 
@@ -61,6 +64,8 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
         }
         logView.filters[findIndex] = filter;
         collection.update(logView);
+        const dynamicView = await getLogDynamicView(projectId, logView.id, path);
+        applyDynamicViewFilter(dynamicView,filter);
         res.json({message:"success"});
     }
 
@@ -84,6 +89,8 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
         }
         logView.filters = logView.filters.filter(item => item.id !== filterId);
         collection.update(logView);
+        const dynamicView = await getLogDynamicView(projectId, logView.id, path);
+        removeDynamicViewFilter(dynamicView,filterId);
         res.json({message:"success"});
     }
 

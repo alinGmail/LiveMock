@@ -8,7 +8,11 @@ import { getExpectationRouter } from "../../src/controller/expectationController
 import { getActionRouter } from "../../src/controller/actionController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { getLogRouter } from "../../src/controller/logController";
-import { AddLogFilterReqBody } from "core/struct/params/LogFilterParam";
+import {
+  AddLogFilterReqBody,
+  DeleteLogFilterReqQuery,
+  UpdateLogFilterReqBody,
+} from "core/struct/params/LogFilterParam";
 import { LogFilterM } from "core/struct/log";
 import { getLogFilterRouter } from "../../src/controller/logFilterController";
 
@@ -51,6 +55,41 @@ export const logFilterCreation = async (
     projectId: projectId,
   };
   return supertest(server).post("/logFilter/").send(param2).expect(200);
+};
+
+export const logFilterUpdateAction = async (
+  server: express.Express,
+  logFilter: LogFilterM,
+  logViewId: string,
+  projectId: string
+) => {
+  let param: UpdateLogFilterReqBody = {
+    filter: logFilter,
+    logViewId: logViewId,
+    projectId: projectId,
+  };
+
+  return supertest(server)
+    .post("/logFilter/" + logFilter.id)
+    .send(param)
+    .expect(200);
+};
+
+export const logFilterDeletion = async (
+  server: express.Express,
+  logFilterId: string,
+  logViewId: string,
+  projectId: string
+) => {
+  let param: DeleteLogFilterReqQuery = {
+    logViewId: logViewId,
+    projectId: projectId,
+  };
+
+  return supertest(server)
+    .delete("/logFilter/" + logFilterId)
+    .query(param)
+    .expect(200);
 };
 
 export const routerSetup = async (server: express.Express) => {

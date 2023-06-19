@@ -6,7 +6,7 @@ import {createLog, createSimpleFilter, LogFilterCondition} from "core/struct/log
 import {deleteFolderRecursive} from "../../src/common/utils";
 import supertest from "supertest";
 import {ListLogReqQuery} from "core/struct/params/LogParams";
-import {logFilterCreation, projectCreation, routerSetup} from "./common";
+import {logFilterCreation, logFilterDeletion, logFilterUpdateAction, projectCreation, routerSetup} from "./common";
 
 describe("test log controller", () => {
   const server = express();
@@ -101,11 +101,22 @@ describe("test log controller", () => {
     expect(logViewLogsRes.body.length).toBe(4);
     const simpleFilterM = createSimpleFilter();
     simpleFilterM.condition = LogFilterCondition.CONTAINS;
-    simpleFilterM.property = "req.header.token";
+    simpleFilterM.property = "req.headers.token";
     simpleFilterM.value = "abc";
     await logFilterCreation(server,simpleFilterM,logView.id,projectM.id);
     const logViewLogsRes2 =await getLogViewLogs(server,logView,projectM);
     expect(logViewLogsRes2.body.length).toBe(2);
+
+
+    simpleFilterM.value = "opq";
+    await logFilterUpdateAction(server,simpleFilterM,logView.id,projectM.id);
+    const logViewLogsRes3 =await getLogViewLogs(server,logView,projectM);
+    expect(logViewLogsRes3.body.length).toBe(1);
+
+    await logFilterDeletion(server,simpleFilterM.id,logView.id,projectM.id);
+    const logViewLogsRes4 =await getLogViewLogs(server,logView,projectM);
+    expect(logViewLogsRes4.body.length).toBe(4);
+
   });
 });
 
