@@ -44,16 +44,16 @@ const LogFilterComponent: React.FC<{
   filter: LogFilterM;
   logViewId: string;
   projectId: string;
-}> = ({ filter, logViewId, projectId }) => {
+  refreshLogList: () => void;
+}> = ({ filter, logViewId, projectId, refreshLogList }) => {
   const [conditionShow, setConditionShow] = useState(false);
 
-  const {
-    run: updateFilter,
-  } = useDebounceFn(
+  const { run: updateFilter } = useDebounceFn(
     (logFilterId: string, param: UpdateLogFilterReqBody) => {
       // update filter
       const updatePromise = updateLogFilterReq(logFilterId, param);
       toastPromise(updatePromise);
+      refreshLogList();
     },
     { wait: debounceWait }
   );
@@ -165,6 +165,7 @@ const LogFilterComponent: React.FC<{
                   projectId,
                 });
                 toastPromise(deletePromise);
+                refreshLogList();
                 dispatch(removeLogFilter(filter.id));
               }}
             />

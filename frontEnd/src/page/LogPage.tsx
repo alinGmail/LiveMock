@@ -117,7 +117,7 @@ const LogPage: React.FC = () => {
 
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
-  useQuery(
+  const logViewLogsQuery = useQuery(
     [currentProject.id, logViewId],
     () => {
       return listLogViewLogs(logViewId as string, {
@@ -184,11 +184,13 @@ const LogPage: React.FC = () => {
               key={filter.id}
               projectId={currentProject.id}
               logViewId={logViewId}
+              refreshLogList={logViewLogsQuery.refetch}
             />
           );
         })}
       {getLogViewQuery.isSuccess && (
         <AddLogFilterBtn
+          refreshLogList={logViewLogsQuery.refetch}
           projectId={currentProject.id}
           logViewId={getLogViewQuery.data[0]?.id}
         />
@@ -217,9 +219,11 @@ const LogPage: React.FC = () => {
 function AddLogFilterBtn({
   logViewId,
   projectId,
+  refreshLogList,
 }: {
   logViewId: string;
   projectId: string;
+  refreshLogList: () => void;
 }) {
   const dispatch = useDispatch();
   return (
@@ -233,6 +237,7 @@ function AddLogFilterBtn({
           projectId: projectId,
         });
         toastPromise(addPromise);
+        refreshLogList();
       }}
       size={"small"}
       type={"text"}
