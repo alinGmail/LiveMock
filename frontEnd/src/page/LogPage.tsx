@@ -175,26 +175,28 @@ const LogPage: React.FC = () => {
     };
   }, []);
   return (
-    <div>
-      {logViewId &&
-        logState.logFilter.map((filter) => {
-          return (
-            <LogFilterComponent
-              filter={filter}
-              key={filter.id}
-              projectId={currentProject.id}
-              logViewId={logViewId}
-              refreshLogList={logViewLogsQuery.refetch}
-            />
-          );
-        })}
-      {getLogViewQuery.isSuccess && (
-        <AddLogFilterBtn
-          refreshLogList={logViewLogsQuery.refetch}
-          projectId={currentProject.id}
-          logViewId={getLogViewQuery.data[0]?.id}
-        />
-      )}
+    <div style={{ padding: "10px" }}>
+      <div style={{ padding: "10px 0px" }}>
+        {logViewId &&
+          logState.logFilter.map((filter) => {
+            return (
+              <LogFilterComponent
+                filter={filter}
+                key={filter.id}
+                projectId={currentProject.id}
+                logViewId={logViewId}
+                refreshLogList={logViewLogsQuery.refetch}
+              />
+            );
+          })}
+        {getLogViewQuery.isSuccess && (
+          <AddLogFilterBtn
+            refreshLogList={logViewLogsQuery.refetch}
+            projectId={currentProject.id}
+            logViewId={getLogViewQuery.data[0]?.id}
+          />
+        )}
+      </div>
       <div>
         <Table
           columns={logColumn}

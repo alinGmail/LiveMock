@@ -53,7 +53,9 @@ const LogFilterComponent: React.FC<{
       // update filter
       const updatePromise = updateLogFilterReq(logFilterId, param);
       toastPromise(updatePromise);
-      refreshLogList();
+      updatePromise.then(res =>{
+          refreshLogList();
+      });
     },
     { wait: debounceWait }
   );

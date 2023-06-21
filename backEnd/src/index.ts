@@ -17,7 +17,6 @@ const io = new Server(http,{
     origin: "http://localhost:5173"
   }
 });
-
 // io.fetchSockets()
 
 (async function () {
@@ -28,7 +27,6 @@ const io = new Server(http,{
   server.use("/logFilter", await getLogFilterRouter("dev_db"));
   server.use("/log", await getLogRouter("dev_db"));
   await addLogListener(io,"dev_db");
-
 
 
   server.use(CustomErrorMiddleware);

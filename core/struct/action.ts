@@ -24,9 +24,15 @@ interface TEXTResponseContentM {
 
 type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
 
+export enum ProxyProtocol{
+  HTTP='http',
+  HTTPS='https'
+}
+
 export interface ProxyActionM {
   id: string;
   type: ActionType.PROXY;
+  protocol:ProxyProtocol;
   host: string;
   pathRewrite: Array<PathRewriteM>;
 }
@@ -69,6 +75,7 @@ export function createProxyAction(): ProxyActionM {
     host: "",
     pathRewrite: [],
     type: ActionType.PROXY,
+    protocol:ProxyProtocol.HTTP
   };
 }
 

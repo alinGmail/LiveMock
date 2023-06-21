@@ -3,7 +3,7 @@ import {
   ActionM,
   ActionType,
   getNewAction,
-  ProxyActionM,
+  ProxyActionM, ProxyProtocol,
 } from "core/struct/action";
 import { Input, InputNumber, Select } from "antd";
 import { useActionContext } from "../context";
@@ -11,6 +11,14 @@ import { ResponseType } from "core/struct/action";
 import TextArea from "antd/es/input/TextArea";
 import HeaderEditor from "./HeaderEditor";
 import mStyle from "./ActionEditor.module.scss";
+
+const { Option } = Select;
+const hostSelectBefore = (
+  <Select defaultValue={ProxyProtocol.HTTP}>
+    <Option value={ProxyProtocol.HTTP}>http://</Option>
+    <Option value={ProxyProtocol.HTTPS}>https://</Option>
+  </Select>
+);
 
 const ActionEditor: React.FC<{
   action: ActionM;
@@ -30,7 +38,7 @@ const ActionEditor: React.FC<{
   );
 
   return (
-    <div className={["popper",mStyle.actionEditor].join(" ")}>
+    <div className={["popper", mStyle.actionEditor].join(" ")}>
       {action.type === ActionType.CUSTOM_RESPONSE && (
         <div>
           <div>type</div>
@@ -96,11 +104,11 @@ const ActionEditor: React.FC<{
                 _headers[headerIndex] = value;
                 actionContext.onActionModify({
                   ...action,
-                  responseContent:{
+                  responseContent: {
                     ...action.responseContent,
-                    headers:_headers
-                  }
-                })
+                    headers: _headers,
+                  },
+                });
               }}
               onAddHeader={(header) => {
                 actionContext.onActionModify({
@@ -113,14 +121,14 @@ const ActionEditor: React.FC<{
               }}
               onDeleteHeader={(headerIndex) => {
                 let _headers = [...action.responseContent.headers];
-                _headers.splice(headerIndex,1);
+                _headers.splice(headerIndex, 1);
                 actionContext.onActionModify({
                   ...action,
-                  responseContent:{
+                  responseContent: {
                     ...action.responseContent,
-                    headers:_headers
-                  }
-                })
+                    headers: _headers,
+                  },
+                });
               }}
             />
           </div>
@@ -161,6 +169,7 @@ const ActionEditor: React.FC<{
           <div>host</div>
           <div>
             <Input
+              addonBefore={hostSelectBefore}
               value={action.host}
               onChange={(event) => {
                 actionContext.onActionModify({
