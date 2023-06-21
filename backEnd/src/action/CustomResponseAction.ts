@@ -1,20 +1,20 @@
-import { CustomResponseActionM, IAction, ResponseType } from "core/struct/action";
+import {
+  CustomResponseActionM,
+  IAction,
+  ResponseType,
+} from "core/struct/action";
 import express from "express";
-import {delayPromise} from "./common";
+import { delayPromise } from "./common";
 
 class CustomResponseActionImpl implements IAction {
   action: CustomResponseActionM;
   delay: number;
-  constructor(
-    action: CustomResponseActionM,
-    delay: number
-  ) {
+  constructor(action: CustomResponseActionM, delay: number) {
     this.action = action;
     this.delay = delay;
   }
 
   async process(req: express.Request, res: express.Response): Promise<void> {
-
     if (this.delay > 0) {
       await delayPromise(this.delay);
     }
@@ -26,7 +26,10 @@ class CustomResponseActionImpl implements IAction {
       const responseVal = this.action.responseContent.value;
       res.end(responseVal);
       // set the body and raw body
-      (res as any).body = JSON.parse(responseVal);
+
+      try {
+        (res as any).body = JSON.parse(responseVal);
+      } catch (e) {}
       (res as any).rawBody = responseVal;
     } else if (this.action.responseContent.type === ResponseType.TEXT) {
       //addCross(res);
@@ -48,7 +51,5 @@ function handleHeaders(action: CustomResponseActionM, res: express.Response) {
     }
   });
 }
-
-
 
 export { CustomResponseActionImpl };

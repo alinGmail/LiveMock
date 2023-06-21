@@ -1,48 +1,54 @@
 import { IAction, ProxyActionM } from "core/struct/action";
 import express from "express";
-import {delayPromise} from "./common";
+import { delayPromise } from "./common";
 import * as zlib from "zlib";
 const util = require("util");
-import httpProxy from "http-proxy"
-import {fixRequestBody} from "./fixRequestBody";
+import httpProxy from "http-proxy";
+import { fixRequestBody } from "./fixRequestBody";
 import * as http from "http";
-import {isRecordBody} from "../util/bodyParseUtil";
+import { isRecordBody } from "../util/bodyParseUtil";
+import typeis from "type-is";
 const inflateAsync = util.promisify(zlib.inflate);
 const unzipAsync = util.promisify(zlib.unzip);
 const brotliDecompressAsync = util.promisify(zlib.brotliDecompress);
 
-
 let proxy = httpProxy.createProxyServer({});
 
-proxy.on("proxyReq", function (proxyReq, req, res ) {
+proxy.on("proxyReq", function (proxyReq, req, res) {
   fixRequestBody(proxyReq, req as express.Request);
 });
-proxy.on(
-    "proxyRes",
-    function (proxyRes: http.IncomingMessage, req, res) {
-      let body: Array<any> = [];
-      const recordBody = isRecordBody(proxyRes);
-      proxyRes.on("data", function (chunk) {
-        if (recordBody) {
-          body.push(chunk);
-        }
-      });
-      proxyRes.on("end", function () {
-        (async function () {
-          let bodyRes = Buffer.concat(body);
-          let bodyStr = "";
-          if (recordBody) {
-            const buffer = await decompress(
-                bodyRes,
-                proxyRes.headers["content-encoding"]
-            );
-            bodyStr = buffer.toString();
-          }
-          // const respObj = new ResponseLogImpl(res, bodyStr);
-        })();
-      });
+proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
+  let body: Array<any> = [];
+  const recordBody = isRecordBody(proxyRes);
+  proxyRes.on("data", function (chunk) {
+    if (recordBody) {
+      body.push(chunk);
     }
-);
+  });
+  proxyRes.on("end", function () {
+    (async function () {
+      let bodyRes = Buffer.concat(body);
+      let bodyStr = "";
+      if (recordBody) {
+        const buffer = await decompress(
+          bodyRes,
+          proxyRes.headers["content-encoding"]
+        );
+        bodyStr = buffer.toString();
+      }
+      (res as any).rawBody = bodyStr;
+      const contentType = res.getHeader("content-type");
+      if (typeof contentType === "string" && typeis.is(contentType, ["json"])) {
+        try {
+          (res as any).body = JSON.stringify(bodyStr);
+        } catch (e) {
+        }
+      }
+      (res as any).rawBody = bodyStr;
+      // const respObj = new ResponseLogImpl(res, bodyStr);
+    })();
+  });
+});
 
 class ProxyAction implements IAction {
   action: ProxyActionM;
@@ -62,14 +68,12 @@ class ProxyAction implements IAction {
       selfHandleResponse: false,
     };
     proxy.web(req, res, option);
-
   }
 }
 
-
 async function decompress(
-    buffer: Buffer,
-    contentEncoding: string | undefined
+  buffer: Buffer,
+  contentEncoding: string | undefined
 ): Promise<Buffer> {
   switch (contentEncoding) {
     case "gzip":
