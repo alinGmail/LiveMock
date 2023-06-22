@@ -3,7 +3,8 @@ import {
   ActionM,
   ActionType,
   getNewAction,
-  ProxyActionM, ProxyProtocol,
+  ProxyActionM,
+  ProxyProtocol,
 } from "core/struct/action";
 import { Input, InputNumber, Select } from "antd";
 import { useActionContext } from "../context";
@@ -14,7 +15,16 @@ import mStyle from "./ActionEditor.module.scss";
 
 const { Option } = Select;
 const hostSelectBefore = (
-  <Select defaultValue={ProxyProtocol.HTTP}>
+  protocol: ProxyProtocol,
+  onChange: (value: ProxyProtocol) => void
+) => (
+  <Select
+    defaultValue={ProxyProtocol.HTTP}
+    value={protocol}
+    onChange={(value) => {
+      onChange(value);
+    }}
+  >
     <Option value={ProxyProtocol.HTTP}>http://</Option>
     <Option value={ProxyProtocol.HTTPS}>https://</Option>
   </Select>
@@ -169,12 +179,27 @@ const ActionEditor: React.FC<{
           <div>host</div>
           <div>
             <Input
-              addonBefore={hostSelectBefore}
-              value={action.host}
-              onChange={(event) => {
+              addonBefore={hostSelectBefore(action.protocol, (value) => {
                 actionContext.onActionModify({
                   ...action,
-                  host: event.target.value,
+                  protocol: value,
+                });
+              })}
+              value={action.host}
+              onChange={(event) => {
+                let value = event.target.value;
+                let protocol = action.protocol;
+                if (value.startsWith("http://")) {
+                  protocol = ProxyProtocol.HTTP;
+                  value = value.substring(7);
+                } else if (value.startsWith("https://")) {
+                  protocol = ProxyProtocol.HTTPS;
+                  value = value.substring(8);
+                }
+                actionContext.onActionModify({
+                  ...action,
+                  host: value,
+                  protocol: protocol,
                 } as ProxyActionM);
               }}
             />
