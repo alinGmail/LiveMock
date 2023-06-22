@@ -29,7 +29,7 @@ export async function projectCreation(
   return res;
 }
 
-const expectationCreation = async (
+export const expectationCreation = async (
   server: express.Express,
   projectM: ProjectM,
   expectationM: ExpectationM

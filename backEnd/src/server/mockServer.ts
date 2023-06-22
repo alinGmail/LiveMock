@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { Collection } from "lokijs";
 import { ExpectationM } from "core/struct/expectation";
-import {getExpectationDb, getLogCollection, setNewestLogNumber} from "../db/dbManager";
+import {getExpectationCollection, getExpectationDb, getLogCollection, setNewestLogNumber} from "../db/dbManager";
 import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
@@ -11,13 +11,7 @@ import {insertReqLog, insertResLog} from "../log/logUtils";
 import * as http from "http";
 import {LogM} from "core/struct/log";
 
-async function getExpectationCollection(
-  projectId: string,
-  path: string
-): Promise<Collection<ExpectationM>> {
-  const db = await getExpectationDb(projectId, path);
-  return db.getCollection("expectation");
-}
+
 // default is 10mb
 const MaxRawBodySize = 10 * 1024 * 1024;
 
