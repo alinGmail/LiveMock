@@ -48,6 +48,21 @@ describe("test proxy action",()=>{
          'token':"this is another token!!!",
          "Content-Type":"text/plain"
       });
+
+      // response json
+      await mockServer.forGet("/testJson1").thenReply(200,JSON.stringify({
+         name:"john",age:20
+      }),{
+         'token':"json header",
+         "Content-Type":"application/json"
+      });
+      await mockServer.forGet("/testJsonNoContentType").thenReply(200,JSON.stringify({
+         name:"john",age:20
+      }),{
+
+      });
+
+
       // server
       proxyServer.all("*", await getMockRouter("test_db", projectM.id));
    });
@@ -63,10 +78,7 @@ describe("test proxy action",()=>{
       expect(response.text).toEqual("A mocked response");
       expect(response.get("token")).toEqual("this is a token!!!");
 
-      const logCollection = await getLogCollection(projectM.id, "test_db");
-      const logs = logCollection.find({});
-      expect(logs.length).toEqual(1);
-      let log = logs[0];
+      const log = await getLastLog(projectM.id, 'test_db');
       expect(log.res!.body).toEqual("A mocked response");
       expect(log.res!.status).toBe(200);
       expect(log.res!.headers["token"]).toEqual("this is a token!!!");
@@ -80,10 +92,7 @@ describe("test proxy action",()=>{
       const response = await request(proxyServer).get("/testNoContentType").set({Accept:"text/plain"});
       expect(response.status).toEqual(200);
       expect(response.text).toEqual("no content type response");
-      const logCollection = await getLogCollection(projectM.id, "test_db");
-      const logs = logCollection.find({});
-      expect(logs.length).toEqual(1);
-      let log = logs[0];
+      const log = await getLastLog(projectM.id, 'test_db');
       expect(log.res!.body).toEqual("no content type response");
       expect(log.res!.status).toBe(200);
 
@@ -96,13 +105,33 @@ describe("test proxy action",()=>{
       expect(response.text).toEqual("server error");
       expect(response.get("token")).toEqual("this is another token!!!");
 
-      const logCollection = await getLogCollection(projectM.id, "test_db");
-      const logs = logCollection.find({});
-      expect(logs.length).toEqual(1);
-      let log = logs[0];
+      const log = await getLastLog(projectM.id, 'test_db');
       expect(log.res!.body).toEqual("server error");
       expect(log.res!.status).toBe(400);
       expect(log.res!.headers["token"]).toEqual("this is another token!!!");
    });
 
+   test(`test proxy json`,async ()=>{
+      const response = await request(proxyServer).get("/testJson1");
+      expect(response.status).toEqual(200);
+      expect(response.text).toEqual(JSON.stringify({
+         name:"john",age:20
+      }));
+      expect(response.get("token")).toEqual("json header");
+      expect(response.body.name).toBe("john");
+      expect(response.body.age).toBe(20);
+
+      const log = await getLastLog(projectM.id, 'test_db');
+      expect(log.res!.body.name).toBe("john");
+      expect(log.res!.status).toBe(200);
+      expect(log.res!.headers["token"]).toEqual("json header");
+   })
+
 });
+
+async function getLastLog(projectId:string,path:string){
+   const logCollection = await getLogCollection(projectId, "test_db");
+   const logs = logCollection.chain().simplesort("id",{desc:true}).find({}).data();
+   let log = logs[0];
+   return log;
+}
