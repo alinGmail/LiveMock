@@ -36,7 +36,7 @@ describe("test custom response action", () => {
     expectationCollection.insert(expectation);
 
     // server
-    server.use("*", await getMockRouter("test_db", project.id));
+    server.all("*", await getMockRouter("test_db", project.id));
   });
 
   test("test response error", async () => {

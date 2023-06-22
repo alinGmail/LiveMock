@@ -82,7 +82,7 @@ describe('test project',()=>{
     async function testProjectList(status:ProjectStatus){
       const listRes = await supertest(server).get("/project").expect(200);
       const projectList:Array<ProjectM> = listRes.body;
-      console.dir(projectList);
+
       expect(projectList[0].status).toBe(status);
     }
     // start project

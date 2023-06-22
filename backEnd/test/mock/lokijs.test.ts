@@ -1,11 +1,11 @@
-import {getProjectDb} from "../../src/db/dbManager";
+import {getProjectCollection, getProjectDb} from "../../src/db/dbManager";
 import {createProject} from "core/struct/project";
 import lokijs from "lokijs";
 
 describe('test lokijs',()=>{
     test('test dynamicView',async ()=>{
         const projectDb = await getProjectDb("test_db");
-        const collection = projectDb.getCollection('project');
+        const collection = await getProjectCollection('test_db');
         const projectM = createProject();
         projectM.name = "projectNameA"
         projectM.port = "9001";

@@ -50,7 +50,7 @@ proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
   });
 });
 
-class ProxyAction implements IAction {
+export default class ProxyActionImpl implements IAction {
   action: ProxyActionM;
   delay: number;
   constructor(action: ProxyActionM, delay: number) {

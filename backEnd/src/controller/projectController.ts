@@ -34,13 +34,9 @@ import {
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
 import { createLogView, LogViewM } from "core/struct/logView";
-import {FilterType, LogFilterCondition, LogFilterM, LogM} from "core/struct/log";
-import {logViewEventEmitter} from "../common/logViewEvent";
-import {changeToLokijsFilter, getLogDynamicView} from "../log/logUtils";
-import {assignWith} from "lodash";
+import {getLogDynamicView} from "../log/logUtils";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
-  const projectDbP = await getProjectDb(path);
   const collection: Collection<ProjectM> = await getProjectCollection(path);
   let router = toAsyncRouter(express());
 
@@ -157,7 +153,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     setProjectStatus(projectId, ProjectStatus.STARTING);
     if (server == null) {
       let expServer = express();
-      expServer.use("*", await getMockRouter(path, projectId));
+      expServer.all("*", await getMockRouter(path, projectId));
       server = expServer.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);

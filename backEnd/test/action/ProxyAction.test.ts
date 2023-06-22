@@ -7,6 +7,7 @@ import {expectationCreation} from "../controller/common";
 import {createProxyAction} from "core/struct/action";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
+import {getExpectationCollection, getLogCollection} from "../../src/db/dbManager";
 
 describe("test proxy action",()=>{
    const projectM = getBaseEnvProject();
@@ -25,9 +26,13 @@ describe("test proxy action",()=>{
       expectationM.activate = true;
       const proxyActionM = createProxyAction();
       proxyActionM.host = "http://localhost:8081";
+      expectationM.actions.push(proxyActionM);
+
 
       await expectationCreation(server, projectM, expectationM);
-       // set up the server
+      const expectationMCollection = await getExpectationCollection(projectM.id, 'test_db');
+
+      // set up the server
       await mockServer.start(8081);
 
       await mockServer.forGet('/testProxy').thenReply(200,'A mocked response',{
@@ -38,18 +43,37 @@ describe("test proxy action",()=>{
          'token':"this is another token!!!"
       });
       // server
-      proxyServer.use("*", await getMockRouter("test_db", proxyActionM.id));
+      proxyServer.all("*", await getMockRouter("test_db", projectM.id));
    });
 
    afterAll(() => {
       mockServer.stop();
-   })
+   });
+   test("test proxy header", async () => {
 
-   test(`test proxy get`,async ()=>{
-      const response = await request(proxyServer).post("/testProxy");
+
+      const response = await request(proxyServer).get("/testProxy");
+      expect(response.status).toEqual(200);
+      expect(response.text).toEqual("A mocked response");
+      expect(response.get("token")).toEqual("this is a token!!!");
+
+      const logCollection = await getLogCollection(projectM.id, "test_db");
+      const logs = logCollection.find({});
+      expect(logs.length).toEqual(1);
+      let log = logs[0];
+      //expect(log.req.body).toEqual("A mocked response");
+      expect(log.res!.headers["token"]).toEqual("this is a token,ha ha ha!!!")
+
+      // test the proxy info
+      // expect(log.proxyInfo.isProxy);
+      // expect(log.proxyInfo.proxyToUrl === "http://localhost:3000/testProxy");
+   });
+
+   test(`test proxy error`,async ()=>{
+      const response = await request(proxyServer).post("/testProxy2");
       expect(response.status).toEqual(400);
-      expect(response.text).toEqual("some error");
-      expect(response.get("token")).toEqual("another token");
+      expect(response.text).toEqual("server error");
+      expect(response.get("token")).toEqual("this is another token!!!");
    });
 
 });

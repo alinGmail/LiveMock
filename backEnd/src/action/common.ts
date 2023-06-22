@@ -1,5 +1,6 @@
 import {ActionM, ActionType, IAction} from "core/struct/action";
 import {CustomResponseActionImpl} from "./CustomResponseAction";
+import ProxyActionImpl from "./ProxyAction";
 
 
 const util = require("util");
@@ -20,8 +21,7 @@ export function getActionImpl(
 ): IAction | null {
     switch (action.type) {
         case ActionType.PROXY:
-            //return new ProxyActionImpl(action, logDbP, delay);
-            return null;
+            return new ProxyActionImpl(action, delay);
         case ActionType.CUSTOM_RESPONSE:
             return new CustomResponseActionImpl(action, delay);
         default:

@@ -29,7 +29,7 @@ export function insertReqLog(
   logM.expectationId = expectationId;
 
   const requestLogM = createRequestLog();
-  requestLogM.path = req.baseUrl;
+  requestLogM.path = req.path;
   requestLogM.body = req.body;
   // @ts-ignore
   requestLogM.rawBody = req.rawBody;
