@@ -8,6 +8,21 @@ import {createProxyAction} from "core/struct/action";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
 import {getExpectationCollection, getLogCollection} from "../../src/db/dbManager";
+import {ProjectM} from "core/struct/project";
+
+async function testJsonResponse(response: request.Response, projectM: ProjectM) {
+   expect(response.status).toEqual(200);
+   expect(response.text).toEqual(JSON.stringify({
+      name: "john", age: 20
+   }));
+   expect(response.get("token")).toEqual("json header");
+
+   const log = await getLastLog(projectM.id, 'test_db');
+   expect(log.res!.body.name).toBe("john");
+   expect(log.res!.body.age).toBe(20);
+   expect(log.res!.status).toBe(200);
+   expect(log.res!.headers["token"]).toEqual("json header");
+}
 
 describe("test proxy action",()=>{
    const projectM = getBaseEnvProject();
@@ -59,7 +74,7 @@ describe("test proxy action",()=>{
       await mockServer.forGet("/testJsonNoContentType").thenReply(200,JSON.stringify({
          name:"john",age:20
       }),{
-
+         'token':"json header",
       });
 
 
@@ -72,7 +87,6 @@ describe("test proxy action",()=>{
    });
    test("test proxy header", async () => {
 
-
       const response = await request(proxyServer).get("/testProxy");
       expect(response.status).toEqual(200);
       expect(response.text).toEqual("A mocked response");
@@ -82,7 +96,7 @@ describe("test proxy action",()=>{
       expect(log.res!.body).toEqual("A mocked response");
       expect(log.res!.status).toBe(200);
       expect(log.res!.headers["token"]).toEqual("this is a token!!!");
-
+      expect(log.req!.path).toBe("/testProxy");
       // test the proxy info
       // expect(log.proxyInfo.isProxy);
       // expect(log.proxyInfo.proxyToUrl === "http://localhost:3000/testProxy");
@@ -113,20 +127,13 @@ describe("test proxy action",()=>{
 
    test(`test proxy json`,async ()=>{
       const response = await request(proxyServer).get("/testJson1");
-      expect(response.status).toEqual(200);
-      expect(response.text).toEqual(JSON.stringify({
-         name:"john",age:20
-      }));
-      expect(response.get("token")).toEqual("json header");
-      expect(response.body.name).toBe("john");
-      expect(response.body.age).toBe(20);
+      await testJsonResponse(response, projectM);
+   });
 
-      const log = await getLastLog(projectM.id, 'test_db');
-      expect(log.res!.body.name).toBe("john");
-      expect(log.res!.status).toBe(200);
-      expect(log.res!.headers["token"]).toEqual("json header");
-   })
-
+   test(`test proxy json no content type`,async ()=>{
+      const response = await request(proxyServer).get("/testJsonNoContentType").set({Accept:"application/json"});
+      await testJsonResponse(response, projectM);
+   });
 });
 
 async function getLastLog(projectId:string,path:string){

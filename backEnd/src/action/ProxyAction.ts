@@ -44,7 +44,7 @@ proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
         (accept && typeis.is(accept, ["json"]))
       ) {
         try {
-          (res as any).body = JSON.stringify(bodyStr);
+          (res as any).body = JSON.parse(bodyStr);
         } catch (e) {}
       } else {
         (res as any).body = bodyStr;
