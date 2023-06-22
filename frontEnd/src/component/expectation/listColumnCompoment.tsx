@@ -3,17 +3,17 @@ import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
-  addAction,
-  addMatcher,
-  modifyAction,
-  modifyMatcher,
-  removeAction,
-  removeMatcher,
-  updateExpectationItem,
+    addAction,
+    addMatcher, deleteExpectation,
+    modifyAction,
+    modifyMatcher,
+    removeAction,
+    removeMatcher,
+    updateExpectationItem,
 } from "../../slice/expectationSlice";
 import { useDebounceFn, useRequest } from "ahooks";
 import { debounceWait } from "../../config";
-import { updateExpectationReq } from "../../server/expectationServer";
+import {deleteExpectationReq, updateExpectationReq} from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import * as React from "react";
 import { MatcherContext, ActionContext } from "../context";
@@ -36,6 +36,7 @@ import {
   deleteActionReq,
   updateActionReq,
 } from "../../server/actionServer";
+import {after} from "lodash";
 
 async function updateExpectation(
   projectId: string,
@@ -392,6 +393,11 @@ export const ActionColumn = ({
       {expectation.actions.length === 0 && (
         <div>
           <Button
+              style={{
+                  fontSize: "14px",
+                  color: "#8c8c8c",
+                  lineHeight: "1.57",
+              }}
             onClick={() => {
               const action: ActionM = createCustomResponseAction();
               dispatch(
@@ -438,7 +444,11 @@ export const OperationColumn = ({
 }) => {
   return (
     <div>
-      <Button type={"text"}>delete</Button>
+      <Button type={"text"} onClick={() =>{
+          const deletePromise = deleteExpectationReq(projectId,expectation.id);
+          toastPromise(deletePromise);
+          dispatch(deleteExpectation(expectation.id));
+      }}>delete</Button>
     </div>
   );
 };

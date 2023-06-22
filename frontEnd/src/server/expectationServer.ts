@@ -34,7 +34,13 @@ export const updateExpectationReq = async (
 
 export const getExpectationListReq = async (projectId: string):Promise<ListExpectationResponse> => {
   const res = await superagent.get(
-    `${ServerUrl}/Expectation/?projectId=${projectId}`
+    `${ServerUrl}/expectation/?projectId=${projectId}`
   );
   return res.body;
 };
+
+export const deleteExpectationReq = async (projectId:string,expectationId:string) =>{
+  const res = await superagent.delete(`${ServerUrl}/expectation/${expectationId}`)
+      .query({projectId:projectId});
+  return res.body;
+}

@@ -26,6 +26,11 @@ const expectationSlice = createSlice({
       const item = state.expectationList[action.payload.expectationIndex];
       Object.assign(item, action.payload.modifyValues);
     },
+    deleteExpectation: (state, action: PayloadAction<string>) => {
+      state.expectationList = state.expectationList.filter(
+        (item) => item.id !== action.payload
+      );
+    },
     ...matcherReducers,
     ...actionReducers,
   },
@@ -43,6 +48,7 @@ let {
   addAction,
   removeAction,
   modifyAction,
+  deleteExpectation,
 } = actions;
 export {
   addMatcher,
@@ -50,6 +56,7 @@ export {
   removeMatcher,
   setExpectationList,
   updateExpectationItem,
+  deleteExpectation,
   addAction,
   removeAction,
   modifyAction,
