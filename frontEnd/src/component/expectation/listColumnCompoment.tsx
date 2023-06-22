@@ -411,10 +411,7 @@ export const ActionColumn = ({
             type={"text"}
             icon={
               <PlusOutlined
-                style={{
-                  position: "absolute",
-                  top: "0px",
-                }}
+
               />
             }
           >

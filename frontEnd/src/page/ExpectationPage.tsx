@@ -151,8 +151,8 @@ const ExpectationPage = () => {
     }
   ];
   return (
-    <div>
-      <div>
+    <div style={{padding:"10px"}}>
+      <div style={{margin:"10px 0px"}}>
         <Button
           type={"text"}
           icon={<PlusOutlined />}
@@ -172,16 +172,10 @@ const ExpectationPage = () => {
         </Button>
       </div>
       <div>
-        <NInput value={text} onChange={(value)=>{
-          setText(value);
-        }} />
-        {JSON.stringify(text)}
-      </div>
-      <div>
         <Table
           columns={expectationColumn}
           size={"small"}
-          rowKey={"_id"}
+          rowKey={"id"}
           dataSource={expectationState.expectationList}
           loading={getExpectationListQuery.isFetching}
         />

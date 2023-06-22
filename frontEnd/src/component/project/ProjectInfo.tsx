@@ -94,6 +94,7 @@ const ProjectInfo = () => {
         )}
       </Modal>
       <Dropdown
+        overlayStyle={{ width: "240px", minWidth: "240px" }}
         open={projectListDropdown}
         onOpenChange={() => {
           setProjectListDropdown(true);
@@ -113,7 +114,8 @@ const ProjectInfo = () => {
               <div className={"menu"}>
                 {projectState.projectList.map((project, index) => {
                   return (
-                    <div key={project.id}
+                    <div
+                      key={project.id}
                       onClick={() => {
                         dispatch(setCurProjectIndex(index));
                         setProjectListDropdown(false);
