@@ -16,9 +16,9 @@ export function processBodyParse(
 }
 
 export function isRecordBody(req:http.IncomingMessage,res: http.IncomingMessage): boolean {
-    const recordByRes = typeis.is(res.headers["content-type"], ["json", "text"]);
+    const recordByRes = typeis.is(res.headers["content-type"], ["json", "text","html"]);
     const accept = req.headers['accept'];
-    const recordByReq = typeis.is(accept,['json','text']);
+    const recordByReq = typeis.is(accept,['json','text','html']);
     if (recordByReq || recordByRes) {
         return true;
     } else {
