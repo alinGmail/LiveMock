@@ -19,7 +19,7 @@ proxy.on("proxyReq", function (proxyReq, req, res) {
 });
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
   let body: Array<any> = [];
-  const recordBody = isRecordBody(proxyRes);
+  const recordBody = isRecordBody(req,proxyRes);
   proxyRes.on("data", function (chunk) {
     if (recordBody) {
       body.push(chunk);
@@ -38,13 +38,19 @@ proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
       }
       (res as any).rawBody = bodyStr;
       const contentType = res.getHeader("content-type");
-      if (typeof contentType === "string" && typeis.is(contentType, ["json"])) {
+      const accept = req.headers["accept"];
+      if (
+        (typeof contentType === "string" && typeis.is(contentType, ["json"])) ||
+        (accept && typeis.is(accept, ["json"]))
+      ) {
         try {
           (res as any).body = JSON.stringify(bodyStr);
-        } catch (e) {
-        }
+        } catch (e) {}
+      } else {
+        (res as any).body = bodyStr;
       }
       (res as any).rawBody = bodyStr;
+      res.emit("end");
       // const respObj = new ResponseLogImpl(res, bodyStr);
     })();
   });
@@ -61,13 +67,22 @@ export default class ProxyActionImpl implements IAction {
     if (this.delay > 0) {
       await delayPromise(this.delay);
     }
-
-    let option = {
-      changeOrigin: true,
-      target: `${this.action.host}`,
-      selfHandleResponse: false,
-    };
-    proxy.web(req, res, option);
+    return new Promise((resolve, reject) => {
+      let option = {
+        changeOrigin: true,
+        target: `${this.action.host}`,
+        selfHandleResponse: false,
+        callback: (error) => {
+          if (error) {
+            reject(error);
+          }
+        },
+      };
+      res.on("end", () => {
+        resolve();
+      });
+      proxy.web(req, res, option);
+    });
   }
 }
 

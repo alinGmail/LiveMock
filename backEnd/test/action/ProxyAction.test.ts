@@ -36,11 +36,17 @@ describe("test proxy action",()=>{
       await mockServer.start(8081);
 
       await mockServer.forGet('/testProxy').thenReply(200,'A mocked response',{
-         'token':"this is a token!!!"
+         'token':"this is a token!!!",
+         "Content-Type":"text/plain"
+      });
+
+      await mockServer.forGet("/testNoContentType").thenReply(200,'no content type response',{
+
       });
 
       await mockServer.forPost('/testProxy2').thenReply(400,'server error',{
-         'token':"this is another token!!!"
+         'token':"this is another token!!!",
+         "Content-Type":"text/plain"
       });
       // server
       proxyServer.all("*", await getMockRouter("test_db", projectM.id));
@@ -61,19 +67,42 @@ describe("test proxy action",()=>{
       const logs = logCollection.find({});
       expect(logs.length).toEqual(1);
       let log = logs[0];
-      //expect(log.req.body).toEqual("A mocked response");
-      expect(log.res!.headers["token"]).toEqual("this is a token,ha ha ha!!!")
+      expect(log.res!.body).toEqual("A mocked response");
+      expect(log.res!.status).toBe(200);
+      expect(log.res!.headers["token"]).toEqual("this is a token!!!");
 
       // test the proxy info
       // expect(log.proxyInfo.isProxy);
       // expect(log.proxyInfo.proxyToUrl === "http://localhost:3000/testProxy");
    });
 
+   test('test no content type response',async ()=>{
+      const response = await request(proxyServer).get("/testNoContentType").set({Accept:"text/plain"});
+      expect(response.status).toEqual(200);
+      expect(response.text).toEqual("no content type response");
+      const logCollection = await getLogCollection(projectM.id, "test_db");
+      const logs = logCollection.find({});
+      expect(logs.length).toEqual(1);
+      let log = logs[0];
+      expect(log.res!.body).toEqual("no content type response");
+      expect(log.res!.status).toBe(200);
+
+   });
+
+
    test(`test proxy error`,async ()=>{
       const response = await request(proxyServer).post("/testProxy2");
       expect(response.status).toEqual(400);
       expect(response.text).toEqual("server error");
       expect(response.get("token")).toEqual("this is another token!!!");
+
+      const logCollection = await getLogCollection(projectM.id, "test_db");
+      const logs = logCollection.find({});
+      expect(logs.length).toEqual(1);
+      let log = logs[0];
+      expect(log.res!.body).toEqual("server error");
+      expect(log.res!.status).toBe(400);
+      expect(log.res!.headers["token"]).toEqual("this is another token!!!");
    });
 
 });
