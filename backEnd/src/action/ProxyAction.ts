@@ -70,7 +70,7 @@ export default class ProxyActionImpl implements IAction {
     return new Promise((resolve, reject) => {
       let option = {
         changeOrigin: true,
-        target: `${this.action.host}`,
+        target: `${this.action.protocol}://${this.action.host}`,
         selfHandleResponse: false,
         callback: (error) => {
           if (error) {

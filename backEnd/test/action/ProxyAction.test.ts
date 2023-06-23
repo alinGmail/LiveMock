@@ -40,7 +40,7 @@ describe("test proxy action",()=>{
       expectationM.matchers = [pathMatcherM];
       expectationM.activate = true;
       const proxyActionM = createProxyAction();
-      proxyActionM.host = "http://localhost:8081";
+      proxyActionM.host = "localhost:8085";
       expectationM.actions.push(proxyActionM);
 
 
@@ -48,7 +48,7 @@ describe("test proxy action",()=>{
       const expectationMCollection = await getExpectationCollection(projectM.id, 'test_db');
 
       // set up the server
-      await mockServer.start(8081);
+      await mockServer.start(8085);
 
       await mockServer.forGet('/testProxy').thenReply(200,'A mocked response',{
          'token':"this is a token!!!",
