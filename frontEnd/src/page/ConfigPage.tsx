@@ -44,9 +44,9 @@ const ConfigPage = () => {
   );
 
   return (
-    <div>
+    <div style={{padding:"20px 10px"}}>
       <ProjectEditor
-        editorType={EditorType.ADD}
+        editorType={EditorType.MODIFY}
         projectM={modifyProject}
         onSubmit={onProjectEditorSubmit}
         updaterProjectM={updateModifyProject}

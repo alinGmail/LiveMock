@@ -3,9 +3,7 @@ import { addCross, ServerError, toAsyncRouter } from "./common";
 import {
   getLogCollection,
   getLogViewCollection,
-  getLogViewDb,
   getProjectCollection,
-  getProjectDb
 } from "../db/dbManager";
 import bodyParser from "body-parser";
 import {
@@ -33,8 +31,8 @@ import {
   setProjectStatus,
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
-import { createLogView, LogViewM } from "core/struct/logView";
-import {getLogDynamicView} from "../log/logUtils";
+import { createLogView } from "core/struct/logView";
+import { getLogDynamicView } from "../log/logUtils";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
@@ -90,7 +88,10 @@ async function getProjectRouter(path: string): Promise<express.Router> {
           throw new ServerError(400, "project name can not be empty!");
         }
         const project = collection.insert(req.body.project);
-        const logViewMCollection = await getLogViewCollection(project!.id,path);
+        const logViewMCollection = await getLogViewCollection(
+          project!.id,
+          path
+        );
         logViewMCollection.insert(createLogView());
         // create the log view
         res.json(project);
@@ -120,7 +121,25 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       if (!project) {
         throw new ServerError(500, "project not exist");
       }
-      Object.assign(project, req.body.projectUpdate);
+      const projectUpdate = req.body.projectUpdate;
+      // if the project start , can not modify port
+      const portChange = projectUpdate && project.port !== projectUpdate;
+      const projectStatus = getProjectStatus(project.id);
+      if (
+        [
+          ProjectStatus.STARTING,
+          ProjectStatus.STARTED,
+          ProjectStatus.CLOSING,
+        ].indexOf(projectStatus) !== -1 &&
+        portChange
+      ) {
+        throw new ServerError(
+          500,
+          `project is ${projectStatus} can not modify port`
+        );
+      }
+
+      Object.assign(project, projectUpdate);
       collection.update(project);
       res.json(project);
     }
@@ -146,7 +165,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
     addCross(res);
     const project = collection.findOne({ id: req.params.projectId });
-    if(!project){
+    if (!project) {
       throw new ServerError(500, "project not exist");
     }
     let server = await getProjectServer(projectId, path);
@@ -181,16 +200,14 @@ async function getProjectRouter(path: string): Promise<express.Router> {
 
   async function onProjectStart(project: ProjectM) {
     // create lokij view
-    const logViewCollection = await getLogViewCollection(project.id,path);
-    const logCollection = await getLogCollection(project.id,path);
+    const logViewCollection = await getLogViewCollection(project.id, path);
+    const logCollection = await getLogCollection(project.id, path);
     const logViews = logViewCollection.find({});
 
     for (const logView of logViews) {
-      await getLogDynamicView(project.id,logView.id,path);
+      await getLogDynamicView(project.id, logView.id, path);
     }
   }
-
-
 
   /**
    * stop the project
