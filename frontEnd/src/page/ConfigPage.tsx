@@ -8,18 +8,26 @@ import { getProjectListReq, updateProjectReq } from "../server/projectServer";
 import { toastPromise } from "../component/common";
 import { setProjectList } from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
+import { useEffect, useRef } from "react";
 
 const ConfigPage = () => {
   const dispatch = useDispatch();
+  const isStartUp = useRef(true);
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
-
   const [modifyProject, updateModifyProject] = useImmer(currentProject);
 
+  useEffect(() => {
+    updateModifyProject(currentProject);
+    isStartUp.current = true;
+  }, [currentProject]);
   function onProjectEditorSubmit() {}
-
   useDebounceEffect(
     () => {
+      if (isStartUp.current) {
+        isStartUp.current = false;
+        return;
+      }
       const updatePromise = updateProjectReq(modifyProject.id, {
         projectUpdate: modifyProject,
       });
