@@ -12,6 +12,7 @@ import {Spin} from "antd";
 import {Route, Routes } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
+import ConfigPage from "./page/ConfigPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -35,6 +36,7 @@ function App() {
               <Routes>
                 <Route path={"expectation"} element={<ExpectationPage />} />
                 <Route path={"requestLog"} element={<LogPage />} />
+                <Route path={"config"} element={<ConfigPage />} />
               </Routes>
             </Layout>
         )

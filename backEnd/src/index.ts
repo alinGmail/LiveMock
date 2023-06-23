@@ -6,8 +6,6 @@ import { getMatcherRouter } from "./controller/matcherController";
 import { getActionRouter } from "./controller/actionController";
 import {addLogListener, getLogRouter} from "./controller/logController";
 import {getLogFilterRouter} from "./controller/logFilterController";
-import {logViewEventEmitter} from "./common/logViewEvent";
-import {LogM} from "core/struct/log";
 import {getLocal} from "mockttp";
 const { Server } = require("socket.io");
 
@@ -36,17 +34,6 @@ const io = new Server(http,{
   });
 
 
-  const mockServer = getLocal();
-  // set up the server
-  await mockServer.start(8081);
-
-  await mockServer.forGet('/testProxy').thenReply(200,'A mocked response',{
-    'token':"this is a token!!!"
-  });
-
-  await mockServer.forPost('/testProxy2').thenReply(400,'server error',{
-    'token':"this is another token!!!"
-  });
 })();
 
 

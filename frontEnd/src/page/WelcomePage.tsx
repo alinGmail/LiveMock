@@ -5,24 +5,30 @@ import { useEffect, useState } from "react";
 import { createProject } from "core/struct/project";
 import ProjectEditor from "../component/project/ProjectEditor";
 import { EditorType } from "../struct/common";
-import {createProjectReq} from "../server/projectServer";
+import { createProjectReq, getProjectListReq } from "../server/projectServer";
 import toast from "react-hot-toast";
-import {getErrorMessage} from "../component/common";
+import { getErrorMessage } from "../component/common";
+import { setProjectList } from "../slice/projectSlice";
+import { useDispatch } from "react-redux";
 
 export const WelcomePage = () => {
+  const dispatch = useDispatch();
   const [project, updateProject] = useImmer<ProjectM | null>(null);
   useEffect(() => {
     updateProject(createProject());
   }, []);
 
-  function onProjectEditorSubmit(project: ProjectM) {
-
-      const createPromise =  createProjectReq({project});
-      toast.promise(createPromise,{
-          error: getErrorMessage,
-          loading: "loading",
-          success: 'operation successful'
-      })
+  async function onProjectEditorSubmit(project: ProjectM) {
+    const createPromise = createProjectReq({ project });
+    toast.promise(createPromise, {
+      error: getErrorMessage,
+      loading: "loading",
+      success: "operation successful",
+    });
+    createPromise.then(async _res =>{
+      let res = await getProjectListReq();
+      dispatch(setProjectList(res));
+    });
   }
 
   return (

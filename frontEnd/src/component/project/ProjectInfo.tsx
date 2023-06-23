@@ -24,13 +24,13 @@ const ProjectInfo = () => {
   const projectState = useAppSelector((state) => state.project);
   const [projectListDropdown, setProjectListDropdown] =
     useState<boolean>(false);
-  const [projectModalShow, setProjectModalShow] = useState<boolean>(true);
+  const [projectModalShow, setProjectModalShow] = useState<boolean>(false);
   const [project, updateProject] = useImmer<ProjectM | null>(null);
   useEffect(() => {
     updateProject(createProject());
   }, []);
 
-  function onProjectEditorSubmit(project: ProjectM) {
+  async function onProjectEditorSubmit(project: ProjectM) {
     const createPromise = createProjectReq({ project });
     toast.promise(createPromise, {
       error: getErrorMessage,
@@ -38,6 +38,11 @@ const ProjectInfo = () => {
       success: "operation successful",
     });
     setProjectModalShow(false);
+    createPromise.then(async _res =>{
+      let res = await getProjectListReq();
+      dispatch(setProjectList(res));
+    })
+    updateProject(createProject());
   }
 
   const ProjectStatusComponent = ({

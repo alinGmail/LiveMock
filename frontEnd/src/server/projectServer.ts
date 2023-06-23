@@ -1,8 +1,14 @@
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
 import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
-import { CreateProjectReqBody } from "core/struct/params/ProjectParams";
-import { CreateProjectResponse } from "core/struct/response/ProjectResponse";
+import {
+  CreateProjectReqBody,
+  UpdateProjectReqBody,
+} from "core/struct/params/ProjectParams";
+import {
+  CreateProjectResponse,
+  UpdateProjectResponse,
+} from "core/struct/response/ProjectResponse";
 
 export const getProjectListReq = async (): Promise<ListExpectationResponse> => {
   const res = await superagent.get(`${ServerUrl}/project/`);
@@ -16,13 +22,21 @@ export const createProjectReq = async (
   return res.body;
 };
 
+export const updateProjectReq = async (
+  projectId: string,
+  param: UpdateProjectReqBody
+): Promise<UpdateProjectResponse> => {
+  const res = await superagent.put(`${ServerUrl}/project/${projectId}`)
+      .send(param);
+  return res.body;
+};
 
-export const startProjectReq = async (projectId:string)=>{
+export const startProjectReq = async (projectId: string) => {
   const res = await superagent.post(`${ServerUrl}/project/start/${projectId}`);
   return res.body;
-}
+};
 
-export const stopProjectReq = async (projectId:string) =>{
+export const stopProjectReq = async (projectId: string) => {
   const res = await superagent.post(`${ServerUrl}/project/stop/${projectId}`);
   return res.body;
-}
+};
