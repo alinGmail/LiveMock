@@ -34,6 +34,8 @@ export interface ProxyActionM {
   type: ActionType.PROXY;
   protocol:ProxyProtocol;
   host: string;
+  handleCross:boolean;
+  crossAllowCredentials:boolean;
   pathRewrite: Array<PathRewriteM>;
 }
 
@@ -75,7 +77,9 @@ export function createProxyAction(): ProxyActionM {
     host: "",
     pathRewrite: [],
     type: ActionType.PROXY,
-    protocol:ProxyProtocol.HTTP
+    protocol:ProxyProtocol.HTTP,
+    handleCross:false,
+    crossAllowCredentials:false,
   };
 }
 
