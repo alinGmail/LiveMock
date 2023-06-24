@@ -1,12 +1,12 @@
 import { Button, Dropdown } from "antd";
-import { EllipsisOutlined, PlusOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { FilterType, LogM } from "core/struct/log";
 import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
 import {
   addTableColumn,
-  ColumnDisplayType,
+  ColumnDisplayType, deleteTableColumn,
   modifyTableColumn,
   setColumnEdit,
   setDefaultColumnVisible,
@@ -75,22 +75,31 @@ export function getDefaultColumn(
       title: getDefaultColumnHead("method", dispatch, 0),
       dataIndex: "req.method",
       key: "req.method",
-      width: "300px",
+      width: "100px",
       render: (text: string, record: any, index: number) => {
         return <div>{record.req.method}</div>;
       },
     },
     {
-      title: getDefaultColumnHead("path", dispatch, 1),
+      title: getDefaultColumnHead("status code",dispatch,1),
+      dataIndex: "res.status",
+      key: "res.status",
+      width: "100px",
+      render:((text:string, record:any, index:number) => {
+        return <div>{record.res.status}</div>
+      })
+    },
+    {
+      title: getDefaultColumnHead("path", dispatch, 2),
       dataIndex: "path",
       key: "path",
-      width: "300px",
+      width: "200px",
       render: (text: string, record: any, index: number) => {
         return <div>{record.req.path}</div>;
       },
     },
     {
-      title: getDefaultColumnHead("body", dispatch, 2),
+      title: getDefaultColumnHead("body", dispatch, 3),
       dataIndex: "body",
       key: "body",
       width: "300px",
@@ -112,9 +121,9 @@ export function getDefaultColumn(
       },
     },
     {
-      title: getDefaultColumnHead("json", dispatch, 3),
-      dataIndex: "json",
-      key: "json",
+      title: getDefaultColumnHead("root", dispatch, 4),
+      dataIndex: "root",
+      key: "root",
       width: "400px",
       render: (text: string, record: any, index: number) => {
         return (
@@ -246,7 +255,7 @@ const CustomColumnHead = ({
               onClick={(event) => {
                 // edit column
                 event.stopPropagation();
-                console.log("edit property");
+                // console.log("edit property");
                 dispatch(setColumnEdit(item));
                 dispatch(showColumnEditor());
                 setMenuDisplay(false);
@@ -272,11 +281,22 @@ const CustomColumnHead = ({
               &nbsp;&nbsp;
               <span style={{ verticalAlign: "middle" }}>Hide In View</span>
             </div>
+            <div className={"menuItem"}
+            onClick={()=>{
+              dispatch(deleteTableColumn(item.id));
+            }}>
+              <DeleteOutlined style={{width:"16px"}}/>
+              &nbsp;&nbsp;
+              <span style={{verticalAlign:"middle"}}>Delete Column</span>
+            </div>
           </div>
         </div>
       }
     >
-      <div className={mStyle.defaultColumnHead}>{item.label}&nbsp;</div>
+      <div className={mStyle.defaultColumnHead}>
+        {!item.label && <span style={{color:"rgba(0, 0, 0, 0.2)"}}>empty</span>}
+        {item.label}&nbsp;
+      </div>
     </Dropdown>
   );
 };

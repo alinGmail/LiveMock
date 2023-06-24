@@ -35,7 +35,7 @@ export const logSlice = createSlice({
     currentColumnEditIndex: -1,
     columnEditorShow: false,
     columnConfigShow: false,
-    defaultColumnVisible: [true, true, true, true],
+    defaultColumnVisible: [true, true, true, true,true],
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
@@ -77,6 +77,11 @@ export const logSlice = createSlice({
       if (index != -1) {
         state.tableColumns[index] = action.payload;
       }
+    },
+    deleteTableColumn: (state, action: PayloadAction<string>) => {
+      state.tableColumns = state.tableColumns.filter((item) => {
+        return item.id !== action.payload;
+      });
     },
     modifyTableColumnVisible: (
       state,
@@ -139,6 +144,7 @@ let {
   showColumnEditor,
   hideColumnEditor,
   modifyLogFilter,
+  deleteTableColumn,
 } = actions;
 
 export {
@@ -151,6 +157,7 @@ export {
   setDefaultColumnVisible,
   setTableColumns,
   modifyTableColumn,
+  deleteTableColumn,
   setColumnEdit,
   showColumnConfig,
   hideColumnConfig,
