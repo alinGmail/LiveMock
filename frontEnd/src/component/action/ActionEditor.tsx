@@ -6,12 +6,13 @@ import {
   ProxyActionM,
   ProxyProtocol,
 } from "core/struct/action";
-import { Input, InputNumber, Select } from "antd";
+import { Checkbox, Col, Input, InputNumber, Row, Select } from "antd";
 import { useActionContext } from "../context";
 import { ResponseType } from "core/struct/action";
 import TextArea from "antd/es/input/TextArea";
 import HeaderEditor from "./HeaderEditor";
 import mStyle from "./ActionEditor.module.scss";
+import { CheckboxChangeEvent } from "antd/es/checkbox";
 
 const { Option } = Select;
 const hostSelectBefore = (
@@ -55,7 +56,7 @@ const ActionEditor: React.FC<{
           <div>
             <Select
               defaultValue={action.type}
-              style={{ width: 120 }}
+              style={{ width: 220 }}
               onChange={typeChange}
               options={[
                 { value: ActionType.PROXY, label: ActionType.PROXY },
@@ -66,45 +67,53 @@ const ActionEditor: React.FC<{
               ]}
             />
           </div>
-          <div>http status</div>
-          <div>
-            <InputNumber
-              value={action.status}
-              onChange={(value) => {
-                if (value !== null) {
-                  actionContext.onActionModify({
-                    ...action,
-                    status: value,
-                  });
-                }
-              }}
-            />
-          </div>
-          <div>response type</div>
-          <div>
-            <Select
-              defaultValue={action.responseContent.type}
-              options={[
-                {
-                  value: ResponseType.TEXT,
-                  label: ResponseType.TEXT,
-                },
-                {
-                  value: ResponseType.JSON,
-                  label: ResponseType.JSON,
-                },
-              ]}
-              onChange={(value) => {
-                actionContext.onActionModify({
-                  ...action,
-                  responseContent: {
-                    ...action.responseContent,
-                    type: value,
-                  },
-                });
-              }}
-            />
-          </div>
+          <Row gutter={10}>
+            <Col span={12}>
+              <div>http status</div>
+              <div>
+                <InputNumber
+                  style={{ width: "220px" }}
+                  value={action.status}
+                  onChange={(value) => {
+                    if (value !== null) {
+                      actionContext.onActionModify({
+                        ...action,
+                        status: value,
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </Col>
+            <Col span={12}>
+              <div>response type</div>
+              <div>
+                <Select
+                  style={{ width: "220px" }}
+                  defaultValue={action.responseContent.type}
+                  options={[
+                    {
+                      value: ResponseType.TEXT,
+                      label: ResponseType.TEXT,
+                    },
+                    {
+                      value: ResponseType.JSON,
+                      label: ResponseType.JSON,
+                    },
+                  ]}
+                  onChange={(value) => {
+                    actionContext.onActionModify({
+                      ...action,
+                      responseContent: {
+                        ...action.responseContent,
+                        type: value,
+                      },
+                    });
+                  }}
+                />
+              </div>
+            </Col>
+          </Row>
           <div>headers</div>
           <div>
             <HeaderEditor
@@ -145,6 +154,7 @@ const ActionEditor: React.FC<{
           <div>content</div>
           <div>
             <TextArea
+              rows={10}
               value={action.responseContent.value}
               onChange={(event: ChangeEvent<{ value: string }>) => {
                 actionContext.onActionModify({
@@ -165,7 +175,7 @@ const ActionEditor: React.FC<{
           <div>
             <Select
               defaultValue={action.type}
-              style={{ width: 120 }}
+              style={{ width: 220 }}
               onChange={typeChange}
               options={[
                 { value: ActionType.PROXY, label: ActionType.PROXY },
@@ -203,6 +213,31 @@ const ActionEditor: React.FC<{
                 } as ProxyActionM);
               }}
             />
+          </div>
+          <div>cross config</div>
+          <div>
+            <Checkbox
+              checked={action.handleCross}
+              onChange={(e: CheckboxChangeEvent) => {
+                actionContext.onActionModify({
+                  ...action,
+                  handleCross: e.target.checked,
+                });
+              }}
+            >
+              handle cross
+            </Checkbox>
+            <Checkbox
+              checked={action.crossAllowCredentials}
+              onChange={(e: CheckboxChangeEvent) => {
+                actionContext.onActionModify({
+                  ...action,
+                  crossAllowCredentials: e.target.checked,
+                });
+              }}
+            >
+              allow Credentials
+            </Checkbox>
           </div>
         </div>
       )}
