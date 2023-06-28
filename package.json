@@ -1,0 +1,28 @@
+{
+  "name": "livemock",
+  "version": "1.0.0",
+  "description": "LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install" : "cd frontEnd && npm install --legacy-peer-deps && cd ../ && cd backEnd && npm install --legacy-peer-deps"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alinGmail/LiveMock.git"
+  },
+  "keywords": [
+    "api",
+    "mock",
+    "http",
+    "mock",
+    "developer",
+    "tool"
+  ],
+  "author": "jason zhai",
+  "license": " Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/alinGmail/LiveMock/issues"
+  },
+  "homepage": "https://github.com/alinGmail/LiveMock#readme"
+}
