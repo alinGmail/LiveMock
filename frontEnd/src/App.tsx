@@ -9,7 +9,7 @@ import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
 import {Spin} from "antd";
-import {Route, Routes } from "react-router-dom";
+import {Route, Routes,Navigate } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
 import ConfigPage from "./page/ConfigPage";
@@ -37,6 +37,7 @@ function App() {
                 <Route path={"expectation"} element={<ExpectationPage />} />
                 <Route path={"requestLog"} element={<LogPage />} />
                 <Route path={"config"} element={<ConfigPage />} />
+                <Route path={"*"} element={<Navigate to={"expectation"}/>} />
               </Routes>
             </Layout>
         )

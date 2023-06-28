@@ -204,6 +204,9 @@ const LogPage: React.FC = () => {
           size={"small"}
           tableLayout={"fixed"}
           rowKey={"id"}
+          pagination={{
+            pageSize:1000
+          }}
         />
       </div>
       <ColumnEditor
