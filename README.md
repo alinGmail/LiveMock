@@ -10,7 +10,7 @@ git clone git@github.com:alinGmail/LiveMock.git
 ### 2.install dependencies
 ```
 cd LiveMock
-cd frontEnd && yarn install && cd ../backEnd && yarn install && cd ../core && yarn install cd ../
+cd frontEnd && yarn install && cd ../backEnd && yarn install && cd ../core && yarn install && cd ../
 ```
 
 
