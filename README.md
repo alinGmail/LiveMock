@@ -8,16 +8,15 @@ git clone git@github.com:alinGmail/LiveMock.git
 ```
 
 ### 2.install dependencies
-cd to the project root, then run 
 ```
-cd frontEnd && yarn install && cd ../backEnd && yarn install
+cd LiveMock
+cd frontEnd && yarn install && cd ../backEnd && yarn install && cd ../
 ```
 
 
 ### 3.build the forntEnd code
-cd to the project root, then run
 ```
-cd frontEnd && yarn build
+cd frontEnd && yarn build && cd ../
 ```
 
 ### run the project
