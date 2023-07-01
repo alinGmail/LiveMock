@@ -10,7 +10,6 @@ import {getLogViewCollection, getLogViewDb} from "../db/dbManager";
 import {DeleteLogFilterResponse, UpdateLogFilterResponse,AddLogFilterResponse} from "core/struct/response/LogFilterResponse";
 import bodyParser from "body-parser";
 import {applyDynamicViewFilter, getLogDynamicView, removeDynamicViewFilter} from "../log/logUtils";
-import {SimpleFilterM} from "../../../core/struct/log";
 
 
 
