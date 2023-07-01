@@ -19,17 +19,17 @@ const io = new Server(http,{
 // io.fetchSockets()
 
 (async function () {
-  server.use("/project", await getProjectRouter("dev_db"));
-  server.use("/expectation", getExpectationRouter("dev_db"));
-  server.use("/matcher", getMatcherRouter("dev_db"));
-  server.use("/action", await getActionRouter("dev_db"));
-  server.use("/logFilter", await getLogFilterRouter("dev_db"));
-  server.use("/log", await getLogRouter("dev_db"));
+  server.use("/project", await getProjectRouter("db"));
+  server.use("/expectation", getExpectationRouter("db"));
+  server.use("/matcher", getMatcherRouter("db"));
+  server.use("/action", await getActionRouter("db"));
+  server.use("/logFilter", await getLogFilterRouter("db"));
+  server.use("/log", await getLogRouter("db"));
   server.use("/dashboard",express.static("../frontEnd/dist"));
   server.all("/",(req,res)=>{
     res.redirect("/dashboard");
   })
-  await addLogListener(io,"dev_db");
+  await addLogListener(io,"db");
 
 
   server.use(CustomErrorMiddleware);
