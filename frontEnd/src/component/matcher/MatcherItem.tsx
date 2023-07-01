@@ -15,6 +15,8 @@ import { useMatcherContext } from "../context";
 import { NInput } from "../nui/NInput";
 import { CloseSquareOutlined, CloseSquareTwoTone } from "@ant-design/icons";
 import MatcherTypeSelector from "./MatcherTypeSelector";
+import {useDebounceFn} from "ahooks";
+import {debounceWait} from "../../config";
 
 const MatcherConditionMenu = ({
   onConditionChange,
@@ -117,7 +119,7 @@ const MatcherItem: FC<{
     [matcher, matcherContext.onMatcherModify]
   );
 
-  const onValueChange = useCallback(
+  const {run : onValueChange } = useDebounceFn(
     (value: string) => {
       let _matcher: RequestMatcherM = {
         ...matcher,
@@ -125,7 +127,7 @@ const MatcherItem: FC<{
       };
       matcherContext.onMatcherModify(_matcher);
     },
-    [matcher, matcherContext.onMatcherModify]
+      {wait:debounceWait}
   );
 
   const onDelMatcher = useCallback(() => {
