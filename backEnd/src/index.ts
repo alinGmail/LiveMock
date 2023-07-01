@@ -25,6 +25,10 @@ const io = new Server(http,{
   server.use("/action", await getActionRouter("dev_db"));
   server.use("/logFilter", await getLogFilterRouter("dev_db"));
   server.use("/log", await getLogRouter("dev_db"));
+  server.use("/dashboard",express.static("../frontEnd/dist"));
+  server.all("/",(req,res)=>{
+    res.redirect("/dashboard");
+  })
   await addLogListener(io,"dev_db");
 
 
