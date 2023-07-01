@@ -12,7 +12,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
+    "baseUrl":"./",
+    "paths":{
+	"core/*": ["../core/*"]
+    },
 
 
     /* Linting */
@@ -23,5 +26,5 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["src","vite.config.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" },{"path":"../core"}]
 }

@@ -20,7 +20,6 @@
     "@types/superagent": "^4.1.17",
     "ahooks": "^3.7.7",
     "antd": "^5.4.6",
-    "core": "file:../core",
     "lodash": "^4.17.21",
     "modern-css-reset": "^1.4.0",
     "react": "^18.2.0",
@@ -34,13 +33,14 @@
     "socket.io-client": "^4.6.2",
     "superagent": "^8.0.9",
     "use-immer": "^0.9.0",
+    "uuid": "^9.0.0",
     "vite-plugin-svgr": "^3.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/sanitize-html": "^2.9.0",
-    "@types/uuid": "^9.0.1",
+    "@types/uuid": "^9.0.2",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-react": "^4.0.0-beta.0",
@@ -51,6 +51,7 @@
     "sass": "^1.62.1",
     "supertest": "^6.3.3",
     "typescript": "^4.9.5",
-    "vite": "^4.3.0"
+    "vite": "^4.3.0",
+    "vite-tsconfig-paths": "^4.2.0"
   }
 }
