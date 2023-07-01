@@ -31,6 +31,13 @@ const ActionItem: React.FC<{
             {action.type === ActionType.PROXY && <div >
                 <div className={mStyle.actionWrap}>
                     proxy to {action.host}
+                    &nbsp;&nbsp;
+                    <CloseSquareOutlined
+                        className={mStyle.closeBtn}
+                        onClick={() => {
+                            actionContext.onActionRemove(action.id);
+                        }}
+                    />
                 </div>
             </div>}
           {action.type === ActionType.CUSTOM_RESPONSE && (
