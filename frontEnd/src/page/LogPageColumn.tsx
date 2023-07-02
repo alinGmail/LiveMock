@@ -1,12 +1,17 @@
-import {Button, Dropdown, Tag} from "antd";
-import { EllipsisOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Tag } from "antd";
+import {
+  EllipsisOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { FilterType, LogM } from "core/struct/log";
 import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
 import {
   addTableColumn,
-  ColumnDisplayType, deleteTableColumn,
+  ColumnDisplayType,
+  deleteTableColumn,
   modifyTableColumn,
   setColumnEdit,
   setDefaultColumnVisible,
@@ -78,7 +83,7 @@ export function getDefaultColumn(
       width: "100px",
       render: (text: string, record: LogM, index: number) => {
         if (record.req == null) {
-          return <div />
+          return <div />;
         }
         const method = record.req.method;
         let color = "cyan";
@@ -99,30 +104,46 @@ export function getDefaultColumn(
             color = "lime";
             break;
         }
-        return <div><Tag color={color}>{method}</Tag></div>
+        return (
+          <div>
+            <Tag color={color}>{method}</Tag>
+          </div>
+        );
       },
     },
     {
-      title: getDefaultColumnHead("status code",dispatch,1),
+      title: getDefaultColumnHead("status code", dispatch, 1),
       dataIndex: "res.status",
       key: "res.status",
       width: "100px",
-      render:((text:string, record:LogM, index:number) => {
-        if(record.res == null){
-          return <div/>
-        }else{
+      render: (text: string, record: LogM, index: number) => {
+        if (record.res == null) {
+          return <div />;
+        } else {
           const status = record.res.status;
           switch (true) {
             case status < 200:
             case status < 400 && status >= 300:
-              return <div><Tag color={"processing"}>{status}</Tag></div>
+              return (
+                <div>
+                  <Tag color={"processing"}>{status}</Tag>
+                </div>
+              );
             case status < 300:
-              return <div><Tag color={"success"}>{status}</Tag></div>
+              return (
+                <div>
+                  <Tag color={"success"}>{status}</Tag>
+                </div>
+              );
             default:
-              return <div><Tag color={"error"}>{status}</Tag></div>
+              return (
+                <div>
+                  <Tag color={"error"}>{status}</Tag>
+                </div>
+              );
           }
         }
-      })
+      },
     },
     {
       title: getDefaultColumnHead("path", dispatch, 2),
@@ -138,7 +159,8 @@ export function getDefaultColumn(
       dataIndex: "body",
       key: "body",
       width: "300px",
-      render: (text: string, record: any, index: number) => {
+      render: (text: string, record: LogM, index: number) => {
+        const bodyType = typeof record.res?.body;
         return (
           <div
             style={{
@@ -146,11 +168,15 @@ export function getDefaultColumn(
               wordBreak: "break-all",
             }}
           >
-            <ReactJson
-              collapseStringsAfterLength={1000}
-              src={record.res?.body}
-              collapsed={true}
-            />
+            {bodyType === "undefined" && <div />}
+            {bodyType === "string" && <span>{record.res?.body}</span>}
+            {bodyType === "object" && (
+              <ReactJson
+                collapseStringsAfterLength={1000}
+                src={record.res?.body}
+                collapsed={true}
+              />
+            )}
           </div>
         );
       },
@@ -168,7 +194,11 @@ export function getDefaultColumn(
               wordBreak: "break-all",
             }}
           >
-            <ReactJson src={record} collapseStringsAfterLength={1000} collapsed={true} />
+            <ReactJson
+              src={record}
+              collapseStringsAfterLength={1000}
+              collapsed={true}
+            />
             {/*<ReactJson
                             src={record}
                             collapseStringsAfterLength={1000}
@@ -316,20 +346,24 @@ const CustomColumnHead = ({
               &nbsp;&nbsp;
               <span style={{ verticalAlign: "middle" }}>Hide In View</span>
             </div>
-            <div className={"menuItem"}
-            onClick={()=>{
-              dispatch(deleteTableColumn(item.id));
-            }}>
-              <DeleteOutlined style={{width:"16px"}}/>
+            <div
+              className={"menuItem"}
+              onClick={() => {
+                dispatch(deleteTableColumn(item.id));
+              }}
+            >
+              <DeleteOutlined style={{ width: "16px" }} />
               &nbsp;&nbsp;
-              <span style={{verticalAlign:"middle"}}>Delete Column</span>
+              <span style={{ verticalAlign: "middle" }}>Delete Column</span>
             </div>
           </div>
         </div>
       }
     >
       <div className={mStyle.defaultColumnHead}>
-        {!item.label && <span style={{color:"rgba(0, 0, 0, 0.2)"}}>empty</span>}
+        {!item.label && (
+          <span style={{ color: "rgba(0, 0, 0, 0.2)" }}>empty</span>
+        )}
         {item.label}&nbsp;
       </div>
     </Dropdown>
