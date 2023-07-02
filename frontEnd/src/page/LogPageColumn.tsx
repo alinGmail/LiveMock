@@ -1,4 +1,4 @@
-import { Button, Dropdown } from "antd";
+import {Button, Dropdown, Tag} from "antd";
 import { EllipsisOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { FilterType, LogM } from "core/struct/log";
 import { Dispatch, useState } from "react";
@@ -76,8 +76,30 @@ export function getDefaultColumn(
       dataIndex: "req.method",
       key: "req.method",
       width: "100px",
-      render: (text: string, record: any, index: number) => {
-        return <div>{record.req.method}</div>;
+      render: (text: string, record: LogM, index: number) => {
+        if (record.req == null) {
+          return <div />
+        }
+        const method = record.req.method;
+        let color = "cyan";
+        switch (method.toUpperCase()) {
+          case "GET":
+            color = "green";
+            break;
+          case "POST":
+            color = "blue";
+            break;
+          case "PUT":
+            color = "purple";
+            break;
+          case "DELETE":
+            color = "red";
+            break;
+          case "OPTION":
+            color = "lime";
+            break;
+        }
+        return <div><Tag color={color}>{method}</Tag></div>
       },
     },
     {
@@ -85,8 +107,21 @@ export function getDefaultColumn(
       dataIndex: "res.status",
       key: "res.status",
       width: "100px",
-      render:((text:string, record:any, index:number) => {
-        return <div>{record.res.status}</div>
+      render:((text:string, record:LogM, index:number) => {
+        if(record.res == null){
+          return <div/>
+        }else{
+          const status = record.res.status;
+          switch (true) {
+            case status < 200:
+            case status < 400 && status >= 300:
+              return <div><Tag color={"processing"}>{status}</Tag></div>
+            case status < 300:
+              return <div><Tag color={"success"}>{status}</Tag></div>
+            default:
+              return <div><Tag color={"error"}>{status}</Tag></div>
+          }
+        }
       })
     },
     {
