@@ -92,18 +92,39 @@ export function getResponseHeaderMap(res: Response): {
   });
   return headers;
 }
-
+function isNumberString(value:string){
+  if(value == null){
+    return false;
+  }
+  const numVal = Number(value);
+  return !isNaN(numVal);
+}
 // change filter to mongo-style query
 export function changeToLokijsFilter(filter: LogFilterM) {
   if (filter.type === FilterType.SIMPLE_FILTER) {
+    const isNumberValue = isNumberString(filter.value);
     switch (filter.condition) {
       case LogFilterCondition.EQUAL:
         return {
           [filter.property]: {
-            $eq: filter.value,
+            // abstract (loose) equality
+            $aeq: filter.value,
           },
         };
       case LogFilterCondition.NOT_EQUAL:
+        if(isNumberValue){
+          return {
+            "$and":[{
+              [filter.property]: {
+                $ne: filter.value,
+              },
+            },{
+              [filter.property]: {
+                $ne: Number(filter.value),
+              },
+            }]
+          }
+        }
         return {
           [filter.property]: {
             $ne: filter.value,
