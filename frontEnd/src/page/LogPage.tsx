@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import { v4 as uuId } from "uuid";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import LogFilterComponent from "../component/log/LogFilterComponent";
@@ -26,6 +26,7 @@ import { getLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
+import {ColumnsType} from "antd/es/table/interface";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -132,15 +133,19 @@ const LogPage: React.FC = () => {
       enabled: !!logViewId,
     }
   );
-
-  const customColumns = getCustomColumn(
-    tableColumns.filter((item, index) => item.visible),
-    dispatch
-  );
-  const logColumn = getDefaultColumn(dispatch)
-    .filter((item, index) => defaultColumnVisible[index])
-    .concat(customColumns)
-    .concat(getConfigColumn(dispatch));
+  const [logColumn,updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
+  useEffect(() =>{
+    console.log("custom columns change")
+    const customColumns = getCustomColumn(
+        tableColumns.filter((item, index) => item.visible),
+        dispatch
+    );
+    const newLogColumn = getDefaultColumn(dispatch)
+        .filter((item, index) => defaultColumnVisible[index])
+        .concat(customColumns)
+        .concat(getConfigColumn(dispatch));
+    updateLogColumn(newLogColumn);
+  },[tableColumns,defaultColumnVisible,dispatch]);
 
   useEffect(() => {
     const socket = io("http://localhost:9002", {
@@ -174,6 +179,18 @@ const LogPage: React.FC = () => {
       socket.disconnect();
     };
   }, []);
+  const listTable = useMemo(() =>{
+      return (<Table
+        columns={logColumn}
+        dataSource={logs}
+        size={"small"}
+        tableLayout={"fixed"}
+        rowKey={"id"}
+        pagination={{
+          pageSize:1000
+        }}
+    />)
+  },[logColumn,logs])
   return (
     <div style={{ padding: "10px" }}>
       <div style={{ padding: "10px 0px" }}>
@@ -198,16 +215,7 @@ const LogPage: React.FC = () => {
         )}
       </div>
       <div>
-        <Table
-          columns={logColumn}
-          dataSource={logs}
-          size={"small"}
-          tableLayout={"fixed"}
-          rowKey={"id"}
-          pagination={{
-            pageSize:1000
-          }}
-        />
+        {listTable}
       </div>
       <ColumnEditor
         onClose={() => {
