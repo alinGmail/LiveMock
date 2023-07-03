@@ -6,6 +6,7 @@
   }
   .mainRow {
     display: flex;
+    background: linear-gradient(to right, rgb(247, 246, 243) 0, rgb(247, 246, 243) 200px, white 200px) repeat-y;
   }
 
   .leftCol {

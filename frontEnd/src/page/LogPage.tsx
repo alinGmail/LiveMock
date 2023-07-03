@@ -188,7 +188,7 @@ const LogPage: React.FC = () => {
         tableLayout={"fixed"}
         rowKey={"id"}
         pagination={{
-          pageSize:1000
+          pageSize:200,
         }}
     />)
   },[logColumn,logs])
