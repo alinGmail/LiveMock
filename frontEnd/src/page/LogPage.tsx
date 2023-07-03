@@ -27,6 +27,7 @@ import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import {ColumnsType} from "antd/es/table/interface";
+import {ServerUrl} from "../config";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -148,7 +149,7 @@ const LogPage: React.FC = () => {
   },[tableColumns,defaultColumnVisible,dispatch]);
 
   useEffect(() => {
-    const socket = io("http://localhost:9002", {
+    const socket = io(ServerUrl, {
       query: {
         projectId: currentProject.id,
       },
