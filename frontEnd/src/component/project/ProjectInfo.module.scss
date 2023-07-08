@@ -1,7 +1,10 @@
 .projectInfo {
+  display: inline-block;
+  padding-right: 20px;
   .curProjectRow {
     margin-left: 30px;
     height: 50px;
+    display: inline-block;
     .rowLeft {
       float: left;
     }
