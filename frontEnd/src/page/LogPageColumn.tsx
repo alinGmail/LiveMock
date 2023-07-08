@@ -26,6 +26,7 @@ import { ReactComponent as EyeBlocked } from "../svg/eye-blocked.svg";
 import _ from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
+import TextColumn from "../component/table/TextColumn";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
   return [
@@ -169,7 +170,7 @@ export function getDefaultColumn(
             }}
           >
             {bodyType === "undefined" && <div />}
-            {bodyType === "string" && <span>{record.res?.body}</span>}
+            {bodyType === "string" && <TextColumn content={record.res?.body} />}
             {bodyType === "object" && (
               <ReactJson
                 collapseStringsAfterLength={1000}
@@ -431,16 +432,16 @@ function TextRender(item: TableColumnItem, log: LogM) {
     case "undefined":
       break;
     case "object":
-      content = <div>{JSON.stringify(root)}</div>;
+      content = <TextColumn content={JSON.stringify(root)}/>;
       break;
     case "boolean":
       content = <div>{root ? "true" : "false"}</div>;
       break;
     case "number":
-      content = <div>{root.toString()}</div>;
+      content = <TextColumn content={root.toString()} />;
       break;
     case "string":
-      content = <div>{root}</div>;
+      content = <TextColumn content={root}/>;
       break;
     case "function":
       break;
