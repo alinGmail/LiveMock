@@ -20,6 +20,7 @@
     "@types/node": "^17.0.32",
     "@types/supertest": "^2.0.12",
     "@types/type-is": "^1.6.3",
+    "@types/lokijs": "^1.5.8",
     "jest": "^28.1.1",
     "mockserver-client": "^5.13.2",
     "mockserver-node": "^5.13.2",
@@ -33,7 +34,6 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    z
     "body-parser": "^1.20.0",
     "express": "4.18.1",
     "form-data": "^4.0.0",
