@@ -13,13 +13,16 @@ export const getProjectListReq = async (): Promise<ListProjectResponse> => {
   return window.api.project.listProject({}, {}, {});
   //const res = await superagent.get(`${ServerUrl}/project/`);
 };
-/*
+
 export const createProjectReq = async (
-  param: CreateProjectReqBody
+    param: CreateProjectReqBody
 ): Promise<CreateProjectResponse> => {
-  const res = await superagent.post(`${ServerUrl}/project/`).send(param);
-  return res.body;
+  //const res = await superagent.post(`${ServerUrl}/project/`).send(param);
+  //return res.body;
+  return window.api.project.createProject({},{},param);
 };
+
+/*
 
 export const updateProjectReq = async (
   projectId: string,
