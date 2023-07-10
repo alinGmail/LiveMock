@@ -126,9 +126,9 @@ export const logSlice = createSlice({
   },
 });
 
-let { actions, caseReducers, getInitialState, name, reducer } = logSlice;
+const { actions, caseReducers, getInitialState, name, reducer } = logSlice;
 
-let {
+const {
   addLogFilter,
   removeLogFilter,
   resetLogFilter,

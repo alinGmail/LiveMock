@@ -1,3 +1,8 @@
+import {ListProjectPathParam, ListProjectReqBody, ListProjectReqQuery} from "core/struct/params/ProjectParams.ts";
+import {ListProjectResponse} from "core/struct/response/ProjectResponse.ts";
+import ipcRenderer = Electron.ipcRenderer;
+import {ProjectEvents} from "core/struct/events/desktopEvents.ts";
+
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
     if (condition.includes(document.readyState)) {
@@ -90,8 +95,10 @@ window.onmessage = ev => {
 }
 
 export const api = {
-  send: (path: string) => {
-
+  project:{
+    listProject:(reqParam:ListProjectPathParam,reqQuery:ListProjectReqQuery,reqBody:ListProjectReqBody):Promise<ListProjectResponse> => {
+      return ipcRenderer.invoke(ProjectEvents.ListProject,reqParam,reqQuery,reqBody);
+    }
   }
 }
 

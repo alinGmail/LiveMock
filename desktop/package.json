@@ -27,9 +27,11 @@
     "superagent": "^8.0.9",
     "use-immer": "^0.9.0",
     "uuid": "^9.0.0",
-    "vite-plugin-svgr": "^3.2.0"
+    "vite-plugin-svgr": "^3.2.0",
+    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3"
   },
   "devDependencies": {
+    "@types/lokijs": "^1.5.8",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
     "@types/sanitize-html": "^2.9.0",

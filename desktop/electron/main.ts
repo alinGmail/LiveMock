@@ -37,6 +37,9 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
+
+
+
 }
 
 app.on('window-all-closed', () => {
