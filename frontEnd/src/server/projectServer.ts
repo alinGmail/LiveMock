@@ -7,10 +7,11 @@ import {
 } from "core/struct/params/ProjectParams";
 import {
   CreateProjectResponse,
+  ListProjectResponse,
   UpdateProjectResponse,
 } from "core/struct/response/ProjectResponse";
 
-export const getProjectListReq = async (): Promise<ListExpectationResponse> => {
+export const getProjectListReq = async (): Promise<ListProjectResponse> => {
   const res = await superagent.get(`${ServerUrl}/project/`);
   return res.body;
 };
@@ -27,7 +28,7 @@ export const updateProjectReq = async (
   param: UpdateProjectReqBody
 ): Promise<UpdateProjectResponse> => {
   const res = await superagent.put(`${ServerUrl}/project/${projectId}`)
-      .send(param);
+    .send(param);
   return res.body;
 };
 

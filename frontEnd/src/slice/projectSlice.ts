@@ -5,19 +5,19 @@ interface ProjectState {
   projectList: Array<ProjectM>;
   curProjectIndex: number;
 }
-const initialState :ProjectState ={
-    projectList: [],
-    curProjectIndex: 0,
+const initialState: ProjectState = {
+  projectList: [],
+  curProjectIndex: 0,
 }
 
 const projectSlice = createSlice({
   name: "project",
   initialState: initialState,
   reducers: {
-    setProjectList: (state, action) => {
+    setProjectList: (state, action: PayloadAction<Array<ProjectM>>) => {
       state.projectList = action.payload;
     },
-    setCurProjectIndex: (state, action) => {
+    setCurProjectIndex: (state, action: PayloadAction<number>) => {
       state.curProjectIndex = action.payload;
     },
   },
