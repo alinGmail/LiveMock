@@ -1,10 +1,10 @@
-import {ProjectEvents} from "core/struct/events/desktopEvents.ts";
+import {ProjectEvents} from "core/struct/events/desktopEvents";
 import ipcMain = Electron.ipcMain;
-import {ListProjectPathParam, ListProjectReqBody, ListProjectReqQuery} from "core/struct/params/ProjectParams.ts";
-import {ProjectM} from "core/struct/project.ts";
+import {ListProjectPathParam, ListProjectReqBody, ListProjectReqQuery} from "core/struct/params/ProjectParams";
+import {ProjectM} from "core/struct/project";
 import { Collection } from "lokijs";
-import {getProjectCollection} from "../db/dbManager.ts";
-import {getProjectStatus} from "../server/projectStatusManage.ts";
+import {getProjectCollection} from "../db/dbManager";
+import {getProjectStatus} from "../server/projectStatusManage";
 
 export async function setProjectHandler(path:string):Promise<void> {
     const collection: Collection<ProjectM> = await getProjectCollection(path);

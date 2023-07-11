@@ -3,10 +3,10 @@ import {
   ListProjectPathParam,
   ListProjectReqBody,
   ListProjectReqQuery
-} from "core/struct/params/ProjectParams.ts";
-import {CreateProjectResponse, ListProjectResponse} from "core/struct/response/ProjectResponse.ts";
+} from "core/struct/params/ProjectParams";
+import {CreateProjectResponse, ListProjectResponse} from "core/struct/response/ProjectResponse";
 import ipcRenderer = Electron.ipcRenderer;
-import {ProjectEvents} from "core/struct/events/desktopEvents.ts";
+import {ProjectEvents} from "core/struct/events/desktopEvents";
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
