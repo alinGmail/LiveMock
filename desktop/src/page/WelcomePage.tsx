@@ -43,6 +43,10 @@ export const WelcomePage = () => {
           updaterProjectM={updateProject as Updater<ProjectM>}
         />
       )}
+      <div><button onClick={()=>{
+        window.api.project.log();
+      }}>aaa</button></div>
+
     </div>
   );
 };

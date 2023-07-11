@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
-
+import waitOn from "wait-on"
+import * as process from "process";
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -19,6 +20,7 @@ let win: BrowserWindow | null
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 function createWindow() {
+  console.log(__dirname);
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, 'electron-vite.svg'),
     webPreferences: {
@@ -31,8 +33,16 @@ function createWindow() {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
-  if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL)
+  if (process.env['PROJECT_ENV'] === "dev") {
+    win?.loadURL("http://localhost:5173")
+    waitOn({
+      resources:[
+        "http://localhost:5173"
+      ]
+    },function (){
+
+
+    });
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))

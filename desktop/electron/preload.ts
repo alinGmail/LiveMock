@@ -7,6 +7,7 @@ import {
 import {CreateProjectResponse, ListProjectResponse} from "core/struct/response/ProjectResponse";
 import ipcRenderer = Electron.ipcRenderer;
 import {ProjectEvents} from "core/struct/events/desktopEvents";
+import contextBridge = Electron.contextBridge;
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
   return new Promise(resolve => {
@@ -106,10 +107,13 @@ export const api = {
     },
     createProject:(reqParam:CreateProjectPathParam,reqQuery:CreateProjectReqQuery,reqBody:CreateProjectReqBody):Promise<CreateProjectResponse>=>{
       return ipcRenderer.invoke(ProjectEvents.CreateProject,reqParam,reqQuery,reqBody);
+    },
+    log:()=>{
+      console.log("abcdefgasdf")
     }
   }
 }
-
+contextBridge.exposeInMainWorld("api",api);
 
 
 
