@@ -8,3 +8,10 @@ export enum ProjectEvents{
     StartProject = "StartProject",
     StopProject = "StopProject"
 }
+
+
+export enum ExpectationEvents{
+    ListExpectation="ListExpectation",
+    CreateExpectation="CreateExpectation",
+    UpdateExpectation="UpdateExpectation",
+}
