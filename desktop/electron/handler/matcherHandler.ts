@@ -1,4 +1,3 @@
-import ipcMain = Electron.ipcMain;
 import { MatcherEvents } from "core/struct/events/desktopEvents";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
@@ -12,6 +11,8 @@ import {
     UpdateMatcherReqBody,
     UpdateMatcherReqQuery,
 } from "core/struct/params/MatcherParams";
+import * as electron from "electron";
+const ipcMain = electron.ipcMain;
 
 export async function setMatcherHandler(path: string): Promise<void> {
   ipcMain.handle(

@@ -21,3 +21,9 @@ export enum MatcherEvents {
     UpdateMatcher="UpdateMatcher",
     DeleteMatcher="DeleteMatcher"
 }
+
+export enum ActionEvents {
+    CreateAction="CreateMatcher",
+    UpdateAction="UpdateMatcher",
+    DeleteAction="DeleteMatcher"
+}
