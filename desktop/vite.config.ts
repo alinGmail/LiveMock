@@ -13,6 +13,11 @@ export default defineConfig({
       {
         // Main-Process entry file of the Electron App.
         entry: 'electron/main.ts',
+        vite: {
+          build: {
+            minify: false,
+          }
+        }
       },
       {
         entry: 'electron/preload.ts',
@@ -21,6 +26,11 @@ export default defineConfig({
           // instead of restarting the entire Electron App.
           options.reload()
         },
+        vite: {
+          build: {
+            minify: false
+          }
+        }
       },
     ]),
     renderer(),
