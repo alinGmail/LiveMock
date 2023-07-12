@@ -22,24 +22,23 @@ export const createProjectReq = async (
   return window.api.project.createProject({},{},param);
 };
 
-/*
 
 export const updateProjectReq = async (
   projectId: string,
   param: UpdateProjectReqBody
 ): Promise<UpdateProjectResponse> => {
-  const res = await superagent.put(`${ServerUrl}/project/${projectId}`)
-    .send(param);
-  return res.body;
+  return window.api.project.updateProject();
+  //const res = await superagent.put(`${ServerUrl}/project/${projectId}`)
+  //  .send(param);
+  //return res.body;
 };
 
 export const startProjectReq = async (projectId: string) => {
-  const res = await superagent.post(`${ServerUrl}/project/start/${projectId}`);
-  return res.body;
+  //const res = await superagent.post(`${ServerUrl}/project/start/${projectId}`);
+  //return res.body;
 };
 
 export const stopProjectReq = async (projectId: string) => {
-  const res = await superagent.post(`${ServerUrl}/project/stop/${projectId}`);
-  return res.body;
+  //const res = await superagent.post(`${ServerUrl}/project/stop/${projectId}`);
+  //return res.body;
 };
-*/

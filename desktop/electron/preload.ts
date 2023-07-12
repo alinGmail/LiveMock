@@ -23,9 +23,17 @@ export const api = {
     createProject:(reqParam:CreateProjectPathParam,reqQuery:CreateProjectReqQuery,reqBody:CreateProjectReqBody):Promise<CreateProjectResponse>=>{
       return ipcRenderer.invoke(ProjectEvents.CreateProject,reqParam,reqQuery,reqBody);
     },
-    log:()=>{
-      console.log("abcdefgasdf")
+    startProject:()=>{
+      return ipcRenderer.invoke(ProjectEvents.StartProject,()=>{
+
+      })
+    },
+    updateProject:()=>{
+      return ipcRenderer.invoke(ProjectEvents.UpdateProject,()=>{
+
+      })
     }
+
   }
 }
 

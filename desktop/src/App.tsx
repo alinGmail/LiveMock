@@ -8,6 +8,7 @@ import {setProjectList} from "./slice/projectSlice.ts";
 import {Spin} from "antd";
 import {Toaster} from "react-hot-toast";
 import WelcomePage from "./page/WelcomePage.tsx";
+import Layout from "./component/Layout.tsx";
 
 function App() {
     const dispatch = useDispatch();
@@ -26,7 +27,9 @@ function App() {
             projectList.length === 0 ? (
                 <WelcomePage />
             ) : (
-               <div>aa</div>
+                <Layout>
+
+                </Layout>
             )
         ) : (
             <Spin tip="Loading" size="large">

@@ -23,7 +23,7 @@ export async function setProjectHandler(path:string):Promise<void> {
     /**
      * list project
      */
-    ipcMain.handle(ProjectEvents.ListProject,(reqParam:ListProjectPathParam,reqQuery:ListProjectReqQuery,reqBody:ListProjectReqBody)=> {
+    ipcMain.handle(ProjectEvents.ListProject,(event,reqParam:ListProjectPathParam,reqQuery:ListProjectReqQuery,reqBody:ListProjectReqBody)=> {
         const projects = collection.find({});
         projects.forEach((project) => {
             const projectStatus = getProjectStatus(project.id);
@@ -32,7 +32,8 @@ export async function setProjectHandler(path:string):Promise<void> {
         return projects;
     });
 
-    ipcMain.handle(ProjectEvents.CreateProject,async (reqParam:CreateProjectPathParam,reqQuery:CreateProjectReqQuery,reqBody:CreateProjectReqBody)=>{
+    ipcMain.handle(ProjectEvents.CreateProject,  async (event,reqParam:CreateProjectPathParam,reqQuery:CreateProjectReqQuery,reqBody:CreateProjectReqBody)=>{
+
         if(reqBody.project){
             if(!isNotEmptyString(reqBody.project.name)){
                 throw new ServerError(400,"project name can not be empty");
@@ -40,7 +41,7 @@ export async function setProjectHandler(path:string):Promise<void> {
             const project = collection.insert(reqBody.project);
             const logViewMCollection = await getLogViewCollection(project!.id,path);
             logViewMCollection.insert(createLogView());
-            return project;
+            return reqBody.project;
         }else{
           throw new ServerError(400,"invalid Request param");
         }
