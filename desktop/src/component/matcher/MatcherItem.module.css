@@ -1,0 +1,35 @@
+.itemWrap {
+  box-shadow: rgb(15 15 15 / 10%) 0px 0px 0px 1px,
+    rgb(15 15 15 / 10%) 0px 2px 4px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.itemOutWrap {
+}
+
+.textBtn {
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 4px;
+  padding: 0px 8px;
+  color: rgba(55, 53, 47, 0.65);
+  user-select: none;
+  display: inline-block;
+  cursor: pointer;
+}
+.textBtn:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.closeBtn{
+  color: #8c8c8c;
+  transition: color ease-in 200ms,transform ease-in 200ms;
+}
+
+.closeBtn:hover{
+  color: #cf1322;
+  transform: scale(1.4);
+}

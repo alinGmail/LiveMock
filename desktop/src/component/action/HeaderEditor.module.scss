@@ -1,0 +1,37 @@
+.addBtn {
+  display: block;
+  text-align: center;
+  margin-bottom: 3px;
+  height: 28px;
+  line-height: 28px;
+  width: 500px;
+}
+.closeBtn{
+  color: #8c8c8c;
+  transition: color ease-in 200ms,transform ease-in 200ms;
+}
+
+.closeBtn:hover{
+  color: #cf1322;
+  transform: scale(1.4);
+}
+
+.headerTilRow{
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  border-right: 1px solid #f0f0f0;
+}
+.headerTilItem{
+  border-left: 1px solid #f0f0f0;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.headerRow{
+  border-bottom: 1px solid #f0f0f0;
+  border-right: 1px solid #f0f0f0;
+}
+.headerItem{
+  padding: 3px;
+  border-left: 1px solid #f0f0f0;
+}

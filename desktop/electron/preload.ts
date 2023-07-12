@@ -12,6 +12,7 @@ import {
 } from "core/struct/response/ProjectResponse";
 import * as electron from "electron";
 import {
+  ActionEvents,
   ExpectationEvents, MatcherEvents,
   ProjectEvents,
 } from "core/struct/events/desktopEvents";
@@ -37,6 +38,14 @@ import {
   UpdateMatcherReqBody,
   UpdateMatcherReqQuery
 } from "core/struct/params/MatcherParams";
+import {
+  CreateActionPathParam,
+  CreateActionReqBody, CreateActionReqQuery,
+  DeleteActionPathParam,
+  DeleteActionReqBody,
+  DeleteActionReqQuery, UpdateActionPathParam,
+  UpdateActionReqBody, UpdateActionReqQuery
+} from "core/struct/params/ActionParams";
 const ipcRenderer = electron.ipcRenderer;
 
 // ----------------------------------------------------------------------
@@ -121,6 +130,29 @@ export const api = {
         reqBody: DeleteMatcherReqBody
     ) => {
       return ipcRenderer.invoke(MatcherEvents.DeleteMatcher,reqParam,reqQuery,reqBody);
+    },
+  },
+  action:{
+    createAction: (
+        reqParam: CreateActionPathParam,
+        reqQuery: CreateActionReqQuery,
+        reqBody: CreateActionReqBody
+    ) => {
+      return ipcRenderer.invoke(ActionEvents.CreateAction,reqParam,reqQuery,reqBody);
+    },
+    updateAction: (
+        reqParam: UpdateActionPathParam,
+        reqQuery: UpdateActionReqQuery,
+        reqBody: UpdateActionReqBody
+    ) => {
+      return ipcRenderer.invoke(ActionEvents.UpdateAction,reqParam,reqQuery,reqBody);
+    },
+    deleteAction: (
+        reqParam: DeleteActionPathParam,
+        reqQuery: DeleteActionReqQuery,
+        reqBody: DeleteActionReqBody
+    ) => {
+      return ipcRenderer.invoke(ActionEvents.DeleteAction,reqParam,reqQuery,reqBody);
     },
   }
 };
