@@ -1,14 +1,17 @@
-import { useState } from 'react'
-import './App.css'
-import {useDispatch} from "react-redux";
-import {useAppSelector} from "./store.ts";
-import {useQuery} from "@tanstack/react-query";
-import {getProjectListReq} from "./server/projectServer.ts";
-import {setProjectList} from "./slice/projectSlice.ts";
+import "antd/dist/reset.css";
+import "./App.css";
+import Layout from "./component/Layout";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectListReq } from "./server/projectServer";
+import WelcomePage from "./page/WelcomePage";
+import { useDispatch } from "react-redux";
+import { setProjectList } from "./slice/projectSlice";
+import { useAppSelector } from "./store";
+import { Toaster } from "react-hot-toast";
 import {Spin} from "antd";
-import {Toaster} from "react-hot-toast";
-import WelcomePage from "./page/WelcomePage.tsx";
-import Layout from "./component/Layout.tsx";
+import {Route, Routes,Navigate } from "react-router-dom";
+import ExpectationPage from "./page/ExpectationPage";
+import ConfigPage from "./page/ConfigPage";
 
 function App() {
     const dispatch = useDispatch();
@@ -21,24 +24,28 @@ function App() {
             return res;
         },
     });
-  return (
-    <>
-        {!projectListQuery.isLoading ? (
-            projectList.length === 0 ? (
-                <WelcomePage />
-            ) : (
-                <Layout>
 
-                </Layout>
-            )
-        ) : (
-            <Spin tip="Loading" size="large">
-                <div className="content" style={{height:"500px"}}/>
-            </Spin>
-        )}
-        <Toaster />
-    </>
-  )
+    return (
+        <>
+            {!projectListQuery.isLoading ? (
+                projectList.length === 0 ? (
+                    <WelcomePage />
+                ) : (
+                    <Layout >
+                        <Routes>
+                            <Route path={"expectation"} element={<ExpectationPage />} />
+                            <Route path={"*"} element={<Navigate to={"expectation"}/>} />
+                        </Routes>
+                    </Layout>
+                )
+            ) : (
+                <Spin tip="Loading" size="large">
+                    <div className="content" style={{height:"500px"}}/>
+                </Spin>
+            )}
+            <Toaster />
+        </>
+    );
 }
 
-export default App
+export default App;
