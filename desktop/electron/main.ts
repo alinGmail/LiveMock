@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
+import {setProjectHandler} from "./handler/projectHandler.ts";
 
 // The built directory structure
 //
@@ -24,7 +25,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
-  })
+  });
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -41,6 +42,9 @@ function createWindow() {
 
 app.on('window-all-closed', () => {
   win = null
-})
+});
+
+setProjectHandler(app.getPath("appData"));
+
 
 app.whenReady().then(createWindow)
