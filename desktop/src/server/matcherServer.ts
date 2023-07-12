@@ -8,8 +8,7 @@ import {
 export const createMatcherReq = async (
   param: CreateMatcherReqBody
 ): Promise<CreateMatcherResponse> => {
-  const res = await superagent.post(`${ServerUrl}/matcher`).send(param);
-  return res.body;
+  return window.api.matcher.createMatcher({}, {}, param);
 };
 
 export const deleteMatcherReq = async ({
@@ -21,17 +20,12 @@ export const deleteMatcherReq = async ({
   projectId: string;
   expectationId: string;
 }): Promise<DeleteMatcherResponse> => {
-  const response = await superagent.delete(
-    `${ServerUrl}/matcher/${matcherId}?projectId=${projectId}&expectationId=${expectationId}`
-  );
-  return response.body;
+  return window.api.matcher.deleteMatcher({matcherId},{projectId,expectationId},{})
 };
 
 export const updateMatcherReq = async (
   matcherId: string,
   param: UpdateMatcherReqBody
 ) :Promise<UpdateMatcherResponse>=> {
-  const response = await superagent.put(`${ServerUrl}/matcher/${matcherId}`)
-      .send(param);
-  return response.body;
+  return window.api.matcher.updateMatcher({matcherId},{},param);
 };
