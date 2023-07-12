@@ -15,3 +15,9 @@ export enum ExpectationEvents{
     CreateExpectation="CreateExpectation",
     UpdateExpectation="UpdateExpectation",
 }
+
+export enum MatcherEvents {
+    CreateMatcher="CreateMatcher",
+    UpdateMatcher="UpdateMatcher",
+    DeleteMatcher="DeleteMatcher"
+}
