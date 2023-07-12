@@ -6,7 +6,7 @@
     "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "build": "tsc && vite build && electron-builder",
     "vbuild": "vite build",
-    "build-electron": "tsc -project electron",
+    "build-electron": "tsc -b electron ",
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite"
@@ -32,7 +32,8 @@
     "use-immer": "^0.9.0",
     "uuid": "^9.0.0",
     "vite-plugin-svgr": "^3.2.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "core": "link:../core"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.195",
@@ -41,6 +42,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/sanitize-html": "^2.9.0",
     "@types/uuid": "^9.0.2",
+    "@types/wait-on": "^5.3.1",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "@vitejs/plugin-react": "^4.0.0",

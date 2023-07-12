@@ -23,9 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl":"./",
-    "paths":{
-      "core/*": ["../core/*"]
-    }
+
   },
   "include": [
     "src",
@@ -34,8 +32,6 @@
   "references": [
     {
       "path": "./tsconfig.node.json"
-    },{
-      "path": "../core"
     }
   ]
 }
