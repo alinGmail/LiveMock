@@ -11,6 +11,7 @@ export default defineConfig({
     svgr(),
     react(),
     tsconfigPaths(),
+/*
     electron([
       {
         // Main-Process entry file of the Electron App.
@@ -35,6 +36,7 @@ export default defineConfig({
         },
       },
     ]),
-    renderer(),
+*/
+    //renderer(),
   ],
 });

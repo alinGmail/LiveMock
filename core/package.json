@@ -1,14 +1,20 @@
 {
   "name": "core",
   "version": "1.0.1",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "source": "index.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "tsc": "tsc"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.2",
     "typescript": "^4.6.4"
+  },
+  "exports": {
+    "./struct/*": {
+      "require": "./build/struct/*.js",
+      "import": "./struct/*.ts"
+    }
   },
   "dependencies": {
     "@types/express": "4.17.13",

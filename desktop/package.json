@@ -3,10 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js",
-    "build": "tsc && vite build && electron-builder",
-    "vbuild": "vite build",
-    "build-electron": "tsc -b electron ",
+    "dev": "tsc -b electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
+    "electron": "electron build/main.js",
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite"
