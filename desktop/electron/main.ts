@@ -1,8 +1,10 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import {setProjectHandler} from "./handler/projectHandler";
-import * as console from "console";
 import * as process from "process";
+import {setExpectationHandler} from "./handler/expectationHandler";
+import {setMatcherHandler} from "./handler/matcherHandler";
+import {setActionHandler} from "./handler/actionHandler";
 
 // The built directory structure
 //
@@ -22,7 +24,14 @@ let win: BrowserWindow | null
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 const env = process.env['PROJECT_ENV']
-function createWindow() {
+async function createWindow() {
+
+  await setProjectHandler(app.getPath("appData"));
+  await setExpectationHandler(app.getPath("appData"));
+  await setMatcherHandler(app.getPath("appData"));
+  await setActionHandler(app.getPath("appData"));
+
+
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, 'electron-vite.svg'),
     webPreferences: {
@@ -47,8 +56,5 @@ function createWindow() {
 app.on('window-all-closed', () => {
   win = null
 });
-
-setProjectHandler(app.getPath("appData"));
-
 
 app.whenReady().then(createWindow)

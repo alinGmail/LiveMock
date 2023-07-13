@@ -3,7 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
-  listExpectationListReq,
+  listExpectationListReq
 } from "../server/expectationServer";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
+import {NInput} from "../component/nui/NInput";
 import {useState} from "react";
 
 const ExpectationPage = () => {

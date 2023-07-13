@@ -17,7 +17,7 @@ import {getExpectationCollection} from "../db/dbManager";
 const ipcMain = electron.ipcMain;
 
 
-export async function expectationHandler(path:string):Promise<void>{
+export async function setExpectationHandler(path:string):Promise<void>{
     ipcMain.handle(ExpectationEvents.CreateExpectation,async (
         event,
         reqParam: CreateExpectationPathParam,

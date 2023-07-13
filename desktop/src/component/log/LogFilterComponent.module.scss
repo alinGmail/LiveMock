@@ -1,0 +1,130 @@
+.simpleFilter {
+  border-radius: 20px;
+  padding: 0px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.dropDownWrap {
+  background: #fff;
+  padding: 6px;
+  box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px,
+  rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+  border-radius: 4px;
+  min-width: 200px;
+  text-align: left;
+  position: relative;
+}
+
+.textBtn {
+  font-size: 14px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 2px;
+  padding: 0px 4px;
+  color: rgba(55, 53, 47, 0.65);
+  user-select: none;
+  display: inline-block;
+  min-width: 20px;
+}
+
+.conditionWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.conditionSpan {
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.closeBtn {
+  margin-right: 6px;
+  margin-left: 3px;
+}
+
+.propertyInp {
+  position: absolute;
+  top: 7px;
+  left: 0px;
+  font-size: 12px;
+  text-indent: 0px;
+  padding: 0px;
+  margin: 0px 8px;
+  width: 130px;
+}
+
+.menuWrap {
+  box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px,
+  rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+  padding: 6px 3px;
+  background: #fff;
+}
+
+.menu {
+  width: 181px;
+}
+
+.menuItem {
+  height: 28px;
+  line-height: 28px;
+  font-size: 14px;
+  padding: 0px 12px;
+  color: rgb(55, 53, 47);
+}
+
+.menuItem:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.textBtn:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.popper {
+  position: absolute;
+  z-index: 3;
+}
+
+.placeHolder {
+  color: rgb(191, 191, 191);
+}
+
+.condition {
+  color: rgba(55, 53, 47, 0.65);
+  margin-right: 5px;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.property {
+  margin-right: 5px;
+  font-weight: 500;
+}
+
+.value {
+  margin-right: 4px;
+}
+
+.simpleFilter:hover .condition {
+  color: #40a9ff;
+}
+
+.filterActivate .simpleFilter {
+  border-color: rgba(46, 170, 220, 0.4);
+  background: rgba(46, 170, 220, 0.1);
+  color: rgb(46, 170, 220);
+}
+
+.filterActivate .condition {
+  color: rgb(46, 170, 220);
+}
+.chevronDown {
+  fill: rgba(55, 53, 47, 0.35);
+}
+.filterActivate .chevronDown {
+  fill: rgb(46, 170, 220);
+}

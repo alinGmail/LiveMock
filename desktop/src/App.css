@@ -1,0 +1,86 @@
+:root {
+    --hoverBgColor: rgba(55, 43, 47, 0.08);
+    --grayText: rgba(55, 53, 47, 0.5);
+    --normalBlack:rgb(55, 53, 47);
+}
+
+/* popup 弹出层 */
+.popper{
+    box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px, rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+    padding: 6px 3px;
+    background: #fff;
+    border-radius: 5px;
+}
+.inputWrap .ant-input{
+    transition: background 50ms ease-in 0s;
+    border-color: rgba(0,0,0,0);
+    background: rgb(0,0,0,0);
+}
+.inputWrap .ant-input:hover{
+    background: rgba(55,53,47,0.08);
+}
+.inputWrap .ant-input-number{
+    border-color: rgba(0,0,0,0);
+    background: rgba(0,0,0,0);
+
+}
+.inputWrap .ant-input-number:hover{
+    background: rgba(55,53,47,0.08);
+    border-color: #40a9ff;
+}
+
+.inputWrap  .ant-input:focus,.inputWrap  .ant-input-focused,
+.inputWrap .ant-input-number-focused{
+    border-color: #40a9ff;
+    box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+    /*border-right-width: 1px;*/
+    background: #ffffff !important;
+}
+
+
+/* menu */
+.menuWrap{
+    box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px, rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
+    padding: 5px 3px;
+    background: #fff;
+    border-radius: 3px;
+}
+
+.menu{
+    /*width: 181px;*/
+}
+.menuItem{
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+    padding: 0px 12px;
+    color:rgb(55, 53, 47);
+    cursor: pointer;
+    user-select: none;
+    border-radius: 3px;
+}
+.menuItem:hover{
+    background: rgba(55, 53, 47, 0.08);
+}
+
+.textBtn{
+    font-size: 14px;
+    height: 24px;
+    line-height: 24px;
+    border-radius: 4px;
+    padding: 0px 8px;
+    color: rgba(55, 53, 47, 0.65);
+    user-select: none;
+    display: inline-block;
+    cursor: pointer;
+}
+.textBtn:hover{
+    background: rgba(55,53,47,0.08);
+}
+.ant-btn-text:hover, .ant-btn-text:focus{
+    background: rgba(55,53,47,0.08);
+}
+html{
+    background: linear-gradient(to bottom, rgb(36, 41, 47) 0, rgb(36, 41, 47) 74px, white 74px) repeat-x;
+
+}

@@ -32,7 +32,7 @@ export const updateExpectationReq = async (
   return res.body;
 };
 
-export const getExpectationListReq = async (projectId: string):Promise<ListExpectationResponse> => {
+export const listExpectationReq = async (projectId: string):Promise<ListExpectationResponse> => {
   const res = await superagent.get(
     `${ServerUrl}/expectation/?projectId=${projectId}`
   );

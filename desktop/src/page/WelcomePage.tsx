@@ -43,8 +43,6 @@ export const WelcomePage = () => {
           updaterProjectM={updateProject as Updater<ProjectM>}
         />
       )}
-
-
     </div>
   );
 };
