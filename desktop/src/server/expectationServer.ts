@@ -26,14 +26,10 @@ export const updateExpectationReq = async (
   return window.api.expectation.updateExpectation({expectationId},{},param);
 };
 
-export const getExpectationListReq = async (projectId: string):Promise<ListExpectationResponse> => {
+export const listExpectationListReq = async (projectId: string):Promise<ListExpectationResponse> => {
   return window.api.expectation.listExpectation({},{projectId},{});
 };
 
 export const deleteExpectationReq = async (projectId:string,expectationId:string) =>{
-
-  //const res = await superagent.delete(`${ServerUrl}/expectation/${expectationId}`)
-  //    .query({projectId:projectId});
-  //return res.body;
-
+  return window.api.expectation.deleteExpectation({expectationId},{projectId},{});
 }

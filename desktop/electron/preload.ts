@@ -20,6 +20,10 @@ import {
   CreateExpectationPathParam,
   CreateExpectationReqBody,
   CreateExpectationReqQuery,
+  DeleteExpectationPathParam,
+  DeleteExpectationReqBody,
+  DeleteExpectationReqQuery,
+  GetExpectationPathParam, GetExpectationReqBody, GetExpectationReqQuery,
   ListExpectationPathParam,
   ListExpectationReqBody,
   ListExpectationReqQuery,
@@ -108,6 +112,21 @@ export const api = {
         reqBody
       );
     },
+    deleteExpectation: (
+        reqParam: DeleteExpectationPathParam,
+        reqQuery: DeleteExpectationReqQuery,
+        reqBody: DeleteExpectationReqBody
+    ) => {
+      return ipcRenderer.invoke(ExpectationEvents.DeleteExpectation, reqParam,reqQuery,reqBody);
+    },
+    getExpectation: (
+        reqParam: GetExpectationPathParam,
+        reqQuery: GetExpectationReqQuery,
+        reqBody: GetExpectationReqBody
+    ) => {
+      return ipcRenderer.invoke(ExpectationEvents.GetExpectation, reqParam,reqQuery,reqBody);
+    },
+
   },
   matcher:{
     createMatcher: (
