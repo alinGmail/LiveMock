@@ -88,7 +88,7 @@ export const api = {
       );
     },
     startProject: ({ projectId }: { projectId: string }) => {
-      return ipcRenderer.invoke(ProjectEvents.StartProject,projectId);
+      return ipcRenderer.invoke(ProjectEvents.StartProject, projectId);
     },
     stopProject: ({ projectId }: { projectId: string }) => {
       return ipcRenderer.invoke(ProjectEvents.StopProject, projectId);
@@ -111,7 +111,14 @@ export const api = {
       reqParam: UpdateExpectationPathParam,
       reqQuery: UpdateExpectationReqQuery,
       reqBody: UpdateExpectationReqBody
-    ) => {},
+    ) => {
+      return ipcRenderer.invoke(
+        ExpectationEvents.UpdateExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
     listExpectation: (
       reqParam: ListExpectationPathParam,
       reqQuery: ListExpectationReqQuery,
