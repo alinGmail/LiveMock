@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import LogFilterComponent from "../component/log/LogFilterComponent";
@@ -21,11 +21,13 @@ import {
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { getLogViewReq, listLogViewLogs } from "../server/logServer";
+import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
-import {ColumnsType} from "antd/es/table/interface";
+import { ColumnsType } from "antd/es/table/interface";
+import { LogViewEvents } from "core/struct/events/desktopEvents";
+import IpcRendererEvent = Electron.IpcRendererEvent;
 
 function onLogsInsert(
   insertLog: LogM,
@@ -104,11 +106,10 @@ const LogPage: React.FC = () => {
   const dispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
-  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
-    return getLogViewReq({ projectId: currentProject.id }).then((res) => {
+    return listLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
       dispatch(resetLogFilter(res[0].filters));
       return res;
@@ -132,64 +133,76 @@ const LogPage: React.FC = () => {
       enabled: !!logViewId,
     }
   );
-  const [logColumn,updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
-  useEffect(() =>{
-    console.log("custom columns change")
+  const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
+  useEffect(() => {
+    console.log("custom columns change");
     const customColumns = getCustomColumn(
-        tableColumns.filter((item, index) => item.visible),
-        dispatch
+      tableColumns.filter((item, index) => item.visible),
+      dispatch
     );
     const newLogColumn = getDefaultColumn(dispatch)
-        .filter((item, index) => defaultColumnVisible[index])
-        .concat(customColumns)
-        .concat(getConfigColumn(dispatch));
+      .filter((item, index) => defaultColumnVisible[index])
+      .concat(customColumns)
+      .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  },[tableColumns,defaultColumnVisible,dispatch]);
+  }, [tableColumns, defaultColumnVisible, dispatch]);
 
   useEffect(() => {
-    const socket = io(ServerUrl, {
-      query: {
-        projectId: currentProject.id,
-      },
-    });
-
-    socket.on("connect", () => {});
-
-    socket.on(
-      "insert",
-      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-      }
-    );
-    socket.on(
-      "update",
-      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
-      }
-    );
-    socket.on(
-      "delete",
-      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
-      }
-    );
-    setSocketInstance(socket);
+    const onLogInsertHandle = (
+      event: IpcRendererEvent,
+      { log, logViewId }: { log: LogM; logViewId: string }
+    ) => {
+      onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
+    };
+    window.api.event.on(LogViewEvents.OnLogAdd, onLogInsertHandle);
     return () => {
-      socket.disconnect();
+      window.api.event.removeListener(
+        LogViewEvents.OnLogAdd,
+        onLogInsertHandle
+      );
     };
   }, []);
-  const listTable = useMemo(() =>{
-      return (<Table
+
+  useEffect(() => {
+    const onLogUpdateHandle = (
+      event: IpcRendererEvent,
+      { log, logViewId }: { log: LogM; logViewId: string }
+    ) => {
+      onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
+    };
+    window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle);
+    return () => {
+      window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle);
+    };
+  });
+
+  useEffect(() => {
+    const onLogDeleteHandle = (
+      event: IpcRendererEvent,
+      { log, logViewId }: { log: LogM; logViewId: string }
+    ) => {
+      onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
+    };
+    window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle);
+    return () => {
+      window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle);
+    };
+  });
+
+  const listTable = useMemo(() => {
+    return (
+      <Table
         columns={logColumn}
         dataSource={logs}
         size={"small"}
         tableLayout={"fixed"}
         rowKey={"id"}
         pagination={{
-          pageSize:200,
+          pageSize: 200,
         }}
-    />)
-  },[logColumn,logs])
+      />
+    );
+  }, [logColumn, logs]);
   return (
     <div style={{ padding: "10px" }}>
       <div style={{ padding: "10px 0px" }}>
@@ -213,9 +226,7 @@ const LogPage: React.FC = () => {
           />
         )}
       </div>
-      <div>
-        {listTable}
-      </div>
+      <div>{listTable}</div>
       <ColumnEditor
         onClose={() => {
           dispatch(hideColumnEditor());

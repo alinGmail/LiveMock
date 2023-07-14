@@ -1,9 +1,9 @@
 import express, {Request, Response} from "express";
 import {
-    AddLogFilterParam,
-    AddLogFilterReqBody,
-    AddLogFilterReqQuery, DeleteLogFilterParam, DeleteLogFilterReqBody, DeleteLogFilterReqQuery,
-    UpdateLogFilterParam, UpdateLogFilterReqBody, UpdateLogFilterReqQuery
+    CreateLogFilterPathParam,
+    CreateLogFilterReqBody,
+    CreateLogFilterReqQuery, DeleteLogFilterPathParam, DeleteLogFilterReqBody, DeleteLogFilterReqQuery,
+    UpdateLogFilterPathParam, UpdateLogFilterReqBody, UpdateLogFilterReqQuery
 } from "core/struct/params/LogFilterParam";
 import {addCross, ServerError, toAsyncRouter} from "./common";
 import {getLogViewCollection, getLogViewDb} from "../db/dbManager";
@@ -16,10 +16,10 @@ import {applyDynamicViewFilter, getLogDynamicView, removeDynamicViewFilter} from
 export async function getLogFilterRouter(path:string):Promise<express.Router>{
 
     async function addLogFilter(req:Request<
-        AddLogFilterParam,
+        CreateLogFilterPathParam,
         AddLogFilterResponse,
-        AddLogFilterReqBody,
-        AddLogFilterReqQuery
+        CreateLogFilterReqBody,
+        CreateLogFilterReqQuery
         >,res:Response<AddLogFilterResponse>){
         addCross(res);
         let {filter, logViewId, projectId} = req.body;
@@ -40,7 +40,7 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
 
 
     async function updateLogFilter(req:Request<
-        UpdateLogFilterParam,
+        UpdateLogFilterPathParam,
         UpdateLogFilterResponse,
         UpdateLogFilterReqBody,
         UpdateLogFilterReqQuery
@@ -71,7 +71,7 @@ export async function getLogFilterRouter(path:string):Promise<express.Router>{
 
 
     async function deleteLogFilter(req:Request<
-        DeleteLogFilterParam,
+        DeleteLogFilterPathParam,
         DeleteLogFilterResponse,
         DeleteLogFilterReqBody,
         DeleteLogFilterReqQuery

@@ -18,6 +18,7 @@ import * as electron from "electron";
 import {
   ActionEvents,
   ExpectationEvents,
+  LogFilterEvents,
   LogViewEvents,
   MatcherEvents,
   ProjectEvents,
@@ -64,17 +65,39 @@ import {
 } from "core/struct/params/ActionParams";
 import {
   ListLogViewLogsPathParam,
-  ListLogViewLogsReqBody, ListLogViewLogsReqQuery,
+  ListLogViewLogsReqBody,
+  ListLogViewLogsReqQuery,
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
 } from "core/struct/params/LogParams";
+import {
+  CreateLogFilterPathParam,
+  CreateLogFilterReqBody,
+  CreateLogFilterReqQuery,
+  DeleteLogFilterPathParam,
+  DeleteLogFilterReqBody,
+  DeleteLogFilterReqQuery,
+  UpdateLogFilterPathParam,
+  UpdateLogFilterReqBody,
+  UpdateLogFilterReqQuery,
+} from "core/struct/params/LogFilterParam";
+import IpcRendererEvent = Electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
 
 // ----------------------------------------------------------------------
-
-
 export const api = {
+  event: {
+    on: (
+      channel: string,
+      listener: (event: IpcRendererEvent, ...args: any[]) => void
+    ) => {
+      ipcRenderer.on(channel, listener);
+    },
+    removeListener: (channel: string, listener: (...args: any[]) => void) => {
+      ipcRenderer.removeListener(channel, listener);
+    },
+  },
   project: {
     listProject: (
       reqParam: ListProjectPathParam,
@@ -275,11 +298,50 @@ export const api = {
       reqQuery: ListLogViewLogsReqQuery,
       reqBody: ListLogViewLogsReqBody
     ) => {
-      return ipcRenderer.invoke(LogViewEvents.ListLogViewLogs,
-          reqParam,
-          reqQuery,
-          reqBody
-          )
+      return ipcRenderer.invoke(
+        LogViewEvents.ListLogViewLogs,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+  },
+  logFilter: {
+    createLogFilter: (
+      reqParam: CreateLogFilterPathParam,
+      reqQuery: CreateLogFilterReqQuery,
+      reqBody: CreateLogFilterReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogFilterEvents.CreateLogFilter,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    updateLogFilter: (
+      reqParam: UpdateLogFilterPathParam,
+      reqQuery: UpdateLogFilterReqQuery,
+      reqBody: UpdateLogFilterReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogFilterEvents.UpdateLogFilter,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    deleteLogFilter: (
+      reqParam: DeleteLogFilterPathParam,
+      reqQuery: DeleteLogFilterReqQuery,
+      reqBody: DeleteLogFilterReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogFilterEvents.DeleteLogFilter,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
   },
 };

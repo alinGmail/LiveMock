@@ -7,7 +7,7 @@ import {getLogFilterRouter} from "../../src/controller/logFilterController";
 import request from "supertest";
 import supertest from "supertest";
 import {createSimpleFilter, FilterType, SimpleFilterM} from "core/struct/log";
-import {AddLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
+import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
 import {getLogViewDb, getProjectDb} from "../../src/db/dbManager";
 import {LogViewM} from "core/struct/logView";
 
@@ -47,7 +47,7 @@ describe(`log filter controller`, () => {
         const simpleFilterM = createSimpleFilter();
         simpleFilterM.value = "filterValue1";
         simpleFilterM.property = "filterProperty1"
-        let param: AddLogFilterReqBody = {filter: simpleFilterM, logViewId: logView!.id, projectId: projectM.id}
+        let param: CreateLogFilterReqBody = {filter: simpleFilterM, logViewId: logView!.id, projectId: projectM.id}
         const addRes = await supertest(server).post("/logFilter/").send(param).expect(200);
 
 
@@ -59,7 +59,7 @@ describe(`log filter controller`, () => {
         expect((dbFilter as SimpleFilterM).property).toBe("filterProperty1");
 
         const simpleFilterM2 = createSimpleFilter();
-        let param2: AddLogFilterReqBody = {filter: simpleFilterM2, logViewId: logView!.id, projectId: projectM.id}
+        let param2: CreateLogFilterReqBody = {filter: simpleFilterM2, logViewId: logView!.id, projectId: projectM.id}
         const addRes2 = await supertest(server).post("/logFilter/").send(param2).expect(200);
 
         //test update
