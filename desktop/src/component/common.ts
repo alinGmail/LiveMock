@@ -1,4 +1,3 @@
-import * as superagent from "superagent";
 import toast from "react-hot-toast";
 
 /**
@@ -6,12 +5,7 @@ import toast from "react-hot-toast";
  * @param error
  */
 export function getErrorMessage(error: any) {
-  if (typeof (error as superagent.ResponseError).response === "object") {
-    return (
-      (error as superagent.ResponseError).response?.body.error.message ??
-      "server error"
-    );
-  } else if (error instanceof Error) {
+ if (error instanceof Error) {
     return error.message;
   } else {
     return "an error occurred";

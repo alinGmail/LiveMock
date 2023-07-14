@@ -5,7 +5,7 @@ import * as process from "process";
 import { setExpectationHandler } from "./handler/expectationHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
-import { logViewEventHandler } from "./handler/logViewHandler";
+import {logViewEventHandler, setLogViewHandler} from "./handler/logViewHandler";
 
 // The built directory structure
 //
@@ -31,8 +31,7 @@ async function createWindow() {
   await setExpectationHandler(app.getPath("appData"));
   await setMatcherHandler(app.getPath("appData"));
   await setActionHandler(app.getPath("appData"));
-
-  logViewEventHandler();
+  await setLogViewHandler(app.getPath("appData"));
 
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
@@ -44,6 +43,7 @@ async function createWindow() {
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
+    logViewEventHandler(win!.webContents);
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
 
