@@ -5,10 +5,14 @@ import {
   ListProjectPathParam,
   ListProjectReqBody,
   ListProjectReqQuery,
+  UpdateProjectPathParam,
+  UpdateProjectReqBody,
+  UpdateProjectReqQuery,
 } from "core/struct/params/ProjectParams";
 import {
   CreateProjectResponse,
   ListProjectResponse,
+  UpdateProjectResponse,
 } from "core/struct/response/ProjectResponse";
 import * as electron from "electron";
 import {
@@ -92,6 +96,18 @@ export const api = {
     },
     stopProject: ({ projectId }: { projectId: string }) => {
       return ipcRenderer.invoke(ProjectEvents.StopProject, projectId);
+    },
+    updateProject: (
+      reqParam: UpdateProjectPathParam,
+      reqQuery: UpdateProjectReqQuery,
+      reqBody: UpdateProjectReqBody
+    ): Promise<UpdateProjectResponse> => {
+      return ipcRenderer.invoke(
+        ProjectEvents.UpdateProject,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
   },
   expectation: {
