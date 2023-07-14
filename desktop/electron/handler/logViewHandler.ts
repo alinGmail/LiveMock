@@ -1,5 +1,5 @@
-import ipcMain = electron.ipcMain;
 import * as electron from "electron";
+import ipcMain = electron.ipcMain;
 import { LogViewEvents } from "core/struct/events/desktopEvents";
 import {
   ListLogViewLogsPathParam,
@@ -12,6 +12,8 @@ import {
 import { ServerError } from "./common";
 import { getLogCollection, getLogViewCollection } from "../db/dbManager";
 import { getLogDynamicView } from "../log/logUtils";
+import { logViewEventEmitter } from "../common/logViewEvent";
+import { LogM } from "core/struct/log";
 
 const PAGE_SIZE = 100;
 export async function setLogViewHandler(path: string) {
@@ -66,4 +68,21 @@ export async function setLogViewHandler(path: string) {
       return logs;
     }
   );
+}
+
+export function logViewEventHandler() {
+  logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogAdd, { log, logViewId });
+  });
+
+  logViewEventEmitter.on("update", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogUpdate, { log, logViewId });
+  });
+
+  logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogDelete, { log, logViewId });
+  });
 }
