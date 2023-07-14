@@ -18,6 +18,7 @@ import * as electron from "electron";
 import {
   ActionEvents,
   ExpectationEvents,
+  LogViewEvents,
   MatcherEvents,
   ProjectEvents,
 } from "core/struct/events/desktopEvents";
@@ -61,9 +62,17 @@ import {
   UpdateActionReqBody,
   UpdateActionReqQuery,
 } from "core/struct/params/ActionParams";
+import {
+  ListLogViewLogsPathParam,
+  ListLogViewLogsReqBody, ListLogViewLogsReqQuery,
+  ListLogViewPathParam,
+  ListLogViewReqBody,
+  ListLogViewReqQuery,
+} from "core/struct/params/LogParams";
 const ipcRenderer = electron.ipcRenderer;
 
 // ----------------------------------------------------------------------
+
 
 export const api = {
   project: {
@@ -246,6 +255,31 @@ export const api = {
         reqQuery,
         reqBody
       );
+    },
+  },
+  logView: {
+    listLogView: (
+      reqParam: ListLogViewPathParam,
+      reqQuery: ListLogViewReqQuery,
+      reqBody: ListLogViewReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogViewEvents.ListLogView,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    listLogViewLogs: (
+      reqParam: ListLogViewLogsPathParam,
+      reqQuery: ListLogViewLogsReqQuery,
+      reqBody: ListLogViewLogsReqBody
+    ) => {
+      return ipcRenderer.invoke(LogViewEvents.ListLogViewLogs,
+          reqParam,
+          reqQuery,
+          reqBody
+          )
     },
   },
 };

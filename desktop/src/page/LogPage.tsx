@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import { v4 as uuId } from "uuid";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import LogFilterComponent from "../component/log/LogFilterComponent";
-import { io, Socket } from "socket.io-client";
 import { useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { Button, Table } from "antd";
@@ -22,12 +21,11 @@ import {
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { listLogViewReq, listLogViewLogs } from "../server/logServer";
+import { getLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import {ColumnsType} from "antd/es/table/interface";
-import {ServerUrl} from "../config";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -110,7 +108,7 @@ const LogPage: React.FC = () => {
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
-    return listLogViewReq({ projectId: currentProject.id }).then((res) => {
+    return getLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
       dispatch(resetLogFilter(res[0].filters));
       return res;

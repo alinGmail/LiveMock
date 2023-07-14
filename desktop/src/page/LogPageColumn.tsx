@@ -432,7 +432,7 @@ function TextRender(item: TableColumnItem, log: LogM) {
     case "undefined":
       break;
     case "object":
-      content = <TextColumn content={JSON.stringify(root)}/>;
+      content = <TextColumn content={JSON.stringify(root)} />;
       break;
     case "boolean":
       content = <div>{root ? "true" : "false"}</div>;
@@ -441,7 +441,7 @@ function TextRender(item: TableColumnItem, log: LogM) {
       content = <TextColumn content={root.toString()} />;
       break;
     case "string":
-      content = <TextColumn content={root}/>;
+      content = <TextColumn content={root} />;
       break;
     case "function":
       break;

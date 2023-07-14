@@ -123,31 +123,34 @@ export async function setProjectHandler(path: string): Promise<void> {
     }
   );
 
-  ipcMain.handle(ProjectEvents.StopProject,async (event,projectId:string)=>{
-    const projectStatus = getProjectStatus(projectId);
+  ipcMain.handle(
+    ProjectEvents.StopProject,
+    async (event, projectId: string) => {
+      const projectStatus = getProjectStatus(projectId);
 
-    if (projectStatus !== ProjectStatus.STARTED) {
-      throw new ServerError(500, "project status is " + projectStatus);
-    }
-    const server = await getProjectServer(projectId, path);
-    if (server) {
-      setProjectStatus(projectId, ProjectStatus.CLOSING);
-      server.closeIdleConnections();
-      server.closeAllConnections();
-      server.close((err) => {
-        if(err){
-          console.log(err);
-          throw new ServerError(500,err.message);
-        }
-        setProjectStatus(projectId, ProjectStatus.STOPPED);
-        return({
-          message: "success",
+      if (projectStatus !== ProjectStatus.STARTED) {
+        throw new ServerError(500, "project status is " + projectStatus);
+      }
+      const server = await getProjectServer(projectId, path);
+      if (server) {
+        setProjectStatus(projectId, ProjectStatus.CLOSING);
+        server.closeIdleConnections();
+        server.closeAllConnections();
+        server.close((err) => {
+          if (err) {
+            console.log(err);
+            throw new ServerError(500, err.message);
+          }
+          setProjectStatus(projectId, ProjectStatus.STOPPED);
+          return {
+            message: "success",
+          };
         });
-      });
-    } else {
-      throw new ServerError(500, "server not exist");
+      } else {
+        throw new ServerError(500, "server not exist");
+      }
     }
-  })
+  );
 
   async function onProjectStart(project: ProjectM) {
     // create lokij view

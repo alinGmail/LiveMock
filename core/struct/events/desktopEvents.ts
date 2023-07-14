@@ -30,3 +30,8 @@ export enum ActionEvents {
     UpdateAction="UpdateAction",
     DeleteAction="DeleteAction"
 }
+
+export enum LogViewEvents{
+    ListLogView="ListLogView",
+    ListLogViewLogs="ListLogViewLogs"
+}
