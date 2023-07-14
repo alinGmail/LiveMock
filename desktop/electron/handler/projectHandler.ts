@@ -27,6 +27,7 @@ import { createLogView } from "core/struct/logView";
 import express from "express";
 import getMockRouter from "../server/mockServer";
 import { getLogDynamicView } from "../log/logUtils";
+import * as console from "console";
 
 const ipcMain = electron.ipcMain;
 
@@ -131,7 +132,13 @@ export async function setProjectHandler(path: string): Promise<void> {
     const server = await getProjectServer(projectId, path);
     if (server) {
       setProjectStatus(projectId, ProjectStatus.CLOSING);
-      server.close(() => {
+      server.closeIdleConnections();
+      server.closeAllConnections();
+      server.close((err) => {
+        if(err){
+          console.log(err);
+          throw new ServerError(500,err.message);
+        }
         setProjectStatus(projectId, ProjectStatus.STOPPED);
         return({
           message: "success",
