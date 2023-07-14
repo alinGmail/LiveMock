@@ -8,7 +8,8 @@
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite"
+    "preview": "vite build",
+    "build": "tsc -project electron && vite build && electron-builder"
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
@@ -32,7 +33,12 @@
     "uuid": "^9.0.0",
     "vite-plugin-svgr": "^3.2.0",
     "wait-on": "^7.0.1",
-    "core": "link:../core"
+    "core": "link:../core",
+    "body-parser": "^1.20.0",
+    "express": "4.18.1",
+    "form-data": "^4.0.0",
+    "http-proxy": "^1.18.1",
+    "type-is": "^1.6.18"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.195",

@@ -8,13 +8,25 @@ import {
   ListProjectReqBody,
   ListProjectReqQuery,
 } from "core/struct/params/ProjectParams";
-import { ProjectM } from "core/struct/project";
+import { ProjectM, ProjectStatus } from "core/struct/project";
 import { Collection } from "lokijs";
-import { getLogViewCollection, getProjectCollection } from "../db/dbManager";
-import { getProjectStatus } from "../server/projectStatusManage";
+import {
+  getLogCollection,
+  getLogViewCollection,
+  getProjectCollection,
+} from "../db/dbManager";
+import {
+  getProjectServer,
+  getProjectStatus,
+  setProjectServer,
+  setProjectStatus,
+} from "../server/projectStatusManage";
 import { isNotEmptyString } from "../common/utils";
 import { ServerError } from "./common";
 import { createLogView } from "core/struct/logView";
+import express from "express";
+import getMockRouter from "../server/mockServer";
+import { getLogDynamicView } from "../log/logUtils";
 
 const ipcMain = electron.ipcMain;
 
@@ -66,5 +78,78 @@ export async function setProjectHandler(path: string): Promise<void> {
     }
   );
 
-  return;
+  ipcMain.handle(
+    ProjectEvents.StartProject,
+    async (event, projectId: string) => {
+      const projectStatus = getProjectStatus(projectId);
+
+      if (projectStatus !== ProjectStatus.STOPPED) {
+        throw new ServerError(500, "project status is " + projectStatus);
+      }
+
+      const project = collection.findOne({ id: projectId });
+      if (!project) {
+        throw new ServerError(500, "project not exist");
+      }
+      let server = await getProjectServer(projectId, path);
+      setProjectStatus(projectId, ProjectStatus.STARTING);
+      if (server == null) {
+        let expServer = express();
+        expServer.all("*", await getMockRouter(path, projectId));
+        server = expServer.listen(project?.port, () => {
+          server!.removeAllListeners("error");
+          setProjectStatus(projectId, ProjectStatus.STARTED);
+          onProjectStart(project);
+          return {
+            message: "success",
+          };
+        });
+        setProjectServer(projectId, server);
+      } else {
+        server.listen(project?.port, () => {
+          server!.removeAllListeners("error");
+          setProjectStatus(projectId, ProjectStatus.STARTED);
+          onProjectStart(project);
+          return {
+            message: "success",
+          };
+        });
+      }
+      server.once("error", (error) => {
+        // res.status(500);
+        throw new ServerError(500, "server start fail");
+      });
+    }
+  );
+
+  ipcMain.handle(ProjectEvents.StopProject,async (event,projectId:string)=>{
+    const projectStatus = getProjectStatus(projectId);
+
+    if (projectStatus !== ProjectStatus.STARTED) {
+      throw new ServerError(500, "project status is " + projectStatus);
+    }
+    const server = await getProjectServer(projectId, path);
+    if (server) {
+      setProjectStatus(projectId, ProjectStatus.CLOSING);
+      server.close(() => {
+        setProjectStatus(projectId, ProjectStatus.STOPPED);
+        return({
+          message: "success",
+        });
+      });
+    } else {
+      throw new ServerError(500, "server not exist");
+    }
+  })
+
+  async function onProjectStart(project: ProjectM) {
+    // create lokij view
+    const logViewCollection = await getLogViewCollection(project.id, path);
+    const logCollection = await getLogCollection(project.id, path);
+    const logViews = logViewCollection.find({});
+
+    for (const logView of logViews) {
+      await getLogDynamicView(project.id, logView.id, path);
+    }
+  }
 }

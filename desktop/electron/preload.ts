@@ -13,7 +13,8 @@ import {
 import * as electron from "electron";
 import {
   ActionEvents,
-  ExpectationEvents, MatcherEvents,
+  ExpectationEvents,
+  MatcherEvents,
   ProjectEvents,
 } from "core/struct/events/desktopEvents";
 import {
@@ -23,7 +24,9 @@ import {
   DeleteExpectationPathParam,
   DeleteExpectationReqBody,
   DeleteExpectationReqQuery,
-  GetExpectationPathParam, GetExpectationReqBody, GetExpectationReqQuery,
+  GetExpectationPathParam,
+  GetExpectationReqBody,
+  GetExpectationReqQuery,
   ListExpectationPathParam,
   ListExpectationReqBody,
   ListExpectationReqQuery,
@@ -35,20 +38,24 @@ import { ListExpectationResponse } from "core/struct/response/ExpectationRespons
 import {
   CreateMatcherPathParam,
   CreateMatcherReqBody,
-  CreateMatcherReqQuery, DeleteMatcherPathParam,
+  CreateMatcherReqQuery,
+  DeleteMatcherPathParam,
   DeleteMatcherReqBody,
   DeleteMatcherReqQuery,
   UpdateMatcherPathParam,
   UpdateMatcherReqBody,
-  UpdateMatcherReqQuery
+  UpdateMatcherReqQuery,
 } from "core/struct/params/MatcherParams";
 import {
   CreateActionPathParam,
-  CreateActionReqBody, CreateActionReqQuery,
+  CreateActionReqBody,
+  CreateActionReqQuery,
   DeleteActionPathParam,
   DeleteActionReqBody,
-  DeleteActionReqQuery, UpdateActionPathParam,
-  UpdateActionReqBody, UpdateActionReqQuery
+  DeleteActionReqQuery,
+  UpdateActionPathParam,
+  UpdateActionReqBody,
+  UpdateActionReqQuery,
 } from "core/struct/params/ActionParams";
 const ipcRenderer = electron.ipcRenderer;
 
@@ -80,11 +87,11 @@ export const api = {
         reqBody
       );
     },
-    startProject: () => {
-      return ipcRenderer.invoke(ProjectEvents.StartProject, () => {});
+    startProject: ({ projectId }: { projectId: string }) => {
+      return ipcRenderer.invoke(ProjectEvents.StartProject,projectId);
     },
-    updateProject: () => {
-      return ipcRenderer.invoke(ProjectEvents.UpdateProject, () => {});
+    stopProject: ({ projectId }: { projectId: string }) => {
+      return ipcRenderer.invoke(ProjectEvents.StopProject, projectId);
     },
   },
   expectation: {
@@ -93,7 +100,12 @@ export const api = {
       reqQuery: CreateExpectationReqQuery,
       reqBody: CreateExpectationReqBody
     ) => {
-      return ipcRenderer.invoke(ExpectationEvents.CreateExpectation, reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ExpectationEvents.CreateExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     updateExpectation: (
       reqParam: UpdateExpectationPathParam,
@@ -113,67 +125,106 @@ export const api = {
       );
     },
     deleteExpectation: (
-        reqParam: DeleteExpectationPathParam,
-        reqQuery: DeleteExpectationReqQuery,
-        reqBody: DeleteExpectationReqBody
+      reqParam: DeleteExpectationPathParam,
+      reqQuery: DeleteExpectationReqQuery,
+      reqBody: DeleteExpectationReqBody
     ) => {
-      return ipcRenderer.invoke(ExpectationEvents.DeleteExpectation, reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ExpectationEvents.DeleteExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     getExpectation: (
-        reqParam: GetExpectationPathParam,
-        reqQuery: GetExpectationReqQuery,
-        reqBody: GetExpectationReqBody
+      reqParam: GetExpectationPathParam,
+      reqQuery: GetExpectationReqQuery,
+      reqBody: GetExpectationReqBody
     ) => {
-      return ipcRenderer.invoke(ExpectationEvents.GetExpectation, reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ExpectationEvents.GetExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
-
   },
-  matcher:{
+  matcher: {
     createMatcher: (
-        reqParam: CreateMatcherPathParam,
-        reqQuery: CreateMatcherReqQuery,
-        reqBody: CreateMatcherReqBody
+      reqParam: CreateMatcherPathParam,
+      reqQuery: CreateMatcherReqQuery,
+      reqBody: CreateMatcherReqBody
     ) => {
-      return ipcRenderer.invoke(MatcherEvents.CreateMatcher,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        MatcherEvents.CreateMatcher,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     updateMatcher: (
-        reqParam: UpdateMatcherPathParam,
-        reqQuery: UpdateMatcherReqQuery,
-        reqBody: UpdateMatcherReqBody
+      reqParam: UpdateMatcherPathParam,
+      reqQuery: UpdateMatcherReqQuery,
+      reqBody: UpdateMatcherReqBody
     ) => {
-      return ipcRenderer.invoke(MatcherEvents.UpdateMatcher,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        MatcherEvents.UpdateMatcher,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     deleteMatcher: (
-        reqParam: DeleteMatcherPathParam,
-        reqQuery: DeleteMatcherReqQuery,
-        reqBody: DeleteMatcherReqBody
+      reqParam: DeleteMatcherPathParam,
+      reqQuery: DeleteMatcherReqQuery,
+      reqBody: DeleteMatcherReqBody
     ) => {
-      return ipcRenderer.invoke(MatcherEvents.DeleteMatcher,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        MatcherEvents.DeleteMatcher,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
   },
-  action:{
+  action: {
     createAction: (
-        reqParam: CreateActionPathParam,
-        reqQuery: CreateActionReqQuery,
-        reqBody: CreateActionReqBody
+      reqParam: CreateActionPathParam,
+      reqQuery: CreateActionReqQuery,
+      reqBody: CreateActionReqBody
     ) => {
-      return ipcRenderer.invoke(ActionEvents.CreateAction,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ActionEvents.CreateAction,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     updateAction: (
-        reqParam: UpdateActionPathParam,
-        reqQuery: UpdateActionReqQuery,
-        reqBody: UpdateActionReqBody
+      reqParam: UpdateActionPathParam,
+      reqQuery: UpdateActionReqQuery,
+      reqBody: UpdateActionReqBody
     ) => {
-      return ipcRenderer.invoke(ActionEvents.UpdateAction,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ActionEvents.UpdateAction,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
     deleteAction: (
-        reqParam: DeleteActionPathParam,
-        reqQuery: DeleteActionReqQuery,
-        reqBody: DeleteActionReqBody
+      reqParam: DeleteActionPathParam,
+      reqQuery: DeleteActionReqQuery,
+      reqBody: DeleteActionReqBody
     ) => {
-      return ipcRenderer.invoke(ActionEvents.DeleteAction,reqParam,reqQuery,reqBody);
+      return ipcRenderer.invoke(
+        ActionEvents.DeleteAction,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
     },
-  }
+  },
 };
 
 electron.contextBridge.exposeInMainWorld("api", api);

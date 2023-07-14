@@ -39,4 +39,5 @@ export default defineConfig({
 */
     //renderer(),
   ],
+  base:"./"
 });
