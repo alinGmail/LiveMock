@@ -5,6 +5,11 @@ import * as process from "process";
 import { setExpectationHandler } from "./handler/expectationHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
+import {LogM} from "../../core/struct/log";
+import {logViewEventEmitter} from "./common/logViewEvent";
+import ipcMain = electron.ipcMain;
+import * as electron from "electron";
+import {LogViewEvents} from "../../core/struct/events/desktopEvents";
 
 // The built directory structure
 //
@@ -30,6 +35,21 @@ async function createWindow() {
   await setExpectationHandler(app.getPath("appData"));
   await setMatcherHandler(app.getPath("appData"));
   await setActionHandler(app.getPath("appData"));
+
+  logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogAdd,{log,logViewId});
+  });
+
+  logViewEventEmitter.on("update", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogUpdate,{log,logViewId});
+  });
+
+  logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
+    let { log, logViewId } = arg;
+    ipcMain.emit(LogViewEvents.OnLogDelete,{log,logViewId});
+  });
 
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, "electron-vite.svg"),

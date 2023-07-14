@@ -82,7 +82,7 @@ import {
   UpdateLogFilterReqBody,
   UpdateLogFilterReqQuery,
 } from "core/struct/params/LogFilterParam";
-import IpcRendererEvent = Electron.IpcRendererEvent;
+import IpcRendererEvent = electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
 
 // ----------------------------------------------------------------------
