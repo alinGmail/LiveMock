@@ -83,20 +83,28 @@ import {
   UpdateLogFilterReqQuery,
 } from "core/struct/params/LogFilterParam";
 import IpcRendererEvent = electron.IpcRendererEvent;
-import * as console from "console";
 const ipcRenderer = electron.ipcRenderer;
+
+
+let funMap = new Map<string,(event: IpcRendererEvent, ...args: any[]) => void>();
+
 
 // ----------------------------------------------------------------------
 export const api = {
   event: {
     on: (
       channel: string,
-      listener: (event: IpcRendererEvent, ...args: any[]) => void
+      listener: (event: IpcRendererEvent, ...args: any[]) => void,
+      id:string,
     ) => {
+      funMap.set(id,listener);
       ipcRenderer.on(channel, listener);
     },
-    removeListener: (channel: string, listener: (...args: any[]) => void) => {
-      ipcRenderer.removeListener(channel, listener);
+    removeListener: (channel: string, id:string) => {
+      const fun = funMap.get(id);
+      if(fun == null)return;
+      ipcRenderer.removeListener(channel, fun);
+      funMap.delete(id);
     },
   },
   project: {

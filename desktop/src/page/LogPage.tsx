@@ -135,7 +135,6 @@ const LogPage: React.FC = () => {
   );
   const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
   useEffect(() => {
-    console.log("custom columns change");
     const customColumns = getCustomColumn(
       tableColumns.filter((item, index) => item.visible),
       dispatch
@@ -148,44 +147,45 @@ const LogPage: React.FC = () => {
   }, [tableColumns, defaultColumnVisible, dispatch]);
 
   useEffect(() => {
-    const onLogInsertHandle = (
+    const id = uuId();
+    function onLogInsertHandle(
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
-    ) => {
+    ) {
       onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-    };
-    window.api.event.on(LogViewEvents.OnLogAdd, onLogInsertHandle);
+    }
+    window.api.event.on(LogViewEvents.OnLogAdd, onLogInsertHandle, id);
     return () => {
-      window.api.event.removeListener(
-        LogViewEvents.OnLogAdd,
-        onLogInsertHandle
-      );
+      console.log("remove");
+      window.api.event.removeListener(LogViewEvents.OnLogAdd, id);
     };
   }, []);
 
   useEffect(() => {
+    const id = uuId();
     const onLogUpdateHandle = (
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) => {
       onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
     };
-    window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle);
+    window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle, id);
     return () => {
-      window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle);
+      window.api.event.removeListener(LogViewEvents.OnLogUpdate, id);
     };
   });
 
   useEffect(() => {
+    const id = uuId();
     const onLogDeleteHandle = (
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) => {
-      onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
+      onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
     };
-    window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle);
+    window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle, id);
     return () => {
-      window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle);
+      window.api.event.removeListener(LogViewEvents.OnLogDelete, id);
     };
   });
 
