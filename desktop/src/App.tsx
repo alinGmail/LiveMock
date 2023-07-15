@@ -36,6 +36,7 @@ function App() {
             <Routes>
               <Route path={"expectation"} element={<ExpectationPage />} />
               <Route path={"requestLog"} element={<LogPage />}></Route>
+              <Route path={"config"} element={<ConfigPage />} />
               <Route path={"*"} element={<Navigate to={"expectation"} />} />
             </Routes>
           </Layout>
