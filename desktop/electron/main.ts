@@ -6,6 +6,7 @@ import { setExpectationHandler } from "./handler/expectationHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
 import {logViewEventHandler, setLogViewHandler} from "./handler/logViewHandler";
+import {setLogFilterHandler} from "./handler/logFilterHandler";
 
 // The built directory structure
 //
@@ -32,7 +33,7 @@ async function createWindow() {
   await setMatcherHandler(app.getPath("appData"));
   await setActionHandler(app.getPath("appData"));
   await setLogViewHandler(app.getPath("appData"));
-
+  await setLogFilterHandler(app.getPath("appData"));
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
     webPreferences: {

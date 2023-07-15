@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
-    "tsx": "tsc -project electron",
+    "tsc": "tsc -project electron",
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite build",
+    "vite": "vite",
     "build": "tsc -project electron && vite build && electron-builder"
   },
   "dependencies": {
