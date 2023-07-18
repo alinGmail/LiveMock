@@ -3,21 +3,36 @@
  */
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "dev.livemock.app",
   "asar": true,
   "directories": {
     "output": "release/${version}"
   },
   "files": [
     "dist-electron",
-    "dist"
+    "dist",
+    "livemockDev.provisioningProfile"
   ],
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",
     "target": [
-      "dmg"
+      "dmg",{
+          "target":"mas",
+          "arch":"universal",
+        },{
+            "target":"pkg",
+            "arch":"universal"
+          }
     ]
   },
+  "mas":{
+    "hardenedRuntime":false,
+    "type":"distribution",
+    "category":"public.app-category.utilities",
+    "provisioningProfile":"mas_asset/livemockprod.provisionprofile",
+    "entitlements":"mas_asset/entitlements.mas.plist",
+    "entitlementsInherit":"mas_asset/entitlements.mas.inherit.plist"
+    },
   "win": {
     "target": [
       {

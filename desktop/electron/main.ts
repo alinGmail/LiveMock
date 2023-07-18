@@ -5,8 +5,8 @@ import * as process from "process";
 import { setExpectationHandler } from "./handler/expectationHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
-import {logViewEventHandler, setLogViewHandler} from "./handler/logViewHandler";
-import {setLogFilterHandler} from "./handler/logFilterHandler";
+import { logViewEventHandler, setLogViewHandler } from "./handler/logViewHandler";
+import { setLogFilterHandler } from "./handler/logFilterHandler";
 
 // The built directory structure
 //
@@ -28,12 +28,14 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 const env = process.env["PROJECT_ENV"];
 async function createWindow() {
-  await setProjectHandler(app.getPath("appData"));
-  await setExpectationHandler(app.getPath("appData"));
-  await setMatcherHandler(app.getPath("appData"));
-  await setActionHandler(app.getPath("appData"));
-  await setLogViewHandler(app.getPath("appData"));
-  await setLogFilterHandler(app.getPath("appData"));
+  console.log(app.getPath("userData"))
+
+  await setProjectHandler(app.getPath("userData"));
+  await setExpectationHandler(app.getPath("userData"));
+  await setMatcherHandler(app.getPath("userData"));
+  await setActionHandler(app.getPath("userData"));
+  await setLogViewHandler(app.getPath("userData"));
+  await setLogFilterHandler(app.getPath("userData"));
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
     webPreferences: {

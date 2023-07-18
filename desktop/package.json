@@ -1,7 +1,7 @@
 {
-  "name": "livemockdesktop",
+  "name": "livemock",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.8.0",
   "scripts": {
     "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
     "tsc": "tsc -project electron",
@@ -9,7 +9,8 @@
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "vite": "vite",
-    "build": "tsc -project electron && vite build && electron-builder"
+    "build": "tsc -project electron && vite build && electron-builder",
+    "ele-build": "cross-env CSC_LINK=/Users/alin/Documents/certificate/all2.p12 CSC_KEY_PASSWORD=2231232 electron-builder"
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
