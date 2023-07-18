@@ -7,6 +7,9 @@ import {
   ListProjectPathParam,
   ListProjectReqBody,
   ListProjectReqQuery,
+  UpdateProjectPathParam,
+  UpdateProjectReqBody,
+  UpdateProjectReqQuery,
 } from "core/struct/params/ProjectParams";
 import { ProjectM, ProjectStatus } from "core/struct/project";
 import { Collection } from "lokijs";
@@ -76,6 +79,42 @@ export async function setProjectHandler(path: string): Promise<void> {
       } else {
         throw new ServerError(400, "invalid Request param");
       }
+    }
+  );
+
+  ipcMain.handle(
+    ProjectEvents.UpdateProject,
+    async (
+      event,
+      reqParam: UpdateProjectPathParam,
+      reqQuery: UpdateProjectReqQuery,
+      reqBody: UpdateProjectReqBody
+    ) => {
+      const project = collection.findOne({ id: reqParam.projectId });
+      if (!project) {
+        throw new ServerError(500, "project not exist");
+      }
+      const projectUpdate = reqBody.projectUpdate;
+      // if the project start , can not modify port
+      const portChange = projectUpdate && project.port !== projectUpdate;
+      const projectStatus = getProjectStatus(project.id);
+      if (
+        [
+          ProjectStatus.STARTING,
+          ProjectStatus.STARTED,
+          ProjectStatus.CLOSING,
+        ].indexOf(projectStatus) !== -1 &&
+        portChange
+      ) {
+        throw new ServerError(
+          500,
+          `project is ${projectStatus} can not modify port`
+        );
+      }
+
+      Object.assign(project, projectUpdate);
+      collection.update(project);
+      return project;
     }
   );
 
