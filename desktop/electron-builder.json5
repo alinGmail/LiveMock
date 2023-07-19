@@ -1,0 +1,56 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "dev.livemock.app",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist-electron",
+    "dist",
+    "livemockDev.provisioningProfile"
+  ],
+  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "icon" :"mas_asset/icon.icns",
+    "target": [
+      "dmg",{
+          "target":"mas",
+          "arch":"universal",
+        },{
+            "target":"pkg",
+            "arch":"universal"
+          }
+    ]
+  },
+  "mas":{
+    "icon" :"mas_asset/icon.icns",
+    "hardenedRuntime":false,
+    "type":"distribution",
+    "category":"public.app-category.utilities",
+    "provisioningProfile":"mas_asset/livemockprod.provisionprofile",
+    "entitlements":"mas_asset/entitlements.mas.plist",
+    "entitlementsInherit":"mas_asset/entitlements.mas.inherit.plist",
+    "entitlementsLoginHelper":"mas_asset/entitlements.mas.loginhelper.plist"
+    },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "${productName}_${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  }
+}

@@ -3,17 +3,17 @@
  */
 import {LogFilterM} from "../log";
 
-export interface AddLogFilterParam{
+export interface CreateLogFilterPathParam {
 
 }
 
-export interface AddLogFilterReqBody{
+export interface CreateLogFilterReqBody {
     projectId:string;
     logViewId:string;
     filter:LogFilterM;
 }
 
-export interface AddLogFilterReqQuery{
+export interface CreateLogFilterReqQuery {
 
 }
 
@@ -21,7 +21,7 @@ export interface AddLogFilterReqQuery{
 /**
  * update log filter
  */
-export interface UpdateLogFilterParam{
+export interface UpdateLogFilterPathParam {
     logFilterId:string;
 }
 
@@ -39,7 +39,7 @@ export interface UpdateLogFilterReqQuery{
 /**
  * delete log filter
  */
-export interface DeleteLogFilterParam{
+export interface DeleteLogFilterPathParam {
     logFilterId:string;
 }
 

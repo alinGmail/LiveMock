@@ -3,7 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
-  getExpectationListReq,
+  listExpectationReq,
 } from "../server/expectationServer";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
@@ -27,7 +27,7 @@ const ExpectationPage = () => {
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
     () => {
-      return getExpectationListReq(currentProject.id).then((res) => {
+      return listExpectationReq(currentProject.id).then((res) => {
         dispatch(getExpectationSuccess(currentProject.id, res));
         return res;
       });

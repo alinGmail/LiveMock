@@ -22,7 +22,7 @@ import {
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { getLogViewReq, listLogViewLogs } from "../server/logServer";
+import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
@@ -110,7 +110,7 @@ const LogPage: React.FC = () => {
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
-    return getLogViewReq({ projectId: currentProject.id }).then((res) => {
+    return listLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
       dispatch(resetLogFilter(res[0].filters));
       return res;

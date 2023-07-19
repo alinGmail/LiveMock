@@ -9,7 +9,7 @@ import { getActionRouter } from "../../src/controller/actionController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { getLogRouter } from "../../src/controller/logController";
 import {
-  AddLogFilterReqBody,
+  CreateLogFilterReqBody,
   DeleteLogFilterReqQuery,
   UpdateLogFilterReqBody,
 } from "core/struct/params/LogFilterParam";
@@ -49,7 +49,7 @@ export const logFilterCreation = async (
   logViewId: string,
   projectId: string
 ) => {
-  let param2: AddLogFilterReqBody = {
+  let param2: CreateLogFilterReqBody = {
     filter: logFilter,
     logViewId: logViewId,
     projectId: projectId,

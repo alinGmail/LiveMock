@@ -20,7 +20,7 @@ export interface ListLogReqQuery{
  * list log view
  */
 
-export interface ListLogViewParam{
+export interface ListLogViewPathParam{
 
 }
 
@@ -37,7 +37,7 @@ export interface ListLogViewReqQuery{
  * list logs by logView
  */
 
-export interface ListLogViewLogsParam{
+export interface ListLogViewLogsPathParam{
     logViewId:string;
 }
 

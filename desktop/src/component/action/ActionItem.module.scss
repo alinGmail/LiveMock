@@ -1,0 +1,25 @@
+.actionWrap {
+  box-shadow: rgb(15 15 15 / 10%) 0px 0px 0px 1px,
+    rgb(15 15 15 / 10%) 0px 2px 4px;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-bottom: 5px;
+  transition: background 100ms ease-out 0s;
+  padding: 4px 10px;
+  cursor: pointer;
+  display: inline-block;
+}
+.actionWrap:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.closeBtn{
+  color: #8c8c8c;
+  transition: color ease-in 200ms,transform ease-in 200ms;
+}
+
+.closeBtn:hover{
+  color: #cf1322;
+  transform: scale(1.4);
+}
+

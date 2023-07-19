@@ -1,8 +1,8 @@
-import {AddLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
+import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
 import * as superagent from "superagent";
 import {ServerUrl} from "../config";
 
-export const addLogFilterReq = async (param:AddLogFilterReqBody)=>{
+export const addLogFilterReq = async (param:CreateLogFilterReqBody)=>{
     const response = await superagent.post(`${ServerUrl}/logFilter/`)
         .send(param);
     return response.body;

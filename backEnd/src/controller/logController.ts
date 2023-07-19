@@ -13,10 +13,10 @@ import {
   ListLogPathParam,
   ListLogReqBody,
   ListLogReqQuery,
-  ListLogViewLogsParam,
+  ListLogViewLogsPathParam,
   ListLogViewLogsReqBody,
   ListLogViewLogsReqQuery,
-  ListLogViewParam,
+  ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
 } from "core/struct/params/LogParams";
@@ -80,7 +80,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
     "/logView",
     async (
       req: Request<
-        ListLogViewParam,
+        ListLogViewPathParam,
         ListLogViewResponse,
         ListLogViewReqBody,
         ListLogViewReqQuery
@@ -106,7 +106,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
     "/logViewLogs/:logViewId",
     async (
       req: Request<
-        ListLogViewLogsParam,
+        ListLogViewLogsPathParam,
         ListLogViewLogsResponse,
         ListLogViewLogsReqBody,
         ListLogViewLogsReqQuery

@@ -33,6 +33,7 @@ import {
 import getMockRouter from "../server/mockServer";
 import { createLogView } from "core/struct/logView";
 import { getLogDynamicView } from "../log/logUtils";
+import * as console from "console";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
@@ -224,7 +225,11 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     const server = await getProjectServer(projectId, path);
     if (server) {
       setProjectStatus(projectId, ProjectStatus.CLOSING);
-      server.close(() => {
+      server.close((err) => {
+        if(err){
+          console.error(err);
+          throw new ServerError(500,err.message);
+        }
         setProjectStatus(projectId, ProjectStatus.STOPPED);
         res.json({
           message: "success",

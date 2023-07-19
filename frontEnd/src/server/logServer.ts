@@ -9,7 +9,7 @@ import {
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
 
-export async function getLogViewReq(
+export async function listLogViewReq(
   query: ListLogViewReqQuery
 ): Promise<ListLogViewResponse> {
   const response = await superagent
