@@ -1,4 +1,10 @@
 
+<p align="center">
+  <img src="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128.png"
+    srcset="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128.png 1x,https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128@2x.png 2x"
+    />
+</p>
+
 # About
 LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
 
