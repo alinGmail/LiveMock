@@ -9,8 +9,7 @@
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "vite": "vite",
-    "build": "tsc -project electron && vite build && electron-builder",
-    "ele-build": "cross-env CSC_LINK=/Users/alin/Documents/certificate/all2.p12 CSC_KEY_PASSWORD=2231232 electron-builder"
+    "build": "tsc -project electron && vite build && electron-builder"
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
