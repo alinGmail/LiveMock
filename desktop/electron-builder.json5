@@ -15,6 +15,7 @@
   ],
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",
+    "icon" :"mas_asset/icon.icns",
     "target": [
       "dmg",{
           "target":"mas",
@@ -26,12 +27,14 @@
     ]
   },
   "mas":{
+    "icon" :"mas_asset/icon.icns",
     "hardenedRuntime":false,
     "type":"distribution",
     "category":"public.app-category.utilities",
     "provisioningProfile":"mas_asset/livemockprod.provisionprofile",
     "entitlements":"mas_asset/entitlements.mas.plist",
-    "entitlementsInherit":"mas_asset/entitlements.mas.inherit.plist"
+    "entitlementsInherit":"mas_asset/entitlements.mas.inherit.plist",
+    "entitlementsLoginHelper":"mas_asset/entitlements.mas.loginhelper.plist"
     },
   "win": {
     "target": [
