@@ -5,9 +5,14 @@ import * as process from "process";
 import { setExpectationHandler } from "./handler/expectationHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
-import { logViewEventHandler, setLogViewHandler } from "./handler/logViewHandler";
+import {
+  logViewEventHandler,
+  setLogViewHandler,
+} from "./handler/logViewHandler";
 import { setLogFilterHandler } from "./handler/logFilterHandler";
-
+import { Menu, shell, MenuItem } from "electron";
+import * as console from "console";
+import { buildMenu } from "./buildMenu";
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -28,7 +33,7 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 const env = process.env["PROJECT_ENV"];
 async function createWindow() {
-  console.log(app.getPath("userData"))
+  buildMenu();
 
   await setProjectHandler(app.getPath("userData"));
   await setExpectationHandler(app.getPath("userData"));

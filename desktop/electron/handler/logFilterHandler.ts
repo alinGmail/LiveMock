@@ -2,16 +2,23 @@ import * as electron from "electron";
 import ipcMain = electron.ipcMain;
 import { LogFilterEvents } from "core/struct/events/desktopEvents";
 import {
-    CreateLogFilterPathParam,
-    CreateLogFilterReqBody,
-    CreateLogFilterReqQuery, DeleteLogFilterPathParam, DeleteLogFilterReqBody, DeleteLogFilterReqQuery,
-    UpdateLogFilterPathParam,
-    UpdateLogFilterReqBody,
-    UpdateLogFilterReqQuery,
+  CreateLogFilterPathParam,
+  CreateLogFilterReqBody,
+  CreateLogFilterReqQuery,
+  DeleteLogFilterPathParam,
+  DeleteLogFilterReqBody,
+  DeleteLogFilterReqQuery,
+  UpdateLogFilterPathParam,
+  UpdateLogFilterReqBody,
+  UpdateLogFilterReqQuery,
 } from "core/struct/params/LogFilterParam";
 import { ServerError } from "./common";
 import { getLogViewCollection } from "../db/dbManager";
-import {applyDynamicViewFilter, getLogDynamicView, removeDynamicViewFilter} from "../log/logUtils";
+import {
+  applyDynamicViewFilter,
+  getLogDynamicView,
+  removeDynamicViewFilter,
+} from "../log/logUtils";
 
 export async function setLogFilterHandler(path: string): Promise<void> {
   ipcMain.handle(
@@ -70,27 +77,29 @@ export async function setLogFilterHandler(path: string): Promise<void> {
       return { message: "success" };
     }
   );
-  ipcMain.handle(LogFilterEvents.DeleteLogFilter,async (
+  ipcMain.handle(
+    LogFilterEvents.DeleteLogFilter,
+    async (
       event,
       reqParam: DeleteLogFilterPathParam,
       reqQuery: DeleteLogFilterReqQuery,
       reqBody: DeleteLogFilterReqBody
-  )=>{
-      let { logViewId, projectId} = reqQuery;
+    ) => {
+      let { logViewId, projectId } = reqQuery;
       let filterId = reqParam.logFilterId;
       if (!projectId) {
-          throw new ServerError(400, "project id not exist!");
+        throw new ServerError(400, "project id not exist!");
       }
-      const collection = await getLogViewCollection(projectId,path);
-      const logView = collection.findOne({id:logViewId});
-      if(!logView){
-          throw new ServerError(400, "logView not exist!");
+      const collection = await getLogViewCollection(projectId, path);
+      const logView = collection.findOne({ id: logViewId });
+      if (!logView) {
+        throw new ServerError(400, "logView not exist!");
       }
-      logView.filters = logView.filters.filter(item => item.id !== filterId);
+      logView.filters = logView.filters.filter((item) => item.id !== filterId);
       collection.update(logView);
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-      removeDynamicViewFilter(dynamicView,filterId);
-      return{message:"success"};
-  })
-
+      removeDynamicViewFilter(dynamicView, filterId);
+      return { message: "success" };
+    }
+  );
 }
