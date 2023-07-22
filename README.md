@@ -10,7 +10,16 @@ LiveMock is a comprehensive tool for API development and testing, offering mock 
 
 ![image](https://github.com/alinGmail/LiveMock/blob/main/img/pic1.png)
 
+
 # Installation
+
+
+There are two versions of liveMock, one is a desktop application and the other is a web service. You can use either version, but I recommend using the desktop version.
+
+## Installation of the desktop version
+To install the desktop version, simply download from the [release page](https://github.com/alinGmail/LiveMock/releases). It supports both macOS and Windows operating systems.
+
+## Installation of the web service version
 ### 1.clone the project
 ```
 git clone git@github.com:alinGmail/LiveMock.git
