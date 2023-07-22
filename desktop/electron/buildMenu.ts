@@ -46,17 +46,17 @@ export function buildMenu() {
         {
           label: "Reload",
           accelerator: "CmdOrCtrl+R",
-          click: function (item, focusedWindow) {
+          click: function(item, focusedWindow) {
             if (focusedWindow) focusedWindow.reload();
           },
         },
         {
           label: "Toggle Full Screen",
-          accelerator: (function () {
+          accelerator: (function() {
             if (process.platform == "darwin") return "Ctrl+Command+F";
             else return "F11";
           })(),
-          click: function (item, focusedWindow) {
+          click: function(item, focusedWindow) {
             if (focusedWindow)
               focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
           },
@@ -84,9 +84,9 @@ export function buildMenu() {
       role: "help",
       submenu: [
         {
-          label: "Learn More",
-          click: function () {
-            require("electron").shell.openExternal("http://www.google.com");
+          label: "Project Home Page",
+          click: function() {
+            require("electron").shell.openExternal("https://github.com/alinGmail/LiveMock");
           },
         },
       ],
@@ -133,7 +133,7 @@ export function buildMenu() {
         {
           label: "Quit",
           accelerator: "Command+Q",
-          click: function () {
+          click: function() {
             app.quit();
           },
         },
