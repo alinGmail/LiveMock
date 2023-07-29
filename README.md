@@ -64,3 +64,40 @@ To create an action, click the "Create Action" button. By default, the action ty
 ### Starting the Project
 On the top, you will find a green start button. Clicking it will start the project. Furthermore, ensure that your expectation is activated. You can then visit http://localhost:8088 to see the JSON response.
 
+# document
+## What is expectation
+An expectation consists of several matchers and an action. When a request matches all its matchers, the defined action will be taken, such as responding with a JSON.
+
+## How to create expectation
+To create an expectation, goto the expectation list page and click the "Add Expectation" button. After that, you will see the newly created expectation in the list.
+
+## property of an expectation
+- `delay`: the delay time of the response,unit is ms.
+- `priority`: the expectation has highter priority will matcher first.
+- `activate`: if the expectation is inactivate, it will be skip when the request match.
+- `matchers`: the matchers of the expectation, if the request match all matchers, the action of the expectation will take.
+- `action`: the action of the expectation,current support two action. custom response and proxy.
+
+## matchers
+The matcher consists of three parts: type, comparator, and value. These three parts determine whether a request can be matched.
+Now livemock supports five types, which are:
+- `method`: the method of the request, such as GET, POST, PUT, etc.
+- `path`: the path of the request, the path is start with `/`,like `/student/123`
+- `header`: the headers of the request
+- `query`: the parameters in the request URL
+- `param`: the parameters in the request body
+
+Here are some examples of matchers:
+- `path START_WITH /book/`: matches all request paths that start with `/book/`.
+- `query teacher_name CONTAINS tom`: matches all requests that have a `teacher_name` query parameter, and the value of the `teacher_name` query parameter contains "tom".
+- `param teacher_name IS tom`: matches all requests that have a body, and the body has a `teacher_name` parameter. For example, a request with a JSON body like the one below:
+```json
+{
+  "teacher_name": "tom"
+}
+```
+
+## action
+there are two type of action:
+- `custom response`: response some custom text or JSON to the request, you can also set the headers of the response
+- `proxy`: make the request forward to another host.
