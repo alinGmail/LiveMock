@@ -90,7 +90,7 @@ Now livemock supports five types, which are:
 Here are some examples of matchers:
 - `path START_WITH /book/`: matches all request paths that start with `/book/`.
 - `query teacher_name CONTAINS tom`: matches all requests that have a `teacher_name` query parameter, and the value of the `teacher_name` query parameter contains "tom".
-- `param teacher_name IS tom`: matches all requests that have a body, and the body has a `teacher_name` parameter. For example, a request with a JSON body like the one below:
+- `param teacher_name IS tom`: matches all requests that have a body, and the body has a `teacher_name` parameter,value is `tom`. For example, a request with a JSON body like the one below:
 ```json
 {
   "teacher_name": "tom"
