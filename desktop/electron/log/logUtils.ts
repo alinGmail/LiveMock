@@ -167,15 +167,15 @@ export async function getLogDynamicView(
     dynamicView = logCollection.addDynamicView(viewId);
     dynamicView.applyFind({});
     dynamicView.applySimpleSort("id", { desc: true });
-    logView.filters.forEach((filter) => {
-      applyDynamicViewFilter(dynamicView!,filter);
-    });
   }
 
   once(viewId, () => {
     if (!dynamicView) {
       return;
     }
+    logView.filters.forEach((filter) => {
+      applyDynamicViewFilter(dynamicView!,filter);
+    });
     dynamicView.on("insert", (log: LogM) => {
       logViewEventEmitter.emit("insert", { log, logViewId: logView.id });
     });
