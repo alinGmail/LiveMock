@@ -7,7 +7,7 @@ import {
   QueryMatcherM,
   RequestMatcherM,
   RequestMatcherHasName,
-  RequestMatcherType,
+  RequestMatcherType, matcherHasValue,
 } from "core/struct/matcher";
 import styles from "./MatcherItem.module.css";
 import { Dropdown } from "antd";
@@ -183,15 +183,15 @@ const MatcherItem: FC<{
             {matcher.conditions.toLowerCase()}
           </span>
         </Dropdown>
-        <div
-          style={{
-            display: "inline-block",
-            fontSize: "14px",
-            lineHeight: "24px",
-          }}
+        {matcherHasValue(matcher) && <div
+            style={{
+              display: "inline-block",
+              fontSize: "14px",
+              lineHeight: "24px",
+            }}
         >
-          <NInput value={matcher.value} onChange={onValueChange} />
-        </div>
+          <NInput value={matcher.value} onChange={onValueChange}/>
+        </div>}
         <div
           style={{
             display: "inline-block",

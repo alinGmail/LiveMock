@@ -148,4 +148,11 @@ export const matcherHasName = (matcher: RequestMatcherM) => {
   ].indexOf(matcher.type) !== -1;
 };
 
+export const matcherHasValue = (matcher: RequestMatcherM):boolean =>{
+  return [
+      MatcherCondition.SHOWED,
+      MatcherCondition.NOT_SHOWED,
+  ].indexOf(matcher.conditions) === -1;
+}
+
 export type RequestMatcherHasName = HeaderMatcherM | QueryMatcherM | ParamMatcherM;
