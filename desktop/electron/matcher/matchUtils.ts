@@ -32,11 +32,30 @@ export const stringMatchCondition = (
       return left == null;
     case MatcherCondition.NOT_SHOWED:
       return left != null;
+    case MatcherCondition.MATCH_REGEX:
+      return regexMatch(left,right);
+    case MatcherCondition.NOT_MATCH_REGEX:
+      return !regexMatch(left,right);
     default:
       return false;
   }
 };
 
+export function regexMatch(valueStr:string,regexStr:string){
+  try {
+    let regExp:RegExp;
+    if(regexStr.startsWith("/")){
+      let pattern = regexStr.slice(1, regexStr.lastIndexOf("/"));
+      let modified = regexStr.slice(regexStr.lastIndexOf("/") + 1);
+      regExp = new RegExp(pattern,modified);
+    }else{
+      regExp = new RegExp(regexStr);
+    }
+    return regExp.test(valueStr);
+  }catch (e){
+    return false;
+  }
+}
 export function matchAnyValue(
   value: string | undefined | Array<any> | Object,
   matcher: RequestMatcherM
