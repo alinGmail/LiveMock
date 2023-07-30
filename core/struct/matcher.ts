@@ -14,7 +14,8 @@ export enum RequestMatcherType {
   HEADER = "header",
   QUERY = "query",
   PARAM = "param",
-  CODE = "code",
+  // todo support code
+  // CODE = "code",
 }
 
 export type MethodMatcherM = {
