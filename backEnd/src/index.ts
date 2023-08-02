@@ -7,6 +7,7 @@ import { getActionRouter } from "./controller/actionController";
 import {addLogListener, getLogRouter} from "./controller/logController";
 import {getLogFilterRouter} from "./controller/logFilterController";
 import {getLocal} from "mockttp";
+import {getSystemCollection} from "./db/dbManager";
 const { Server } = require("socket.io");
 
 const server = express();
@@ -16,9 +17,19 @@ const io = new Server(http,{
     origin: "http://localhost:5173"
   }
 });
+export const systemVersion = 801;
 // io.fetchSockets()
+async function projectInit() {
+  const systemCollection = await getSystemCollection("userData");
+  const systemConfig = systemCollection.findOne({});
+  if(systemConfig){
 
+  }else{
+    systemCollection.insertOne({version:systemVersion});
+  }
+}
 (async function () {
+  await projectInit();
   server.use("/project", await getProjectRouter("db"));
   server.use("/expectation", getExpectationRouter("db"));
   server.use("/matcher", getMatcherRouter("db"));

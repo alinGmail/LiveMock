@@ -13,6 +13,8 @@ import { setLogFilterHandler } from "./handler/logFilterHandler";
 import { Menu, shell, MenuItem } from "electron";
 import * as console from "console";
 import { buildMenu } from "./buildMenu";
+import { getSystemCollection } from "./db/dbManager";
+import {systemVersion} from "../src/config";
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -32,9 +34,20 @@ let win: BrowserWindow | null;
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 const env = process.env["PROJECT_ENV"];
+
+async function projectInit() {
+  const systemCollection = await getSystemCollection(app.getPath("userData"));
+  const systemConfig = systemCollection.findOne({});
+  if(systemConfig){
+
+  }else{
+    systemCollection.insertOne({version:systemVersion});
+  }
+}
+
 async function createWindow() {
   buildMenu();
-
+  await projectInit();
   await setProjectHandler(app.getPath("userData"));
   await setExpectationHandler(app.getPath("userData"));
   await setMatcherHandler(app.getPath("userData"));

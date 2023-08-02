@@ -4,6 +4,7 @@ import { ProjectM } from "core/struct/project";
 import { ExpectationM } from "core/struct/expectation";
 import { LogViewM } from "core/struct/logView";
 import { LogM } from "core/struct/log";
+import {SystemConfigM} from "core/struct/systemConfig";
 
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
@@ -52,6 +53,16 @@ export async function getProjectCollection(path: string) {
   }
   return entries;
 }
+
+export async function getSystemCollection(path:string){
+  const projectDb = await getProjectDb(path);
+  let entries = projectDb.getCollection<SystemConfigM>("system");
+  if (entries === null) {
+    entries = projectDb.addCollection<SystemConfigM>("system");
+  }
+  return entries;
+}
+
 
 export async function getExpectationCollection(
   projectId: string,
