@@ -20,11 +20,15 @@ proxy.on("proxyReq", function (proxyReq, req, res, options) {
   //
   if (proxyAction.handleCross) {
     // handle cross
-    handleOptionsCross(
+    handleRequestCross(
       req as express.Request,
       res as express.Response,
       proxyAction.crossAllowCredentials
     );
+  }
+  // handle the external headers
+  if (proxyAction.headers && proxyAction.headers.length > 0){
+    handleExternalHeaders(req as express.Request,res as express.Response,proxyAction.headers);
   }
 });
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
@@ -87,6 +91,19 @@ function handleOptionsCross(
   res.end();
 }
 
+/**
+ *
+ * @param req
+ * @param res
+ * @param headers
+ */
+function handleExternalHeaders(req: express.Request,
+                               res: express.Response,
+                               headers:Array<[string,string]>){
+  headers.forEach(item=>{
+    res.header(item[0],item[1]);
+  });
+}
 /**
  *
  * @param req
