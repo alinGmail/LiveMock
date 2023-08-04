@@ -91,6 +91,7 @@ describe("test proxy action",()=>{
          name:"john",age:20
       }),{
          'token':"json header",
+         "myToken":"origin value",
          "Content-Type":"application/json"
       });
       await mockServer.forGet("/testJsonNoContentType").thenReply(200,JSON.stringify({
