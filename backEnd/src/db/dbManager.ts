@@ -5,6 +5,7 @@ import { ExpectationM } from "core/struct/expectation";
 import { LogViewM } from "core/struct/logView";
 import { LogM } from "core/struct/log";
 import e from "express";
+import {SystemConfigM} from "core/struct/systemConfig";
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();
 
@@ -92,3 +93,12 @@ export function setNewestLogNumber(
 ) {
   logIndexMap.set(`${path}/${projectId}`, newestLogIndex);
 }
+export async function getSystemCollection(path:string){
+  const projectDb = await getProjectDb(path);
+  let entries = projectDb.getCollection<SystemConfigM>("system");
+  if (entries === null) {
+    entries = projectDb.addCollection<SystemConfigM>("system");
+  }
+  return entries;
+}
+

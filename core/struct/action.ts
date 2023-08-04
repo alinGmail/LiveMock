@@ -37,6 +37,7 @@ export interface ProxyActionM {
   handleCross:boolean;
   crossAllowCredentials:boolean;
   pathRewrite: Array<PathRewriteM>;
+  headers: Array<[string, string]>|undefined;
 }
 
 export interface CustomResponseActionM {
@@ -80,6 +81,7 @@ export function createProxyAction(): ProxyActionM {
     protocol:ProxyProtocol.HTTP,
     handleCross:false,
     crossAllowCredentials:false,
+    headers:[]
   };
 }
 

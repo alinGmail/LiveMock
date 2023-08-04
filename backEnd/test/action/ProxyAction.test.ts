@@ -39,13 +39,28 @@ describe("test proxy action",()=>{
       pathMatcherM.value = "";
       expectationM.matchers = [pathMatcherM];
       expectationM.activate = true;
+      expectationM.priority = 1;
       const proxyActionM = createProxyAction();
       proxyActionM.host = "localhost:8085";
       expectationM.actions.push(proxyActionM);
 
+      const expectationCrossM = createExpectation();
+      const pathMatcherCrossM = createPathMatcher();
+      pathMatcherCrossM.conditions = MatcherCondition.START_WITH;
+      pathMatcherCrossM.value = "/testCross";
+      expectationCrossM.matchers = [pathMatcherCrossM];
+      expectationCrossM.activate = true;
+      expectationCrossM.priority = 2;
+      const proxyCrossActionM = createProxyAction();
+      proxyCrossActionM.host = "localhost:8085";
+      proxyCrossActionM.handleCross = true;
+      proxyCrossActionM.crossAllowCredentials = true;
+      proxyCrossActionM.headers?.push(["myToken","myTokenValue"])
+      expectationCrossM.actions.push(proxyCrossActionM);
+
 
       await expectationCreation(server, projectM, expectationM);
-      const expectationMCollection = await getExpectationCollection(projectM.id, 'test_db');
+      await expectationCreation(server, projectM, expectationCrossM);
 
       // set up the server
       await mockServer.start(8085);
@@ -69,6 +84,14 @@ describe("test proxy action",()=>{
          name:"john",age:20
       }),{
          'token':"json header",
+         "Content-Type":"application/json"
+      });
+      // response json
+      await mockServer.forGet("/testCross").thenReply(200,JSON.stringify({
+         name:"john",age:20
+      }),{
+         'token':"json header",
+         "myToken":"origin value",
          "Content-Type":"application/json"
       });
       await mockServer.forGet("/testJsonNoContentType").thenReply(200,JSON.stringify({
@@ -134,6 +157,30 @@ describe("test proxy action",()=>{
       const response = await request(proxyServer).get("/testJsonNoContentType").set({Accept:"application/json"});
       await testJsonResponse(response, projectM);
    });
+
+   test(`test handle cross`,async ()=>{
+      const response = await request(proxyServer).get("/testCross")
+          .set("Origin","www.google.com")
+          .set("AccessToken","aaa").set("SecretName","bbb");
+      await testJsonResponse(response, projectM);
+      expect(response.get("Access-Control-Allow-Origin")).toEqual("www.google.com");
+      expect(response.get("Access-Control-Allow-Headers")).toContain("accesstoken");
+      expect(response.get("Access-Control-Allow-Headers")).toContain("secretname");
+      expect(response.get("Access-Control-Allow-Credentials")).toContain("true");
+      expect(response.get("myToken")).toEqual("myTokenValue");
+
+     const optionResponse = await request(proxyServer).options("/testCross")
+         .set("Origin","www.google.com")
+         .set("Access-Control-Request-Headers","accesstoken,secretname")
+         .set("Access-Control-Request-Methods","POST");
+      expect(optionResponse.statusCode).toBe(200);
+      expect(optionResponse.get("Access-Control-Allow-Origin")).toEqual("www.google.com");
+      expect(optionResponse.get("Access-Control-Allow-Headers")).toContain("accesstoken");
+      expect(optionResponse.get("Access-Control-Allow-Headers")).toContain("secretname");
+      expect(optionResponse.get("Access-Control-Allow-Credentials")).toContain("true");
+   });
+
+
 });
 
 async function getLastLog(projectId:string,path:string){

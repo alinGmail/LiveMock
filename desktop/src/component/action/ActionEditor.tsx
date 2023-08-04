@@ -186,6 +186,35 @@ const ActionEditor: React.FC<{
               ]}
             />
           </div>
+          <div>headers</div>
+          <div>
+            <HeaderEditor
+                headers={action.headers||[]}
+                onHeaderModify={(headerIndex, value) => {
+                  let _headers = action.headers?[...action.headers]:[];
+                  _headers[headerIndex] = value;
+                  actionContext.onActionModify({
+                    ...action,
+                    headers: _headers,
+                  });
+                }}
+                onAddHeader={(header) => {
+                  actionContext.onActionModify({
+                    ...action,
+                    headers: action.headers?[...action.headers, header]:[header],
+                  });
+                }}
+                onDeleteHeader={(headerIndex) => {
+                  let _headers = action.headers?[...action.headers]:[];
+                  _headers.splice(headerIndex, 1);
+                  actionContext.onActionModify({
+                    ...action,
+                    headers: _headers,
+                  });
+                }}
+            />
+          </div>
+
           <div>host</div>
           <div>
             <Input
