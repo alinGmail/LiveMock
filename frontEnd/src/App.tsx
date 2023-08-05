@@ -8,8 +8,8 @@ import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
-import {Spin} from "antd";
-import {Route, Routes,Navigate } from "react-router-dom";
+import { ConfigProvider, Spin, theme } from "antd";
+import { Route, Routes, Navigate } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
 import ConfigPage from "./page/ConfigPage";
@@ -17,6 +17,7 @@ import ConfigPage from "./page/ConfigPage";
 function App() {
   const dispatch = useDispatch();
   const projectList = useAppSelector((state) => state.project.projectList);
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const projectListQuery = useQuery({
     queryKey: ["projectList"],
     queryFn: async () => {
@@ -28,25 +29,33 @@ function App() {
 
   return (
     <>
-      {!projectListQuery.isLoading ? (
-        projectList.length === 0 ? (
-          <WelcomePage />
-        ) : (
-            <Layout >
+      <ConfigProvider
+        theme={
+          systemConfigState.mode === "dark"
+            ? { algorithm: theme.darkAlgorithm }
+            : {}
+        }
+      >
+        {!projectListQuery.isLoading ? (
+          projectList.length === 0 ? (
+            <WelcomePage />
+          ) : (
+            <Layout>
               <Routes>
                 <Route path={"expectation"} element={<ExpectationPage />} />
                 <Route path={"requestLog"} element={<LogPage />} />
                 <Route path={"config"} element={<ConfigPage />} />
-                <Route path={"*"} element={<Navigate to={"expectation"}/>} />
+                <Route path={"*"} element={<Navigate to={"expectation"} />} />
               </Routes>
             </Layout>
-        )
-      ) : (
-        <Spin tip="Loading" size="large">
-          <div className="content" style={{height:"500px"}}/>
-        </Spin>
-      )}
-      <Toaster />
+          )
+        ) : (
+          <Spin tip="Loading" size="large">
+            <div className="content" style={{ height: "500px" }} />
+          </Spin>
+        )}
+        <Toaster />
+      </ConfigProvider>
     </>
   );
 }
