@@ -12,6 +12,9 @@
 .actionWrap:hover {
   background: rgba(55, 53, 47, 0.08);
 }
+:global(.dark_mode) .actionWrap:hover{
+  background: rgba(255, 253, 247, 0.08);
+}
 
 .closeBtn{
   color: #8c8c8c;

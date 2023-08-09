@@ -7,6 +7,11 @@
   min-width: 60px;
   border-radius: 2px;
 }
+
+:global(.dark_mode) .inputEditor{
+  border: 1px solid #1f1f1f;
+}
+
 .sizeSmall .inputEditor {
   padding: 0px 4px;
 }
@@ -20,6 +25,13 @@
   border: 1px solid #40a9ff;
 }
 
+:global(.dark_mode) .inputEditor:focus{
+  background: #1f1f1f;
+}
+
+:global(.dark_mode) .inputEditor:hover {
+  background: rgba(255, 253, 247, 0.08);
+}
 .inputWrap {
   position: relative;
   font-size: 14px;

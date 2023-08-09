@@ -11,6 +11,10 @@
     background: #fff;
     border-radius: 5px;
 }
+.dark_mode .popper{
+    background: #1f1f1f;
+}
+
 .inputWrap .ant-input{
     transition: background 50ms ease-in 0s;
     border-color: rgba(0,0,0,0);
@@ -76,6 +80,12 @@
 }
 .textBtn:hover{
     background: rgba(55,53,47,0.08);
+}
+.dark_mode .textBtn{
+    color: #f0f0f0;
+}
+.dark_mode .textBtn:hover{
+    background: rgba(255,253,247,0.08);
 }
 .ant-btn-text:hover, .ant-btn-text:focus{
     background: rgba(55,53,47,0.08);
