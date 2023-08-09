@@ -67,6 +67,17 @@
     background: rgba(55, 53, 47, 0.08);
 }
 
+.dark_mode .menuWrap{
+    background: #434343;
+    box-shadow: rgb(115 115 115 / 5%) 0px 0px 0px 1px, rgb(115 115 115 / 10%) 0px 3px 6px, rgb(115 115 115 / 15%) 0px 9px 24px;
+}
+.dark_mode .menuItem{
+    color: rgb(255, 253, 247);;
+}
+.dark_mode .menuItem:hover{
+    background: rgba(255, 253, 247, 0.08);
+}
+
 .textBtn{
     font-size: 14px;
     height: 24px;

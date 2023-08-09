@@ -13,6 +13,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
 import ConfigPage from "./page/ConfigPage";
+import { useEffect } from "react";
 
 function App() {
   const dispatch = useDispatch();
@@ -26,38 +27,43 @@ function App() {
       return res;
     },
   });
+  useEffect(() => {
+    if (systemConfigState.mode === "dark") {
+      document.body.className = "dark_mode";
+    } else {
+      document.body.className = "";
+    }
+  }, [systemConfigState.mode]);
 
   return (
     <>
-      <div className={systemConfigState.mode === "dark" ? "dark_mode":""}>
-        <ConfigProvider
-          theme={
-            systemConfigState.mode === "dark"
-              ? { algorithm: theme.darkAlgorithm }
-              : {}
-          }
-        >
-          {!projectListQuery.isLoading ? (
-            projectList.length === 0 ? (
-              <WelcomePage />
-            ) : (
-              <Layout>
-                <Routes>
-                  <Route path={"expectation"} element={<ExpectationPage />} />
-                  <Route path={"requestLog"} element={<LogPage />} />
-                  <Route path={"config"} element={<ConfigPage />} />
-                  <Route path={"*"} element={<Navigate to={"expectation"} />} />
-                </Routes>
-              </Layout>
-            )
+      <ConfigProvider
+        theme={
+          systemConfigState.mode === "dark"
+            ? { algorithm: theme.darkAlgorithm }
+            : {}
+        }
+      >
+        {!projectListQuery.isLoading ? (
+          projectList.length === 0 ? (
+            <WelcomePage />
           ) : (
-            <Spin tip="Loading" size="large">
-              <div className="content" style={{ height: "500px" }} />
-            </Spin>
-          )}
-          <Toaster />
-        </ConfigProvider>
-      </div>
+            <Layout>
+              <Routes>
+                <Route path={"expectation"} element={<ExpectationPage />} />
+                <Route path={"requestLog"} element={<LogPage />} />
+                <Route path={"config"} element={<ConfigPage />} />
+                <Route path={"*"} element={<Navigate to={"expectation"} />} />
+              </Routes>
+            </Layout>
+          )
+        ) : (
+          <Spin tip="Loading" size="large">
+            <div className="content" style={{ height: "500px" }} />
+          </Spin>
+        )}
+        <Toaster />
+      </ConfigProvider>
     </>
   );
 }
