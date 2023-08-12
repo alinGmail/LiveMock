@@ -15,6 +15,11 @@
 :global(.dark_mode) .actionWrap:hover{
   background: rgba(255, 253, 247, 0.08);
 }
+:global(.dark_mode) .actionWrap{
+  box-shadow: rgb(215 215 215 / 10%) 0px 0px 0px 1px,
+  rgb(215 215 215 / 10%) 0px 2px 4px;
+}
+
 .closeBtn{
   color: #8c8c8c;
   transition: color ease-in 200ms,transform ease-in 200ms;

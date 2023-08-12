@@ -50,7 +50,10 @@
 .sizeSmall .placeHolder {
   padding: 0px 4px;
 }
-
+:global(.dark_mode) .inputWrap .placeHolder,
+:global(.dark_mode) .inputWrap .rightHolder{
+  color: rgba(165,165,165,0.5);
+}
 .inputWrap .rightHolder {
   left: 1px;
 }
