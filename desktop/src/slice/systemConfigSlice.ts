@@ -14,6 +14,9 @@ const systemConfigSlice = createSlice({
     reducers:{
         setMode:(state, action:PayloadAction<"dark"|"light">)=>{
             state.mode = action.payload
+            if (localStorage) {
+                localStorage.setItem("systemConfig",JSON.stringify(state));
+            }
         }
     }
 });

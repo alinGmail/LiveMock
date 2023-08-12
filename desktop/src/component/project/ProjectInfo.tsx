@@ -25,6 +25,7 @@ import { setMode } from "../../slice/systemConfigSlice";
 
 const ProjectInfo = () => {
   const projectState = useAppSelector((state) => state.project);
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const [projectListDropdown, setProjectListDropdown] =
     useState<boolean>(false);
   const [projectModalShow, setProjectModalShow] = useState<boolean>(false);
@@ -233,7 +234,7 @@ const ProjectInfo = () => {
             style={{ fill: "#d9d9d9", stroke: "white", margin: "0px 6px" }}
           />
           <Switch
-            defaultChecked
+            checked={systemConfigState.mode === "dark"}
             onChange={(checked) => {
               dispatch(setMode(checked ? "dark" : "light"));
             }}
