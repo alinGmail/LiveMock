@@ -140,7 +140,8 @@ const LogPage: React.FC = () => {
     console.log("custom columns change")
     const customColumns = getCustomColumn(
         tableColumns.filter((item, index) => item.visible),
-        dispatch
+        dispatch,
+        systemConfigState.mode
     );
     const newLogColumn = getDefaultColumn(dispatch,systemConfigState.mode)
         .filter((item, index) => defaultColumnVisible[index])

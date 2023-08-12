@@ -175,6 +175,7 @@ export function getDefaultColumn(
             {bodyType === "object" && (
               <ReactJson
                 theme={mode === "dark" ? "ashes" : "rjv-default"}
+                style={{ backgroundColor: "none" }}
                 collapseStringsAfterLength={1000}
                 src={record.res?.body}
                 collapsed={true}
@@ -202,7 +203,7 @@ export function getDefaultColumn(
               src={record}
               collapseStringsAfterLength={1000}
               collapsed={true}
-              style={{backgroundColor:"none"}}
+              style={{ backgroundColor: "none" }}
             />
             {/*<ReactJson
                             src={record}
@@ -366,9 +367,7 @@ const CustomColumnHead = ({
       }
     >
       <div className={mStyle.defaultColumnHead}>
-        {!item.label && (
-          <span className={mStyle.placeHolder}>empty</span>
-        )}
+        {!item.label && <span className={mStyle.placeHolder}>empty</span>}
         {item.label}&nbsp;
       </div>
     </Dropdown>
@@ -377,17 +376,19 @@ const CustomColumnHead = ({
 
 export function getCustomColumn(
   items: Array<TableColumnItem>,
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "light" | "dark"
 ) {
   let res: ColumnType<LogM>[] = [];
   items.forEach((item) => {
-    res.push(transferColumn(item, dispatch));
+    res.push(transferColumn(item, dispatch, mode));
   });
   return res;
 }
 export function transferColumn(
   item: TableColumnItem,
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "light" | "dark"
 ): ColumnType<LogM> {
   return {
     title: (
@@ -402,7 +403,7 @@ export function transferColumn(
       return (
         <div>
           {item.displayType == ColumnDisplayType.JSON &&
-            JsonRender(item, record)}
+            JsonRender(item, record, mode)}
           {item.displayType == ColumnDisplayType.TEXT &&
             TextRender(item, record)}
         </div>
@@ -411,7 +412,7 @@ export function transferColumn(
   };
 }
 
-function JsonRender(item: TableColumnItem, log: LogM) {
+function JsonRender(item: TableColumnItem, log: LogM, mode: "light" | "dark") {
   let root = _.get(log, item.path, {});
   return (
     <div
@@ -421,6 +422,8 @@ function JsonRender(item: TableColumnItem, log: LogM) {
       }}
     >
       <ReactJson
+        theme={mode === "dark" ? "ashes" : "rjv-default"}
+        style={{ backgroundColor: "none" }}
         collapseStringsAfterLength={1000}
         collapsed={true}
         src={root}

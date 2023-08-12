@@ -41,7 +41,7 @@
 .inputWrap .placeHolder,
 .inputWrap .rightHolder {
   position: absolute;
-  color: #bfbfbf;
+  color: rgba(165,165,165,0.5);
   pointer-events: none;
   top: 0px;
   font-size: 14px;
@@ -51,6 +51,10 @@
 }
 .sizeSmall .placeHolder {
   padding: 0px 4px;
+}
+:global(.dark_mode) .inputWrap .placeHolder,
+:global(.dark_mode) .inputWrap .rightHolder{
+  color: rgba(165,165,165,0.5);
 }
 
 .inputWrap .rightHolder {
