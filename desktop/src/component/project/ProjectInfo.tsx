@@ -2,7 +2,7 @@ import mStyle from "./ProjectInfo.module.scss";
 import { ReactComponent as StartIcon } from "../../assets/svg/play2.svg";
 import { ReactComponent as StopIcon } from "../../assets/svg/stop.svg";
 import Icon, { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import {Dropdown, Modal, Switch} from "antd";
+import { Dropdown, Modal, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { Updater, useImmer } from "use-immer";
 import { createProject, ProjectM, ProjectStatus } from "core/struct/project";
@@ -21,6 +21,7 @@ import { useDispatch } from "react-redux";
 import { setCurProjectIndex, setProjectList } from "../../slice/projectSlice";
 import { ReactComponent as DarkIcon } from "../../assets/svg/dark.svg";
 import { ReactComponent as LightIcon } from "../../assets/svg/light.svg";
+import { setMode } from "../../slice/systemConfigSlice";
 
 const ProjectInfo = () => {
   const projectState = useAppSelector((state) => state.project);
@@ -231,7 +232,12 @@ const ProjectInfo = () => {
           <DarkIcon
             style={{ fill: "#d9d9d9", stroke: "white", margin: "0px 6px" }}
           />
-          <Switch defaultChecked onChange={() => {}} />
+          <Switch
+            defaultChecked
+            onChange={(checked) => {
+              dispatch(setMode(checked ? "dark" : "light"));
+            }}
+          />
           <LightIcon
             style={{ fill: "#d9d9d9", stroke: "white", margin: "0px 6px" }}
           />

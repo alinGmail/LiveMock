@@ -20,3 +20,18 @@
     flex: 1;
   }
 }
+:global(.dark_mode){
+  .layout{
+    .headRow{
+      background: #262626;
+      border-bottom: 1px solid #595959;
+    }
+    .leftCol{
+      background: #1f1f1f;
+      color: rgb(191, 191, 191);
+    }
+    .rightCol{
+      background: #262626;
+    }
+  }
+}

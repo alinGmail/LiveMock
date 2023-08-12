@@ -29,33 +29,35 @@ function App() {
 
   return (
     <>
-      <ConfigProvider
-        theme={
-          systemConfigState.mode === "dark"
-            ? { algorithm: theme.darkAlgorithm }
-            : {}
-        }
-      >
-        {!projectListQuery.isLoading ? (
-          projectList.length === 0 ? (
-            <WelcomePage />
+      <div className={systemConfigState.mode === "dark" ? "dark_mode" : ""}>
+        <ConfigProvider
+          theme={
+            systemConfigState.mode === "dark"
+              ? { algorithm: theme.darkAlgorithm }
+              : {}
+          }
+        >
+          {!projectListQuery.isLoading ? (
+            projectList.length === 0 ? (
+              <WelcomePage />
+            ) : (
+              <Layout>
+                <Routes>
+                  <Route path={"expectation"} element={<ExpectationPage />} />
+                  <Route path={"requestLog"} element={<LogPage />}></Route>
+                  <Route path={"config"} element={<ConfigPage />} />
+                  <Route path={"*"} element={<Navigate to={"expectation"} />} />
+                </Routes>
+              </Layout>
+            )
           ) : (
-            <Layout>
-              <Routes>
-                <Route path={"expectation"} element={<ExpectationPage />} />
-                <Route path={"requestLog"} element={<LogPage />}></Route>
-                <Route path={"config"} element={<ConfigPage />} />
-                <Route path={"*"} element={<Navigate to={"expectation"} />} />
-              </Routes>
-            </Layout>
-          )
-        ) : (
-          <Spin tip="Loading" size="large">
-            <div className="content" style={{ height: "500px" }} />
-          </Spin>
-        )}
-        <Toaster />
-      </ConfigProvider>
+            <Spin tip="Loading" size="large">
+              <div className="content" style={{ height: "500px" }} />
+            </Spin>
+          )}
+          <Toaster />
+        </ConfigProvider>
+      </div>
     </>
   );
 }
