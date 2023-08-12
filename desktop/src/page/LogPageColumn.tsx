@@ -367,7 +367,7 @@ const CustomColumnHead = ({
     >
       <div className={mStyle.defaultColumnHead}>
         {!item.label && (
-          <span style={{ color: "rgba(0, 0, 0, 0.2)" }}>empty</span>
+          <span className={mStyle.placeHolder}>empty</span>
         )}
         {item.label}&nbsp;
       </div>

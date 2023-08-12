@@ -93,7 +93,9 @@
 .placeHolder {
   color: rgb(191, 191, 191);
 }
-
+:global(.dark_mode) .placeHolder{
+  color: #8c8c8c;
+}
 .condition {
   color: rgba(55, 53, 47, 0.65);
   margin-right: 5px;
