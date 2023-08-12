@@ -24,6 +24,19 @@
   background: rgba(55, 53, 47, 0.08);
 }
 
+:global(.dark_mode) .textBtn{
+  color: #f0f0f0;
+}
+:global(.dark_mode) .textBtn:hover{
+  background: rgba(255, 253, 247, 0.08);
+}
+
+:global(.dark_mode) .itemWrap{
+  box-shadow: rgb(215 215 215 / 10%) 0px 0px 0px 1px,
+  rgb(215 215 215 / 10%) 0px 2px 4px;
+  background: #1f1f1f;
+}
+
 .closeBtn{
   color: #8c8c8c;
   transition: color ease-in 200ms,transform ease-in 200ms;
