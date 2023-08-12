@@ -4,6 +4,11 @@
     --normalBlack:rgb(55, 53, 47);
 }
 
+.dark_mode{
+    --hoverBgColor: rgba(255, 243, 247, 0.08);
+    --grayText: rgba(255, 253, 247, 0.5);
+    --normalBlack:rgb(255, 253, 247);
+}
 .popper{
     box-shadow: rgb(15 15 15 / 5%) 0px 0px 0px 1px, rgb(15 15 15 / 10%) 0px 3px 6px, rgb(15 15 15 / 20%) 0px 9px 24px;
     padding: 6px 3px;
