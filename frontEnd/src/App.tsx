@@ -30,7 +30,10 @@ function App() {
   useEffect(() => {
     if (systemConfigState.mode === "dark") {
       document.body.className = "dark_mode";
+      document.getElementsByTagName("html")[0].style.background = "linear-gradient(to bottom, #262626 0, #262626 73px, #595959 73px) repeat-x";
     } else {
+
+      document.getElementsByTagName("html")[0].style.background = "linear-gradient(to bottom, rgb(36, 41, 47) 0, rgb(36, 41, 47) 73px, white 73px) repeat-x";
       document.body.className = "";
     }
   }, [systemConfigState.mode]);

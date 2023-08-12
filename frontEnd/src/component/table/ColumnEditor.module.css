@@ -12,6 +12,12 @@
   transition: transform 200ms ease-in;
 }
 
+:global(.dark_mode) .addColumnWrap{
+  background-color: #1f1f1f;
+  border-left: 1px solid #434343;
+  color: #f5f5f5;
+}
+
 .columnShow {
   transform: translateX(0px);
 }

@@ -3,6 +3,11 @@
     --grayText: rgba(55, 53, 47, 0.5);
     --normalBlack:rgb(55, 53, 47);
 }
+.dark_mode{
+    --hoverBgColor: rgba(255, 243, 247, 0.08);
+    --grayText: rgba(255, 253, 247, 0.5);
+    --normalBlack:rgb(255, 253, 247);
+}
 
 /* popup 弹出层 */
 .popper{
