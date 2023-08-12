@@ -13,6 +13,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import ConfigPage from "./page/ConfigPage";
 import LogPage from "./page/LogPage";
+import { useEffect } from "react";
 
 function App() {
   const dispatch = useDispatch();
@@ -26,10 +27,15 @@ function App() {
       return res;
     },
   });
-
+  useEffect(() => {
+    if (systemConfigState.mode === "dark") {
+      document.body.className = "dark_mode";
+    } else {
+      document.body.className = "";
+    }
+  }, [systemConfigState.mode]);
   return (
     <>
-      <div className={systemConfigState.mode === "dark" ? "dark_mode" : ""}>
         <ConfigProvider
           theme={
             systemConfigState.mode === "dark"
@@ -57,7 +63,6 @@ function App() {
           )}
           <Toaster />
         </ConfigProvider>
-      </div>
     </>
   );
 }

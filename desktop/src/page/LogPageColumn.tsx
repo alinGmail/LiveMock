@@ -74,7 +74,8 @@ export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
 }
 
 export function getDefaultColumn(
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "dark" | "light"
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -173,6 +174,7 @@ export function getDefaultColumn(
             {bodyType === "string" && <TextColumn content={record.res?.body} />}
             {bodyType === "object" && (
               <ReactJson
+                theme={mode === "dark" ? "ashes" : "rjv-default"}
                 collapseStringsAfterLength={1000}
                 src={record.res?.body}
                 collapsed={true}
@@ -196,9 +198,11 @@ export function getDefaultColumn(
             }}
           >
             <ReactJson
+              theme={mode === "dark" ? "summerfruit" : "rjv-default"}
               src={record}
               collapseStringsAfterLength={1000}
               collapsed={true}
+              style={{ backgroundColor: "none" }}
             />
             {/*<ReactJson
                             src={record}
