@@ -36,7 +36,9 @@
   justify-content: center;
   align-items: center;
 }
-
+:global(.dark_mode) .conditionWrap{
+  color: #f5f5f5;
+}
 .conditionSpan {
   margin-right: 3px;
   vertical-align: middle;
