@@ -101,3 +101,6 @@ Here are some examples of matchers:
 there are two type of action:
 - `custom response`: response some custom text or JSON to the request, you can also set the headers of the response
 - `proxy`: make the request forward to another host.
+
+You can customize the header of the response, both in custom response and proxy actions.
+
