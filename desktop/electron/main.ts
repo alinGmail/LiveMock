@@ -14,7 +14,7 @@ import { Menu, shell, MenuItem } from "electron";
 import * as console from "console";
 import { buildMenu } from "./buildMenu";
 import { getSystemCollection } from "./db/dbManager";
-import {systemVersion} from "../src/config";
+import {systemVersion} from "./config";
 // The built directory structure
 //
 // ├─┬─┬ dist
