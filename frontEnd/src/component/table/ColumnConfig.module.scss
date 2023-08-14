@@ -11,6 +11,12 @@
   transform: translateX(260px);
 }
 
+:global(.dark_mode) .wrap{
+  background-color: #1f1f1f;
+  border-left: 1px solid #434343;
+  color: #f5f5f5;
+}
+
 .wrapShow {
   transform: translateX(0px);
 }
@@ -49,6 +55,10 @@
 
   .titleBtn {
   }
+}
+
+:global(.dark_mode) .titleRow{
+  color: rgba(255, 253, 247, 0.65);
 }
 
 .configList {

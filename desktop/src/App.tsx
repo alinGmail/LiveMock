@@ -8,15 +8,17 @@ import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
-import { Spin } from "antd";
+import { Spin, ConfigProvider, theme } from "antd";
 import { Route, Routes, Navigate } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import ConfigPage from "./page/ConfigPage";
 import LogPage from "./page/LogPage";
+import { useEffect } from "react";
 
 function App() {
   const dispatch = useDispatch();
   const projectList = useAppSelector((state) => state.project.projectList);
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const projectListQuery = useQuery({
     queryKey: ["projectList"],
     queryFn: async () => {
@@ -25,28 +27,46 @@ function App() {
       return res;
     },
   });
-
+  useEffect(() => {
+    if (systemConfigState.mode === "dark") {
+      document.body.className = "dark_mode";
+      document.getElementsByTagName("html")[0].style.background =
+        "linear-gradient(to bottom, #262626 0, #262626 73px, #595959 73px) repeat-x";
+    } else {
+      document.getElementsByTagName("html")[0].style.background =
+        "linear-gradient(to bottom, rgb(36, 41, 47) 0, rgb(36, 41, 47) 73px, white 73px) repeat-x";
+      document.body.className = "";
+    }
+  }, [systemConfigState.mode]);
   return (
     <>
-      {!projectListQuery.isLoading ? (
-        projectList.length === 0 ? (
-          <WelcomePage />
+      <ConfigProvider
+        theme={
+          systemConfigState.mode === "dark"
+            ? { algorithm: theme.darkAlgorithm }
+            : {}
+        }
+      >
+        {!projectListQuery.isLoading ? (
+          projectList.length === 0 ? (
+            <WelcomePage />
+          ) : (
+            <Layout>
+              <Routes>
+                <Route path={"expectation"} element={<ExpectationPage />} />
+                <Route path={"requestLog"} element={<LogPage />}></Route>
+                <Route path={"config"} element={<ConfigPage />} />
+                <Route path={"*"} element={<Navigate to={"expectation"} />} />
+              </Routes>
+            </Layout>
+          )
         ) : (
-          <Layout>
-            <Routes>
-              <Route path={"expectation"} element={<ExpectationPage />} />
-              <Route path={"requestLog"} element={<LogPage />}></Route>
-              <Route path={"config"} element={<ConfigPage />} />
-              <Route path={"*"} element={<Navigate to={"expectation"} />} />
-            </Routes>
-          </Layout>
-        )
-      ) : (
-        <Spin tip="Loading" size="large">
-          <div className="content" style={{ height: "500px" }} />
-        </Spin>
-      )}
-      <Toaster />
+          <Spin tip="Loading" size="large">
+            <div className="content" style={{ height: "500px" }} />
+          </Spin>
+        )}
+        <Toaster />
+      </ConfigProvider>
     </>
   );
 }

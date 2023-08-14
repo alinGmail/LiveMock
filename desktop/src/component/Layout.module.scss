@@ -20,3 +20,21 @@
     flex: 1;
   }
 }
+:global(.dark_mode){
+  .layout{
+    .mainRow{
+      background: linear-gradient(to right,#1f1f1f 0,#1f1f1f 200px,#262626 2000px) repeat-y;
+    }
+    .headRow{
+      background: #262626;
+      border-bottom: 1px solid #595959;
+    }
+    .leftCol{
+      background: #1f1f1f;
+      color: rgb(191, 191, 191);
+    }
+    .rightCol{
+      background: #262626;
+    }
+  }
+}

@@ -8,3 +8,11 @@
 .defaultColumnHead:hover {
     background: rgba(0, 0, 0, 0.09);
 }
+
+.placeHolder{
+    color: rgba(0, 0, 0, 0.2)
+}
+
+:global(.dark_mode) .placeHolder{
+    color: rgba(255,255,255,0.2);
+}

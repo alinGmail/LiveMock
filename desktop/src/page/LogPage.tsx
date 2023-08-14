@@ -92,6 +92,7 @@ const placeHolderColumn: TableColumnItem = {
 
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const logViewIdRef = useRef<string>();
   let {
     columnConfigShow,
@@ -137,14 +138,15 @@ const LogPage: React.FC = () => {
   useEffect(() => {
     const customColumns = getCustomColumn(
       tableColumns.filter((item, index) => item.visible),
-      dispatch
+      dispatch,
+      systemConfigState.mode
     );
-    const newLogColumn = getDefaultColumn(dispatch)
+    const newLogColumn = getDefaultColumn(dispatch, systemConfigState.mode)
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
       .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  }, [tableColumns, defaultColumnVisible, dispatch]);
+  }, [tableColumns, defaultColumnVisible, dispatch, systemConfigState.mode]);
 
   useEffect(() => {
     const id = uuId();

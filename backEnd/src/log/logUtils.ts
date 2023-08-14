@@ -174,7 +174,20 @@ export async function getLogDynamicView(
       return;
     }
     logView.filters.forEach((filter) => {
-      applyDynamicViewFilter(dynamicView!,filter);
+      const find = dynamicView!.filterPipeline.find(pipeLine =>{
+        return pipeLine.uid === filter.id;
+      });
+      if(!find){
+        applyDynamicViewFilter(dynamicView!,filter);
+      }
+    });
+    dynamicView.filterPipeline.forEach(pipeLine=>{
+      const find = logView.filters.find(filter=>{
+        return filter.id === pipeLine.uid;
+      });
+      if(!find && pipeLine.uid){
+        dynamicView?.removeFilter(pipeLine.uid);
+      }
     });
     dynamicView.on("insert", (log: LogM) => {
       logViewEventEmitter.emit("insert", { log, logViewId: logView.id });

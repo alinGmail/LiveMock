@@ -35,3 +35,21 @@
   padding: 3px;
   border-left: 1px solid #f0f0f0;
 }
+:global(.dark_mode){
+  .headerTilRow{
+    border-top: 1px solid #595959;
+    border-bottom: 1px solid #595959;
+    border-right: 1px solid #595959;
+  }
+  .headerTilItem{
+    border-left: 1px solid #595959;
+  }
+
+  .headerRow{
+    border-bottom: 1px solid #595959;
+    border-right: 1px solid #595959;
+  }
+  .headerItem{
+    border-left: 1px solid #595959;
+  }
+}

@@ -35,7 +35,7 @@ function ChevronDown({ fill }: { fill: string }) {
         marginTop: "1px",
       }}
     >
-      <polygon points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
+      <polygon fill={"currentColor"} points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
     </svg>
   );
 }

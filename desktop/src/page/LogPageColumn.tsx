@@ -74,7 +74,8 @@ export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
 }
 
 export function getDefaultColumn(
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "dark" | "light"
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -173,6 +174,8 @@ export function getDefaultColumn(
             {bodyType === "string" && <TextColumn content={record.res?.body} />}
             {bodyType === "object" && (
               <ReactJson
+                theme={mode === "dark" ? "ashes" : "rjv-default"}
+                style={{ backgroundColor: "none" }}
                 collapseStringsAfterLength={1000}
                 src={record.res?.body}
                 collapsed={true}
@@ -196,9 +199,11 @@ export function getDefaultColumn(
             }}
           >
             <ReactJson
+              theme={mode === "dark" ? "summerfruit" : "rjv-default"}
               src={record}
               collapseStringsAfterLength={1000}
               collapsed={true}
+              style={{ backgroundColor: "none" }}
             />
             {/*<ReactJson
                             src={record}
@@ -362,9 +367,7 @@ const CustomColumnHead = ({
       }
     >
       <div className={mStyle.defaultColumnHead}>
-        {!item.label && (
-          <span style={{ color: "rgba(0, 0, 0, 0.2)" }}>empty</span>
-        )}
+        {!item.label && <span className={mStyle.placeHolder}>empty</span>}
         {item.label}&nbsp;
       </div>
     </Dropdown>
@@ -373,17 +376,19 @@ const CustomColumnHead = ({
 
 export function getCustomColumn(
   items: Array<TableColumnItem>,
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "light" | "dark"
 ) {
   let res: ColumnType<LogM>[] = [];
   items.forEach((item) => {
-    res.push(transferColumn(item, dispatch));
+    res.push(transferColumn(item, dispatch, mode));
   });
   return res;
 }
 export function transferColumn(
   item: TableColumnItem,
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<AnyAction>,
+  mode: "light" | "dark"
 ): ColumnType<LogM> {
   return {
     title: (
@@ -398,7 +403,7 @@ export function transferColumn(
       return (
         <div>
           {item.displayType == ColumnDisplayType.JSON &&
-            JsonRender(item, record)}
+            JsonRender(item, record, mode)}
           {item.displayType == ColumnDisplayType.TEXT &&
             TextRender(item, record)}
         </div>
@@ -407,7 +412,7 @@ export function transferColumn(
   };
 }
 
-function JsonRender(item: TableColumnItem, log: LogM) {
+function JsonRender(item: TableColumnItem, log: LogM, mode: "light" | "dark") {
   let root = _.get(log, item.path, {});
   return (
     <div
@@ -417,6 +422,8 @@ function JsonRender(item: TableColumnItem, log: LogM) {
       }}
     >
       <ReactJson
+        theme={mode === "dark" ? "ashes" : "rjv-default"}
+        style={{ backgroundColor: "none" }}
         collapseStringsAfterLength={1000}
         collapsed={true}
         src={root}

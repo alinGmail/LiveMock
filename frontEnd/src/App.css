@@ -3,6 +3,11 @@
     --grayText: rgba(55, 53, 47, 0.5);
     --normalBlack:rgb(55, 53, 47);
 }
+.dark_mode{
+    --hoverBgColor: rgba(255, 243, 247, 0.08);
+    --grayText: rgba(255, 253, 247, 0.5);
+    --normalBlack:rgb(255, 253, 247);
+}
 
 /* popup 弹出层 */
 .popper{
@@ -11,6 +16,10 @@
     background: #fff;
     border-radius: 5px;
 }
+.dark_mode .popper{
+    background: #1f1f1f;
+}
+
 .inputWrap .ant-input{
     transition: background 50ms ease-in 0s;
     border-color: rgba(0,0,0,0);
@@ -63,6 +72,17 @@
     background: rgba(55, 53, 47, 0.08);
 }
 
+.dark_mode .menuWrap{
+    background: #434343;
+    box-shadow: rgb(115 115 115 / 5%) 0px 0px 0px 1px, rgb(115 115 115 / 10%) 0px 3px 6px, rgb(115 115 115 / 15%) 0px 9px 24px;
+}
+.dark_mode .menuItem{
+    color: rgb(255, 253, 247);;
+}
+.dark_mode .menuItem:hover{
+    background: rgba(255, 253, 247, 0.08);
+}
+
 .textBtn{
     font-size: 14px;
     height: 24px;
@@ -76,6 +96,12 @@
 }
 .textBtn:hover{
     background: rgba(55,53,47,0.08);
+}
+.dark_mode .textBtn{
+    color: #f0f0f0;
+}
+.dark_mode .textBtn:hover{
+    background: rgba(255,253,247,0.08);
 }
 .ant-btn-text:hover, .ant-btn-text:focus{
     background: rgba(55,53,47,0.08);

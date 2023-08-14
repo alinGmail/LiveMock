@@ -14,15 +14,30 @@
   }
   .linkRow:hover {
     background: rgba(0, 0, 0, 0.08);
-    color: #595959;
   }
   .linkActivate {
     background: rgba(0, 0, 0, 0.12);
-    color: #595959;
   }
 
   .linkActivate:hover {
     background: rgba(0, 0, 0, 0.18);
-    color: #595959;
+  }
+}
+:global(.dark_mode){
+  .leftNav{
+    .linkRow{
+      color: rgb(191, 191, 191);
+    }
+  }
+
+  .linkRow:hover {
+    background: rgba(0, 0, 0, 0.16);
+  }
+  .linkActivate {
+    background: rgba(0, 0, 0, 0.24);
+  }
+
+  .linkActivate:hover {
+    background: rgba(0, 0, 0, 0.32);
   }
 }
