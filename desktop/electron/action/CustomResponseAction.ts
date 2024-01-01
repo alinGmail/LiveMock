@@ -1,10 +1,12 @@
 import {
+  ContentHandler,
   CustomResponseActionM,
   IAction,
   ResponseType,
 } from "core/struct/action";
 import express from "express";
 import { delayPromise } from "./common";
+import Mock from "mockjs";
 
 class CustomResponseActionImpl implements IAction {
   action: CustomResponseActionM;
@@ -23,7 +25,8 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "application/json");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      const responseVal = this.action.responseContent.value;
+      let responseVal = getResponseContentStr(this.action);
+
       res.end(responseVal);
       // set the body and raw body
 
@@ -36,7 +39,8 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "text/plain");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      const responseVal = this.action.responseContent.value;
+      let responseVal = getResponseContentStr(this.action);
+
       res.end(responseVal);
       (res as any).body = responseVal;
       (res as any).rawBody = responseVal;
@@ -44,6 +48,14 @@ class CustomResponseActionImpl implements IAction {
   }
 }
 
+function getResponseContentStr(action: CustomResponseActionM): string {
+  let responseVal = action.responseContent.value;
+  if (action.responseContent.contentHandler === ContentHandler.MOCK_JS) {
+    responseVal = Mock.mock(JSON.parse(action.responseContent.value));
+    responseVal = JSON.stringify(responseVal);
+  }
+  return responseVal;
+}
 function handleHeaders(action: CustomResponseActionM, res: express.Response) {
   action.responseContent.headers.forEach((headers) => {
     if (headers[0].trim() !== "") {

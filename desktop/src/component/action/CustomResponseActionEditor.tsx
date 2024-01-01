@@ -1,6 +1,7 @@
 import React, { ChangeEvent } from "react";
 import {
   ActionType,
+  ContentHandler,
   CustomResponseActionM,
   ResponseType,
 } from "core/struct/action";
@@ -116,6 +117,34 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
             }}
           />
         </div>
+        <Row gutter={10}>
+          <Col span={12}>
+            <div>content handler</div>
+            <Select
+              style={{ width: "220px" }}
+              defaultValue={action.responseContent.contentHandler}
+              options={[
+                {
+                  value: ContentHandler.NONE,
+                  label: ContentHandler.NONE,
+                },
+                {
+                  value: ContentHandler.MOCK_JS,
+                  label: ContentHandler.MOCK_JS,
+                },
+              ]}
+              onChange={(value) =>{
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent:{
+                    ...action.responseContent,
+                    contentHandler:value
+                  }
+                })
+              }}
+            />
+          </Col>
+        </Row>
         <div>content</div>
         <div>
           <TextArea

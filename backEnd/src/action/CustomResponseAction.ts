@@ -26,13 +26,7 @@ class CustomResponseActionImpl implements IAction {
       handleHeaders(this.action, res);
       res.status(this.action.status);
 
-      let responseVal = this.action.responseContent.value;
-      if (
-        this.action.responseContent.contentHandler === ContentHandler.MOCK_JS
-      ) {
-        responseVal = Mock.mock(JSON.parse(this.action.responseContent.value));
-        responseVal = JSON.stringify(responseVal);
-      }
+      let responseVal = getResponseContentStr(this.action);
       res.end(responseVal);
       // set the body and raw body
 
@@ -45,18 +39,21 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "text/plain");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      let responseVal = this.action.responseContent.value;
-      if (
-        this.action.responseContent.contentHandler === ContentHandler.MOCK_JS
-      ) {
-        responseVal = Mock.mock(JSON.parse(this.action.responseContent.value));
-        responseVal = JSON.stringify(responseVal);
-      }
+      let responseVal = getResponseContentStr(this.action);
       res.end(responseVal);
       (res as any).body = responseVal;
       (res as any).rawBody = responseVal;
     }
   }
+}
+
+function getResponseContentStr(action: CustomResponseActionM): string {
+  let responseVal = action.responseContent.value;
+  if (action.responseContent.contentHandler === ContentHandler.MOCK_JS) {
+    responseVal = Mock.mock(JSON.parse(action.responseContent.value));
+    responseVal = JSON.stringify(responseVal);
+  }
+  return responseVal;
 }
 
 function handleHeaders(action: CustomResponseActionM, res: express.Response) {
