@@ -16,8 +16,6 @@ import { CheckboxChangeEvent } from "antd/es/checkbox";
 import CustomResponseActionEditor from "./CustomResponseActionEditor";
 import ProxyActionEditor from "./ProxyActionEditor";
 
-
-
 const ActionEditor: React.FC<{
   action: ActionM;
 }> = ({ action }) => {
@@ -41,7 +39,7 @@ const ActionEditor: React.FC<{
         <CustomResponseActionEditor action={action} typeChange={typeChange} />
       )}
       {action.type === ActionType.PROXY && (
-          <ProxyActionEditor action={action} typeChange={typeChange}/>
+        <ProxyActionEditor action={action} typeChange={typeChange} />
       )}
     </div>
   );
