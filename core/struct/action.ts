@@ -11,15 +11,22 @@ export enum ResponseType {
   TEXT = "TEXT",
 }
 
+export enum ContentHandler{
+  NONE = "NONE",
+  MOCK_JS = "MOCK_JS"
+}
+
 interface JSONResponseContentM {
   headers: Array<[string, string]>;
   type: ResponseType.JSON;
   value: string;
+  contentHandler?: ContentHandler | undefined | null;
 }
 interface TEXTResponseContentM {
   headers: Array<[string, string]>;
   type: ResponseType.TEXT;
   value: string;
+  contentHandler?: ContentHandler | undefined | null;
 }
 
 type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
@@ -91,7 +98,8 @@ export function createCustomResponseAction(): CustomResponseActionM {
     responseContent: {
       type: ResponseType.JSON,
       value: "",
-      headers:[]
+      headers:[],
+      contentHandler:ContentHandler.NONE
     },
     status: 200,
     type: ActionType.CUSTOM_RESPONSE,
