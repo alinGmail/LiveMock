@@ -141,12 +141,25 @@ const LogPage: React.FC = () => {
       dispatch,
       systemConfigState.mode
     );
-    const newLogColumn = getDefaultColumn(dispatch, systemConfigState.mode)
+    const newLogColumn = getDefaultColumn(
+      dispatch,
+      systemConfigState.mode,
+      logViewId,
+      currentProject.id,
+      logViewLogsQuery.refetch
+    )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
       .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  }, [tableColumns, defaultColumnVisible, dispatch, systemConfigState.mode]);
+  }, [
+    tableColumns,
+    defaultColumnVisible,
+    dispatch,
+    systemConfigState.mode,
+    logViewId,
+    currentProject.id,
+  ]);
 
   useEffect(() => {
     const id = uuId();
@@ -262,7 +275,9 @@ function AddLogFilterBtn({
           projectId: projectId,
         });
         toastPromise(addPromise);
-        refreshLogList();
+        addPromise.then((res) => {
+          refreshLogList();
+        });
       }}
       size={"small"}
       type={"text"}
