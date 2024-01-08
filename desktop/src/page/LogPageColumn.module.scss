@@ -16,3 +16,14 @@
 :global(.dark_mode) .placeHolder{
     color: rgba(255,255,255,0.2);
 }
+
+:global(.ant-table-cell-row-hover) .filterIcon{
+    display: inline;
+}
+
+.filterIcon{
+    user-select: none;
+    cursor: pointer;
+    margin-left: 5px;
+    display: none;
+}

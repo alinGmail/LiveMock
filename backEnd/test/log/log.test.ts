@@ -82,12 +82,15 @@ describe('test log',()=>{
         expect(lastLog!.req!.method).toBe("POST");
         expect(lastLog!.req!.rawBody).toBe("request body test");
         expect(lastLog!.req!.headers["token"]).toEqual("abc_token");
+        expect(lastLog!.req!.query["testParam"]).toEqual("paramVal");
+
 
         // response log
         expect(lastLog!.res!.status).toBe(200);
         expect(lastLog!.res!.body).toBe("test response");
         expect(lastLog!.res!.rawBody).toBe("test response");
         expect(lastLog!.res!.headers["respheader"]).toEqual("test header value");
+
 
     });
 

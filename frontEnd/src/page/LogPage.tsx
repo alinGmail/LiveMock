@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import LogFilterComponent from "../component/log/LogFilterComponent";
@@ -26,8 +26,8 @@ import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
-import {ColumnsType} from "antd/es/table/interface";
-import {ServerUrl} from "../config";
+import { ColumnsType } from "antd/es/table/interface";
+import { ServerUrl } from "../config";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -92,7 +92,7 @@ const placeHolderColumn: TableColumnItem = {
 
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
-  const systemConfigState = useAppSelector((state)=>state.systemConfig);
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const logViewIdRef = useRef<string>();
   let {
     columnConfigShow,
@@ -135,20 +135,26 @@ const LogPage: React.FC = () => {
       enabled: !!logViewId,
     }
   );
-  const [logColumn,updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
-  useEffect(() =>{
-    console.log("custom columns change")
+  const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
+  useEffect(() => {
+    console.log("custom columns change");
     const customColumns = getCustomColumn(
-        tableColumns.filter((item, index) => item.visible),
-        dispatch,
-        systemConfigState.mode
+      tableColumns.filter((item, index) => item.visible),
+      dispatch,
+      systemConfigState.mode
     );
-    const newLogColumn = getDefaultColumn(dispatch,systemConfigState.mode)
-        .filter((item, index) => defaultColumnVisible[index])
-        .concat(customColumns)
-        .concat(getConfigColumn(dispatch));
+    const newLogColumn = getDefaultColumn(
+      dispatch,
+      systemConfigState.mode,
+      logViewId,
+      currentProject.id,
+      logViewLogsQuery.refetch
+    )
+      .filter((item, index) => defaultColumnVisible[index])
+      .concat(customColumns)
+      .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  },[tableColumns,defaultColumnVisible,dispatch,systemConfigState.mode]);
+  }, [tableColumns, defaultColumnVisible, dispatch, systemConfigState.mode,logViewId,currentProject.id]);
 
   useEffect(() => {
     const socket = io(ServerUrl, {
@@ -182,18 +188,20 @@ const LogPage: React.FC = () => {
       socket.disconnect();
     };
   }, []);
-  const listTable = useMemo(() =>{
-      return (<Table
+  const listTable = useMemo(() => {
+    return (
+      <Table
         columns={logColumn}
         dataSource={logs}
         size={"small"}
         tableLayout={"fixed"}
         rowKey={"id"}
         pagination={{
-          pageSize:200,
+          pageSize: 200,
         }}
-    />)
-  },[logColumn,logs])
+      />
+    );
+  }, [logColumn, logs]);
   return (
     <div style={{ padding: "10px" }}>
       <div style={{ padding: "10px 0px" }}>
@@ -217,9 +225,7 @@ const LogPage: React.FC = () => {
           />
         )}
       </div>
-      <div>
-        {listTable}
-      </div>
+      <div>{listTable}</div>
       <ColumnEditor
         onClose={() => {
           dispatch(hideColumnEditor());
@@ -253,7 +259,9 @@ function AddLogFilterBtn({
           projectId: projectId,
         });
         toastPromise(addPromise);
-        refreshLogList();
+        addPromise.then(res =>{
+          refreshLogList();
+        })
       }}
       size={"small"}
       type={"text"}

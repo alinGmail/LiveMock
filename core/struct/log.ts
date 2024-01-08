@@ -13,6 +13,10 @@ export interface ProxyInfoM {
   isProxy: boolean;
 }
 
+export interface ParsedQs{
+  [key: string]: string | undefined | null | string[] | ParsedQs | ParsedQs[];
+}
+
 export interface RequestLogM {
   body: any | null;
   rawBody: string | null;
@@ -22,6 +26,7 @@ export interface RequestLogM {
   headers: {
     [key: string]: string | undefined | null;
   };
+  query : ParsedQs;
 }
 
 type ResponseLogM = {
@@ -50,6 +55,7 @@ export function createRequestLog(): RequestLogM {
   return {
     body: null,
     headers: {},
+    query:{},
     method: "get",
     path: "",
     rawBody: null,
