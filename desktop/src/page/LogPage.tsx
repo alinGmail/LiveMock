@@ -207,6 +207,7 @@ const LogPage: React.FC = () => {
   const listTable = useMemo(() => {
     return (
       <Table
+        loading={logViewLogsQuery.isFetching}
         columns={logColumn}
         dataSource={logs}
         size={"small"}

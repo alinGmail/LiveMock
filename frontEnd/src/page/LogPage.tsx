@@ -154,7 +154,14 @@ const LogPage: React.FC = () => {
       .concat(customColumns)
       .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  }, [tableColumns, defaultColumnVisible, dispatch, systemConfigState.mode,logViewId,currentProject.id]);
+  }, [
+    tableColumns,
+    defaultColumnVisible,
+    dispatch,
+    systemConfigState.mode,
+    logViewId,
+    currentProject.id,
+  ]);
 
   useEffect(() => {
     const socket = io(ServerUrl, {
@@ -191,6 +198,7 @@ const LogPage: React.FC = () => {
   const listTable = useMemo(() => {
     return (
       <Table
+        loading={logViewLogsQuery.isFetching}
         columns={logColumn}
         dataSource={logs}
         size={"small"}
@@ -259,9 +267,9 @@ function AddLogFilterBtn({
           projectId: projectId,
         });
         toastPromise(addPromise);
-        addPromise.then(res =>{
+        addPromise.then((res) => {
           refreshLogList();
-        })
+        });
       }}
       size={"small"}
       type={"text"}

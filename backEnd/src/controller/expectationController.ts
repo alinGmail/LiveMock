@@ -84,7 +84,7 @@ export function getExpectationRouter(path: string): express.Router {
         throw new ServerError(400, "project id not exist!");
       }
       const collection = await getExpectationCollection(projectId, path);
-      const expectations = collection.find({});
+      const expectations = collection.find({}).reverse();
       res.json(expectations);
     }
   );
