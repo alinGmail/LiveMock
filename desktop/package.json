@@ -60,7 +60,6 @@
     "prettier": "^2.8.8",
     "sass": "^1.62.1",
     "supertest": "^6.3.3",
-    "typescript": "^5.0.2",
     "vite": "^4.3.2",
     "vite-plugin-electron": "^0.11.2",
     "vite-plugin-electron-renderer": "^0.14.5",
