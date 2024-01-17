@@ -20,6 +20,7 @@ const ActionItem: React.FC<{
         onVisibleChange={(visible) => {
           setDropShow(visible);
         }}
+        placement={"bottom"}
         trigger={["click"]}
         overlay={
           <div>
