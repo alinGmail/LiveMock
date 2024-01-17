@@ -94,7 +94,7 @@ const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
   const systemConfigState = useAppSelector((state) => state.systemConfig);
   const logViewIdRef = useRef<string>();
-  let {
+  const {
     columnConfigShow,
     columnEditorShow,
     currentColumnEditIndex,
@@ -103,7 +103,7 @@ const LogPage: React.FC = () => {
     logList,
     tableColumns,
   } = logState;
-  let currentEditColumn = tableColumns[currentColumnEditIndex];
+  const currentEditColumn = tableColumns[currentColumnEditIndex];
   const dispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
