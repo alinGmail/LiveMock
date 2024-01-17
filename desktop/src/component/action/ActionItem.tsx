@@ -17,6 +17,7 @@ const ActionItem: React.FC<{
     <div>
       <Dropdown
         visible={dropShow}
+        placement={"bottom"}
         onVisibleChange={(visible) => {
           setDropShow(visible);
         }}

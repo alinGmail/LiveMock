@@ -34,8 +34,6 @@ const ExpectationPage = () => {
     }
   );
 
-  const [text,setText] = useState("")
-
   const expectationColumn = [
     {
       title: "name",
