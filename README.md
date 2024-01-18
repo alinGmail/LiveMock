@@ -38,7 +38,6 @@ yarn workspace front-end build
 ```
 
 ### 4.run the project
-cd to the project root, then run
 ```
 yarn workspace back-end start
 ```
