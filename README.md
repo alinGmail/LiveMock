@@ -27,20 +27,20 @@ git clone git@github.com:alinGmail/LiveMock.git
 
 ### 2.install dependencies
 ```
-cd LiveMock
-cd frontEnd && yarn install && cd ../backEnd && yarn install && cd ../core && yarn install && cd ../
+cd LiveMock 
+yarn install
 ```
 
 
 ### 3.build the forntEnd code
 ```
-cd frontEnd && yarn build && cd ../
+yarn workspace front-end build
 ```
 
 ### 4.run the project
 cd to the project root, then run
 ```
-cd backEnd && yarn start
+yarn workspace back-end start
 ```
 the server will running at http://localhost:9002 
 
