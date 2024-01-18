@@ -33,6 +33,7 @@ export function insertReqLog(
   requestLogM.body = req.body;
   // @ts-ignore
   requestLogM.rawBody = req.rawBody;
+  requestLogM.query = req.query;
   requestLogM.headers = req.rawHeaders.reduce(
     (header, current, index, array) => {
       if (index % 2 === 0) {

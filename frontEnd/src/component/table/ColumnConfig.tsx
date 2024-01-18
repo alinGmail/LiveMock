@@ -13,6 +13,7 @@ import classNames from "classnames";
 import {
   ColumnDisplayType,
   hideColumnConfig,
+  modifyAllTableColumnVisible,
   modifyTableColumn,
   modifyTableColumnVisible,
   setDefaultColumnVisible,
@@ -63,7 +64,14 @@ const ColumnConfig: React.FC<{
       <div className={styles.titleRow}>
         <div className={styles.titleLabel}>Shown in table</div>
         <div className={styles.titleBtnColumn}>
-          <div className={styles.titleBtn}>Hide all</div>
+          <div
+            className={styles.titleBtn}
+            onClick={() => {
+              dispatch(modifyAllTableColumnVisible({ visible: false }));
+            }}
+          >
+            Hide all
+          </div>
         </div>
       </div>
       <div className={styles.configList}>
@@ -104,7 +112,14 @@ const ColumnConfig: React.FC<{
       <div className={styles.titleRow}>
         <div className={styles.titleLabel}>Hidden in table</div>
         <div className={styles.titleBtnColumn}>
-          <div className={styles.titleBtn}>Show all</div>
+          <div
+            className={styles.titleBtn}
+            onClick={() => {
+              dispatch(modifyAllTableColumnVisible({ visible: true }));
+            }}
+          >
+            Show all
+          </div>
         </div>
       </div>
       <div className={styles.configList}>
@@ -165,7 +180,7 @@ const ConfigRow = ({
         {displayType == ColumnDisplayType.JSON ? (
           <BracketsIcon style={{ width: "16px", verticalAlign: "middle" }} />
         ) : (
-          <AlignLeftOutlined style={{verticalAlign:"middle"}}/>
+          <AlignLeftOutlined style={{ verticalAlign: "middle" }} />
         )}
         &nbsp;<span style={{ verticalAlign: "middle" }}>{title}</span>
       </div>
@@ -192,9 +207,9 @@ const ConfigRow = ({
           }}
         >
           {visible ? (
-            <EyeBlock style={{ width: "16px",verticalAlign:"middle" }} />
+            <EyeBlock style={{ width: "16px", verticalAlign: "middle" }} />
           ) : (
-            <Eye style={{ width: "16px" ,verticalAlign:"middle"}} />
+            <Eye style={{ width: "16px", verticalAlign: "middle" }} />
           )}
         </div>
       </div>

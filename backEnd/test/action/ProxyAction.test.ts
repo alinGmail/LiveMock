@@ -137,7 +137,7 @@ describe("test proxy action",()=>{
 
 
    test(`test proxy error`,async ()=>{
-      const response = await request(proxyServer).post("/testProxy2");
+      const response = await request(proxyServer).post("/testProxy2?testParam=testVal");
       expect(response.status).toEqual(400);
       expect(response.text).toEqual("server error");
       expect(response.get("token")).toEqual("this is another token!!!");
@@ -146,6 +146,7 @@ describe("test proxy action",()=>{
       expect(log.res!.body).toEqual("server error");
       expect(log.res!.status).toBe(400);
       expect(log.res!.headers["token"]).toEqual("this is another token!!!");
+      expect(log.req!.query['testParam']).toEqual("testVal");
    });
 
    test(`test proxy json`,async ()=>{

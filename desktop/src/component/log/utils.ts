@@ -22,6 +22,10 @@ export function getDefaultColumnTitles() {
             displayType: ColumnDisplayType.TEXT,
         },
         {
+            title: "status code",
+            displayType: ColumnDisplayType.TEXT,
+        },
+        {
             title: "path",
             displayType: ColumnDisplayType.TEXT,
         },
@@ -30,7 +34,7 @@ export function getDefaultColumnTitles() {
             displayType: ColumnDisplayType.JSON,
         },
         {
-            title: "json",
+            title: "root",
             displayType: ColumnDisplayType.JSON,
         },
     ];

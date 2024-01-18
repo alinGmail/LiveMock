@@ -14,7 +14,6 @@
     "jsx": "react-jsx",
     "baseUrl":"./",
     "paths":{
-	"core/*": ["../core/*"]
     },
 
 
@@ -26,5 +25,5 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["src","vite.config.ts"],
-  "references": [{ "path": "./tsconfig.node.json" },{"path":"../core"}]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

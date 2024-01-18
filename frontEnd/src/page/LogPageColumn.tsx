@@ -3,12 +3,14 @@ import {
   EllipsisOutlined,
   PlusOutlined,
   DeleteOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
-import { FilterType, LogM } from "core/struct/log";
+import {createSimpleFilter, FilterType, LogM} from "core/struct/log";
 import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
 import {
+  addLogFilter,
   addTableColumn,
   ColumnDisplayType,
   deleteTableColumn,
@@ -27,6 +29,8 @@ import _ from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
+import {addLogFilterReq} from "../server/logFilterServer";
+import {toastPromise} from "../component/common";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
   return [
@@ -75,7 +79,10 @@ export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
 
 export function getDefaultColumn(
   dispatch: Dispatch<AnyAction>,
-  mode: "dark" | "light"
+  mode: "dark" | "light",
+  logViewId:string | undefined,
+  projectId:string,
+  refreshLogList: () => void
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -153,7 +160,29 @@ export function getDefaultColumn(
       key: "path",
       width: "200px",
       render: (text: string, record: any, index: number) => {
-        return <div>{record.req.path}</div>;
+        return (
+          <div>
+            {record.req.path}
+            <span className={mStyle.filterIcon}
+            onClick={()=>{
+              const simpleFilterM = createSimpleFilter();
+              simpleFilterM.property = "req.path";
+              simpleFilterM.value = record.req.path;
+              dispatch(addLogFilter(simpleFilterM));
+              const addPromise = addLogFilterReq({
+                filter: simpleFilterM,
+                logViewId: logViewId ?? "",
+                projectId: projectId,
+              });
+              toastPromise(addPromise);
+              addPromise.then(res =>{
+                refreshLogList();
+              })
+            }}>
+              <FilterOutlined />
+            </span>
+          </div>
+        );
       },
     },
     {

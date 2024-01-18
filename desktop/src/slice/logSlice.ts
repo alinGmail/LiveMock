@@ -123,6 +123,19 @@ export const logSlice = createSlice({
       let { visible, index } = action.payload;
       state.defaultColumnVisible[index] = visible;
     },
+    modifyAllTableColumnVisible: (
+        state,
+        action: PayloadAction<{
+          visible: boolean;
+        }>
+    ) => {
+      state.tableColumns.forEach((column) => {
+        column.visible = action.payload.visible;
+      });
+      state.defaultColumnVisible = state.defaultColumnVisible.map((item) => {
+        return action.payload.visible;
+      });
+    },
   },
 });
 
@@ -145,6 +158,7 @@ const {
   hideColumnEditor,
   modifyLogFilter,
   deleteTableColumn,
+  modifyAllTableColumnVisible,
 } = actions;
 
 export {
@@ -165,4 +179,5 @@ export {
   hideColumnEditor,
   modifyTableColumnVisible,
   modifyLogFilter,
+  modifyAllTableColumnVisible,
 };

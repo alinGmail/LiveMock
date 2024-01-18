@@ -1,7 +1,7 @@
 {
-  "name": "livemock",
+  "name": "desktop",
   "private": true,
-  "version": "0.8.0",
+  "version": "0.8.2",
   "scripts": {
     "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
     "tsc": "tsc -project electron",
@@ -33,12 +33,13 @@
     "uuid": "^9.0.0",
     "vite-plugin-svgr": "^3.2.0",
     "wait-on": "^7.0.1",
-    "core": "link:../core",
+    "core": "1.0.1",
     "body-parser": "^1.20.0",
     "express": "4.18.1",
     "form-data": "^4.0.0",
     "http-proxy": "^1.18.1",
-    "type-is": "^1.6.18"
+    "type-is": "^1.6.18",
+    "mockjs": "^1.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.195",
@@ -52,15 +53,14 @@
     "@typescript-eslint/parser": "^5.59.0",
     "@vitejs/plugin-react": "^4.0.0",
     "cross-env": "^7.0.3",
-    "electron": "^24.4.0",
-    "electron-builder": "^23.6.0",
+    "electron": "24.8.8",
+    "electron-builder": "^24.9.1",
     "eslint": "^8.38.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.4",
     "prettier": "^2.8.8",
     "sass": "^1.62.1",
     "supertest": "^6.3.3",
-    "typescript": "^5.0.2",
     "vite": "^4.3.2",
     "vite-plugin-electron": "^0.11.2",
     "vite-plugin-electron-renderer": "^0.14.5",

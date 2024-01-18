@@ -21,11 +21,15 @@ let NInput: FC<{
     <div className={[styles.inputWrap, styles.sizeSmall].join(" ")}>
       {showEmpty ? <div className={styles.placeHolder}>empty</div> : null}
       <ContentEditable
+        style={{
+          whiteSpace: "pre",
+        }}
         onPaste={(event) => {
           event.preventDefault();
           // get paste date
           let clipboardData = event.clipboardData;
           let pastedText = clipboardData.getData("text/plain");
+          pastedText = pastedText.trim();
           // input pure text in ContentEditable
           document.execCommand("insertText", false, pastedText);
         }}

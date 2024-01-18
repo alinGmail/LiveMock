@@ -35,7 +35,7 @@ export const logSlice = createSlice({
     currentColumnEditIndex: -1,
     columnEditorShow: false,
     columnConfigShow: false,
-    defaultColumnVisible: [true, true, true, true,true],
+    defaultColumnVisible: [true, true, true, true, true],
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
@@ -123,6 +123,19 @@ export const logSlice = createSlice({
       let { visible, index } = action.payload;
       state.defaultColumnVisible[index] = visible;
     },
+    modifyAllTableColumnVisible: (
+      state,
+      action: PayloadAction<{
+        visible: boolean;
+      }>
+    ) => {
+      state.tableColumns.forEach((column) => {
+        column.visible = action.payload.visible;
+      });
+      state.defaultColumnVisible = state.defaultColumnVisible.map((item) => {
+        return action.payload.visible;
+      });
+    },
   },
 });
 
@@ -145,6 +158,7 @@ let {
   hideColumnEditor,
   modifyLogFilter,
   deleteTableColumn,
+  modifyAllTableColumnVisible,
 } = actions;
 
 export {
@@ -165,4 +179,5 @@ export {
   hideColumnEditor,
   modifyTableColumnVisible,
   modifyLogFilter,
+  modifyAllTableColumnVisible,
 };

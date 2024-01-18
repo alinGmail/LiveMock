@@ -94,7 +94,7 @@ const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
   const systemConfigState = useAppSelector((state) => state.systemConfig);
   const logViewIdRef = useRef<string>();
-  let {
+  const {
     columnConfigShow,
     columnEditorShow,
     currentColumnEditIndex,
@@ -103,7 +103,7 @@ const LogPage: React.FC = () => {
     logList,
     tableColumns,
   } = logState;
-  let currentEditColumn = tableColumns[currentColumnEditIndex];
+  const currentEditColumn = tableColumns[currentColumnEditIndex];
   const dispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
@@ -141,12 +141,25 @@ const LogPage: React.FC = () => {
       dispatch,
       systemConfigState.mode
     );
-    const newLogColumn = getDefaultColumn(dispatch, systemConfigState.mode)
+    const newLogColumn = getDefaultColumn(
+      dispatch,
+      systemConfigState.mode,
+      logViewId,
+      currentProject.id,
+      logViewLogsQuery.refetch
+    )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
       .concat(getConfigColumn(dispatch));
     updateLogColumn(newLogColumn);
-  }, [tableColumns, defaultColumnVisible, dispatch, systemConfigState.mode]);
+  }, [
+    tableColumns,
+    defaultColumnVisible,
+    dispatch,
+    systemConfigState.mode,
+    logViewId,
+    currentProject.id,
+  ]);
 
   useEffect(() => {
     const id = uuId();
@@ -194,6 +207,7 @@ const LogPage: React.FC = () => {
   const listTable = useMemo(() => {
     return (
       <Table
+        loading={logViewLogsQuery.isFetching}
         columns={logColumn}
         dataSource={logs}
         size={"small"}
@@ -262,7 +276,9 @@ function AddLogFilterBtn({
           projectId: projectId,
         });
         toastPromise(addPromise);
-        refreshLogList();
+        addPromise.then((res) => {
+          refreshLogList();
+        });
       }}
       size={"small"}
       type={"text"}

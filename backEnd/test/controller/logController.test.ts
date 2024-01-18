@@ -21,6 +21,7 @@ describe("test log controller", () => {
     headers: {
         token:"abc"
     },
+    query:{},
     method: "",
     rawBody: "",
     requestDate: new Date(),
@@ -31,6 +32,7 @@ describe("test log controller", () => {
     headers: {
         token:"abcde"
     },
+    query:{},
     method: "",
     rawBody: "",
     requestDate: new Date(),
@@ -41,6 +43,7 @@ describe("test log controller", () => {
     headers: {
         token:"efg"
     },
+    query:{},
     method: "",
     rawBody: "",
     requestDate: new Date(),
@@ -51,6 +54,7 @@ describe("test log controller", () => {
     headers: {
         token:"opq"
     },
+    query:{},
     method: "",
     rawBody: "",
     requestDate: new Date(),
