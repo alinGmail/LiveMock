@@ -1,8 +1,6 @@
 
 <p align="center">
-  <img src="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128.png"
-    srcset="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128.png 1x,https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128@2x.png 2x"
-    />
+  <img width="128px" src="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128@2x.png"  alt="logo"/>
 </p>
 
 <h1 align="center">
