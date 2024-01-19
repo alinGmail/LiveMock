@@ -5,46 +5,56 @@
     />
 </p>
 
-# About
-LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
+<h1 align="center">
+    LiveMock
+</h1>
 
+LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
+## 🎆 Preview
 ![image](https://github.com/alinGmail/LiveMock/blob/main/img/pic1.png)
 
+## 📦 features
 
-# Installation
+* **Dynamic mocking** - Apply mock changes without restarting the server
+* **Cross-platform** - Available as web, Windows, and Mac applications
+* **api proxy support** Forward requests to actual API when needed
+* **support mockjs** - Generate mock data with mockjs library
+* **Logging and analytics** - Log requests/responses for analysis.
+
+## 🚧 Installation
 
 
 There are two versions of liveMock, one is a desktop application and the other is a web service. You can use either version, but I recommend using the desktop version.
 
-## Installation of the desktop version
+### Installation of the desktop version
 To install the desktop version, simply download from the [release page](https://github.com/alinGmail/LiveMock/releases). It supports both macOS and Windows operating systems.
 
-## Installation of the web service version
-### 1.clone the project
+### Installation of the web service version
+#### 1.clone the project
 ```
 git clone git@github.com:alinGmail/LiveMock.git
 ```
 
-### 2.install dependencies
+#### 2.install dependencies
 ```
 cd LiveMock 
 yarn install
 ```
 
 
-### 3.build the forntEnd code
+#### 3.build the forntEnd code
 ```
 yarn workspace front-end build
 ```
 
-### 4.run the project
+#### 4.run the project
 ```
 yarn workspace back-end start
 ```
 the server will running at http://localhost:9002 
 
 
-# Quick Start
+## 📌Quick Start
 After installing liveMock, you will be able to access the welcome page (a page to create a project). Simply input the project name and submit the form, and you will be redirected to the dashboard page.
 
 ### Creating an Expectation
@@ -63,21 +73,21 @@ To create an action, click the "Create Action" button. By default, the action ty
 ### Starting the Project
 On the top, you will find a green start button. Clicking it will start the project. Furthermore, ensure that your expectation is activated. You can then visit http://localhost:8088 to see the JSON response.
 
-# document
-## What is expectation
+## 🧱document
+### What is expectation
 An expectation consists of several matchers and an action. When a request matches all its matchers, the defined action will be taken, such as responding with a JSON.
 
-## How to create expectation
+### How to create expectation
 To create an expectation, goto the expectation list page and click the "Add Expectation" button. After that, you will see the newly created expectation in the list.
 
-## property of an expectation
+### property of an expectation
 - `delay`: the delay time of the response,unit is ms.
 - `priority`: the expectation has highter priority will matcher first.
 - `activate`: if the expectation is inactivate, it will be skip when the request match.
 - `matchers`: the matchers of the expectation, if the request match all matchers, the action of the expectation will take.
 - `action`: the action of the expectation,current support two action. custom response and proxy.
 
-## matchers
+### matchers
 The matcher consists of three parts: type, comparator, and value. These three parts determine whether a request can be matched.
 Now livemock supports five types, which are:
 - `method`: the method of the request, such as GET, POST, PUT, etc.
@@ -96,14 +106,14 @@ Here are some examples of matchers:
 }
 ```
 
-## action
+### action
 there are two type of action:
 - `custom response`: response some custom text or JSON to the request, you can also set the headers of the response
 - `proxy`: make the request forward to another host.
 
 You can customize the header of the response, both in custom response and proxy actions.
 
-## request log
+### request log
 Livemock will record all requests that match an expectation as a JSON object and display them on the request log page. Below is an example of a recorded object:
 ```json
 {
