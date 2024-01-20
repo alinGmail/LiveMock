@@ -25,7 +25,7 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "application/json");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      let responseVal = getResponseContentStr(this.action);
+      const responseVal = getResponseContentStr(this.action);
 
       res.end(responseVal);
       // set the body and raw body
@@ -39,7 +39,7 @@ class CustomResponseActionImpl implements IAction {
       res.setHeader("Content-Type", "text/plain");
       handleHeaders(this.action, res);
       res.status(this.action.status);
-      let responseVal = getResponseContentStr(this.action);
+      const responseVal = getResponseContentStr(this.action);
 
       res.end(responseVal);
       (res as any).body = responseVal;

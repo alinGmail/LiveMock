@@ -6,9 +6,9 @@ import {
   ResponseType,
 } from "core/struct/action";
 import HeaderEditor from "./HeaderEditor";
-import TextArea from "antd/es/input/TextArea";
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { useActionContext } from "../context";
+import Editor from "@monaco-editor/react";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
@@ -146,16 +146,24 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
           </Col>
         </Row>
         <div>content</div>
-        <div>
-          <TextArea
-            rows={10}
-            value={action.responseContent.value}
-            onChange={(event: ChangeEvent<{ value: string }>) => {
+        <div
+          style={{
+            border: "1px solid #bfbfbf",
+            borderRadius: "4px",
+            padding: "2px",
+          }}
+        >
+          <Editor
+            options={{ lineNumbers: "off" }}
+            height="300px"
+            language={action.responseContent.type === ResponseType.JSON ? "json":"none"}
+            defaultValue={action.responseContent.value}
+            onChange={(value) => {
               actionContext.onActionModify({
                 ...action,
                 responseContent: {
                   ...action.responseContent,
-                  value: event.target.value,
+                  value: value ?? "",
                 },
               });
             }}
