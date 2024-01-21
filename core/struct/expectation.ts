@@ -16,7 +16,7 @@ export interface ExpectationM {
 export function createExpectation():ExpectationM{
     return {
         actions: [],
-        activate: false,
+        activate: true,
         createTime: new Date(),
         delay: 0,
         id: uuId(),
