@@ -9,7 +9,10 @@
 
 LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
 ## 🎆 Preview
-![image](https://github.com/alinGmail/LiveMock/blob/main/img/pic1.png)
+![image](https://github.com/alinGmail/LiveMock/blob/main/img/light1.png)
+![image](https://github.com/alinGmail/LiveMock/blob/main/img/light2.png)
+![image](https://github.com/alinGmail/LiveMock/blob/main/img/dark1.png)
+![image](https://github.com/alinGmail/LiveMock/blob/main/img/dark2.png)
 
 ## 📦 features
 
