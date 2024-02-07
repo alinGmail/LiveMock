@@ -9,12 +9,14 @@ import HeaderEditor from "./HeaderEditor";
 import React from "react";
 import { useActionContext } from "../context";
 import Editor from "@monaco-editor/react";
+import { useAppSelector } from "../../store";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
   typeChange: (type: ActionType) => void;
 }> = ({ action, typeChange }) => {
   const actionContext = useActionContext();
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   return (
     <>
       <div>
@@ -155,8 +157,13 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
         >
           <Editor
             options={{ lineNumbers: "off" }}
+            theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
             height="300px"
-            language={action.responseContent.type === ResponseType.JSON ? "json":"none"}
+            language={
+              action.responseContent.type === ResponseType.JSON
+                ? "json"
+                : "none"
+            }
             defaultValue={action.responseContent.value}
             onChange={(value) => {
               actionContext.onActionModify({
