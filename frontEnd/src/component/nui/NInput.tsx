@@ -1,4 +1,4 @@
-import { FC, memo, useRef, useState } from "react";
+import { CSSProperties, FC, memo, useRef, useState } from "react";
 import ContentEditable from "react-contenteditable";
 import styles from "./NInput.module.css";
 import sanitizeHtml from "sanitize-html";
@@ -6,14 +6,8 @@ import sanitizeHtml from "sanitize-html";
 let NInput: FC<{
   value?: string;
   onChange?: (value: string) => void;
-}> = ({
-  value,
-  onChange,
-}: {
-  value?: string;
-  onChange?: (value: string) => void;
-}) => {
-  //console.log("NInput")
+  style?: CSSProperties;
+}> = ({ value, onChange, style }) => {
   const curValue = useRef<string>(value ? value : "");
   const [showEmpty, setShowEmpty] = useState(!value);
 
@@ -21,13 +15,11 @@ let NInput: FC<{
     <div className={[styles.inputWrap, styles.sizeSmall].join(" ")}>
       {showEmpty ? <div className={styles.placeHolder}>empty</div> : null}
       <ContentEditable
-          style={{
-              "whiteSpace":"pre"
-          }}
+        style={style ? { ...style } : {}}
         onPaste={(event) => {
           event.preventDefault();
           // get paste date
-          let clipboardData = event.clipboardData;
+          const clipboardData = event.clipboardData;
           let pastedText = clipboardData.getData("text/plain");
           pastedText = pastedText.trim();
           // input pure text in ContentEditable
