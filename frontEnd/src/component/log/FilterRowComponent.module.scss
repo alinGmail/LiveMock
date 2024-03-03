@@ -1,0 +1,13 @@
+
+
+.filterRow{
+  display: flex;
+  padding: 10px 0;
+  .filterCol{
+    flex: 1;
+  }
+  .btnCol{
+    text-align: right;
+    width: 100px;
+  }
+}

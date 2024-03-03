@@ -28,12 +28,13 @@ import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { ServerUrl } from "../config";
+import FilterRowComponent from "../component/log/FilterRowComponent";
 
 function onLogsInsert(
   insertLog: LogM,
   logViewId: string,
   currentLogViewId: string | undefined,
-  setLogs: Updater<Array<LogM>>
+  setLogs: Updater<Array<LogM>>,
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -54,7 +55,7 @@ function onLogsUpdate(
   logViewId: string,
   currentLogViewId: string | undefined,
   setLogs: Updater<Array<LogM>>,
-  isDelete: boolean
+  isDelete: boolean,
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -133,22 +134,21 @@ const LogPage: React.FC = () => {
     },
     {
       enabled: !!logViewId,
-    }
+    },
   );
   const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
   useEffect(() => {
-    console.log("custom columns change");
     const customColumns = getCustomColumn(
       tableColumns.filter((item, index) => item.visible),
       dispatch,
-      systemConfigState.mode
+      systemConfigState.mode,
     );
     const newLogColumn = getDefaultColumn(
       dispatch,
       systemConfigState.mode,
       logViewId,
       currentProject.id,
-      logViewLogsQuery.refetch
+      logViewLogsQuery.refetch,
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
@@ -176,19 +176,19 @@ const LogPage: React.FC = () => {
       "insert",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-      }
+      },
     );
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
-      }
+      },
     );
     socket.on(
       "delete",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
-      }
+      },
     );
     setSocketInstance(socket);
     return () => {
@@ -212,27 +212,13 @@ const LogPage: React.FC = () => {
   }, [logColumn, logs]);
   return (
     <div style={{ padding: "10px" }}>
-      <div style={{ padding: "10px 0px" }}>
-        {logViewId &&
-          logState.logFilter.map((filter) => {
-            return (
-              <LogFilterComponent
-                filter={filter}
-                key={filter.id}
-                projectId={currentProject.id}
-                logViewId={logViewId}
-                refreshLogList={logViewLogsQuery.refetch}
-              />
-            );
-          })}
-        {getLogViewQuery.isSuccess && (
-          <AddLogFilterBtn
-            refreshLogList={logViewLogsQuery.refetch}
-            projectId={currentProject.id}
-            logViewId={getLogViewQuery.data[0]?.id}
-          />
-        )}
-      </div>
+      <FilterRowComponent
+        getLogViewQuery={getLogViewQuery}
+        logViewId={logViewId}
+        currentProject={currentProject}
+        refreshLogList={logViewLogsQuery.refetch}
+        logState={logState}
+      ></FilterRowComponent>
       <div>{listTable}</div>
       <ColumnEditor
         onClose={() => {
@@ -245,52 +231,5 @@ const LogPage: React.FC = () => {
     </div>
   );
 };
-
-function AddLogFilterBtn({
-  logViewId,
-  projectId,
-  refreshLogList,
-}: {
-  logViewId: string;
-  projectId: string;
-  refreshLogList: () => void;
-}) {
-  const dispatch = useDispatch();
-  return (
-    <Button
-      onClick={() => {
-        const simpleFilterM = createSimpleFilter();
-        dispatch(addLogFilter(simpleFilterM));
-        const addPromise = addLogFilterReq({
-          filter: simpleFilterM,
-          logViewId: logViewId,
-          projectId: projectId,
-        });
-        toastPromise(addPromise);
-        addPromise.then((res) => {
-          refreshLogList();
-        });
-      }}
-      size={"small"}
-      type={"text"}
-      style={{
-        fontSize: "14px",
-        color: "#8c8c8c",
-        lineHeight: "1.57",
-        borderRadius: "3px",
-      }}
-      icon={
-        <PlusOutlined
-          style={{
-            position: "relative",
-            top: "0px",
-          }}
-        />
-      }
-    >
-      Add Filter
-    </Button>
-  );
-}
 
 export default LogPage;
