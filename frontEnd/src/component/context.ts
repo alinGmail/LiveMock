@@ -2,7 +2,16 @@ import { createContext, useContext } from "react";
 import { RequestMatcherM } from "core/struct/matcher";
 import { ActionM } from "core/struct/action";
 
-const ExpectationContext = createContext(null);
+export interface ExpectationContextData {
+  refreshExpectationList: () => void;
+}
+const ExpectationContext = createContext<ExpectationContextData>({
+  refreshExpectationList:() => undefined,
+});
+
+export function useExpectationContext():ExpectationContextData{
+  return useContext(ExpectationContext);
+}
 
 interface MatcherContextData {
   matcherIndex: number | null;

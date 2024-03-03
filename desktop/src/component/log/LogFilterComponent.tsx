@@ -145,6 +145,9 @@ const LogFilterComponent: React.FC<{
             >
               <NInput
                 value={filter.value}
+                style={{
+                    whiteSpace:'pre',
+                }}
                 onChange={(value) => {
                   const modifiedFilter = Object.assign({}, filter, {
                     value: value,
