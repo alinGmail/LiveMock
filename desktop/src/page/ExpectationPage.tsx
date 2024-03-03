@@ -1,25 +1,28 @@
-import { Button, Table } from "antd";
+import { App, Button, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
-  listExpectationListReq
+  listExpectationListReq,
 } from "../server/expectationServer";
 import { createExpectation, ExpectationM } from "core/struct/expectation";
 import {
   ActionColumn,
   ActivateColumn,
-  DelayColumn, MatcherColumn,
-  NameColumn, OperationColumn, PriorityColumn,
+  DelayColumn,
+  MatcherColumn,
+  NameColumn,
+  OperationColumn,
+  PriorityColumn,
 } from "../component/expectation/listColumnCompoment";
 import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
-import {NInput} from "../component/nui/NInput";
-import {useState} from "react";
+import { ExpectationContext } from "src/component/context";
 
 const ExpectationPage = () => {
+  const { modal } = App.useApp();
   const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
@@ -89,13 +92,13 @@ const ExpectationPage = () => {
       key: "activate",
       render: (text: string, record: ExpectationM, index: number) => {
         return (
-            <ActivateColumn
-                projectId={currentProject.id}
-                text={text}
-                expectation={record}
-                index={index}
-                dispatch={dispatch}
-            />
+          <ActivateColumn
+            projectId={currentProject.id}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+          />
         );
       },
     },
@@ -105,13 +108,13 @@ const ExpectationPage = () => {
       key: "matchers",
       render: (text: string, record: ExpectationM, index: number) => {
         return (
-            <MatcherColumn
-                projectId={currentProject.id}
-                text={text}
-                expectation={record}
-                index={index}
-                dispatch={dispatch}
-            />
+          <MatcherColumn
+            projectId={currentProject.id}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+          />
         );
       },
     },
@@ -121,13 +124,13 @@ const ExpectationPage = () => {
       key: "actions",
       render: (text: string, record: ExpectationM, index: number) => {
         return (
-            <ActionColumn
-                projectId={currentProject.id}
-                text={text}
-                expectation={record}
-                index={index}
-                dispatch={dispatch}
-            />
+          <ActionColumn
+            projectId={currentProject.id}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+          />
         );
       },
     },
@@ -137,48 +140,57 @@ const ExpectationPage = () => {
       key: "operation",
       render: (text: string, record: ExpectationM, index: number) => {
         return (
-            <OperationColumn
-                projectId={currentProject.id}
-                text={text}
-                expectation={record}
-                index={index}
-                dispatch={dispatch}
-            />
+          <OperationColumn
+            projectId={currentProject.id}
+            text={text}
+            expectation={record}
+            index={index}
+            dispatch={dispatch}
+            modal={modal}
+          />
         );
       },
-    }
+    },
   ];
   return (
-    <div style={{padding:"10px"}}>
-      <div style={{margin:"10px 0px"}}>
-        <Button
-          type={"text"}
-          icon={<PlusOutlined />}
-          onClick={async () => {
-            // send request to add new expectation
-            const createPromise = createExpectationReq(
-              projectState.projectList[projectState.curProjectIndex].id,
-              createExpectation()
-            );
-            toastPromise(createPromise);
-            createPromise.then((res) => {
-              getExpectationListQuery.refetch();
-            });
-          }}
-        >
-          Add Expectation
-        </Button>
+    <ExpectationContext.Provider
+      value={{
+        refreshExpectationList: () => {
+          getExpectationListQuery.refetch();
+        },
+      }}
+    >
+      <div style={{ padding: "10px" }}>
+        <div style={{ margin: "10px 0px" }}>
+          <Button
+            type={"text"}
+            icon={<PlusOutlined />}
+            onClick={async () => {
+              // send request to add new expectation
+              const createPromise = createExpectationReq(
+                projectState.projectList[projectState.curProjectIndex].id,
+                createExpectation()
+              );
+              toastPromise(createPromise);
+              createPromise.then((res) => {
+                getExpectationListQuery.refetch();
+              });
+            }}
+          >
+            Add Expectation
+          </Button>
+        </div>
+        <div>
+          <Table
+            columns={expectationColumn}
+            size={"small"}
+            rowKey={"id"}
+            dataSource={expectationState.expectationList}
+            loading={getExpectationListQuery.isFetching}
+          />
+        </div>
       </div>
-      <div>
-        <Table
-          columns={expectationColumn}
-          size={"small"}
-          rowKey={"id"}
-          dataSource={expectationState.expectationList}
-          loading={getExpectationListQuery.isFetching}
-        />
-      </div>
-    </div>
+    </ExpectationContext.Provider>
   );
 };
 export default ExpectationPage;

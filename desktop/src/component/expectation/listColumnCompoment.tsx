@@ -1,24 +1,29 @@
-import { ExpectationM } from "core/struct/expectation";
+import { duplicateExpectation, ExpectationM } from "core/struct/expectation";
 import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
 import {
-    addAction,
-    addMatcher, deleteExpectation,
-    modifyAction,
-    modifyMatcher,
-    removeAction,
-    removeMatcher,
-    updateExpectationItem,
+  addAction,
+  addMatcher,
+  deleteExpectation,
+  modifyAction,
+  modifyMatcher,
+  removeAction,
+  removeMatcher,
+  updateExpectationItem,
 } from "../../slice/expectationSlice";
 import { useDebounceFn, useRequest } from "ahooks";
 import { debounceWait } from "../../config";
-import {deleteExpectationReq, updateExpectationReq} from "../../server/expectationServer";
+import {
+  createExpectationReq,
+  deleteExpectationReq,
+  updateExpectationReq,
+} from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import * as React from "react";
-import { MatcherContext, ActionContext } from "../context";
+import {MatcherContext, ActionContext, useExpectationContext} from "../context";
 import MatcherItem from "../matcher/MatcherItem";
-import { PlusOutlined } from "@ant-design/icons";
+import { CopyOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { createPathMatcher } from "core/struct/matcher";
 import {
   createMatcherReq,
@@ -36,7 +41,7 @@ import {
   deleteActionReq,
   updateActionReq,
 } from "../../server/actionServer";
-import {after} from "lodash";
+import { HookAPI as ModalHookAPI } from "antd/es/modal/useModal";
 
 async function updateExpectation(
   projectId: string,
@@ -237,7 +242,9 @@ export const MatcherColumn = ({
             key={matcherIndex}
             value={{
               matcherIndex: matcherIndex,
-              onMatcherAdd: (matcher) => {},
+              onMatcherAdd: (matcher) => {
+                return;
+              },
               onMatcherModify: (matcher) => {
                 dispatch(
                   modifyMatcher({
@@ -298,7 +305,7 @@ export const MatcherAddBtn = ({
     <Button
       type="text"
       onClick={() => {
-        let newMatcher = createPathMatcher();
+        const newMatcher = createPathMatcher();
         dispatch(
           addMatcher({
             expectationIndex: expectationIndex,
@@ -385,7 +392,12 @@ export const ActionColumn = ({
         {expectation.actions.map((item) => {
           return (
             <div key={item.id}>
-              <ActionItem action={item} onPropertyChange={() => {}} />
+              <ActionItem
+                action={item}
+                onPropertyChange={() => {
+                  return;
+                }}
+              />
             </div>
           );
         })}
@@ -393,11 +405,11 @@ export const ActionColumn = ({
       {expectation.actions.length === 0 && (
         <div>
           <Button
-              style={{
-                  fontSize: "14px",
-                  color: "#8c8c8c",
-                  lineHeight: "1.57",
-              }}
+            style={{
+              fontSize: "14px",
+              color: "#8c8c8c",
+              lineHeight: "1.57",
+            }}
             onClick={() => {
               const action: ActionM = createCustomResponseAction();
               dispatch(
@@ -415,11 +427,7 @@ export const ActionColumn = ({
               toastPromise(createPromise);
             }}
             type={"text"}
-            icon={
-              <PlusOutlined
-
-              />
-            }
+            icon={<PlusOutlined />}
           >
             Create Action
           </Button>
@@ -435,20 +443,53 @@ export const OperationColumn = ({
   expectation,
   index,
   dispatch,
+  modal,
 }: {
   projectId: string;
   text: string;
   expectation: ExpectationM;
   index: number;
   dispatch: AppDispatch;
+  modal: ModalHookAPI;
 }) => {
+  const expectationContext = useExpectationContext();
   return (
     <div>
-      <Button type={"text"} onClick={() =>{
-          const deletePromise = deleteExpectationReq(projectId,expectation.id);
-          toastPromise(deletePromise);
-          dispatch(deleteExpectation(expectation.id));
-      }}>delete</Button>
+      <Button
+        title={"copy"}
+        type={"text"}
+        shape={"circle"}
+        icon={<CopyOutlined />}
+        onClick={() => {
+          const expectation_dc = duplicateExpectation(expectation);
+          const copyPromise = createExpectationReq(projectId, expectation_dc);
+          toastPromise(copyPromise);
+          expectationContext.refreshExpectationList();
+        }}
+      />
+      <Button
+        title={"delete"}
+        type={"text"}
+        onClick={() => {
+          modal.confirm({
+            title: "warning",
+            content: `are you sure to delete expectation ${expectation.name} ?`,
+            onOk: () => {
+              const deletePromise = deleteExpectationReq(
+                projectId,
+                expectation.id
+              );
+              toastPromise(deletePromise);
+              dispatch(deleteExpectation(expectation.id));
+            },
+            onCancel: () => {
+              return;
+            },
+          });
+        }}
+        shape={"circle"}
+        icon={<DeleteOutlined />}
+      />
     </div>
   );
 };
