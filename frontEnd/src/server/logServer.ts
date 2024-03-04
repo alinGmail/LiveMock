@@ -1,16 +1,18 @@
 import {
+  DeleteAllRequestLogsReqQuery,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
 } from "core/struct/params/LogParams";
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
 import {
+  DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
 
 export async function listLogViewReq(
-  query: ListLogViewReqQuery
+  query: ListLogViewReqQuery,
 ): Promise<ListLogViewResponse> {
   const response = await superagent
     .get(`${ServerUrl}/log/logView`)
@@ -20,10 +22,17 @@ export async function listLogViewReq(
 
 export async function listLogViewLogs(
   logViewId: string,
-  query: ListLogViewLogsReqQuery
+  query: ListLogViewLogsReqQuery,
 ): Promise<ListLogViewLogsResponse> {
   const response = await superagent
     .get(`${ServerUrl}/log/logViewLogs/${logViewId}`)
     .query(query);
+  return response.body;
+}
+
+export async function deleteAllRequestLogs(
+  query: DeleteAllRequestLogsReqQuery,
+): Promise<DeleteAllRequestLogsResponse> {
+  const response = await superagent.delete(`${ServerUrl}/log`).query(query);
   return response.body;
 }

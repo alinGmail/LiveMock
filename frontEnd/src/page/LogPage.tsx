@@ -40,6 +40,9 @@ function onLogsInsert(
     return;
   }
   setLogs((logs) => {
+    if (logs.length === 0) {
+      logs.push(insertLog);
+    }
     for (let i = 0; i < logs.length; i++) {
       const curLog = logs.at(i);
       if (curLog!.id < insertLog.id) {
@@ -122,7 +125,7 @@ const LogPage: React.FC = () => {
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
   const logViewLogsQuery = useQuery(
-    [currentProject.id, logViewId],
+    [logViewId],
     () => {
       return listLogViewLogs(logViewId as string, {
         maxLogId: null,
@@ -194,7 +197,7 @@ const LogPage: React.FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [currentProject.id]);
   const listTable = useMemo(() => {
     return (
       <Table

@@ -49,3 +49,18 @@ export interface ListLogViewLogsReqQuery{
     projectId:string;
     maxLogId:string|null;
 }
+
+/**
+ * delete all logs by logView
+ */
+export interface DeleteAllRequestLogsPathParam{
+
+}
+
+export interface DeleteAllRequestLogsReqBody{
+
+}
+
+export interface DeleteAllRequestLogsReqQuery{
+    projectId:string;
+}

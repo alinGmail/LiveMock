@@ -10,6 +10,9 @@ import {
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import {
+  DeleteAllRequestLogsPathParam,
+  DeleteAllRequestLogsReqBody,
+  DeleteAllRequestLogsReqQuery,
   ListLogPathParam,
   ListLogReqBody,
   ListLogReqQuery,
@@ -23,11 +26,12 @@ import {
 import { LogM } from "core/struct/log";
 import { Server, Socket } from "socket.io";
 import {
+  DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
 import { logViewEventEmitter } from "../common/logViewEvent";
-import {  getLogDynamicView } from "../log/logUtils";
+import { getLogDynamicView } from "../log/logUtils";
 
 const PAGE_SIZE = 100;
 
@@ -132,8 +136,33 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       } else {
         resultset = resultset.find({ id: { $lt: maxLogId } });
       }
-      const logs = resultset.simplesort("id",{desc:true}).limit(PAGE_SIZE).data();
+      const logs = resultset
+        .simplesort("id", { desc: true })
+        .limit(PAGE_SIZE)
+        .data();
       res.json(logs);
+    }
+  );
+
+  router.delete(
+    "/",
+    async (
+      req: Request<
+        DeleteAllRequestLogsPathParam,
+        DeleteAllRequestLogsResponse,
+        DeleteAllRequestLogsReqBody,
+        DeleteAllRequestLogsReqQuery
+      >,
+      res: Response<DeleteAllRequestLogsResponse>
+    ) => {
+      addCross(res);
+      let { projectId } = req.query;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const logCollection = await getLogCollection(projectId, path);
+      logCollection.findAndRemove({});
+      res.json({ message: "success" });
     }
   );
 
