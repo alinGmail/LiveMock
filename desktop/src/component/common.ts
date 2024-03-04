@@ -27,6 +27,9 @@ export function binarySearch<T>(
   start?: number | undefined,
   end?: number | undefined
 ): number {
+  if (arr.length === 0) {
+    return -1;
+  }
   if (end == undefined) {
     end = arr.length - 1;
   }

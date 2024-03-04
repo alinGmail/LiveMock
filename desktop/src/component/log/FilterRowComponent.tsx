@@ -4,13 +4,14 @@ import LogFilterComponent from "./LogFilterComponent";
 import { addLogFilter, LogState } from "../../slice/logSlice";
 import { ProjectM } from "core/build/struct/project";
 import { useDispatch } from "react-redux";
-import { Button } from "antd";
+import { App, Button } from "antd";
 import { createSimpleFilter } from "core/struct/log";
 import { addLogFilterReq } from "../../server/logFilterServer";
 import { toastPromise } from "../common";
-import { PlusOutlined } from "@ant-design/icons";
+import { ClearOutlined, PlusOutlined } from "@ant-design/icons";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ListLogViewResponse } from "core/struct/response/LogResponse";
+import { deleteAllRequestLogs } from "../../server/logServer";
 
 const FilterRowComponent: React.FunctionComponent<{
   logViewId: string | undefined;
@@ -25,6 +26,7 @@ const FilterRowComponent: React.FunctionComponent<{
   refreshLogList,
   getLogViewQuery,
 }) => {
+  const { modal } = App.useApp();
   return (
     <div className={mStyle.filterRow}>
       <div className={mStyle.filterCol}>
@@ -49,7 +51,32 @@ const FilterRowComponent: React.FunctionComponent<{
         )}
       </div>
       <div className={mStyle.btnCol}>
-        <Button>clear all</Button>
+        <Button
+          type={"text"}
+          title={"delete all"}
+          shape={"circle"}
+          icon={<ClearOutlined />}
+          onClick={() => {
+            modal.confirm({
+              content: "Are you sure to delete all the request log?",
+              title: "warning",
+              type: "warning",
+              onOk: () => {
+                const deletePromise = deleteAllRequestLogs({
+                  projectId: currentProject.id,
+                });
+                toastPromise(deletePromise);
+                deletePromise
+                  .then((res) => {
+                    refreshLogList();
+                  })
+                  .catch((e) => {
+                    return;
+                  });
+              },
+            });
+          }}
+        />
       </div>
     </div>
   );

@@ -64,6 +64,9 @@ import {
   UpdateActionReqQuery,
 } from "core/struct/params/ActionParams";
 import {
+  DeleteAllRequestLogsPathParam,
+  DeleteAllRequestLogsReqBody,
+  DeleteAllRequestLogsReqQuery,
   ListLogViewLogsPathParam,
   ListLogViewLogsReqBody,
   ListLogViewLogsReqQuery,
@@ -85,9 +88,10 @@ import {
 import IpcRendererEvent = electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
 
-
-let funMap = new Map<string,(event: IpcRendererEvent, ...args: any[]) => void>();
-
+let funMap = new Map<
+  string,
+  (event: IpcRendererEvent, ...args: any[]) => void
+>();
 
 // ----------------------------------------------------------------------
 export const api = {
@@ -95,14 +99,14 @@ export const api = {
     on: (
       channel: string,
       listener: (event: IpcRendererEvent, ...args: any[]) => void,
-      id:string,
+      id: string
     ) => {
-      funMap.set(id,listener);
+      funMap.set(id, listener);
       ipcRenderer.on(channel, listener);
     },
-    removeListener: (channel: string, id:string) => {
+    removeListener: (channel: string, id: string) => {
       const fun = funMap.get(id);
-      if(fun == null)return;
+      if (fun == null) return;
       ipcRenderer.removeListener(channel, fun);
       funMap.delete(id);
     },
@@ -309,6 +313,18 @@ export const api = {
     ) => {
       return ipcRenderer.invoke(
         LogViewEvents.ListLogViewLogs,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    deleteAllRequestLogs: (
+      reqParam: DeleteAllRequestLogsPathParam,
+      reqQuery: DeleteAllRequestLogsReqQuery,
+      reqBody: DeleteAllRequestLogsReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogViewEvents.DeleteAllRequestLogs,
         reqParam,
         reqQuery,
         reqBody
