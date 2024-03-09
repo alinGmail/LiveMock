@@ -166,6 +166,13 @@ const LogPage: React.FC = () => {
   ]);
 
   useEffect(() => {
+    // clear all event on reload
+     window.api.event.removeAllListener(LogViewEvents.OnLogAdd);
+     window.api.event.removeAllListener(LogViewEvents.OnLogUpdate);
+     window.api.event.removeAllListener(LogViewEvents.OnLogDelete);
+  },[])
+
+  useEffect(() => {
     const id = uuId();
     function onLogInsertHandle(
       event: IpcRendererEvent,

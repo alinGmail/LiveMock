@@ -110,6 +110,9 @@ export const api = {
       ipcRenderer.removeListener(channel, fun);
       funMap.delete(id);
     },
+    removeAllListener:(channel:string) =>{
+      ipcRenderer.removeAllListeners(channel);
+    }
   },
   project: {
     listProject: (

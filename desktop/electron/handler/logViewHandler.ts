@@ -92,7 +92,13 @@ export async function setLogViewHandler(path: string) {
   );
 }
 
+let logViewEventHandlerInit = false;
+
 export function logViewEventHandler(webContent: WebContents) {
+  if (logViewEventHandlerInit) {
+    return;
+  }
+  logViewEventHandlerInit = true;
   logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogAdd, { log, logViewId });
