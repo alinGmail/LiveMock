@@ -28,6 +28,7 @@ import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { LogViewEvents } from "core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
+import FilterRowComponent from "../component/log/FilterRowComponent";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -39,6 +40,9 @@ function onLogsInsert(
     return;
   }
   setLogs((logs) => {
+    if (logs.length === 0) {
+      logs.push(insertLog);
+    }
     for (let i = 0; i < logs.length; i++) {
       const curLog = logs.at(i);
       if (curLog!.id < insertLog.id) {
@@ -120,7 +124,7 @@ const LogPage: React.FC = () => {
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
   const logViewLogsQuery = useQuery(
-    [currentProject.id, logViewId],
+    [logViewId],
     () => {
       return listLogViewLogs(logViewId as string, {
         maxLogId: null,
@@ -162,6 +166,13 @@ const LogPage: React.FC = () => {
   ]);
 
   useEffect(() => {
+    // clear all event on reload
+     window.api.event.removeAllListener(LogViewEvents.OnLogAdd);
+     window.api.event.removeAllListener(LogViewEvents.OnLogUpdate);
+     window.api.event.removeAllListener(LogViewEvents.OnLogDelete);
+  },[])
+
+  useEffect(() => {
     const id = uuId();
     function onLogInsertHandle(
       event: IpcRendererEvent,
@@ -171,10 +182,9 @@ const LogPage: React.FC = () => {
     }
     window.api.event.on(LogViewEvents.OnLogAdd, onLogInsertHandle, id);
     return () => {
-      console.log("remove");
       window.api.event.removeListener(LogViewEvents.OnLogAdd, id);
     };
-  }, []);
+  }, [currentProject.id]);
 
   useEffect(() => {
     const id = uuId();
@@ -188,7 +198,7 @@ const LogPage: React.FC = () => {
     return () => {
       window.api.event.removeListener(LogViewEvents.OnLogUpdate, id);
     };
-  });
+  }, [currentProject.id]);
 
   useEffect(() => {
     const id = uuId();
@@ -202,7 +212,7 @@ const LogPage: React.FC = () => {
     return () => {
       window.api.event.removeListener(LogViewEvents.OnLogDelete, id);
     };
-  });
+  }, [currentProject.id]);
 
   const listTable = useMemo(() => {
     return (
@@ -221,27 +231,13 @@ const LogPage: React.FC = () => {
   }, [logColumn, logs]);
   return (
     <div style={{ padding: "10px" }}>
-      <div style={{ padding: "10px 0px" }}>
-        {logViewId &&
-          logState.logFilter.map((filter) => {
-            return (
-              <LogFilterComponent
-                filter={filter}
-                key={filter.id}
-                projectId={currentProject.id}
-                logViewId={logViewId}
-                refreshLogList={logViewLogsQuery.refetch}
-              />
-            );
-          })}
-        {getLogViewQuery.isSuccess && (
-          <AddLogFilterBtn
-            refreshLogList={logViewLogsQuery.refetch}
-            projectId={currentProject.id}
-            logViewId={getLogViewQuery.data[0]?.id}
-          />
-        )}
-      </div>
+      <FilterRowComponent
+        getLogViewQuery={getLogViewQuery}
+        logViewId={logViewId}
+        currentProject={currentProject}
+        refreshLogList={logViewLogsQuery.refetch}
+        logState={logState}
+      ></FilterRowComponent>
       <div>{listTable}</div>
       <ColumnEditor
         onClose={() => {
@@ -254,52 +250,5 @@ const LogPage: React.FC = () => {
     </div>
   );
 };
-
-function AddLogFilterBtn({
-  logViewId,
-  projectId,
-  refreshLogList,
-}: {
-  logViewId: string;
-  projectId: string;
-  refreshLogList: () => void;
-}) {
-  const dispatch = useDispatch();
-  return (
-    <Button
-      onClick={() => {
-        const simpleFilterM = createSimpleFilter();
-        dispatch(addLogFilter(simpleFilterM));
-        const addPromise = addLogFilterReq({
-          filter: simpleFilterM,
-          logViewId: logViewId,
-          projectId: projectId,
-        });
-        toastPromise(addPromise);
-        addPromise.then((res) => {
-          refreshLogList();
-        });
-      }}
-      size={"small"}
-      type={"text"}
-      style={{
-        fontSize: "14px",
-        color: "#8c8c8c",
-        lineHeight: "1.57",
-        borderRadius: "3px",
-      }}
-      icon={
-        <PlusOutlined
-          style={{
-            position: "relative",
-            top: "0px",
-          }}
-        />
-      }
-    >
-      Add Filter
-    </Button>
-  );
-}
 
 export default LogPage;

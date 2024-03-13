@@ -2,6 +2,9 @@ import * as electron from "electron";
 import ipcMain = electron.ipcMain;
 import { LogViewEvents } from "core/struct/events/desktopEvents";
 import {
+  DeleteAllRequestLogsPathParam,
+  DeleteAllRequestLogsReqBody,
+  DeleteAllRequestLogsReqQuery,
   ListLogViewLogsPathParam,
   ListLogViewLogsReqBody,
   ListLogViewLogsReqQuery,
@@ -69,9 +72,33 @@ export async function setLogViewHandler(path: string) {
       return logs;
     }
   );
+
+  ipcMain.handle(
+    LogViewEvents.DeleteAllRequestLogs,
+    async (
+      event,
+      reqParam: DeleteAllRequestLogsPathParam,
+      reqQuery: DeleteAllRequestLogsReqQuery,
+      reqBody: DeleteAllRequestLogsReqBody
+    ) => {
+      const { projectId } = reqQuery;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const logCollection = await getLogCollection(projectId, path);
+      logCollection.findAndRemove({});
+      return { message: "success" };
+    }
+  );
 }
 
-export function logViewEventHandler(webContent:WebContents) {
+let logViewEventHandlerInit = false;
+
+export function logViewEventHandler(webContent: WebContents) {
+  if (logViewEventHandlerInit) {
+    return;
+  }
+  logViewEventHandlerInit = true;
   logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogAdd, { log, logViewId });

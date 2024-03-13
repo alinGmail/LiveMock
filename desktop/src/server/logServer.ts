@@ -1,8 +1,10 @@
 import {
+  DeleteAllRequestLogsReqQuery,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
 } from "core/struct/params/LogParams";
 import {
+  DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
@@ -17,5 +19,11 @@ export async function listLogViewLogs(
   logViewId: string,
   query: ListLogViewLogsReqQuery
 ): Promise<ListLogViewLogsResponse> {
-  return window.api.logView.listLogViewLogs({logViewId},query,{});
+  return window.api.logView.listLogViewLogs({ logViewId }, query, {});
+}
+
+export async function deleteAllRequestLogs(
+  query: DeleteAllRequestLogsReqQuery
+): Promise<DeleteAllRequestLogsResponse> {
+  return window.api.logView.deleteAllRequestLogs({}, query, {});
 }

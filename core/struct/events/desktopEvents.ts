@@ -34,6 +34,7 @@ export enum ActionEvents {
 export enum LogViewEvents{
     ListLogView="ListLogView",
     ListLogViewLogs="ListLogViewLogs",
+    DeleteAllRequestLogs="DeleteAllRequestLogs",
     OnLogAdd="OnLogAdd",
     OnLogUpdate="OnLogUpdate",
     OnLogDelete="OnLogDelete"
