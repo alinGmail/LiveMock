@@ -121,8 +121,9 @@ describe("test proxy action",()=>{
       expect(log.res!.headers["token"]).toEqual("this is a token!!!");
       expect(log.req!.path).toBe("/testProxy");
       // test the proxy info
-      // expect(log.proxyInfo.isProxy);
-      // expect(log.proxyInfo.proxyToUrl === "http://localhost:3000/testProxy");
+      expect(log.proxyInfo!.isProxy);
+      expect(log.proxyInfo!.proxyHost === "http://localhost:3000");
+      expect(log.proxyInfo!.proxyPath === '/textProxy');
    });
 
    test('test no content type response',async ()=>{
@@ -133,6 +134,10 @@ describe("test proxy action",()=>{
       expect(log.res!.body).toEqual("no content type response");
       expect(log.res!.status).toBe(200);
 
+      // test the proxy info
+      expect(log.proxyInfo!.isProxy);
+      expect(log.proxyInfo!.proxyHost === "http://localhost:3000");
+      expect(log.proxyInfo!.proxyPath === '/testNoContentType');
    });
 
 

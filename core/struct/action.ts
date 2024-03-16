@@ -1,5 +1,6 @@
 import express from "express";
 import { v4 as uuId } from "uuid";
+import {LogM} from "./log";
 
 export enum ActionType {
   PROXY = "PROXY",
@@ -77,7 +78,7 @@ export type PathRewriteM = AddPrefixM | RemovePrefixM;
 
 // 实现类的接口
 export interface IAction {
-  process: (req: express.Request, res: express.Response) => Promise<void>;
+  process: (req: express.Request, res: express.Response,log:LogM | undefined) => Promise<void>;
 }
 export function createProxyAction(): ProxyActionM {
   return {

@@ -7,6 +7,7 @@ import {
 import express from "express";
 import { delayPromise } from "./common";
 import Mock from "mockjs";
+import { LogM } from "core/struct/log";
 
 class CustomResponseActionImpl implements IAction {
   action: CustomResponseActionM;
@@ -16,10 +17,15 @@ class CustomResponseActionImpl implements IAction {
     this.delay = delay;
   }
 
-  async process(req: express.Request, res: express.Response): Promise<void> {
+  async process(
+    req: express.Request,
+    res: express.Response,
+    logM: LogM | undefined
+  ): Promise<void> {
     if (this.delay > 0) {
       await delayPromise(this.delay);
     }
+    insetProxyInfo(logM);
     if (this.action.responseContent.type === ResponseType.JSON) {
       //addCross(res);
       res.setHeader("Content-Type", "application/json");
@@ -54,6 +60,17 @@ function getResponseContentStr(action: CustomResponseActionM): string {
     responseVal = JSON.stringify(responseVal);
   }
   return responseVal;
+}
+
+function insetProxyInfo(log: LogM | undefined) {
+  if (!log) {
+    return;
+  }
+  log.proxyInfo = {
+    isProxy: false,
+    proxyHost: null,
+    proxyPath: null,
+  };
 }
 
 function handleHeaders(action: CustomResponseActionM, res: express.Response) {
