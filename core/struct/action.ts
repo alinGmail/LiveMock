@@ -1,6 +1,6 @@
 import express from "express";
 import { v4 as uuId } from "uuid";
-import {LogM} from "./log";
+import { LogM } from "./log";
 
 export enum ActionType {
   PROXY = "PROXY",
@@ -12,9 +12,9 @@ export enum ResponseType {
   TEXT = "TEXT",
 }
 
-export enum ContentHandler{
+export enum ContentHandler {
   NONE = "NONE",
-  MOCK_JS = "MOCK_JS"
+  MOCK_JS = "MOCK_JS",
 }
 
 interface JSONResponseContentM {
@@ -32,20 +32,21 @@ interface TEXTResponseContentM {
 
 type ResponseContentM = JSONResponseContentM | TEXTResponseContentM;
 
-export enum ProxyProtocol{
-  HTTP='http',
-  HTTPS='https'
+export enum ProxyProtocol {
+  HTTP = "http",
+  HTTPS = "https",
 }
 
 export interface ProxyActionM {
   id: string;
   type: ActionType.PROXY;
-  protocol:ProxyProtocol;
+  protocol: ProxyProtocol;
   host: string;
-  handleCross:boolean;
-  crossAllowCredentials:boolean;
+  handleCross: boolean;
+  crossAllowCredentials: boolean;
   pathRewrite: Array<PathRewriteM>;
-  headers: Array<[string, string]>|undefined;
+  prefixRemove: string | undefined | null;
+  headers: Array<[string, string]> | undefined;
 }
 
 export interface CustomResponseActionM {
@@ -78,7 +79,11 @@ export type PathRewriteM = AddPrefixM | RemovePrefixM;
 
 // 实现类的接口
 export interface IAction {
-  process: (req: express.Request, res: express.Response,log:LogM | undefined) => Promise<void>;
+  process: (
+    req: express.Request,
+    res: express.Response,
+    log: LogM | undefined,
+  ) => Promise<void>;
 }
 export function createProxyAction(): ProxyActionM {
   return {
@@ -86,10 +91,11 @@ export function createProxyAction(): ProxyActionM {
     host: "",
     pathRewrite: [],
     type: ActionType.PROXY,
-    protocol:ProxyProtocol.HTTP,
-    handleCross:false,
-    crossAllowCredentials:false,
-    headers:[]
+    protocol: ProxyProtocol.HTTP,
+    handleCross: false,
+    crossAllowCredentials: false,
+    headers: [],
+    prefixRemove:null
   };
 }
 
@@ -99,8 +105,8 @@ export function createCustomResponseAction(): CustomResponseActionM {
     responseContent: {
       type: ResponseType.JSON,
       value: "",
-      headers:[],
-      contentHandler:ContentHandler.NONE
+      headers: [],
+      contentHandler: ContentHandler.NONE,
     },
     status: 200,
     type: ActionType.CUSTOM_RESPONSE,
