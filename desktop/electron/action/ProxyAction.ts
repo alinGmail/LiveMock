@@ -8,6 +8,8 @@ import { fixRequestBody } from "./fixRequestBody";
 import * as http from "http";
 import { isRecordBody } from "../util/bodyParseUtil";
 import typeis from "type-is";
+import { LogM } from "core/struct/log";
+
 const inflateAsync = util.promisify(zlib.inflate);
 const unzipAsync = util.promisify(zlib.unzip);
 const brotliDecompressAsync = util.promisify(zlib.brotliDecompress);
@@ -16,7 +18,6 @@ let proxy = httpProxy.createProxyServer({});
 
 proxy.on("proxyReq", function (proxyReq, req, res, options) {
   fixRequestBody(proxyReq, req as express.Request);
-
 });
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
   let body: Array<any> = [];
@@ -26,14 +27,18 @@ proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
   if (proxyAction.handleCross) {
     // handle cross
     handleRequestCross(
-        req as express.Request,
-        proxyRes,
-        proxyAction.crossAllowCredentials
+      req as express.Request,
+      proxyRes,
+      proxyAction.crossAllowCredentials
     );
   }
   // handle the external headers
-  if (proxyAction.headers && proxyAction.headers.length > 0){
-    handleExternalHeaders(req as express.Request,proxyRes,proxyAction.headers);
+  if (proxyAction.headers && proxyAction.headers.length > 0) {
+    handleExternalHeaders(
+      req as express.Request,
+      proxyRes,
+      proxyAction.headers
+    );
   }
   proxyRes.on("data", function (chunk) {
     if (recordBody) {
@@ -98,10 +103,12 @@ function handleOptionsCross(
  * @param res
  * @param headers
  */
-function handleExternalHeaders(req: express.Request,
-                               res: http.IncomingMessage,
-                               headers:Array<[string,string]>){
-  headers.forEach(item=>{
+function handleExternalHeaders(
+  req: express.Request,
+  res: http.IncomingMessage,
+  headers: Array<[string, string]>
+) {
+  headers.forEach((item) => {
     res.headers[item[0].toLowerCase()] = item[1];
   });
 }
@@ -117,7 +124,7 @@ function handleRequestCross(
   res: http.IncomingMessage,
   crossAllowCredentials: boolean
 ) {
-  res.headers['Access-Control-Allow-Origin'.toLowerCase()] = req.get("Origin");
+  res.headers["Access-Control-Allow-Origin".toLowerCase()] = req.get("Origin");
   const headerKeySet = new Set<string>();
   req.rawHeaders.forEach((item, index) => {
     if (index % 2 === 0) {
@@ -129,7 +136,7 @@ function handleRequestCross(
     headerArray.push(item);
   });
   const headerStr = headerArray.join(",");
-  res.headers['Access-Control-Allow-Headers'] = headerStr;
+  res.headers["Access-Control-Allow-Headers"] = headerStr;
   res.headers["Access-Control-Allow-Methods"] = req.method.toUpperCase();
   if (crossAllowCredentials) {
     res.headers["Access-Control-Allow-Credentials"] = "true";
@@ -143,7 +150,11 @@ export default class ProxyActionImpl implements IAction {
     this.action = action;
     this.delay = delay;
   }
-  async process(req: express.Request, res: express.Response): Promise<void> {
+  async process(
+    req: express.Request,
+    res: express.Response,
+    logM: LogM | undefined
+  ): Promise<void> {
     // handle cross
     if (this.action.handleCross && req.method.toUpperCase() === "OPTIONS") {
       return handleOptionsCross(req, res, this.action.crossAllowCredentials);
@@ -167,9 +178,25 @@ export default class ProxyActionImpl implements IAction {
       res.on("end", () => {
         resolve();
       });
+      insetProxyInfo(logM, option.target, req.path);
       proxy.web(req, res, option);
     });
   }
+}
+
+function insetProxyInfo(
+  logM: LogM | undefined,
+  proxyHost: string,
+  proxyPath: string
+) {
+  if (!logM) {
+    return;
+  }
+  logM.proxyInfo = {
+    isProxy: true,
+    proxyHost,
+    proxyPath,
+  };
 }
 
 async function decompress(
