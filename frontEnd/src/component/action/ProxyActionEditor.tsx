@@ -1,10 +1,11 @@
 import React from "react";
-import { Checkbox, Input, Select } from "antd";
+import {Checkbox, Input, Select, Tooltip} from "antd";
 import { ActionType, ProxyActionM, ProxyProtocol } from "core/struct/action";
 import HeaderEditor from "./HeaderEditor";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useActionContext } from "../context";
 import moduleStyle from "./ProxyActionEditor.module.scss";
+import {QuestionCircleOutlined} from "@ant-design/icons";
 
 const { Option } = Select;
 const hostSelectBefore = (
@@ -47,7 +48,12 @@ export const ProxyActionEditor: React.FunctionComponent<{
           />
         </div>
         <div className={moduleStyle.row}>
-          <div>headers</div>
+          <div>
+            response headers{" "}
+            <Tooltip title={"the headers append to the response"}>
+              <QuestionCircleOutlined style={{ fontSize: "12px" }} />
+            </Tooltip>
+          </div>
           <div>
             <HeaderEditor
               headers={action.headers || []}

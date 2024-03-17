@@ -5,12 +5,13 @@ import {
   CustomResponseActionM,
   ResponseType,
 } from "core/struct/action";
-import { Col, InputNumber, Row, Select } from "antd";
+import { Col, InputNumber, Row, Select, Tooltip } from "antd";
 import HeaderEditor from "./HeaderEditor";
 import TextArea from "antd/es/input/TextArea";
 import { useActionContext } from "../context";
 import Editor from "@monaco-editor/react";
 import moduleStyle from "./CustomResponseActionEditor.module.scss";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
@@ -83,7 +84,12 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
           </Col>
         </Row>
         <div className={moduleStyle.row}>
-          <div>headers</div>
+          <div>
+            response headers{" "}
+            <Tooltip title={"the headers append to the response"}>
+              <QuestionCircleOutlined style={{ fontSize: "12px" }} />
+            </Tooltip>
+          </div>
           <div>
             <HeaderEditor
               headers={action.responseContent.headers}
