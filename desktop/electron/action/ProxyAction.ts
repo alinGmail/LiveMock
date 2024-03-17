@@ -17,6 +17,15 @@ const brotliDecompressAsync = util.promisify(zlib.brotliDecompress);
 let proxy = httpProxy.createProxyServer({});
 
 proxy.on("proxyReq", function (proxyReq, req, res, options) {
+  // handle prefix remove
+  const proxyAction: ProxyActionM = (options as any).proxyAction;
+  if (
+      proxyAction.prefixRemove &&
+      proxyReq.path.startsWith(proxyAction.prefixRemove)
+  ) {
+    proxyReq.path = proxyReq.path.slice(proxyAction.prefixRemove.length);
+  }
+
   fixRequestBody(proxyReq, req as express.Request);
 });
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {

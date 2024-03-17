@@ -10,7 +10,7 @@ import HeaderEditor from "./HeaderEditor";
 import TextArea from "antd/es/input/TextArea";
 import { useActionContext } from "../context";
 import Editor from "@monaco-editor/react";
-
+import moduleStyle from "./CustomResponseActionEditor.module.scss";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
@@ -35,7 +35,7 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
             ]}
           />
         </div>
-        <Row gutter={10}>
+        <Row gutter={10} className={moduleStyle.row}>
           <Col span={12}>
             <div>http status</div>
             <div>
@@ -82,44 +82,47 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
             </div>
           </Col>
         </Row>
-        <div>headers</div>
-        <div>
-          <HeaderEditor
-            headers={action.responseContent.headers}
-            onHeaderModify={(headerIndex, value) => {
-              const _headers = [...action.responseContent.headers];
-              _headers[headerIndex] = value;
-              actionContext.onActionModify({
-                ...action,
-                responseContent: {
-                  ...action.responseContent,
-                  headers: _headers,
-                },
-              });
-            }}
-            onAddHeader={(header) => {
-              actionContext.onActionModify({
-                ...action,
-                responseContent: {
-                  ...action.responseContent,
-                  headers: [...action.responseContent.headers, header],
-                },
-              });
-            }}
-            onDeleteHeader={(headerIndex) => {
-              const _headers = [...action.responseContent.headers];
-              _headers.splice(headerIndex, 1);
-              actionContext.onActionModify({
-                ...action,
-                responseContent: {
-                  ...action.responseContent,
-                  headers: _headers,
-                },
-              });
-            }}
-          />
+        <div className={moduleStyle.row}>
+          <div>headers</div>
+          <div>
+            <HeaderEditor
+              headers={action.responseContent.headers}
+              onHeaderModify={(headerIndex, value) => {
+                const _headers = [...action.responseContent.headers];
+                _headers[headerIndex] = value;
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    headers: _headers,
+                  },
+                });
+              }}
+              onAddHeader={(header) => {
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    headers: [...action.responseContent.headers, header],
+                  },
+                });
+              }}
+              onDeleteHeader={(headerIndex) => {
+                const _headers = [...action.responseContent.headers];
+                _headers.splice(headerIndex, 1);
+                actionContext.onActionModify({
+                  ...action,
+                  responseContent: {
+                    ...action.responseContent,
+                    headers: _headers,
+                  },
+                });
+              }}
+            />
+          </div>
         </div>
-        <Row gutter={10}>
+
+        <Row gutter={10} className={moduleStyle.row}>
           <Col span={12}>
             <div>content handler</div>
             <Select
@@ -135,31 +138,36 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
                   label: ContentHandler.MOCK_JS,
                 },
               ]}
-              onChange={(value) =>{
+              onChange={(value) => {
                 actionContext.onActionModify({
                   ...action,
-                  responseContent:{
+                  responseContent: {
                     ...action.responseContent,
-                    contentHandler:value
-                  }
-                })
+                    contentHandler: value,
+                  },
+                });
               }}
             />
           </Col>
         </Row>
-        <div>content</div>
-        <div
+        <div className={moduleStyle.row}>
+          <div>content</div>
+          <div
             style={{
               border: "1px solid #bfbfbf",
               borderRadius: "4px",
               padding: "2px",
             }}
-        >
-          <Editor
+          >
+            <Editor
               options={{ lineNumbers: "off" }}
               height="300px"
-              theme={'vs-dark'}
-              language={action.responseContent.type === ResponseType.JSON ? "json":"none"}
+              theme={"vs-dark"}
+              language={
+                action.responseContent.type === ResponseType.JSON
+                  ? "json"
+                  : "none"
+              }
               defaultValue={action.responseContent.value}
               onChange={(value) => {
                 actionContext.onActionModify({
@@ -170,7 +178,8 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
                   },
                 });
               }}
-          />
+            />
+          </div>
         </div>
       </div>
     </>
