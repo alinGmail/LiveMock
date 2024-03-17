@@ -191,7 +191,7 @@ export default class ProxyActionImpl implements IAction {
       res.on("end", () => {
         resolve();
       });
-      insetProxyInfo(logM, option.target, req.path);
+      insetProxyInfo(logM, option.target, req.path, this.action);
       proxy.web(req, res, option);
     });
   }
@@ -200,15 +200,23 @@ export default class ProxyActionImpl implements IAction {
 function insetProxyInfo(
   logM: LogM | undefined,
   proxyHost: string,
-  proxyPath: string
+  proxyPath: string,
+  proxyAction: ProxyActionM,
 ) {
+  let _proxyPath = proxyPath;
   if (!logM) {
     return;
+  }
+  if (
+    proxyAction.prefixRemove &&
+    proxyPath.startsWith(proxyAction.prefixRemove)
+  ) {
+    _proxyPath = _proxyPath.slice(proxyAction.prefixRemove.length);
   }
   logM.proxyInfo = {
     isProxy: true,
     proxyHost,
-    proxyPath,
+    proxyPath: _proxyPath,
   };
 }
 

@@ -50,7 +50,7 @@ describe('test project',()=>{
     // end test log view
 
     const projectListRes = await request(server).get("/project/").expect(200);
-    expect(projectListRes.body.length === 1);
+    expect(projectListRes.body.length).toBe(1);
     expect(projectListRes.body[0].name).toEqual(projectM.name);
     expect(projectListRes.body[0].port).toEqual(projectM.port);
 

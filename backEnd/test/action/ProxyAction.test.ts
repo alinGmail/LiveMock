@@ -142,12 +142,12 @@ describe("test proxy action", () => {
     expect(log.res!.headers["token"]).toEqual("this is a token!!!");
     expect(log.req!.path).toBe("/testProxy");
     // test the proxy info
-    expect(log.proxyInfo!.isProxy);
-    expect(log.proxyInfo!.proxyHost === "http://localhost:3000");
-    expect(log.proxyInfo!.proxyPath === "/textProxy");
+    expect(log.proxyInfo!.isProxy).toEqual(true);
+    expect(log.proxyInfo!.proxyHost === "http://localhost:8085").toBe(true);
+    expect(log.proxyInfo!.proxyPath === "/testProxy").toBe(true);
   });
 
-  test("prefix remove", async () => {
+  test("test prefix remove", async () => {
     const _prefixRemove = proxyActionM.prefixRemove;
     proxyActionM.prefixRemove = "/api";
 
@@ -164,9 +164,8 @@ describe("test proxy action", () => {
 
     // test the proxy info
     const log = await getLastLog(projectM.id, "test_db");
-    expect(log.proxyInfo?.proxyPath === "testProxy");
-    expect(log.proxyInfo?.isProxy);
-
+    expect(log.proxyInfo?.proxyPath).toBe('/testProxy');
+    expect(log.proxyInfo?.isProxy).toBe(true);
 
     proxyActionM.prefixRemove = _prefixRemove;
     await updateProxyAction(
@@ -189,9 +188,9 @@ describe("test proxy action", () => {
     expect(log.res!.status).toBe(200);
 
     // test the proxy info
-    expect(log.proxyInfo!.isProxy);
-    expect(log.proxyInfo!.proxyHost === "http://localhost:3000");
-    expect(log.proxyInfo!.proxyPath === "/testNoContentType");
+    expect(log.proxyInfo!.isProxy).toBe(true);
+    expect(log.proxyInfo!.proxyHost).toBe("http://localhost:8085");
+    expect(log.proxyInfo!.proxyPath).toBe("/testNoContentType");
   });
 
   test(`test proxy error`, async () => {
