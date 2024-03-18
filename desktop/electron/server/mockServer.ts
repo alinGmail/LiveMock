@@ -90,7 +90,7 @@ const getMockRouter: (
               expectation.delay
             );
             const logM = insertReqLog(logCollection, req, res, expectation.id,projectId,path);
-            await actionImpl?.process(req, res);
+            await actionImpl?.process(req, res, logM);
             logM && insertResLog(logCollection,req,res,expectation.id,logM);
             return true;
           }

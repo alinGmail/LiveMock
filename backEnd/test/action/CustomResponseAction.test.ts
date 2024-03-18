@@ -1,7 +1,9 @@
 import {
   getExpectationCollection,
-  getExpectationDb, getLogCollection,
-  getLogDb, getProjectCollection,
+  getExpectationDb,
+  getLogCollection,
+  getLogDb,
+  getProjectCollection,
   getProjectDb,
 } from "../../src/db/dbManager";
 import { createProject } from "core/struct/project";
@@ -25,14 +27,17 @@ describe("test custom response action", () => {
   beforeAll(async () => {
     projectDb = await getProjectDb("test_db");
     project.name = "test custom response";
-    const projectCollection = await getProjectCollection('test_db');
+    const projectCollection = await getProjectCollection("test_db");
     projectCollection.insert(project);
     // matcher
     const pathMatcher = createPathMatcher();
     pathMatcher.conditions = MatcherCondition.START_WITH;
     pathMatcher.value = "/";
     expectation.matchers.push(pathMatcher);
-    expectationCollection = await getExpectationCollection(project.id,'test_db');
+    expectationCollection = await getExpectationCollection(
+      project.id,
+      "test_db"
+    );
     expectationCollection.insert(expectation);
 
     // server
@@ -77,6 +82,11 @@ describe("test custom response action", () => {
     expect(log.res!.headers["content-type"]).toBe("text/plain");
     expect(log.res!.status).toBe(400);
     expect(log.res!.rawBody).toBe("some error happen!");
+
+    // test proxy info
+    expect(log.proxyInfo?.isProxy === false);
+    expect(log.proxyInfo?.proxyHost === null);
+    expect(log.proxyInfo?.proxyPath === null);
   });
 
   test("test response json", async () => {
@@ -102,7 +112,11 @@ describe("test custom response action", () => {
 
     // test the log
     const logCollection = await getLogCollection(project.id, "test_db");
-    const logs = logCollection.chain().find({}).simplesort("id",{desc:true}).data();
+    const logs = logCollection
+      .chain()
+      .find({})
+      .simplesort("id", { desc: true })
+      .data();
 
     const lastLog = logs[0];
     expect(lastLog.req!.path).toBe("/testJson");

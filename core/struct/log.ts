@@ -9,11 +9,12 @@ export interface LogM {
 }
 
 export interface ProxyInfoM {
-  proxyToUrl: string | null;
+  proxyHost: string | null;
+  proxyPath: string | null;
   isProxy: boolean;
 }
 
-export interface ParsedQs{
+export interface ParsedQs {
   [key: string]: string | undefined | null | string[] | ParsedQs | ParsedQs[];
 }
 
@@ -26,7 +27,7 @@ export interface RequestLogM {
   headers: {
     [key: string]: string | undefined | null;
   };
-  query : ParsedQs;
+  query: ParsedQs;
 }
 
 type ResponseLogM = {
@@ -41,7 +42,7 @@ type ResponseLogM = {
   responseDate: Date;
 };
 
-export function createLog(id:number): LogM {
+export function createLog(id: number): LogM {
   return {
     id: id,
     expectationId: null,
@@ -55,7 +56,7 @@ export function createRequestLog(): RequestLogM {
   return {
     body: null,
     headers: {},
-    query:{},
+    query: {},
     method: "get",
     path: "",
     rawBody: null,
@@ -63,7 +64,7 @@ export function createRequestLog(): RequestLogM {
   };
 }
 
-export function createResponseLog():ResponseLogM{
+export function createResponseLog(): ResponseLogM {
   const _now = new Date();
   return {
     body: undefined,
@@ -72,8 +73,8 @@ export function createResponseLog():ResponseLogM{
     rawBody: "",
     responseDate: _now,
     status: 0,
-    statusMessage: ""
-  }
+    statusMessage: "",
+  };
 }
 
 export enum FilterType {
@@ -90,47 +91,48 @@ export interface SimpleFilterM {
   activate: boolean;
 }
 export interface GroupFilter {
-    type: FilterType.GROUP_FILTER;
-    id: string;
-    conjunction: "AND" | "OR";
-    subGroup: Array<SimpleFilterM>;
-    activate: boolean;
+  type: FilterType.GROUP_FILTER;
+  id: string;
+  conjunction: "AND" | "OR";
+  subGroup: Array<SimpleFilterM>;
+  activate: boolean;
 }
-export type LogFilterM =  SimpleFilterM |GroupFilter;
+export type LogFilterM = SimpleFilterM | GroupFilter;
 
-export enum LogFilterCondition{
-    EQUAL="EQUAL",
-    NOT_EQUAL="NOT_EQUAL",
-    CONTAINS="CONTAINS",
-    GREATER="GREATER",
-    LESS="LESS"
+export enum LogFilterCondition {
+  EQUAL = "EQUAL",
+  NOT_EQUAL = "NOT_EQUAL",
+  CONTAINS = "CONTAINS",
+  GREATER = "GREATER",
+  LESS = "LESS",
 }
 
-export const LogFilterConditionMap:{
-  [keys in LogFilterCondition]:string
+export const LogFilterConditionMap: {
+  [keys in LogFilterCondition]: string;
 } = {
-  EQUAL:"$eq",
-  NOT_EQUAL:"$neq",
-  CONTAINS:"$contains",
-  GREATER:"$gt",
-  LESS:"$less"
-}
+  EQUAL: "$eq",
+  NOT_EQUAL: "$neq",
+  CONTAINS: "$contains",
+  GREATER: "$gt",
+  LESS: "$less",
+};
 
-function getKeyByValue<T extends Record<string, string>>(enumObject: T, value: string): keyof T | undefined {
+function getKeyByValue<T extends Record<string, string>>(
+  enumObject: T,
+  value: string,
+): keyof T | undefined {
   const entries = Object.entries(enumObject);
   const foundEntry = entries.find(([key, val]) => val === value);
-  return foundEntry ? foundEntry[0] as keyof T : undefined;
+  return foundEntry ? (foundEntry[0] as keyof T) : undefined;
 }
 
-
-export function createSimpleFilter():SimpleFilterM{
+export function createSimpleFilter(): SimpleFilterM {
   return {
     activate: true,
     condition: LogFilterCondition.EQUAL,
     id: uuId(),
     property: "",
     type: FilterType.SIMPLE_FILTER,
-    value: ""
-  }
+    value: "",
+  };
 }
-
