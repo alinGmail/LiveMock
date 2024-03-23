@@ -12,12 +12,14 @@ import { useActionContext } from "../context";
 import Editor from "@monaco-editor/react";
 import moduleStyle from "./CustomResponseActionEditor.module.scss";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import {useAppSelector} from "../../store";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
   typeChange: (type: ActionType) => void;
 }> = ({ action, typeChange }) => {
   const actionContext = useActionContext();
+  const systemConfigState = useAppSelector((state) => state.systemConfig);
   return (
     <>
       <div>
@@ -168,7 +170,7 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
             <Editor
               options={{ lineNumbers: "off" }}
               height="300px"
-              theme={"vs-dark"}
+              theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
               language={
                 action.responseContent.type === ResponseType.JSON
                   ? "json"
