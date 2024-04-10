@@ -1,7 +1,7 @@
 {
   "name": "desktop",
   "private": true,
-  "version": "0.8.2",
+  "version": "1.2.2",
   "scripts": {
     "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
     "tsc": "tsc -project electron",
@@ -27,6 +27,7 @@
     "lokijs": "git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3",
     "mockjs": "^1.1.0",
     "modern-css-reset": "^1.4.0",
+    "monaco-editor": "^0.47.0",
     "react": "^18.2.0",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.2.0",
