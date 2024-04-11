@@ -12,17 +12,22 @@ import { useActionContext } from "../context";
 import Editor from "@monaco-editor/react";
 import moduleStyle from "./CustomResponseActionEditor.module.scss";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import {useAppSelector} from "../../store";
+import { useAppSelector } from "../../store";
 
 export const CustomResponseActionEditor: React.FunctionComponent<{
   action: CustomResponseActionM;
   typeChange: (type: ActionType) => void;
-}> = ({ action, typeChange }) => {
+  fullScreen: boolean;
+}> = ({ action, typeChange, fullScreen }) => {
   const actionContext = useActionContext();
   const systemConfigState = useAppSelector((state) => state.systemConfig);
   return (
     <>
-      <div>
+      <div
+        style={{
+          viewTransitionName: "type-input",
+        }}
+      >
         <div>type</div>
         <div>
           <Select
@@ -169,7 +174,7 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
           >
             <Editor
               options={{ lineNumbers: "off" }}
-              height="300px"
+              height={fullScreen ? "600px" : "300px"}
               theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
               language={
                 action.responseContent.type === ResponseType.JSON
