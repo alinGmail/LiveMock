@@ -13,7 +13,7 @@
   .leftCol {
     width: 200px;
     background: rgb(247, 246, 243);
-    height: 100vh;
+    height: calc(100vh - 78px);
     flex-shrink: 0;
   }
   .rightCol {

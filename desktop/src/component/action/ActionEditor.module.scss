@@ -1,4 +1,24 @@
-.actionEditor{
-  padding:20px;
+.actionEditor {
+  position: relative;
+  box-sizing: border-box;
   width: 500px;
+  padding: 20px;
+}
+
+.fullScreenEditor {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  box-sizing: border-box;
+  width: calc(100vw - 40px);
+  height: calc(100vh - 40px);
+}
+
+.fullScreenBtn{
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 100;
+  color: #8c8c8c;
 }

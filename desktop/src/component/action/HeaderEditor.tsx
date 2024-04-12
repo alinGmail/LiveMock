@@ -46,7 +46,6 @@ const HeaderEditor: React.FC<{
           className={["textBtn", mStyle.addBtn].join(" ")}
           onClick={() => {
             onAddHeader(["", ""]);
-            //onAddHeader && onAddHeader();
           }}
         >
           <PlusOutlined /> ADD

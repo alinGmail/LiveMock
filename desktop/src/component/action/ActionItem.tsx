@@ -22,25 +22,23 @@ const ActionItem: React.FC<{
           setDropShow(visible);
         }}
         trigger={["click"]}
-        overlay={
-          <div>
-            <ActionEditor action={action} />
-          </div>
-        }
+        overlay={<ActionEditor action={action} />}
       >
         <div>
-            {action.type === ActionType.PROXY && <div >
-                <div className={mStyle.actionWrap}>
-                    proxy to {action.host}
-                    &nbsp;&nbsp;
-                    <CloseSquareOutlined
-                        className={mStyle.closeBtn}
-                        onClick={() => {
-                            actionContext.onActionRemove(action.id);
-                        }}
-                    />
-                </div>
-            </div>}
+          {action.type === ActionType.PROXY && (
+            <div>
+              <div className={mStyle.actionWrap}>
+                proxy to {action.host}
+                &nbsp;&nbsp;
+                <CloseSquareOutlined
+                  className={mStyle.closeBtn}
+                  onClick={() => {
+                    actionContext.onActionRemove(action.id);
+                  }}
+                />
+              </div>
+            </div>
+          )}
           {action.type === ActionType.CUSTOM_RESPONSE && (
             <div className={mStyle.actionWrap}>
               response {action.status} with {action.responseContent.type}
