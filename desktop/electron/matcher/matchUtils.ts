@@ -1,6 +1,7 @@
 import {
   MatcherCondition,
-  RequestMatcherM, RequestMatcherType,
+  RequestMatcherM,
+  RequestMatcherType,
   StringMatcherCondition,
 } from "core/struct/matcher";
 import _ from "lodash";
@@ -9,6 +10,7 @@ import PathMatcher from "./PathMatcher";
 import HeaderMatcher from "./HeaderMatcher";
 import QueryMatcher from "./QueryMatcher";
 import ParamMatcher from "./ParamMatcher";
+import micromatch from "micromatch";
 
 export const stringMatchCondition = (
   left: string,
@@ -33,29 +35,38 @@ export const stringMatchCondition = (
     case MatcherCondition.NOT_SHOWED:
       return left != null;
     case MatcherCondition.MATCH_REGEX:
-      return regexMatch(left,right);
+      return regexMatch(left, right);
     case MatcherCondition.NOT_MATCH_REGEX:
-      return !regexMatch(left,right);
+      return !regexMatch(left, right);
+    case MatcherCondition.MATCH_GLOB:
+      return globMatch(left, right);
+    case MatcherCondition.NO_MATCH_GLOB:
+      return !globMatch(left, right);
     default:
       return false;
   }
 };
 
-export function regexMatch(valueStr:string,regexStr:string){
+export function regexMatch(valueStr: string, regexStr: string) {
   try {
-    let regExp:RegExp;
-    if(regexStr.startsWith("/")){
+    let regExp: RegExp;
+    if (regexStr.startsWith("/")) {
       let pattern = regexStr.slice(1, regexStr.lastIndexOf("/"));
       let modified = regexStr.slice(regexStr.lastIndexOf("/") + 1);
-      regExp = new RegExp(pattern,modified);
-    }else{
+      regExp = new RegExp(pattern, modified);
+    } else {
       regExp = new RegExp(regexStr);
     }
     return regExp.test(valueStr);
-  }catch (e){
+  } catch (e) {
     return false;
   }
 }
+
+export function globMatch(valueStr: string, pattern: string) {
+  return micromatch.isMatch(valueStr, pattern);
+}
+
 export function matchAnyValue(
   value: string | undefined | Array<any> | Object,
   matcher: RequestMatcherM
@@ -107,4 +118,3 @@ export const getMatcherImpl = (matcher: RequestMatcherM) => {
     return null;
   }
 };
-

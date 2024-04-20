@@ -1,4 +1,4 @@
-import {regexMatch} from "../../src/matcher/matchUtils";
+import {globMatch, regexMatch} from "../../src/matcher/matchUtils";
 
 
 test("match util",async ()=>{
@@ -8,3 +8,13 @@ test("match util",async ()=>{
     expect(regexMatch("abcsjs",regexStr)).toBe(false);
     expect(regexMatch("ABC","/abc/i")).toBe(true);
 });
+
+
+test("glob matcher", async () => {
+    const value = "/folder1/main.js";
+    const pattern = '*/*.js';
+    expect(globMatch(value,pattern)).toBe(false);
+
+    const pattern2 = "**/*.js";
+    expect(globMatch(value,pattern2)).toBe(true);
+})

@@ -61,13 +61,14 @@ export enum MatcherCondition {
   NOT_CONTAINS = "NOT_CONTAINS",
   START_WITH = "START_WITH",
   END_WITH = "END_WITH",
-
   MATCH_REGEX = "MATCH_REGEX",
   NOT_MATCH_REGEX = "NOT_MATCH_REGEX",
   // 出现了
   SHOWED = "SHOWED",
   // 没出现
   NOT_SHOWED = "NOT_SHOWED",
+  MATCH_GLOB = "MATCH_GLOB",
+  NO_MATCH_GLOB = "NO_MATCH_GLOB",
 }
 
 export type StringMatcherCondition = Extract<
@@ -82,6 +83,8 @@ export type StringMatcherCondition = Extract<
   | MatcherCondition.NOT_MATCH_REGEX
   | MatcherCondition.SHOWED
   | MatcherCondition.NOT_SHOWED
+  | MatcherCondition.MATCH_GLOB
+  | MatcherCondition.NO_MATCH_GLOB
 >;
 
 export type ArrayMatcherCondition = Extract<
