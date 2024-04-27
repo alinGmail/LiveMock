@@ -45,3 +45,7 @@ export enum LogFilterEvents{
     UpdateLogFilter="UpdateLogFilter",
     DeleteLogFilter="DeleteLogFilter"
 }
+
+export enum SystemEvents{
+    OpenAboutWindow = "OpenAboutWindow",
+}
