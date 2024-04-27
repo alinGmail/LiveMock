@@ -12,12 +12,5 @@
     <div style="font-size: 12px; text-align: center; margin-top: 4px">
       version: <span id="version"></span>
     </div>
-
-    <script type="text/javascript">
-      const searchParams = new URLSearchParams(window.location.search);
-      const versionValue = searchParams.get("version");
-      const element = document.querySelector("#version");
-      element.innerHTML = versionValue;
-    </script>
   </body>
 </html>

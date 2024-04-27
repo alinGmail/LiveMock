@@ -47,9 +47,9 @@ async function projectInit() {
 
 async function createWindow() {
   buildMenu({
-    onAboutClick:() => {
+    onAboutClick: () => {
       createAboutWindow();
-    }
+    },
   });
   await projectInit();
   await setProjectHandler(app.getPath("userData"));
@@ -92,14 +92,22 @@ function createAboutWindow() {
     show: true,
     width: 300,
     height: 300,
+    autoHideMenuBar: true,
   });
-
-  if(env === "dev"){
-    aboutWin.loadURL(`http://localhost:5173/about.html?version=${process.env.npm_package_version}`);
+  if (env === "dev") {
+    aboutWin.loadURL(
+      `http://localhost:5173/about.html?version=${process.env.npm_package_version}`
+    );
   } else {
-    aboutWin.loadFile(path.join(process.env.DIST, `about.html?version=${process.env.npm_package_version}`));
+    aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
   }
-
+  aboutWin.webContents.openDevTools();
+  aboutWin.webContents.on("did-finish-load", () => {
+    aboutWin.webContents.executeJavaScript(`
+      const ele = document.querySelector("#version");
+      ele.innerHTML = '${process.env.npm_package_version}';
+    `).catch(console.error);
+  });
 }
 
 ipcMain.handle(SystemEvents.OpenAboutWindow, () => {
