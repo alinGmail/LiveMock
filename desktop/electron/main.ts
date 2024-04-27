@@ -101,11 +101,10 @@ function createAboutWindow() {
   } else {
     aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
   }
-  aboutWin.webContents.openDevTools();
   aboutWin.webContents.on("did-finish-load", () => {
     aboutWin.webContents.executeJavaScript(`
       const ele = document.querySelector("#version");
-      ele.innerHTML = '${process.env.npm_package_version}';
+      ele.innerHTML = '${app.getVersion()}';
     `).catch(console.error);
   });
 }
