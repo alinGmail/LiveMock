@@ -39,6 +39,7 @@ const LeftNav = () => {
       >
         <SettingOutlined /> Config
       </NavLink>
+      <div className={mStyle.bottomVersion}>version:{APP_VERSION}</div>
     </div>
   );
 };

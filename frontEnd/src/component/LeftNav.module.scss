@@ -1,6 +1,16 @@
 .leftNav {
-  margin-top: 20px;
-
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  padding-top: 20px;
+  .bottomVersion{
+    position: absolute;
+    bottom: 24px;
+    box-sizing: border-box;
+    padding-left: 20px;
+    width: 100%;
+    color: #8c8c8c;
+  }
   .linkRow {
     margin: 3px 10px;
     border-radius: 8px;
@@ -28,6 +38,9 @@
   .leftNav{
     .linkRow{
       color: rgb(191, 191, 191);
+    }
+    .bottomVersion{
+      color: #595959;
     }
   }
 
