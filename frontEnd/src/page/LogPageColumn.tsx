@@ -184,9 +184,14 @@ export function getDefaultColumn(
           </div>
         );
       },
+    },{
+      title:getDefaultColumnHead('expectation',dispatch,3),
+      dataIndex: 'expectationId',
+      key: 'expectationId',
+      width: '200px'
     },
     {
-      title: getDefaultColumnHead("body", dispatch, 3),
+      title: getDefaultColumnHead("body", dispatch, 4),
       dataIndex: "body",
       key: "body",
       width: "300px",
@@ -215,7 +220,7 @@ export function getDefaultColumn(
       },
     },
     {
-      title: getDefaultColumnHead("root", dispatch, 4),
+      title: getDefaultColumnHead("root", dispatch, 5),
       dataIndex: "root",
       key: "root",
       width: "400px",
