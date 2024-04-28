@@ -10,11 +10,12 @@ import {
   setLogViewHandler,
 } from "./handler/logViewHandler";
 import { setLogFilterHandler } from "./handler/logFilterHandler";
-import { Menu, shell, MenuItem } from "electron";
-import * as console from "console";
 import { buildMenu } from "./buildMenu";
 import { getSystemCollection } from "./db/dbManager";
-import {systemVersion} from "./config";
+import { systemVersion } from "./config";
+import * as electron from "electron";
+import ipcMain = electron.ipcMain;
+import { SystemEvents } from "core/struct/events/desktopEvents";
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -38,15 +39,18 @@ const env = process.env["PROJECT_ENV"];
 async function projectInit() {
   const systemCollection = await getSystemCollection(app.getPath("userData"));
   const systemConfig = systemCollection.findOne({});
-  if(systemConfig){
-
-  }else{
-    systemCollection.insertOne({version:systemVersion});
+  if (systemConfig) {
+  } else {
+    systemCollection.insertOne({ version: systemVersion });
   }
 }
 
 async function createWindow() {
-  buildMenu();
+  buildMenu({
+    onAboutClick: () => {
+      createAboutWindow();
+    },
+  });
   await projectInit();
   await setProjectHandler(app.getPath("userData"));
   await setExpectationHandler(app.getPath("userData"));
@@ -54,8 +58,9 @@ async function createWindow() {
   await setActionHandler(app.getPath("userData"));
   await setLogViewHandler(app.getPath("userData"));
   await setLogFilterHandler(app.getPath("userData"));
+
   win = new BrowserWindow({
-    icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
+    icon: path.join(process.env.PUBLIC, "logo.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
@@ -70,11 +75,43 @@ async function createWindow() {
 
   if (env === "dev") {
     win.loadURL("http://localhost:5173");
+    // win.webContents.openDevTools();
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, "index.html"));
   }
 }
+
+function createAboutWindow() {
+  if (!win) {
+    return;
+  }
+  const aboutWin = new BrowserWindow({
+    parent: win,
+    modal: true,
+    show: true,
+    width: 300,
+    height: 300,
+    autoHideMenuBar: true,
+  });
+  if (env === "dev") {
+    aboutWin.loadURL(
+      `http://localhost:5173/about.html?version=${process.env.npm_package_version}`
+    );
+  } else {
+    aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
+  }
+  aboutWin.webContents.on("did-finish-load", () => {
+    aboutWin.webContents.executeJavaScript(`
+      const ele = document.querySelector("#version");
+      ele.innerHTML = '${app.getVersion()}';
+    `).catch(console.error);
+  });
+}
+
+ipcMain.handle(SystemEvents.OpenAboutWindow, () => {
+  createAboutWindow();
+});
 
 app.on("window-all-closed", () => {
   win = null;
