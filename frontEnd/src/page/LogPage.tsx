@@ -208,6 +208,10 @@ const LogPage: React.FC = () => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
       },
     );
+    socket.on("updateExpectation",({projectId,expectation}) => {
+      // todo
+
+    });
     setSocketInstance(socket);
     return () => {
       socket.disconnect();

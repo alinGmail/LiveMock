@@ -215,4 +215,10 @@ export async function addLogListener(io: Server, path: string) {
     let { log, logViewId } = arg;
     io.to(logViewId).emit("delete", { log, logViewId });
   });
+
+  logViewEventEmitter.on('updateExpectation',(arg:{projectId:string,expectation:ExpectationM}) => {
+    let {projectId,expectation} = arg;
+    io.emit('updateExpectation',{projectId,expectation})
+  })
+
 }

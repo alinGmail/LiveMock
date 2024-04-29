@@ -26,6 +26,7 @@ import {
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
+import {logViewEventEmitter} from "../common/logViewEvent";
 
 
 export function getExpectationRouter(path: string): express.Router {
@@ -148,6 +149,7 @@ export function getExpectationRouter(path: string): express.Router {
       }
       Object.assign(expectation, req.body.expectationUpdate);
       const result = collection.update(expectation);
+      logViewEventEmitter.emit('updateExpectation',{projectId,expectation});
       res.json(result);
     }
   );
