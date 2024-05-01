@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
 import { LogM } from "core/struct/log";
 import { io, Socket } from "socket.io-client";
-import {AppDispatch, useAppSelector} from "../store";
+import { AppDispatch, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { Table } from "antd";
 import {
@@ -26,15 +26,17 @@ import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
-import {listExpectationReq} from "../server/expectationServer";
-import {getExpectationSuccess} from "../slice/thunk";
+import { listExpectationReq } from "../server/expectationServer";
+import { getExpectationSuccess } from "../slice/thunk";
 import _ from "lodash";
+import { setExpectationMap } from "../slice/expectationSlice";
+import ReactJson from "react-json-view";
 
 function onLogsInsert(
   insertLog: LogM,
   logViewId: string,
   currentLogViewId: string | undefined,
-  setLogs: Updater<Array<LogM>>,
+  setLogs: Updater<Array<LogM>>
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -58,7 +60,7 @@ function onLogsUpdate(
   logViewId: string,
   currentLogViewId: string | undefined,
   setLogs: Updater<Array<LogM>>,
-  isDelete: boolean,
+  isDelete: boolean
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -108,7 +110,7 @@ const LogPage: React.FC = () => {
     tableColumns,
   } = logState;
   let currentEditColumn = tableColumns[currentColumnEditIndex];
-  const dispatch:AppDispatch= useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
@@ -123,19 +125,20 @@ const LogPage: React.FC = () => {
     });
   });
 
-
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
     () => {
       return listExpectationReq(currentProject.id).then((res) => {
+        const _expectationMap = _.keyBy(res, (expectation) => expectation.id);
+        dispatch(setExpectationMap(_expectationMap));
         dispatch(getExpectationSuccess(currentProject.id, res));
         return res;
       });
     },
+    {
+      staleTime: 3000,
+    }
   );
-  const expectationMap = useMemo(() => {
-    return _.keyBy(expectationState.expectationList,expectation => expectation.id);
-  },[expectationState]);
 
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
@@ -152,14 +155,14 @@ const LogPage: React.FC = () => {
     },
     {
       enabled: !!logViewId,
-    },
+    }
   );
   const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
   useEffect(() => {
     const customColumns = getCustomColumn(
       tableColumns.filter((item, index) => item.visible),
       dispatch,
-      systemConfigState.mode,
+      systemConfigState.mode
     );
     const newLogColumn = getDefaultColumn(
       dispatch,
@@ -167,6 +170,7 @@ const LogPage: React.FC = () => {
       logViewId,
       currentProject.id,
       logViewLogsQuery.refetch,
+      expectationState.expectationMap
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
@@ -194,24 +198,26 @@ const LogPage: React.FC = () => {
       "insert",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-      },
+      }
     );
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
-      },
+      }
     );
     socket.on(
       "delete",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
-      },
+      }
     );
-    socket.on("updateExpectation",({projectId,expectation}) => {
-      // todo
+    socket.on("updateExpectation", ({ projectId, expectation }) => {
 
     });
+    socket.on("insertExpectation", ({ projectId, expectation }) => {});
+    socket.on("deleteExpectation", ({ projectId, expectation }) => {});
+
     setSocketInstance(socket);
     return () => {
       socket.disconnect();
@@ -231,7 +237,7 @@ const LogPage: React.FC = () => {
         }}
       />
     );
-  }, [logColumn, logs]);
+  }, [logColumn, logs, expectationState]);
   return (
     <div style={{ padding: "10px" }}>
       <FilterRowComponent

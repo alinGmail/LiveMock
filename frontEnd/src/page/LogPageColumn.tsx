@@ -5,7 +5,7 @@ import {
   DeleteOutlined,
   FilterOutlined,
 } from "@ant-design/icons";
-import {createSimpleFilter, FilterType, LogM} from "core/struct/log";
+import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
@@ -29,8 +29,10 @@ import _ from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
-import {addLogFilterReq} from "../server/logFilterServer";
-import {toastPromise} from "../component/common";
+import { addLogFilterReq } from "../server/logFilterServer";
+import { toastPromise } from "../component/common";
+import { ExpectationM } from "core/build/struct/expectation";
+import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
   return [
@@ -80,9 +82,12 @@ export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
 export function getDefaultColumn(
   dispatch: Dispatch<AnyAction>,
   mode: "dark" | "light",
-  logViewId:string | undefined,
-  projectId:string,
-  refreshLogList: () => void
+  logViewId: string | undefined,
+  projectId: string,
+  refreshLogList: () => void,
+  expectationMap: {
+    [key: string]: ExpectationM;
+  }
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -163,32 +168,46 @@ export function getDefaultColumn(
         return (
           <div>
             {record.req.path}
-            <span className={mStyle.filterIcon}
-            onClick={()=>{
-              const simpleFilterM = createSimpleFilter();
-              simpleFilterM.property = "req.path";
-              simpleFilterM.value = record.req.path;
-              dispatch(addLogFilter(simpleFilterM));
-              const addPromise = addLogFilterReq({
-                filter: simpleFilterM,
-                logViewId: logViewId ?? "",
-                projectId: projectId,
-              });
-              toastPromise(addPromise);
-              addPromise.then(res =>{
-                refreshLogList();
-              })
-            }}>
+            <span
+              className={mStyle.filterIcon}
+              onClick={() => {
+                const simpleFilterM = createSimpleFilter();
+                simpleFilterM.property = "req.path";
+                simpleFilterM.value = record.req.path;
+                dispatch(addLogFilter(simpleFilterM));
+                const addPromise = addLogFilterReq({
+                  filter: simpleFilterM,
+                  logViewId: logViewId ?? "",
+                  projectId: projectId,
+                });
+                toastPromise(addPromise);
+                addPromise.then((res) => {
+                  refreshLogList();
+                });
+              }}
+            >
               <FilterOutlined />
             </span>
           </div>
         );
       },
-    },{
-      title:getDefaultColumnHead('expectation',dispatch,3),
-      dataIndex: 'expectationId',
-      key: 'expectationId',
-      width: '200px'
+    },
+    {
+      title: getDefaultColumnHead("expectation", dispatch, 3),
+      dataIndex: "expectationId",
+      key: "expectationId",
+      width: "200px",
+      render: (text: string, record: LogM, index: number) => {
+        const { expectationId } = record;
+        if (!expectationId) {
+          return <div />;
+        }
+        const expectation = expectationMap[expectationId];
+        if (!expectation) {
+          return <div />;
+        }
+        return <ExpectationBriefComponent expectation={expectation} />;
+      },
     },
     {
       title: getDefaultColumnHead("body", dispatch, 4),
@@ -239,34 +258,6 @@ export function getDefaultColumn(
               collapsed={true}
               style={{ backgroundColor: "none" }}
             />
-            {/*<ReactJson
-                            src={record}
-                            collapseStringsAfterLength={1000}
-                            onAddFilter={(arg) => {
-                                if (
-                                    arg.namespace.length != 0 &&
-                                    arg.namespace[0] != null &&
-                                    arg.name
-                                ) {
-                                    let nameArr = (arg.namespace as Array<string>)
-                                        .slice(1)
-                                        .concat(arg.name);
-
-                                    dispatch(
-                                        addFilter({
-                                            type: FilterType.SIMPLE_FILTER,
-                                            id: uuId(),
-                                            activate: true,
-                                            property: nameArr.join("."),
-                                            value: _.get(record, nameArr),
-                                            condition: StringCondition.IS,
-                                        })
-                                    );
-                                }
-                                console.log(arg);
-                            }}
-                            collapsed={true}
-                        />*/}
           </div>
         );
       },

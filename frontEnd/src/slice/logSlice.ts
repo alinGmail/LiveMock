@@ -35,7 +35,7 @@ export const logSlice = createSlice({
     currentColumnEditIndex: -1,
     columnEditorShow: false,
     columnConfigShow: false,
-    defaultColumnVisible: [true, true, true, true, true],
+    defaultColumnVisible: [true, true, true, true, true, true],
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
