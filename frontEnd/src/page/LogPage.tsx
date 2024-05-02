@@ -12,7 +12,6 @@ import {
 } from "./LogPageColumn";
 import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
-  addLogFilter,
   ColumnDisplayType,
   hideColumnEditor,
   resetLogFilter,
@@ -30,7 +29,6 @@ import { listExpectationReq } from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
 import _ from "lodash";
 import { setExpectationMap } from "../slice/expectationSlice";
-import ReactJson from "react-json-view";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -134,9 +132,6 @@ const LogPage: React.FC = () => {
         dispatch(getExpectationSuccess(currentProject.id, res));
         return res;
       });
-    },
-    {
-      staleTime: 3000,
     }
   );
 

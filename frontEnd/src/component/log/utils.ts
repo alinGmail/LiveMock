@@ -13,28 +13,31 @@ export function getStringConditionWord(condition: LogFilterCondition) {
   }
 }
 
-
 export function getDefaultColumnTitles() {
-    return [
-        {
-            title: "method",
-            displayType: ColumnDisplayType.TEXT,
-        },
-        {
-            title: "status code",
-            displayType: ColumnDisplayType.TEXT,
-        },
-        {
-            title: "path",
-            displayType: ColumnDisplayType.TEXT,
-        },
-        {
-            title: "body",
-            displayType: ColumnDisplayType.JSON,
-        },
-        {
-            title: "root",
-            displayType: ColumnDisplayType.JSON,
-        },
-    ];
+  return [
+    {
+      title: "method",
+      displayType: ColumnDisplayType.TEXT,
+    },
+    {
+      title: "status code",
+      displayType: ColumnDisplayType.TEXT,
+    },
+    {
+      title: "path",
+      displayType: ColumnDisplayType.TEXT,
+    },
+    {
+      title: "expectation",
+      displayType: ColumnDisplayType.TEXT,
+    },
+    {
+      title: "body",
+      displayType: ColumnDisplayType.JSON,
+    },
+    {
+      title: "root",
+      displayType: ColumnDisplayType.JSON,
+    },
+  ];
 }
