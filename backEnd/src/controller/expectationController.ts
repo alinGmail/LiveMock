@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
-import {getExpectationCollection, getExpectationDb} from "../db/dbManager";
+import { getExpectationCollection, getExpectationDb } from "../db/dbManager";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
@@ -26,8 +26,7 @@ import {
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
-import {logViewEventEmitter} from "../common/logViewEvent";
-
+import { logViewEventEmitter } from "../common/logViewEvent";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
@@ -58,6 +57,7 @@ export function getExpectationRouter(path: string): express.Router {
       const collection = await getExpectationCollection(projectId, path);
       if (req.body.expectation) {
         const resExp = collection.insert(req.body.expectation);
+        logViewEventEmitter.emit("insertExpectation", { projectId, resExp });
         res.json(resExp);
       } else {
         throw new ServerError(400, "expectation not exist!");
@@ -117,6 +117,7 @@ export function getExpectationRouter(path: string): express.Router {
         throw new ServerError(500, "expectation not exist");
       }
       collection.remove(expectation);
+      logViewEventEmitter.emit("deleteExpectation", { projectId, expectation });
       res.json({ message: "success" });
     }
   );
@@ -149,7 +150,7 @@ export function getExpectationRouter(path: string): express.Router {
       }
       Object.assign(expectation, req.body.expectationUpdate);
       const result = collection.update(expectation);
-      logViewEventEmitter.emit('updateExpectation',{projectId,expectation});
+      logViewEventEmitter.emit("updateExpectation", { projectId, expectation });
       res.json(result);
     }
   );

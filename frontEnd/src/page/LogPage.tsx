@@ -25,10 +25,17 @@ import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
-import { listExpectationReq } from "../server/expectationServer";
+import {
+  listExpectationReq,
+  updateExpectationReq,
+} from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
 import _ from "lodash";
-import { setExpectationMap } from "../slice/expectationSlice";
+import {
+  deleteExpectationMap,
+  setExpectationMap,
+  updateExpectationMap,
+} from "../slice/expectationSlice";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -207,11 +214,22 @@ const LogPage: React.FC = () => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
       }
     );
-    socket.on("updateExpectation", ({ projectId, expectation }) => {
 
+    socket.on("updateExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(updateExpectationMap(expectation));
+      }
     });
-    socket.on("insertExpectation", ({ projectId, expectation }) => {});
-    socket.on("deleteExpectation", ({ projectId, expectation }) => {});
+    socket.on("insertExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(updateExpectationMap(expectation));
+      }
+    });
+    socket.on("deleteExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(deleteExpectationMap(expectation));
+      }
+    });
 
     setSocketInstance(socket);
     return () => {
