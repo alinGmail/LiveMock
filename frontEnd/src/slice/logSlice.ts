@@ -16,6 +16,10 @@ export interface TableColumnItem {
   visible: boolean;
 }
 
+export interface PresetFilterState{
+  expectationId: string | null;
+}
+
 export interface LogState {
   tableColumns: Array<TableColumnItem>;
   currentColumnEditIndex: number;
@@ -24,6 +28,7 @@ export interface LogState {
   defaultColumnVisible: Array<boolean>;
   logList: Array<LogM>;
   logFilter: Array<LogFilterM>;
+  presetFilter: PresetFilterState;
 }
 
 export const logSlice = createSlice({
@@ -31,6 +36,9 @@ export const logSlice = createSlice({
   initialState: {
     logList: [],
     logFilter: [],
+    presetFilter: {
+      expectationId: null,
+    },
     tableColumns: [],
     currentColumnEditIndex: -1,
     columnEditorShow: false,
@@ -60,6 +68,12 @@ export const logSlice = createSlice({
     },
     resetLogFilter(state, action: PayloadAction<Array<LogFilterM>>) {
       state.logFilter = action.payload;
+    },
+    updatePresetFilter(state, action: PayloadAction<Partial<PresetFilterState>>) {
+      state.presetFilter = {
+        ...state.presetFilter,
+        ...action.payload,
+      }
     },
     setTableColumns: (state, action: PayloadAction<Array<TableColumnItem>>) => {
       state.tableColumns = action.payload;
@@ -159,6 +173,7 @@ let {
   modifyLogFilter,
   deleteTableColumn,
   modifyAllTableColumnVisible,
+  updatePresetFilter,
 } = actions;
 
 export {
@@ -180,4 +195,5 @@ export {
   modifyTableColumnVisible,
   modifyLogFilter,
   modifyAllTableColumnVisible,
+  updatePresetFilter,
 };

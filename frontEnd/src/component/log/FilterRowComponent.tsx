@@ -1,10 +1,14 @@
 import React from "react";
 import mStyle from "./FilterRowComponent.module.scss";
 import LogFilterComponent from "./LogFilterComponent";
-import { addLogFilter, LogState } from "../../slice/logSlice";
+import {
+  addLogFilter,
+  LogState,
+  updatePresetFilter,
+} from "../../slice/logSlice";
 import { ProjectM } from "core/build/struct/project";
 import { useDispatch } from "react-redux";
-import { App, Button } from "antd";
+import { App, Button, Select } from "antd";
 import { createSimpleFilter } from "core/struct/log";
 import { addLogFilterReq } from "../../server/logFilterServer";
 import { toastPromise } from "../common";
@@ -12,6 +16,8 @@ import { ClearOutlined, PlusOutlined } from "@ant-design/icons";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ListLogViewResponse } from "core/struct/response/LogResponse";
 import { deleteAllRequestLogs } from "../../server/logServer";
+import { ListExpectationResponse } from "core/build/struct/response/ExpectationResponse";
+import { useAppSelector } from "../../store";
 
 const FilterRowComponent: React.FunctionComponent<{
   logViewId: string | undefined;
@@ -19,61 +25,91 @@ const FilterRowComponent: React.FunctionComponent<{
   currentProject: ProjectM;
   refreshLogList: () => void;
   getLogViewQuery: UseQueryResult<ListLogViewResponse>;
+  getExpectationListQuery: UseQueryResult<ListExpectationResponse>;
 }> = ({
   logViewId,
   logState,
   currentProject,
   refreshLogList,
   getLogViewQuery,
+  getExpectationListQuery,
 }) => {
   const { modal } = App.useApp();
+  const presetFilterState = useAppSelector((state) => state.log.presetFilter);
+  const dispatch = useDispatch();
   return (
-    <div className={mStyle.filterRow}>
-      <div className={mStyle.filterCol}>
-        {logViewId &&
-          logState.logFilter.map((filter) => {
-            return (
-              <LogFilterComponent
-                filter={filter}
-                key={filter.id}
-                projectId={currentProject.id}
-                logViewId={logViewId}
-                refreshLogList={refreshLogList}
-              />
-            );
+    <div>
+      <div>
+        handle by expectation:&nbsp;
+        <Select
+          allowClear={true}
+          value={presetFilterState.expectationId}
+          style={{
+            width: "200px",
+          }}
+          loading={getExpectationListQuery.isLoading}
+          options={getExpectationListQuery.data?.map((item) => {
+            return {
+              label: item.name,
+              value: item.id,
+            };
           })}
-        {getLogViewQuery.isSuccess && (
-          <AddLogFilterBtn
-            refreshLogList={refreshLogList}
-            projectId={currentProject.id}
-            logViewId={getLogViewQuery.data[0]?.id}
-          />
-        )}
-      </div>
-      <div className={mStyle.btnCol}>
-        <Button
-          type={"text"}
-          title={"delete all"}
-          shape={"circle"}
-          icon={<ClearOutlined />}
-          onClick={() => {
-            modal.confirm({
-              content: "Are you sure to delete all the request log?",
-              title: "warning",
-              type: "warning",
-              onOk: () => {
-                const deletePromise = deleteAllRequestLogs({
-                  projectId: currentProject.id,
-                });
-                toastPromise(deletePromise);
-                deletePromise.then(res => {
-                    refreshLogList();
-                }).catch(e => {return;});
-
-              },
-            });
+          onChange={(value) => {
+            dispatch(updatePresetFilter({ expectationId: value }));
           }}
         />
+      </div>
+      <div className={mStyle.filterRow}>
+        <div className={mStyle.filterCol}>
+          custom filter:
+          {logViewId &&
+            logState.logFilter.map((filter) => {
+              return (
+                <LogFilterComponent
+                  filter={filter}
+                  key={filter.id}
+                  projectId={currentProject.id}
+                  logViewId={logViewId}
+                  refreshLogList={refreshLogList}
+                />
+              );
+            })}
+          {getLogViewQuery.isSuccess && (
+            <AddLogFilterBtn
+              refreshLogList={refreshLogList}
+              projectId={currentProject.id}
+              logViewId={getLogViewQuery.data[0]?.id}
+            />
+          )}
+        </div>
+        <div className={mStyle.btnCol}>
+          <Button
+            type={"text"}
+            title={"delete all"}
+            shape={"circle"}
+            icon={<ClearOutlined />}
+            onClick={() => {
+              modal.confirm({
+                content: "Are you sure to delete all the request log?",
+                title: "warning",
+                type: "warning",
+                onOk: () => {
+                  const deletePromise = deleteAllRequestLogs({
+                    projectId: currentProject.id,
+                  });
+                  toastPromise(deletePromise);
+                  deletePromise
+                    .then((res) => {
+                      refreshLogList();
+                    })
+                    .catch((e) => {
+                      return;
+                    });
+                },
+              });
+            }}
+          />
+        </div>
       </div>
     </div>
   );

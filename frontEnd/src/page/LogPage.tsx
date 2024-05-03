@@ -254,6 +254,7 @@ const LogPage: React.FC = () => {
   return (
     <div style={{ padding: "10px" }}>
       <FilterRowComponent
+        getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
         logViewId={logViewId}
         currentProject={currentProject}
