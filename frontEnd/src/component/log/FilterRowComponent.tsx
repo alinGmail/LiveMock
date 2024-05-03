@@ -48,10 +48,11 @@ const FilterRowComponent: React.FunctionComponent<{
       <div>
         handle by expectation:&nbsp;
         <Select
+          size={"small"}
           allowClear={true}
           value={presetFilterState.expectationId}
           style={{
-            width: "200px",
+            width: "150px",
           }}
           loading={getExpectationListQuery.isLoading}
           options={getExpectationListQuery.data?.map((item) => {

@@ -137,16 +137,18 @@ export async function getLogFilterRouter(
         removeDynamicViewFilter(dynamicView, presetFilter.id);
       }
     } else {
+      let presetFilter: PresetFilterM = filter;
       // update filter
       if (findIndex === -1) {
         // append to de logView
         logView.filters.push(filter);
       } else {
-        (logView.filters[findIndex] as PresetFilterM).value = filter.value;
+        presetFilter = logView.filters[findIndex] as PresetFilterM;
+        presetFilter.value = filter.value;
         collection.update(logView);
       }
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-      applyDynamicViewFilter(dynamicView, filter);
+      applyDynamicViewFilter(dynamicView, presetFilter);
     }
 
     res.json({ message: "success" });

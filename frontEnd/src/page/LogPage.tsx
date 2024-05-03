@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
-import { LogM } from "core/struct/log";
+import {
+  FilterType,
+  LogM,
+  PresetFilterM,
+  PresetFilterName,
+} from "core/struct/log";
 import { io, Socket } from "socket.io-client";
 import { AppDispatch, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
@@ -14,20 +19,19 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   ColumnDisplayType,
   hideColumnEditor,
+  PresetFilterState,
   resetLogFilter,
-  TableColumnItem,
+  TableColumnItem, updatePresetFilter,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
 import { useQuery } from "@tanstack/react-query";
-import { listLogViewReq, listLogViewLogs } from "../server/logServer";
-import { binarySearch, toastPromise } from "../component/common";
+import { listLogViewLogs, listLogViewReq } from "../server/logServer";
+import { binarySearch } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
-import {
-  listExpectationReq,
-} from "../server/expectationServer";
+import { listExpectationReq } from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
 import _ from "lodash";
 import {
@@ -124,7 +128,26 @@ const LogPage: React.FC = () => {
   const getLogViewQuery = useQuery([currentProject.id], () => {
     return listLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
-      dispatch(resetLogFilter(res[0].filters));
+      dispatch(
+        resetLogFilter(
+          res[0].filters.filter(
+            (item) => item.type === FilterType.SIMPLE_FILTER
+          )
+        )
+      );
+
+      // update preset filter
+      const presetFilters: Array<PresetFilterM> = res[0].filters.filter(
+        (item) => item.type === FilterType.PRESET_FILTER
+      ) as Array<PresetFilterM>;
+      const presetFilterUpdate: Partial<PresetFilterState> = {};
+      presetFilters.forEach((presetFilter) => {
+        if (presetFilter.name === PresetFilterName.EXPECTATION) {
+          presetFilterUpdate.expectationId = presetFilter.value;
+        }
+      });
+      dispatch(updatePresetFilter(presetFilterUpdate));
+      // end update preset filter
       return res;
     });
   });
@@ -184,7 +207,7 @@ const LogPage: React.FC = () => {
     systemConfigState.mode,
     logViewId,
     currentProject.id,
-    expectationState
+    expectationState,
   ]);
 
   useEffect(() => {
