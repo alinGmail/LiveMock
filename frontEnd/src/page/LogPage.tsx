@@ -21,7 +21,8 @@ import {
   hideColumnEditor,
   PresetFilterState,
   resetLogFilter,
-  TableColumnItem, updatePresetFilter,
+  TableColumnItem,
+  updatePresetFilter,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
 import { useQuery } from "@tanstack/react-query";
@@ -39,6 +40,7 @@ import {
   setExpectationMap,
   updateExpectationMap,
 } from "../slice/expectationSlice";
+import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -140,7 +142,9 @@ const LogPage: React.FC = () => {
       const presetFilters: Array<PresetFilterM> = res[0].filters.filter(
         (item) => item.type === FilterType.PRESET_FILTER
       ) as Array<PresetFilterM>;
-      const presetFilterUpdate: Partial<PresetFilterState> = {};
+      const presetFilterUpdate: PresetFilterState = {
+        expectationId: null,
+      };
       presetFilters.forEach((presetFilter) => {
         if (presetFilter.name === PresetFilterName.EXPECTATION) {
           presetFilterUpdate.expectationId = presetFilter.value;
@@ -276,6 +280,14 @@ const LogPage: React.FC = () => {
   }, [logColumn, logs, expectationState]);
   return (
     <div style={{ padding: "10px" }}>
+      <PresetFilterRowComponent
+        getExpectationListQuery={getExpectationListQuery}
+        getLogViewQuery={getLogViewQuery}
+        logViewId={logViewId}
+        currentProject={currentProject}
+        refreshLogList={logViewLogsQuery.refetch}
+        logState={logState}
+      />
       <FilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}

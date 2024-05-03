@@ -1,5 +1,5 @@
 import React from "react";
-import { ExpectationM } from "core/build/struct/expectation";
+import { ExpectationM } from "core/struct/expectation";
 import {Button, Tooltip} from "antd";
 import { ActionType } from "core/struct/action";
 

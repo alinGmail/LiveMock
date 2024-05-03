@@ -31,7 +31,7 @@ import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
-import { ExpectationM } from "core/build/struct/expectation";
+import { ExpectationM } from "core/struct/expectation";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {

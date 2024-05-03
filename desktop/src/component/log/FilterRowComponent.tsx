@@ -2,7 +2,7 @@ import React from "react";
 import mStyle from "./FilterRowComponent.module.scss";
 import LogFilterComponent from "./LogFilterComponent";
 import { addLogFilter, LogState } from "../../slice/logSlice";
-import { ProjectM } from "core/build/struct/project";
+import { ProjectM } from "core/struct/project";
 import { useDispatch } from "react-redux";
 import { App, Button } from "antd";
 import { createSimpleFilter } from "core/struct/log";
