@@ -35,6 +35,24 @@ export interface UpdateLogFilterReqQuery{
 
 }
 
+/**
+ * update preset log filter
+ */
+export interface UpdatePresetLogFilterPathParam{
+
+}
+
+export interface UpdatePresetLogFilterReqBody{
+    projectId:string;
+    logViewId:string;
+    filter:LogFilterM;
+}
+
+export interface UpdatePresetLogFilterReqQuery{
+
+}
+
+
 
 /**
  * delete log filter

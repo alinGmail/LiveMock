@@ -1,4 +1,9 @@
-import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
+import {
+  CreateLogFilterReqBody,
+  DeleteLogFilterReqQuery,
+  UpdateLogFilterReqBody,
+  UpdatePresetLogFilterReqBody
+} from "core/struct/params/LogFilterParam";
 import * as superagent from "superagent";
 import {ServerUrl} from "../config";
 
@@ -18,6 +23,10 @@ export const updateLogFilterReq = async (
   return response.body;
 };
 
+export const updatePresetLogFilterReq = async (param:UpdatePresetLogFilterReqBody)=> {
+  const response = await superagent.post(`${ServerUrl}/logFilter/updatePresetLogFilter`).send(param);
+  return response.body;
+}
 
 export const deleteLogFilterReq = async (logFilterId:string,param:DeleteLogFilterReqQuery)=>{
     const response = await superagent.delete(`${ServerUrl}/logFilter/${logFilterId}`)

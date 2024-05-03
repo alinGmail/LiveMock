@@ -9,7 +9,7 @@ import supertest from "supertest";
 import {createSimpleFilter, FilterType, SimpleFilterM} from "core/struct/log";
 import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
 import {getLogViewDb, getProjectDb} from "../../src/db/dbManager";
-import {LogViewM} from "core/struct/logView";
+import {createLogView, LogViewM} from "core/struct/logView";
 
 
 describe(`log filter controller`, () => {

@@ -27,7 +27,6 @@ import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import {
   listExpectationReq,
-  updateExpectationReq,
 } from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
 import _ from "lodash";
@@ -185,6 +184,7 @@ const LogPage: React.FC = () => {
     systemConfigState.mode,
     logViewId,
     currentProject.id,
+    expectationState
   ]);
 
   useEffect(() => {

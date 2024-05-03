@@ -102,7 +102,7 @@ function isNumberString(value:string){
 }
 // change filter to mongo-style query
 export function changeToLokijsFilter(filter: LogFilterM) {
-  if (filter.type === FilterType.SIMPLE_FILTER) {
+  if (filter.type === FilterType.SIMPLE_FILTER || filter.type === FilterType.PRESET_FILTER) {
     const isNumberValue = isNumberString(filter.value);
     switch (filter.condition) {
       case LogFilterCondition.EQUAL:

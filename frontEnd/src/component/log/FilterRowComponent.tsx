@@ -9,8 +9,14 @@ import {
 import { ProjectM } from "core/build/struct/project";
 import { useDispatch } from "react-redux";
 import { App, Button, Select } from "antd";
-import { createSimpleFilter } from "core/struct/log";
-import { addLogFilterReq } from "../../server/logFilterServer";
+import {
+  createExpectationPresetFilterM,
+  createSimpleFilter,
+} from "core/struct/log";
+import {
+  addLogFilterReq,
+  updatePresetLogFilterReq,
+} from "../../server/logFilterServer";
 import { toastPromise } from "../common";
 import { ClearOutlined, PlusOutlined } from "@ant-design/icons";
 import { UseQueryResult } from "@tanstack/react-query";
@@ -56,6 +62,17 @@ const FilterRowComponent: React.FunctionComponent<{
           })}
           onChange={(value) => {
             dispatch(updatePresetFilter({ expectationId: value }));
+            const filter = createExpectationPresetFilterM();
+            filter.value = value ?? null;
+
+            const updatePromise = updatePresetLogFilterReq({
+              projectId: currentProject.id,
+              logViewId: logViewId ?? "",
+              filter: filter,
+            }).then(res => {
+              refreshLogList();
+            });
+            toastPromise(updatePromise);
           }}
         />
       </div>
