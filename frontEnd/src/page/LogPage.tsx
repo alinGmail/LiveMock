@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
-import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
-import LogFilterComponent from "../component/log/LogFilterComponent";
+import {
+  FilterType,
+  LogM,
+  PresetFilterM,
+  PresetFilterName,
+} from "core/struct/log";
 import { io, Socket } from "socket.io-client";
-import { useAppSelector } from "../store";
+import { AppDispatch, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
-import { Button, Table } from "antd";
+import { Table } from "antd";
 import {
   getConfigColumn,
   getCustomColumn,
@@ -13,28 +17,36 @@ import {
 } from "./LogPageColumn";
 import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
-  addLogFilter,
   ColumnDisplayType,
   hideColumnEditor,
+  PresetFilterState,
   resetLogFilter,
   TableColumnItem,
+  updatePresetFilter,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
-import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { listLogViewReq, listLogViewLogs } from "../server/logServer";
-import { addLogFilterReq } from "../server/logFilterServer";
-import { binarySearch, toastPromise } from "../component/common";
+import { listLogViewLogs, listLogViewReq } from "../server/logServer";
+import { binarySearch } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
 import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
+import { listExpectationReq } from "../server/expectationServer";
+import { getExpectationSuccess } from "../slice/thunk";
+import _ from "lodash";
+import {
+  deleteExpectationMap,
+  setExpectationMap,
+  updateExpectationMap,
+} from "../slice/expectationSlice";
+import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
 
 function onLogsInsert(
   insertLog: LogM,
   logViewId: string,
   currentLogViewId: string | undefined,
-  setLogs: Updater<Array<LogM>>,
+  setLogs: Updater<Array<LogM>>
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -58,7 +70,7 @@ function onLogsUpdate(
   logViewId: string,
   currentLogViewId: string | undefined,
   setLogs: Updater<Array<LogM>>,
-  isDelete: boolean,
+  isDelete: boolean
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -108,19 +120,53 @@ const LogPage: React.FC = () => {
     tableColumns,
   } = logState;
   let currentEditColumn = tableColumns[currentColumnEditIndex];
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
+  const expectationState = useAppSelector((state) => state.expectation);
   const getLogViewQuery = useQuery([currentProject.id], () => {
     return listLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
-      dispatch(resetLogFilter(res[0].filters));
+      dispatch(
+        resetLogFilter(
+          res[0].filters.filter(
+            (item) => item.type === FilterType.SIMPLE_FILTER
+          )
+        )
+      );
+
+      // update preset filter
+      const presetFilters: Array<PresetFilterM> = res[0].filters.filter(
+        (item) => item.type === FilterType.PRESET_FILTER
+      ) as Array<PresetFilterM>;
+      const presetFilterUpdate: PresetFilterState = {
+        expectationId: null,
+      };
+      presetFilters.forEach((presetFilter) => {
+        if (presetFilter.name === PresetFilterName.EXPECTATION) {
+          presetFilterUpdate.expectationId = presetFilter.value;
+        }
+      });
+      dispatch(updatePresetFilter(presetFilterUpdate));
+      // end update preset filter
       return res;
     });
   });
+
+  const getExpectationListQuery = useQuery(
+    ["getExpectationList", currentProject.id],
+    () => {
+      return listExpectationReq(currentProject.id).then((res) => {
+        const _expectationMap = _.keyBy(res, (expectation) => expectation.id);
+        dispatch(setExpectationMap(_expectationMap));
+        dispatch(getExpectationSuccess(currentProject.id, res));
+        return res;
+      });
+    }
+  );
 
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
@@ -137,14 +183,14 @@ const LogPage: React.FC = () => {
     },
     {
       enabled: !!logViewId,
-    },
+    }
   );
   const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
   useEffect(() => {
     const customColumns = getCustomColumn(
       tableColumns.filter((item, index) => item.visible),
       dispatch,
-      systemConfigState.mode,
+      systemConfigState.mode
     );
     const newLogColumn = getDefaultColumn(
       dispatch,
@@ -152,6 +198,7 @@ const LogPage: React.FC = () => {
       logViewId,
       currentProject.id,
       logViewLogsQuery.refetch,
+      expectationState.expectationMap
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
@@ -164,6 +211,7 @@ const LogPage: React.FC = () => {
     systemConfigState.mode,
     logViewId,
     currentProject.id,
+    expectationState,
   ]);
 
   useEffect(() => {
@@ -179,20 +227,37 @@ const LogPage: React.FC = () => {
       "insert",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-      },
+      }
     );
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
-      },
+      }
     );
     socket.on(
       "delete",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
-      },
+      }
     );
+
+    socket.on("updateExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(updateExpectationMap(expectation));
+      }
+    });
+    socket.on("insertExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(updateExpectationMap(expectation));
+      }
+    });
+    socket.on("deleteExpectation", ({ projectId, expectation }) => {
+      if (projectId === currentProject.id) {
+        dispatch(deleteExpectationMap(expectation));
+      }
+    });
+
     setSocketInstance(socket);
     return () => {
       socket.disconnect();
@@ -212,10 +277,19 @@ const LogPage: React.FC = () => {
         }}
       />
     );
-  }, [logColumn, logs]);
+  }, [logColumn, logs, expectationState]);
   return (
-    <div style={{ padding: "10px" }}>
+    <div style={{ padding: "10px",marginTop:"10px" }}>
+      <PresetFilterRowComponent
+        getExpectationListQuery={getExpectationListQuery}
+        getLogViewQuery={getLogViewQuery}
+        logViewId={logViewId}
+        currentProject={currentProject}
+        refreshLogList={logViewLogsQuery.refetch}
+        logState={logState}
+      />
       <FilterRowComponent
+        getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
         logViewId={logViewId}
         currentProject={currentProject}

@@ -83,7 +83,7 @@ import {
   DeleteLogFilterReqQuery,
   UpdateLogFilterPathParam,
   UpdateLogFilterReqBody,
-  UpdateLogFilterReqQuery,
+  UpdateLogFilterReqQuery, UpdatePresetLogFilterPathParam, UpdatePresetLogFilterReqBody, UpdatePresetLogFilterReqQuery,
 } from "core/struct/params/LogFilterParam";
 import IpcRendererEvent = electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
@@ -358,6 +358,18 @@ export const api = {
         reqQuery,
         reqBody
       );
+    },
+    updatePresetLogFilter:(
+      reqParam: UpdatePresetLogFilterPathParam,
+      reqQuery:UpdatePresetLogFilterReqQuery,
+      reqBody: UpdatePresetLogFilterReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogFilterEvents.UpdatePresetLogFilter,
+        reqParam,
+        reqQuery,
+        reqBody
+      )
     },
     deleteLogFilter: (
       reqParam: DeleteLogFilterPathParam,

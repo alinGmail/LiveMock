@@ -5,16 +5,34 @@ import { actionReducers } from "./actionSlice";
 
 export interface ExpectationState {
   expectationList: Array<ExpectationM>;
+  expectationMap: {
+    [key: string]: ExpectationM;
+  };
 }
 
 const expectationSlice = createSlice({
   name: "expectation",
   initialState: {
     expectationList: [],
+    expectationMap: {},
   } as ExpectationState,
   reducers: {
     setExpectationList(state, action: PayloadAction<Array<ExpectationM>>) {
       state.expectationList = action.payload;
+    },
+    setExpectationMap(
+      state,
+      action: PayloadAction<{
+        [key: string]: ExpectationM;
+      }>
+    ) {
+      state.expectationMap = action.payload;
+    },
+    updateExpectationMap(state, action: PayloadAction<ExpectationM>) {
+      state.expectationMap[action.payload.id] = action.payload;
+    },
+    deleteExpectationMap(state, action: PayloadAction<string>) {
+      delete state.expectationMap[action.payload];
     },
     updateExpectationItem: (
       state,
@@ -49,6 +67,9 @@ let {
   removeAction,
   modifyAction,
   deleteExpectation,
+  setExpectationMap,
+  updateExpectationMap,
+  deleteExpectationMap,
 } = actions;
 export {
   addMatcher,
@@ -61,4 +82,7 @@ export {
   removeAction,
   modifyAction,
   reducer,
+  setExpectationMap,
+  updateExpectationMap,
+  deleteExpectationMap,
 };

@@ -93,8 +93,8 @@ export function getResponseHeaderMap(res: Response): {
   });
   return headers;
 }
-function isNumberString(value:string){
-  if(value == null){
+function isNumberString(value: string) {
+  if (value == null) {
     return false;
   }
   const numVal = Number(value);
@@ -102,7 +102,10 @@ function isNumberString(value:string){
 }
 // change filter to mongo-style query
 export function changeToLokijsFilter(filter: LogFilterM) {
-  if (filter.type === FilterType.SIMPLE_FILTER) {
+  if (
+    filter.type === FilterType.SIMPLE_FILTER ||
+    filter.type === FilterType.PRESET_FILTER
+  ) {
     const isNumberValue = isNumberString(filter.value);
     switch (filter.condition) {
       case LogFilterCondition.EQUAL:
@@ -113,18 +116,21 @@ export function changeToLokijsFilter(filter: LogFilterM) {
           },
         };
       case LogFilterCondition.NOT_EQUAL:
-        if(isNumberValue){
+        if (isNumberValue) {
           return {
-            "$and":[{
-              [filter.property]: {
-                $ne: filter.value,
+            $and: [
+              {
+                [filter.property]: {
+                  $ne: filter.value,
+                },
               },
-            },{
-              [filter.property]: {
-                $ne: Number(filter.value),
+              {
+                [filter.property]: {
+                  $ne: Number(filter.value),
+                },
               },
-            }]
-          }
+            ],
+          };
         }
         return {
           [filter.property]: {
@@ -143,11 +149,17 @@ export function changeToLokijsFilter(filter: LogFilterM) {
   }
 }
 
-export function applyDynamicViewFilter(dynamicView:DynamicView<LogM>,filter:LogFilterM){
+export function applyDynamicViewFilter(
+  dynamicView: DynamicView<LogM>,
+  filter: LogFilterM
+) {
   const applyFilter = changeToLokijsFilter(filter);
   dynamicView.applyFind(applyFilter, filter.id);
 }
-export function removeDynamicViewFilter(dynamicView:DynamicView<LogM>,filterId:string){
+export function removeDynamicViewFilter(
+  dynamicView: DynamicView<LogM>,
+  filterId: string
+) {
   dynamicView.removeFilter(filterId);
 }
 
@@ -176,18 +188,18 @@ export async function getLogDynamicView(
     }
     // sync the logView filter and dynamicView filterPipeline
     logView.filters.forEach((filter) => {
-      const find = dynamicView!.filterPipeline.find(pipeLine =>{
+      const find = dynamicView!.filterPipeline.find((pipeLine) => {
         return pipeLine.uid === filter.id;
       });
-      if(!find){
-        applyDynamicViewFilter(dynamicView!,filter);
+      if (!find) {
+        applyDynamicViewFilter(dynamicView!, filter);
       }
     });
-    dynamicView.filterPipeline.forEach(pipeLine=>{
-      const find = logView.filters.find(filter=>{
+    dynamicView.filterPipeline.forEach((pipeLine) => {
+      const find = logView.filters.find((filter) => {
         return filter.id === pipeLine.uid;
       });
-      if(!find && pipeLine.uid){
+      if (!find && pipeLine.uid) {
         dynamicView?.removeFilter(pipeLine.uid);
       }
     });

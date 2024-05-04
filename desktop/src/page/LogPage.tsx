@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
-import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
-import LogFilterComponent from "../component/log/LogFilterComponent";
-import { useAppSelector } from "../store";
+import {createSimpleFilter, FilterType, LogM, PresetFilterM, PresetFilterName} from "core/struct/log";
+import {AppDispatch, useAppSelector} from "../store";
 import { useDispatch } from "react-redux";
 import { Button, Table } from "antd";
 import {
@@ -14,9 +13,9 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   addLogFilter,
   ColumnDisplayType,
-  hideColumnEditor,
+  hideColumnEditor, PresetFilterState,
   resetLogFilter,
-  TableColumnItem,
+  TableColumnItem, updatePresetFilter,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
 import { PlusOutlined } from "@ant-design/icons";
@@ -29,6 +28,11 @@ import { ColumnsType } from "antd/es/table/interface";
 import { LogViewEvents } from "core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import FilterRowComponent from "../component/log/FilterRowComponent";
+import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
+import {setExpectationMap} from "../slice/expectationSlice";
+import {listExpectationListReq} from "../server/expectationServer";
+import _ from "lodash";
+import {getExpectationSuccess} from "../slice/thunk";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -108,18 +112,53 @@ const LogPage: React.FC = () => {
     tableColumns,
   } = logState;
   const currentEditColumn = tableColumns[currentColumnEditIndex];
-  const dispatch = useDispatch();
+  const dispatch:AppDispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
 
+  const expectationState = useAppSelector((state) => state.expectation);
+
   const getLogViewQuery = useQuery([currentProject.id], () => {
     return listLogViewReq({ projectId: currentProject.id }).then((res) => {
       logViewIdRef.current = res.at(0)?.id;
-      dispatch(resetLogFilter(res[0].filters));
+      dispatch(
+        resetLogFilter(
+          res[0].filters.filter(
+            (item) => item.type === FilterType.SIMPLE_FILTER
+          )
+        )
+      );
+
+      // update preset filter
+      const presetFilters: Array<PresetFilterM> = res[0].filters.filter(
+        (item) => item.type === FilterType.PRESET_FILTER
+      ) as Array<PresetFilterM>;
+      const presetFilterUpdate: PresetFilterState = {
+        expectationId: null,
+      };
+      presetFilters.forEach((presetFilter) => {
+        if (presetFilter.name === PresetFilterName.EXPECTATION) {
+          presetFilterUpdate.expectationId = presetFilter.value;
+        }
+      });
+      dispatch(updatePresetFilter(presetFilterUpdate));
+      // end update preset filter
       return res;
     });
   });
+
+  const getExpectationListQuery = useQuery(
+    ["getExpectationList", currentProject.id],
+    () => {
+      return listExpectationListReq(currentProject.id).then((res) => {
+        const _expectationMap = _.keyBy(res, (expectation) => expectation.id);
+        dispatch(setExpectationMap(_expectationMap));
+        dispatch(getExpectationSuccess(currentProject.id, res));
+        return res;
+      });
+    }
+  );
 
   const logViewId = getLogViewQuery.data?.at(0)?.id;
 
@@ -150,7 +189,8 @@ const LogPage: React.FC = () => {
       systemConfigState.mode,
       logViewId,
       currentProject.id,
-      logViewLogsQuery.refetch
+      logViewLogsQuery.refetch,
+      expectationState.expectationMap,
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
@@ -163,14 +203,15 @@ const LogPage: React.FC = () => {
     systemConfigState.mode,
     logViewId,
     currentProject.id,
+    expectationState
   ]);
 
   useEffect(() => {
     // clear all event on reload
-     window.api.event.removeAllListener(LogViewEvents.OnLogAdd);
-     window.api.event.removeAllListener(LogViewEvents.OnLogUpdate);
-     window.api.event.removeAllListener(LogViewEvents.OnLogDelete);
-  },[])
+    window.api.event.removeAllListener(LogViewEvents.OnLogAdd);
+    window.api.event.removeAllListener(LogViewEvents.OnLogUpdate);
+    window.api.event.removeAllListener(LogViewEvents.OnLogDelete);
+  }, []);
 
   useEffect(() => {
     const id = uuId();
@@ -228,15 +269,24 @@ const LogPage: React.FC = () => {
         }}
       />
     );
-  }, [logColumn, logs]);
+  }, [logColumn, logs, expectationState]);
   return (
-    <div style={{ padding: "10px" }}>
+    <div style={{ padding: "10px" , marginTop:"10px"}}>
+      <PresetFilterRowComponent
+        getExpectationListQuery={getExpectationListQuery}
+        getLogViewQuery={getLogViewQuery}
+        logViewId={logViewId}
+        currentProject={currentProject}
+        refreshLogList={logViewLogsQuery.refetch}
+        logState={logState}
+      />
       <FilterRowComponent
         getLogViewQuery={getLogViewQuery}
         logViewId={logViewId}
         currentProject={currentProject}
         refreshLogList={logViewLogsQuery.refetch}
         logState={logState}
+        getExpectationListQuery={getExpectationListQuery}
       ></FilterRowComponent>
       <div>{listTable}</div>
       <ColumnEditor

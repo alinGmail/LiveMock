@@ -80,6 +80,11 @@ export function createResponseLog(): ResponseLogM {
 export enum FilterType {
   SIMPLE_FILTER = "SIMPLE_FILTER",
   GROUP_FILTER = "GROUP_FILTER",
+  PRESET_FILTER = "PRESET_FILTER",
+}
+
+export enum PresetFilterName {
+  EXPECTATION = "EXPECTATION",
 }
 
 export interface SimpleFilterM {
@@ -90,6 +95,17 @@ export interface SimpleFilterM {
   condition: LogFilterCondition;
   activate: boolean;
 }
+
+export interface PresetFilterM {
+  type: FilterType.PRESET_FILTER;
+  name: PresetFilterName;
+  id: string;
+  property: string;
+  value: string;
+  condition: LogFilterCondition;
+  activate: boolean;
+}
+
 export interface GroupFilter {
   type: FilterType.GROUP_FILTER;
   id: string;
@@ -97,7 +113,7 @@ export interface GroupFilter {
   subGroup: Array<SimpleFilterM>;
   activate: boolean;
 }
-export type LogFilterM = SimpleFilterM | GroupFilter;
+export type LogFilterM = SimpleFilterM | GroupFilter | PresetFilterM;
 
 export enum LogFilterCondition {
   EQUAL = "EQUAL",
@@ -119,7 +135,7 @@ export const LogFilterConditionMap: {
 
 function getKeyByValue<T extends Record<string, string>>(
   enumObject: T,
-  value: string,
+  value: string
 ): keyof T | undefined {
   const entries = Object.entries(enumObject);
   const foundEntry = entries.find(([key, val]) => val === value);
@@ -134,5 +150,17 @@ export function createSimpleFilter(): SimpleFilterM {
     property: "",
     type: FilterType.SIMPLE_FILTER,
     value: "",
+  };
+}
+
+export function createExpectationPresetFilterM(): PresetFilterM {
+  return {
+    activate: true,
+    condition: LogFilterCondition.EQUAL,
+    id: uuId(),
+    property: "expectationId",
+    type: FilterType.PRESET_FILTER,
+    value: "",
+    name: PresetFilterName.EXPECTATION,
   };
 }

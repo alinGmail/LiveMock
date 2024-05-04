@@ -168,9 +168,10 @@ const LogFilterComponent: React.FC<{
                 const deletePromise = deleteLogFilterReq(filter.id, {
                   logViewId,
                   projectId,
+                }).then(res => {
+                  refreshLogList();
                 });
                 toastPromise(deletePromise);
-                refreshLogList();
                 dispatch(removeLogFilter(filter.id));
               }}
             />
