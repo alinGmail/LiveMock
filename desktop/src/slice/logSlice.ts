@@ -15,7 +15,9 @@ export interface TableColumnItem {
   displayType: ColumnDisplayType;
   visible: boolean;
 }
-
+export interface PresetFilterState {
+  expectationId: string | null;
+}
 export interface LogState {
   tableColumns: Array<TableColumnItem>;
   currentColumnEditIndex: number;
@@ -24,6 +26,7 @@ export interface LogState {
   defaultColumnVisible: Array<boolean>;
   logList: Array<LogM>;
   logFilter: Array<LogFilterM>;
+  presetFilter: PresetFilterState;
 }
 
 export const logSlice = createSlice({
@@ -31,11 +34,14 @@ export const logSlice = createSlice({
   initialState: {
     logList: [],
     logFilter: [],
+    presetFilter: {
+      expectationId: null,
+    },
     tableColumns: [],
     currentColumnEditIndex: -1,
     columnEditorShow: false,
     columnConfigShow: false,
-    defaultColumnVisible: [true, true, true, true,true],
+    defaultColumnVisible: [true, true, true, true, true, true],
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
@@ -60,6 +66,12 @@ export const logSlice = createSlice({
     },
     resetLogFilter(state, action: PayloadAction<Array<LogFilterM>>) {
       state.logFilter = action.payload;
+    },
+    updatePresetFilter(state, action: PayloadAction<Partial<PresetFilterState>>) {
+      state.presetFilter = {
+        ...state.presetFilter,
+        ...action.payload,
+      }
     },
     setTableColumns: (state, action: PayloadAction<Array<TableColumnItem>>) => {
       state.tableColumns = action.payload;
@@ -124,10 +136,10 @@ export const logSlice = createSlice({
       state.defaultColumnVisible[index] = visible;
     },
     modifyAllTableColumnVisible: (
-        state,
-        action: PayloadAction<{
-          visible: boolean;
-        }>
+      state,
+      action: PayloadAction<{
+        visible: boolean;
+      }>
     ) => {
       state.tableColumns.forEach((column) => {
         column.visible = action.payload.visible;
@@ -159,6 +171,7 @@ const {
   modifyLogFilter,
   deleteTableColumn,
   modifyAllTableColumnVisible,
+  updatePresetFilter
 } = actions;
 
 export {
@@ -180,4 +193,5 @@ export {
   modifyTableColumnVisible,
   modifyLogFilter,
   modifyAllTableColumnVisible,
+  updatePresetFilter
 };

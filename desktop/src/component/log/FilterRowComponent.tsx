@@ -12,6 +12,7 @@ import { ClearOutlined, PlusOutlined } from "@ant-design/icons";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ListLogViewResponse } from "core/struct/response/LogResponse";
 import { deleteAllRequestLogs } from "../../server/logServer";
+import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
 
 const FilterRowComponent: React.FunctionComponent<{
   logViewId: string | undefined;
@@ -19,12 +20,14 @@ const FilterRowComponent: React.FunctionComponent<{
   currentProject: ProjectM;
   refreshLogList: () => void;
   getLogViewQuery: UseQueryResult<ListLogViewResponse>;
+  getExpectationListQuery: UseQueryResult<ListExpectationResponse>;
 }> = ({
   logViewId,
   logState,
   currentProject,
   refreshLogList,
   getLogViewQuery,
+  getExpectationListQuery,
 }) => {
   const { modal } = App.useApp();
   return (

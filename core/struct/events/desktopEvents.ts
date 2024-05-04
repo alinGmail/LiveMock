@@ -43,5 +43,6 @@ export enum LogViewEvents{
 export enum LogFilterEvents{
     CreateLogFilter="CreateLogFilter",
     UpdateLogFilter="UpdateLogFilter",
-    DeleteLogFilter="DeleteLogFilter"
+    DeleteLogFilter="DeleteLogFilter",
+    UpdatePresetLogFilter="UpdatePresetLogFilter",
 }

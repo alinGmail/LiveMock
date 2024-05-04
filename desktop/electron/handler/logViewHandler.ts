@@ -113,4 +113,5 @@ export function logViewEventHandler(webContent: WebContents) {
     let { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogDelete, { log, logViewId });
   });
+
 }

@@ -31,6 +31,8 @@ import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
+import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
+import {ExpectationM} from "core/build/struct/expectation";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
   return [
@@ -82,7 +84,10 @@ export function getDefaultColumn(
   mode: "dark" | "light",
   logViewId: string | undefined,
   projectId: string,
-  refreshLogList: () => void
+  refreshLogList: () => void,
+  expectationMap: {
+    [key: string]: ExpectationM;
+  }
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -188,7 +193,24 @@ export function getDefaultColumn(
       },
     },
     {
-      title: getDefaultColumnHead("body", dispatch, 3),
+      title: getDefaultColumnHead("expectation", dispatch, 3),
+      dataIndex: "expectationId",
+      key: "expectationId",
+      width: "200px",
+      render: (text: string, record: LogM, index: number) => {
+        const { expectationId } = record;
+        if (!expectationId) {
+          return <div />;
+        }
+        const expectation = expectationMap[expectationId];
+        if (!expectation) {
+          return <div />;
+        }
+        return <ExpectationBriefComponent expectation={expectation} />;
+      },
+    },
+    {
+      title: getDefaultColumnHead("body", dispatch, 4),
       dataIndex: "body",
       key: "body",
       width: "300px",
@@ -217,7 +239,7 @@ export function getDefaultColumn(
       },
     },
     {
-      title: getDefaultColumnHead("root", dispatch, 4),
+      title: getDefaultColumnHead("root", dispatch, 5),
       dataIndex: "root",
       key: "root",
       width: "400px",
@@ -236,34 +258,6 @@ export function getDefaultColumn(
               collapsed={true}
               style={{ backgroundColor: "none" }}
             />
-            {/*<ReactJson
-                            src={record}
-                            collapseStringsAfterLength={1000}
-                            onAddFilter={(arg) => {
-                                if (
-                                    arg.namespace.length != 0 &&
-                                    arg.namespace[0] != null &&
-                                    arg.name
-                                ) {
-                                    let nameArr = (arg.namespace as Array<string>)
-                                        .slice(1)
-                                        .concat(arg.name);
-
-                                    dispatch(
-                                        addFilter({
-                                            type: FilterType.SIMPLE_FILTER,
-                                            id: uuId(),
-                                            activate: true,
-                                            property: nameArr.join("."),
-                                            value: _.get(record, nameArr),
-                                            condition: StringCondition.IS,
-                                        })
-                                    );
-                                }
-                                console.log(arg);
-                            }}
-                            collapsed={true}
-                        />*/}
           </div>
         );
       },
