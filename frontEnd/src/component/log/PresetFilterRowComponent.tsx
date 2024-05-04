@@ -29,37 +29,47 @@ const PresetFilterRowComponent: React.FunctionComponent<{
   const presetFilterState = useAppSelector((state) => state.log.presetFilter);
   const dispatch = useDispatch();
   return (
-    <div>
-      handle by expectation:&nbsp;
-      <Select
-        size={"small"}
-        allowClear={true}
-        value={presetFilterState.expectationId}
-        style={{
-          width: "150px",
-        }}
-        loading={getExpectationListQuery.isLoading}
-        options={getExpectationListQuery.data?.map((item) => {
-          return {
-            label: item.name,
-            value: item.id,
-          };
-        })}
-        onChange={(value) => {
-          dispatch(updatePresetFilter({ expectationId: value }));
-          const filter = createExpectationPresetFilterM();
-          filter.value = value ?? null;
+    <div style={{
+      display:'flex',
+      alignItems:"center",
+    }}>
+      <div style={{
+        fontSize:'18px',
+        marginRight:"10px",
+      }}></div>
+      <div>
+        <span style={{
+          paddingRight:"8px",
+        }}>expectation:</span>
+        <Select
+          allowClear={true}
+          value={presetFilterState.expectationId}
+          style={{
+            width: "150px",
+          }}
+          loading={getExpectationListQuery.isLoading}
+          options={getExpectationListQuery.data?.map((item) => {
+            return {
+              label: item.name,
+              value: item.id,
+            };
+          })}
+          onChange={(value) => {
+            dispatch(updatePresetFilter({ expectationId: value }));
+            const filter = createExpectationPresetFilterM();
+            filter.value = value ?? null;
 
-          const updatePromise = updatePresetLogFilterReq({
-            projectId: currentProject.id,
-            logViewId: logViewId ?? "",
-            filter: filter,
-          }).then((res) => {
-            refreshLogList();
-          });
-          toastPromise(updatePromise);
-        }}
-      />
+            const updatePromise = updatePresetLogFilterReq({
+              projectId: currentProject.id,
+              logViewId: logViewId ?? "",
+              filter: filter,
+            }).then((res) => {
+              refreshLogList();
+            });
+            toastPromise(updatePromise);
+          }}
+        />
+      </div>
     </div>
   );
 };
