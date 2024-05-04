@@ -136,7 +136,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
 
       if (reqFilter.value === null) {
         // remove the filter
-        if (findIndex === -1) {
+        if (findIndex !== -1) {
           const presetFilter = logView.filters[findIndex];
           logView.filters = logView.filters.filter(
             (item) => item.id !== presetFilter.id
@@ -163,7 +163,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
           logView.id,
           path
         );
-        applyDynamicViewFilter(dynamicView, filter);
+        applyDynamicViewFilter(dynamicView, presetFilter);
       }
       return { message: "success" };
     }
