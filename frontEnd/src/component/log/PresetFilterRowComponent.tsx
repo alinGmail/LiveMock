@@ -33,10 +33,6 @@ const PresetFilterRowComponent: React.FunctionComponent<{
       display:'flex',
       alignItems:"center",
     }}>
-      <div style={{
-        fontSize:'18px',
-        marginRight:"10px",
-      }}></div>
       <div>
         <span style={{
           paddingRight:"8px",

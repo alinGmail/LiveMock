@@ -32,10 +32,6 @@ const FilterRowComponent: React.FunctionComponent<{
   const { modal } = App.useApp();
   return (
     <div className={mStyle.filterRow}>
-      <div style={{
-        fontSize:'18px',
-        marginRight:"10px",
-      }}></div>
       <div className={mStyle.filterCol}>
         {logViewId &&
           logState.logFilter.map((filter) => {
