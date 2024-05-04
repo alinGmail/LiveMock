@@ -120,7 +120,11 @@ Livemock will record all requests that match an expectation as a JSON object and
 {
     "id": 100099, 
     "expectationId": "c26a2cef-8ac7-4ce4-8a4b-595c850488be", 
-    "proxyInfo": null, 
+    "proxyInfo": {
+      "isProxy": false,
+      "proxyHost": null,
+      "proxyPath": null
+    }, 
     "req": {
         "body": { }, 
         "headers": {
