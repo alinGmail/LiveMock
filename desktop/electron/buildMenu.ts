@@ -1,6 +1,6 @@
 import { app, Menu, MenuItemConstructorOptions } from "electron";
 
-export function buildMenu() {
+export function buildMenu({onAboutClick}) {
   const template: Array<MenuItemConstructorOptions> = [
     {
       label: "Edit",
@@ -89,6 +89,12 @@ export function buildMenu() {
             require("electron").shell.openExternal("https://github.com/alinGmail/LiveMock");
           },
         },
+        {
+          label: "about LiveMock",
+          click:function (){
+            onAboutClick();
+          }
+        }
       ],
     },
   ];
