@@ -85,7 +85,9 @@ export const NameColumn = ({
     manual: true,
   });
   return (
-    <div>
+    <div style={{
+      minWidth:"150px"
+    }}>
       <Input
         placeholder={"empty"}
         value={expectation.name}
