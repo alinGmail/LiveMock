@@ -32,6 +32,11 @@ export const updateProjectReq = async (
   return res.body;
 };
 
+export const deleteProjectReq = async (projectId: string): Promise<void> => {
+  const res = await superagent.delete(`${ServerUrl}/project/${projectId}`);
+  return res.body;
+}
+
 export const startProjectReq = async (projectId: string) => {
   const res = await superagent.post(`${ServerUrl}/project/start/${projectId}`);
   return res.body;

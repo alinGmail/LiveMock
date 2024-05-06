@@ -4,11 +4,12 @@ import { useImmer } from "use-immer";
 import { useAppSelector } from "../store";
 import { useDebounceEffect, useDebounceFn } from "ahooks";
 import { debounceWait } from "../config";
-import { getProjectListReq, updateProjectReq } from "../server/projectServer";
+import {deleteProjectReq, getProjectListReq, updateProjectReq} from "../server/projectServer";
 import { toastPromise } from "../component/common";
 import { setProjectList } from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
+import {Button} from "antd";
 
 const ConfigPage = () => {
   const dispatch = useDispatch();
@@ -51,6 +52,12 @@ const ConfigPage = () => {
         onSubmit={onProjectEditorSubmit}
         updaterProjectM={updateModifyProject}
       />
+      <Button onClick={() => {
+
+        const deletePromise = deleteProjectReq(currentProject.id);
+        toastPromise(deletePromise);
+
+      }}>Delete Project</Button>
     </div>
   );
 };

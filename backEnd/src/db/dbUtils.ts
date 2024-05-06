@@ -44,3 +44,20 @@ export async function getCollection<T extends Object>(
   }
   return collection;
 }
+
+export async function deleteDatabase(
+  projectId: string,
+  path: string,
+  name: string
+) {
+  const db = await getDb(projectId, path, name);
+  return new Promise((resolve, reject) => {
+    db.deleteDatabase((err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
