@@ -1,4 +1,6 @@
 import lokijs from "lokijs";
+import * as console from "node:console";
+import fs from 'fs';
 
 const allMapDbMap = new Map<string, Map<string, Promise<Loki>>>();
 
@@ -54,7 +56,12 @@ export async function deleteDatabase(
   return new Promise((resolve, reject) => {
     db.deleteDatabase((err, data) => {
       if (err) {
-        reject(err);
+        if (fs.existsSync(db.filename)) {
+          reject(err);
+        } else {
+          // ignore, maybe the file was not created
+          resolve(null);
+        }
       } else {
         resolve(null);
       }
