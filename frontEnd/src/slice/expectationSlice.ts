@@ -37,11 +37,15 @@ const expectationSlice = createSlice({
     updateExpectationItem: (
       state,
       action: PayloadAction<{
-        expectationIndex: number;
+        expectationId: string;
         modifyValues: Partial<ExpectationM>;
       }>
     ) => {
-      const item = state.expectationList[action.payload.expectationIndex];
+      const index = state.expectationList.findIndex((item) => item.id === action.payload.expectationId);
+      if (index === -1) {
+        throw new Error('expectationId not found');
+      }
+      const item = state.expectationList[index];
       Object.assign(item, action.payload.modifyValues);
     },
     deleteExpectation: (state, action: PayloadAction<string>) => {
