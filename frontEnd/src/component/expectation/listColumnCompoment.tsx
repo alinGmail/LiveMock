@@ -1,5 +1,4 @@
 import {
-  createExpectation,
   duplicateExpectation,
   ExpectationM,
 } from "core/struct/expectation";
@@ -42,16 +41,13 @@ import ActionItem from "../action/ActionItem";
 import {
   ActionM,
   createCustomResponseAction,
-  createProxyAction,
 } from "core/struct/action";
 import {
   createActionReq,
   deleteActionReq,
   updateActionReq,
 } from "../../server/actionServer";
-import _, { after } from "lodash";
 import { HookAPI as ModalHookAPI } from "antd/es/modal/useModal";
-import { v4 as uuId } from "uuid";
 
 async function updateExpectation(
   projectId: string,
@@ -101,7 +97,7 @@ export const NameColumn = ({
           });
           dispatch(
             updateExpectationItem({
-              expectationIndex: index,
+              expectationId: expectation.id,
               modifyValues: {
                 name: event.target.value,
               },
@@ -144,7 +140,7 @@ export const NumberColumn: React.FC<NumberColumnProps> = ({
     });
     dispatch(
       updateExpectationItem({
-        expectationIndex: index,
+        expectationId: expectation.id,
         modifyValues: {
           [valueKey]: number,
         },
@@ -220,7 +216,7 @@ export const ActivateColumn = ({
           });
           dispatch(
             updateExpectationItem({
-              expectationIndex: index,
+              expectationId: expectation.id,
               modifyValues: {
                 activate: value,
               },
