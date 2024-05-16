@@ -91,7 +91,7 @@ export const NameColumn = ({
           });
           dispatch(
             updateExpectationItem({
-              expectationIndex: index,
+              expectationId:expectation.id,
               modifyValues: {
                 name: event.target.value,
               },
@@ -134,7 +134,7 @@ export const NumberColumn: React.FC<NumberColumnProps> = ({
     });
     dispatch(
       updateExpectationItem({
-        expectationIndex: index,
+        expectationId:expectation.id,
         modifyValues: {
           [valueKey]: number,
         },
@@ -210,7 +210,7 @@ export const ActivateColumn = ({
           });
           dispatch(
             updateExpectationItem({
-              expectationIndex: index,
+              expectationId:expectation.id,
               modifyValues: {
                 activate: value,
               },
