@@ -10,7 +10,7 @@ import {
   updateProjectReq,
 } from "../server/projectServer";
 import { toastPromise } from "../component/common";
-import { setProjectList } from "../slice/projectSlice";
+import {setCurProjectIndex, setProjectList} from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import { Button, Input, Modal } from "antd";
@@ -51,7 +51,7 @@ const ConfigPage = () => {
   );
 
   const [messageApi, messageContextHolder] = message.useMessage();
-  const [projectNameInp, setProjectNameInp] = useState<string>("abc");
+  const [projectNameInp, setProjectNameInp] = useState<string>("");
   const [deleteModalShow, setDeleteModalShow] = useState(false);
 
   return (
@@ -68,6 +68,12 @@ const ConfigPage = () => {
           const deletePromise = deleteProjectReq(currentProject.id).then(
             (res) => {
               setDeleteModalShow(false);
+              getProjectListReq().then(projectListRes => {
+                dispatch(setProjectList(projectListRes));
+                if (projectListRes.length > 0) {
+                  dispatch(setCurProjectIndex(0));
+                }
+              });
             },
           );
           toastPromise(deletePromise);

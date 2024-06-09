@@ -147,6 +147,9 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     }
   );
 
+  /**
+   * delete project
+   */
   router.delete("/:projectId", bodyParser.json(), async (req, res) => {
     addCross(res);
     const projectId = req.params.projectId;
@@ -154,6 +157,12 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     if (!project) {
       throw new ServerError(500, "project not exist");
     }
+
+    const projectStatus = getProjectStatus(projectId);
+    if (projectStatus !== ProjectStatus.STOPPED) {
+      throw new ServerError(500, "project status is " + projectStatus);
+    }
+
     await deleteDatabase(projectId, path, "expectation");
     await deleteDatabase(projectId, path, "logView");
     await deleteDatabase(projectId, path, "log");
