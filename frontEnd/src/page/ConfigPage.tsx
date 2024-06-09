@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import { Button, Input, Modal } from "antd";
 import { message } from "antd/lib";
+import { DeleteOutlined } from "@ant-design/icons";
 
 const ConfigPage = () => {
   const dispatch = useDispatch();
@@ -101,13 +102,22 @@ const ConfigPage = () => {
         onSubmit={onProjectEditorSubmit}
         updaterProjectM={updateModifyProject}
       />
-      <Button
-        onClick={async () => {
-          setDeleteModalShow(true);
-        }}
-      >
-        Delete Project
-      </Button>
+      <div style={{
+        width:'560px',
+        margin:'20px auto',
+      }}>
+        <Button
+          block={true}
+          size={'large'}
+          danger={true}
+          icon={<DeleteOutlined />}
+          onClick={async () => {
+            setDeleteModalShow(true);
+          }}
+        >
+          Delete Project
+        </Button>
+      </div>
     </div>
   );
 };
