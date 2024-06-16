@@ -83,7 +83,10 @@ import {
   DeleteLogFilterReqQuery,
   UpdateLogFilterPathParam,
   UpdateLogFilterReqBody,
-  UpdateLogFilterReqQuery, UpdatePresetLogFilterPathParam, UpdatePresetLogFilterReqBody, UpdatePresetLogFilterReqQuery,
+  UpdateLogFilterReqQuery,
+  UpdatePresetLogFilterPathParam,
+  UpdatePresetLogFilterReqBody,
+  UpdatePresetLogFilterReqQuery,
 } from "core/struct/params/LogFilterParam";
 import IpcRendererEvent = electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
@@ -110,9 +113,9 @@ export const api = {
       ipcRenderer.removeListener(channel, fun);
       funMap.delete(id);
     },
-    removeAllListener:(channel:string) =>{
+    removeAllListener: (channel: string) => {
       ipcRenderer.removeAllListeners(channel);
-    }
+    },
   },
   project: {
     listProject: (
@@ -138,6 +141,9 @@ export const api = {
         reqQuery,
         reqBody
       );
+    },
+    deleteProject: ({ projectId }: { projectId: string }) => {
+      return ipcRenderer.invoke(ProjectEvents.DeleteProject,projectId);
     },
     startProject: ({ projectId }: { projectId: string }) => {
       return ipcRenderer.invoke(ProjectEvents.StartProject, projectId);
@@ -359,9 +365,9 @@ export const api = {
         reqBody
       );
     },
-    updatePresetLogFilter:(
+    updatePresetLogFilter: (
       reqParam: UpdatePresetLogFilterPathParam,
-      reqQuery:UpdatePresetLogFilterReqQuery,
+      reqQuery: UpdatePresetLogFilterReqQuery,
       reqBody: UpdatePresetLogFilterReqBody
     ) => {
       return ipcRenderer.invoke(
@@ -369,7 +375,7 @@ export const api = {
         reqParam,
         reqQuery,
         reqBody
-      )
+      );
     },
     deleteLogFilter: (
       reqParam: DeleteLogFilterPathParam,

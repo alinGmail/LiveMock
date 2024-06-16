@@ -6,7 +6,8 @@ export enum ProjectEvents{
     CreateProject = "CreateProject",
     UpdateProject = "UpdateProject",
     StartProject = "StartProject",
-    StopProject = "StopProject"
+    StopProject = "StopProject",
+    DeleteProject = "DeleteProject",
 }
 
 

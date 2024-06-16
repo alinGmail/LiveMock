@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.2.4",
   "scripts": {
-    "dev": "concurrently \"tsc -project electron\" \"vite\" \"cross-env PROJECT_ENV=dev electron dist-electron/main.js\" ",
+    "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev electron dist-electron/main.js\" \"vite\"",
     "tsc": "tsc -project electron",
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
