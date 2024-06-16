@@ -75,6 +75,11 @@ async function createWindow() {
 
   if (env === "dev") {
     win.loadURL("http://localhost:5173");
+    win.webContents.on('did-fail-load', () => {
+      setTimeout(() => {
+        win?.loadURL("http://localhost:5173");
+      },3000);
+    });
     // win.webContents.openDevTools();
   } else {
     // win.loadFile('dist/index.html')

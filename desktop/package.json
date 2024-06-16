@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.2.4",
   "scripts": {
-    "dev": "tsc -project electron &&cross-env PROJECT_ENV=dev electron dist-electron/main.js && vite",
+    "dev": "concurrently \"tsc -project electron\" \"vite\" \"cross-env PROJECT_ENV=dev electron dist-electron/main.js\" ",
     "tsc": "tsc -project electron",
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
@@ -56,6 +56,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "@vitejs/plugin-react": "^4.0.0",
+    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "24.8.8",
     "electron-builder": "^24.9.1",
