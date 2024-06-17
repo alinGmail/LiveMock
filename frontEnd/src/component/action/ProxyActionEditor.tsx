@@ -117,7 +117,16 @@ export const ProxyActionEditor: React.FunctionComponent<{
         <div className={moduleStyle.row}>
           <div>prefix remove</div>
           <div>
-            <Input placeholder={'example: /api'}/>
+            <Input
+                placeholder={"example: /api"}
+                value={typeof action.prefixRemove === 'string' ? action.prefixRemove : undefined}
+                onChange={(event) => {
+                  actionContext.onActionModify({
+                    ...action,
+                    prefixRemove: event.target.value,
+                  });
+                }}
+            />
           </div>
         </div>
         <div className={moduleStyle.row}>
