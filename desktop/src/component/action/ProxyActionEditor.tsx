@@ -121,6 +121,7 @@ export const ProxyActionEditor: React.FunctionComponent<{
           <div>
             <Input
               placeholder={"example: /api"}
+              value={typeof action.prefixRemove === 'string' ? action.prefixRemove : undefined}
               onChange={(event) => {
                 actionContext.onActionModify({
                   ...action,
