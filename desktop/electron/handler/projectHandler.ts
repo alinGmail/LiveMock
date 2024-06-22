@@ -31,6 +31,7 @@ import express from "express";
 import getMockRouter from "../server/mockServer";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
+import {deleteDatabase} from "../db/dbUtils";
 
 const ipcMain = electron.ipcMain;
 
@@ -201,4 +202,24 @@ export async function setProjectHandler(path: string): Promise<void> {
       await getLogDynamicView(project.id, logView.id, path);
     }
   }
+
+
+  ipcMain.handle(ProjectEvents.DeleteProject, async (event, projectId: string) => {
+    const project = collection.findOne({ id: projectId });
+    if (!project) {
+      throw new ServerError(500, "project not exist");
+    }
+    const projectStatus = getProjectStatus(projectId);
+    if (projectStatus !== ProjectStatus.STOPPED) {
+      throw new ServerError(500, "project status is " + projectStatus);
+    }
+    await deleteDatabase(projectId, path, "expectation");
+    await deleteDatabase(projectId, path, "logView");
+    await deleteDatabase(projectId, path, "log");
+    collection.remove(project);
+    return {
+      message: "success",
+    };
+  })
+
 }

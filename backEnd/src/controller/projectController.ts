@@ -34,6 +34,7 @@ import getMockRouter from "../server/mockServer";
 import { createLogView } from "core/struct/logView";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
+import { deleteDatabase } from "../db/dbUtils";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
@@ -146,10 +147,26 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     }
   );
 
+  /**
+   * delete project
+   */
   router.delete("/:projectId", bodyParser.json(), async (req, res) => {
     addCross(res);
-    // todo remove expectation
-    // todo remove log
+    const projectId = req.params.projectId;
+    const project = collection.findOne({ id: req.params.projectId });
+    if (!project) {
+      throw new ServerError(500, "project not exist");
+    }
+
+    const projectStatus = getProjectStatus(projectId);
+    if (projectStatus !== ProjectStatus.STOPPED) {
+      throw new ServerError(500, "project status is " + projectStatus);
+    }
+
+    await deleteDatabase(projectId, path, "expectation");
+    await deleteDatabase(projectId, path, "logView");
+    await deleteDatabase(projectId, path, "log");
+    collection.remove(project);
     res.end("success");
   });
 
@@ -226,9 +243,9 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     if (server) {
       setProjectStatus(projectId, ProjectStatus.CLOSING);
       server.close((err) => {
-        if(err){
+        if (err) {
           console.error(err);
-          throw new ServerError(500,err.message);
+          throw new ServerError(500, err.message);
         }
         setProjectStatus(projectId, ProjectStatus.STOPPED);
         res.json({

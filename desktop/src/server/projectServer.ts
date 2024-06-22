@@ -27,6 +27,10 @@ export const updateProjectReq = async (
   return window.api.project.updateProject({projectId},{},param);
 };
 
+export const deleteProjectReq = async (projectId: string): Promise<void> => {
+  return window.api.project.deleteProject({projectId});
+}
+
 export const startProjectReq = async (projectId: string) => {
   return window.api.project.startProject({projectId});
 };
