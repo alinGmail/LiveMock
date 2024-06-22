@@ -47,6 +47,7 @@ export interface ProxyActionM {
   pathRewrite: Array<PathRewriteM>;
   prefixRemove: string | undefined | null;
   headers: Array<[string, string]> | undefined;
+  requestHeaders: Array<[string, string]> | undefined;
 }
 
 export interface CustomResponseActionM {
@@ -95,6 +96,7 @@ export function createProxyAction(): ProxyActionM {
     handleCross: false,
     crossAllowCredentials: false,
     headers: [],
+    requestHeaders:[],
     prefixRemove:null
   };
 }

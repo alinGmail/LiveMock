@@ -11,6 +11,8 @@ export interface LogM {
 export interface ProxyInfoM {
   proxyHost: string | null;
   proxyPath: string | null;
+  requestHeaders: Array<{ name: string; value: string }> | null | undefined;
+  responseHeaders: Array<{ name: string; value: string }> | null | undefined;
   isProxy: boolean;
 }
 
