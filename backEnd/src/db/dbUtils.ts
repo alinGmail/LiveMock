@@ -1,5 +1,4 @@
 import lokijs from "lokijs";
-import * as console from "node:console";
 import fs from 'fs';
 import {checkValidIdStr} from "../util/commonUtils";
 
