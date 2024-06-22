@@ -49,6 +49,42 @@ export const ProxyActionEditor: React.FunctionComponent<{
         </div>
         <div className={moduleStyle.row}>
           <div>
+            request headers{" "}
+            <Tooltip title={"the headers append to the request"}>
+              <QuestionCircleOutlined style={{ fontSize: "12px" }} />
+            </Tooltip>
+          </div>
+          <HeaderEditor
+          headers={action.requestHeaders || []}
+          onHeaderModify={(headerIndex, value) => {
+            let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
+            _headers[headerIndex] = value;
+            actionContext.onActionModify({
+              ...action,
+              requestHeaders: _headers
+            });
+          }}
+
+          onAddHeader={(header) => {
+            actionContext.onActionModify({
+              ...action,
+              requestHeaders: action.requestHeaders ? [...action.requestHeaders,header] : [],
+            });
+          }}
+
+          onDeleteHeader={(headerIndex) => {
+            let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
+            _headers.splice(headerIndex, 1);
+            actionContext.onActionModify({
+              ...action,
+              requestHeaders: _headers,
+            });
+          }}
+
+          />
+        </div>
+        <div className={moduleStyle.row}>
+          <div>
             response headers{" "}
             <Tooltip title={"the headers append to the response"}>
               <QuestionCircleOutlined style={{ fontSize: "12px" }} />
