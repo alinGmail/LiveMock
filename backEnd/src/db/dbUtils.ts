@@ -1,5 +1,4 @@
 import lokijs from "lokijs";
-import * as console from "node:console";
 import fs from 'fs';
 
 const allMapDbMap = new Map<string, Map<string, Promise<Loki>>>();
