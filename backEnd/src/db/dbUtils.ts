@@ -1,6 +1,7 @@
 import lokijs from "lokijs";
 import * as console from "node:console";
 import fs from 'fs';
+import {checkValidIdStr} from "../util/commonUtils";
 
 const allMapDbMap = new Map<string, Map<string, Promise<Loki>>>();
 
@@ -9,6 +10,9 @@ export async function getDb(
   path: string,
   name: string
 ): Promise<Loki> {
+  if(!checkValidIdStr(projectId)){
+    throw new Error(`Invalid project ID: ${projectId}`);
+  }
   let dbMap = allMapDbMap.get(name);
   if (dbMap == null) {
     dbMap = new Map<string, Promise<Loki>>();

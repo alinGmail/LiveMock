@@ -37,3 +37,16 @@ export function once(key:string,fn:Function){
     runMap[key] = true;
     fn();
 }
+
+
+/**
+ * check the id string is valid
+ * @param id
+ */
+export function checkValidIdStr(id:string):boolean{
+    if(id === null || id === undefined){
+        return false;
+    }
+    const pattern = /^[a-zA-Z0-9-]+$/;
+    return pattern.test(id);
+}
