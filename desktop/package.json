@@ -1,7 +1,7 @@
 {
   "name": "desktop",
   "private": true,
-  "version": "1.2.4",
+  "version": "1.2.5",
   "scripts": {
     "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev electron dist-electron/main.js\" \"vite\"",
     "tsc": "tsc -project electron",
