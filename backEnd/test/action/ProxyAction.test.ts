@@ -123,6 +123,22 @@ describe("test proxy action", () => {
       }
     );
 
+    // for test request header
+    await mockServer
+      .forGet("/testRequestHeader")
+      .withHeaders({
+        myRequestHeader: "someHeaderValue",
+      })
+      .thenReply(
+        200,
+        JSON.stringify({
+          message: "success",
+        }),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+
     // server
     proxyServer.all("*", await getMockRouter("test_db", projectM.id));
   });
@@ -130,7 +146,7 @@ describe("test proxy action", () => {
   afterAll(() => {
     mockServer.stop();
   });
-  test("test proxy header", async () => {
+  test("test proxy response header", async () => {
     const response = await request(proxyServer).get("/testProxy");
     expect(response.status).toEqual(200);
     expect(response.text).toEqual("A mocked response");
@@ -145,6 +161,45 @@ describe("test proxy action", () => {
     expect(log.proxyInfo!.isProxy).toEqual(true);
     expect(log.proxyInfo!.proxyHost === "http://localhost:8085").toBe(true);
     expect(log.proxyInfo!.proxyPath === "/testProxy").toBe(true);
+  });
+
+  test("test proxy request header", async () => {
+    const _requestHeaders = proxyActionM.requestHeaders;
+    // set the response header
+    proxyActionM.requestHeaders = [["myRequestHeader", "someHeaderValue"]];
+    await updateProxyAction(
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
+    );
+
+    const response = await request(proxyServer).get("/testRequestHeader");
+
+    expect(response.status).toEqual(200);
+    expect(response.body?.message).toEqual("success");
+
+    const log = await getLastLog(projectM.id, "test_db");
+    expect(log.res!.status).toBe(200);
+    expect(log.res!.body.message).toEqual("success");
+    expect(log.proxyInfo!.isProxy).toEqual(true);
+    expect(log.proxyInfo!.proxyHost).toEqual("http://localhost:8085");
+    expect(log.proxyInfo!.proxyPath).toEqual("/testRequestHeader");
+    expect(log.proxyInfo!.requestHeaders).toEqual([
+      {
+        name: "myRequestHeader",
+        value: "someHeaderValue",
+      },
+    ]);
+
+    // clean up
+    proxyActionM.requestHeaders = _requestHeaders;
+    await updateProxyAction(
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
+    );
   });
 
   test("test prefix remove", async () => {
@@ -164,17 +219,16 @@ describe("test proxy action", () => {
 
     // test the proxy info
     const log = await getLastLog(projectM.id, "test_db");
-    expect(log.proxyInfo?.proxyPath).toBe('/testProxy');
+    expect(log.proxyInfo?.proxyPath).toBe("/testProxy");
     expect(log.proxyInfo?.isProxy).toBe(true);
 
     proxyActionM.prefixRemove = _prefixRemove;
     await updateProxyAction(
-        projectM.id,
-        "test_db",
-        expectationM.id,
-        proxyActionM
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
     );
-
   });
 
   test("test no content type response", async () => {
@@ -238,6 +292,14 @@ describe("test proxy action", () => {
     );
     expect(response.get("Access-Control-Allow-Credentials")).toContain("true");
     expect(response.get("myToken")).toEqual("myTokenValue");
+
+
+    const log = await getLastLog(projectM.id, "test_db");
+    expect(log.proxyInfo!.responseHeaders).toEqual([{
+      name: "myToken",
+      value: "myTokenValue",
+    }]);
+
 
     const optionResponse = await request(proxyServer)
       .options("/testCross")

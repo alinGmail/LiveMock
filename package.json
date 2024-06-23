@@ -1,6 +1,6 @@
 {
   "name": "livemock",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.",
   "main": "index.js",
   "private": true,

@@ -26,10 +26,19 @@ proxy.on("proxyReq", function (proxyReq, req, res, options) {
     proxyReq.path = proxyReq.path.slice(proxyAction.prefixRemove.length);
   }
 
+  // handle request headers
+  if (proxyAction.requestHeaders && proxyAction.requestHeaders.length > 0) {
+    proxyAction.requestHeaders.forEach(([headerName, headerValue]) => {
+      // ignore the blank header name
+      if(headerName.trim() === ''){
+        return;
+      }
+      proxyReq.setHeader(headerName, headerValue);
+    });
+  }
+
   fixRequestBody(proxyReq, req as express.Request);
 });
-
-
 
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
   let body: Array<any> = [];
@@ -110,7 +119,7 @@ function handleOptionsCross(
 }
 
 /**
- *
+ * handle response headers
  * @param req
  * @param res
  * @param headers
@@ -121,6 +130,10 @@ function handleExternalHeaders(
   headers: Array<[string, string]>
 ) {
   headers.forEach((item) => {
+    // ignore the empty header
+    if(item[0].trim() === ''){
+      return;
+    }
     res.headers[item[0].toLowerCase()] = item[1];
   });
 }
@@ -201,7 +214,7 @@ function insetProxyInfo(
   logM: LogM | undefined,
   proxyHost: string,
   proxyPath: string,
-  proxyAction: ProxyActionM,
+  proxyAction: ProxyActionM
 ) {
   let _proxyPath = proxyPath;
   if (!logM) {
@@ -217,6 +230,14 @@ function insetProxyInfo(
     isProxy: true,
     proxyHost,
     proxyPath: _proxyPath,
+    requestHeaders: proxyAction.requestHeaders?.map(([name, value]) => ({
+      name,
+      value,
+    })),
+    responseHeaders: proxyAction.headers?.map(([name, value]) => ({
+      name,
+      value,
+    })),
   };
 }
 

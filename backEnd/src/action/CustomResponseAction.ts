@@ -70,6 +70,8 @@ function insetProxyInfo(log: LogM | undefined) {
     isProxy: false,
     proxyHost: null,
     proxyPath: null,
+    requestHeaders:[],
+    responseHeaders:[],
   };
 }
 
