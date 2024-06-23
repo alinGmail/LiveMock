@@ -9,7 +9,7 @@ import { ListLogViewResponse } from "core/struct/response/LogResponse";
 import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
 import { useAppSelector } from "../../store";
 import { useDispatch } from "react-redux";
-import {createExpectationPresetFilterM} from "core/struct/log";
+import { createExpectationPresetFilterM } from "core/struct/log";
 
 const PresetFilterRowComponent: React.FunctionComponent<{
   logViewId: string | undefined;
@@ -29,14 +29,20 @@ const PresetFilterRowComponent: React.FunctionComponent<{
   const presetFilterState = useAppSelector((state) => state.log.presetFilter);
   const dispatch = useDispatch();
   return (
-    <div style={{
-      display:'flex',
-      alignItems:"center",
-    }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
       <div>
-        <span style={{
-          paddingRight:"8px",
-        }}>expectation:</span>
+        <span
+          style={{
+            paddingRight: "8px",
+          }}
+        >
+          expectation:
+        </span>
         <Select
           allowClear={true}
           value={presetFilterState.expectationId}
@@ -46,7 +52,7 @@ const PresetFilterRowComponent: React.FunctionComponent<{
           loading={getExpectationListQuery.isLoading}
           options={getExpectationListQuery.data?.map((item) => {
             return {
-              label: item.name,
+              label: item.name ? item.name : item.id,
               value: item.id,
             };
           })}
