@@ -31,46 +31,66 @@ const PresetFilterRowComponent: React.FunctionComponent<{
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
+        marginBottom: "10px",
       }}
     >
-      <div>
-        <span
+      <div
+        style={{
+          fontWeight: "600",
+          marginRight: "10px",
+          fontSize: "12px",
+          color: "#999",
+        }}
+      >
+        FILTERS:
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <div
           style={{
             paddingRight: "8px",
+            fontSize: "18px",
+            fontWeight: "500",
+            lineHeight: "2em",
+            fontFamily: "Arial",
           }}
         >
           expectation:
-        </span>
-        <Select
-          allowClear={true}
-          value={presetFilterState.expectationId}
-          style={{
-            width: "150px",
-          }}
-          loading={getExpectationListQuery.isLoading}
-          options={getExpectationListQuery.data?.map((item) => {
-            return {
-              label: item.name ? item.name : item.id,
-              value: item.id,
-            };
-          })}
-          onChange={(value) => {
-            dispatch(updatePresetFilter({ expectationId: value }));
-            const filter = createExpectationPresetFilterM();
-            filter.value = value ?? null;
+        </div>
+        <div>
+          <Select
+            allowClear={true}
+            value={presetFilterState.expectationId}
+            style={{
+              width: "200px",
+            }}
+            loading={getExpectationListQuery.isLoading}
+            options={getExpectationListQuery.data?.map((item) => {
+              return {
+                label: item.name ? item.name : item.id,
+                value: item.id,
+              };
+            })}
+            onChange={(value) => {
+              dispatch(updatePresetFilter({ expectationId: value }));
+              const filter = createExpectationPresetFilterM();
+              filter.value = value ?? null;
 
-            const updatePromise = updatePresetLogFilterReq({
-              projectId: currentProject.id,
-              logViewId: logViewId ?? "",
-              filter: filter,
-            }).then((res) => {
-              refreshLogList();
-            });
-            toastPromise(updatePromise);
-          }}
-        />
+              const updatePromise = updatePresetLogFilterReq({
+                projectId: currentProject.id,
+                logViewId: logViewId ?? "",
+                filter: filter,
+              }).then((res) => {
+                refreshLogList();
+              });
+              toastPromise(updatePromise);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
