@@ -1,13 +1,22 @@
-
-
-.filterRow{
+.filterRowWrap {
+  padding: 10px 0;
+  .filterTil {
+    font-weight: 600;
+    margin-right: 10px;
+    font-size: 12px;
+    color: #999;
+  }
+}
+.filterRow {
   display: flex;
   align-items: center;
-  padding: 10px 0;
-  .filterCol{
+  .filterCol {
     flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 10px;
   }
-  .btnCol{
+  .btnCol {
     text-align: right;
     width: 100px;
   }

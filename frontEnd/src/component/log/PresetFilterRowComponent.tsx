@@ -31,19 +31,37 @@ const PresetFilterRowComponent: React.FunctionComponent<{
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
+        marginBottom: "10px",
       }}
     >
-      <div>
-        <span
+      <div
+        style={{
+          fontWeight: "600",
+          marginRight: "10px",
+          fontSize: "12px",
+          color: "#999",
+        }}
+      >
+        FILTERS:
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <div
           style={{
             paddingRight: "8px",
+            fontSize: "18px",
+            verticalAlign: "center",
+            fontFamily: "Arial",
           }}
         >
           expectation:
-        </span>
+        </div>
         <Select
+          size={"small"}
           allowClear={true}
           value={presetFilterState.expectationId}
           style={{
