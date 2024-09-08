@@ -1,11 +1,11 @@
 import React from "react";
 import { ActionType, ProxyActionM, ProxyProtocol } from "core/struct/action";
-import {Checkbox, Input, Select, Tooltip} from "antd";
+import { Checkbox, Input, Select, Tooltip } from "antd";
 import HeaderEditor from "./HeaderEditor";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useActionContext } from "../context";
 import moduleStyle from "./ProxyActionEditor.module.scss";
-import {QuestionCircleOutlined} from "@ant-design/icons";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -37,10 +37,10 @@ export const ProxyActionEditor: React.FunctionComponent<{
         <div>
           <Select
             defaultValue={action.type}
-            style={{width: 220}}
+            style={{ width: 220 }}
             onChange={typeChange}
             options={[
-              {value: ActionType.PROXY, label: ActionType.PROXY},
+              { value: ActionType.PROXY, label: ActionType.PROXY },
               {
                 value: ActionType.CUSTOM_RESPONSE,
                 label: ActionType.CUSTOM_RESPONSE,
@@ -52,43 +52,46 @@ export const ProxyActionEditor: React.FunctionComponent<{
           <div>
             request headers{" "}
             <Tooltip title={"the headers append to the request"}>
-              <QuestionCircleOutlined style={{fontSize: "12px"}}/>
+              <QuestionCircleOutlined style={{ fontSize: "12px" }} />
             </Tooltip>
           </div>
           <HeaderEditor
             headers={action.requestHeaders || []}
             onHeaderModify={(headerIndex, value) => {
-              let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
+              let _headers = action.requestHeaders
+                ? [...action.requestHeaders]
+                : [];
               _headers[headerIndex] = value;
               actionContext.onActionModify({
                 ...action,
-                requestHeaders: _headers
+                requestHeaders: _headers,
               });
             }}
-
             onAddHeader={(header) => {
               actionContext.onActionModify({
                 ...action,
-                requestHeaders: action.requestHeaders ? [...action.requestHeaders, header] : [],
+                requestHeaders: action.requestHeaders
+                  ? [...action.requestHeaders, header]
+                  : [header],
               });
             }}
-
             onDeleteHeader={(headerIndex) => {
-              let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
+              let _headers = action.requestHeaders
+                ? [...action.requestHeaders]
+                : [];
               _headers.splice(headerIndex, 1);
               actionContext.onActionModify({
                 ...action,
                 requestHeaders: _headers,
               });
             }}
-
           />
         </div>
         <div className={moduleStyle.row}>
           <div>
             response headers{" "}
             <Tooltip title={"the headers append to the response"}>
-              <QuestionCircleOutlined style={{fontSize: "12px"}}/>
+              <QuestionCircleOutlined style={{ fontSize: "12px" }} />
             </Tooltip>
           </div>
           <div>
@@ -157,7 +160,11 @@ export const ProxyActionEditor: React.FunctionComponent<{
           <div>
             <Input
               placeholder={"example: /api"}
-              value={typeof action.prefixRemove === 'string' ? action.prefixRemove : undefined}
+              value={
+                typeof action.prefixRemove === "string"
+                  ? action.prefixRemove
+                  : undefined
+              }
               onChange={(event) => {
                 actionContext.onActionModify({
                   ...action,
