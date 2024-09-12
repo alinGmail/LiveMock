@@ -279,7 +279,7 @@ const LogPage: React.FC = () => {
     );
   }, [logColumn, logs, expectationState]);
   return (
-    <div style={{ padding: "10px",marginTop:"10px" }}>
+    <div style={{ padding: "10px", marginTop: "10px" }}>
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}

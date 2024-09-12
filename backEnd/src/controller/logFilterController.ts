@@ -28,6 +28,7 @@ import {
   removeDynamicViewFilter,
 } from "../log/logUtils";
 import { FilterType, PresetFilterM } from "core/struct/log";
+import { isEmptyArray } from "../util/arrayUtils";
 
 export async function getLogFilterRouter(
   path: string
@@ -121,7 +122,7 @@ export async function getLogFilterRouter(
         item.type === FilterType.PRESET_FILTER && item.name === reqFilter.name
     );
 
-    if (reqFilter.value === null) {
+    if (reqFilter.value === null || isEmptyArray(reqFilter.value)) {
       // remove filter
       if (findIndex !== -1) {
         const presetFilter = logView.filters[findIndex];
