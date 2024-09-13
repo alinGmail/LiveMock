@@ -88,6 +88,7 @@ export enum FilterType {
 export enum PresetFilterName {
   EXPECTATION = "EXPECTATION",
   METHODS = "METHODS",
+  STATUS_CODE = "STATUS_CODE",
 }
 
 export interface SimpleFilterM {
@@ -104,7 +105,7 @@ export interface PresetFilterM {
   name: PresetFilterName;
   id: string;
   property: string;
-  value: string | Array<string>;
+  value: string | Array<string> | Array<number>;
   condition: LogFilterCondition;
   activate: boolean;
 }
@@ -174,9 +175,21 @@ export function createMethodsPresetFilterM(): PresetFilterM {
   return {
     activate: true,
     name: PresetFilterName.METHODS,
-    condition: LogFilterCondition.CONTAINS,
+    condition: LogFilterCondition.IN,
     id: uuId(),
-    property: "",
+    property: "req.method",
+    type: FilterType.PRESET_FILTER,
+    value: "",
+  };
+}
+
+export function createStatusCodePresetFilterM(): PresetFilterM {
+  return {
+    activate: true,
+    name: PresetFilterName.STATUS_CODE,
+    condition: LogFilterCondition.IN,
+    id: uuId(),
+    property: "res.status",
     type: FilterType.PRESET_FILTER,
     value: "",
   };

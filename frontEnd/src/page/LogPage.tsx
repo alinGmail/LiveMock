@@ -144,10 +144,14 @@ const LogPage: React.FC = () => {
       ) as Array<PresetFilterM>;
       const presetFilterUpdate: PresetFilterState = {
         expectationId: null,
+        methods: [],
+        statusCode: [],
       };
       presetFilters.forEach((presetFilter) => {
         if (presetFilter.name === PresetFilterName.EXPECTATION) {
-          presetFilterUpdate.expectationId = presetFilter.value;
+          presetFilterUpdate.expectationId = presetFilter.value as string;
+        } else if (presetFilter.name === PresetFilterName.METHODS) {
+          presetFilterUpdate.methods = presetFilter.value as string[];
         }
       });
       dispatch(updatePresetFilter(presetFilterUpdate));

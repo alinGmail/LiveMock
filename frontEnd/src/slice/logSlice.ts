@@ -19,6 +19,7 @@ export interface TableColumnItem {
 export interface PresetFilterState {
   expectationId: string | null;
   methods: Array<string>;
+  statusCode: Array<string>;
 }
 
 export interface LogState {
@@ -40,6 +41,7 @@ export const logSlice = createSlice({
     presetFilter: {
       expectationId: null,
       methods: [],
+      statusCode: [],
     },
     tableColumns: [],
     currentColumnEditIndex: -1,

@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import {
   createExpectationPresetFilterM,
   createMethodsPresetFilterM,
+  createStatusCodePresetFilterM,
 } from "core/struct/log";
 
 const ExpectationPresetFilter: React.FunctionComponent<{
@@ -77,12 +78,13 @@ const MethodPresetFilter: React.FunctionComponent<{
   logViewId: string | undefined;
   currentProject: ProjectM;
 }> = ({ logViewId, refreshLogList, currentProject }) => {
+  const presetFilterState = useAppSelector((state) => state.log.presetFilter);
   const dispatch = useDispatch();
   return (
     <div>
       <div
         style={{
-          width: "300px",
+          width: "200px",
         }}
       >
         <div
@@ -98,8 +100,10 @@ const MethodPresetFilter: React.FunctionComponent<{
         <Select
           size="small"
           mode="tags"
+          allowClear={true}
+          value={presetFilterState.methods}
           style={{ width: "100%" }}
-          placeholder="Tags Mode"
+          placeholder="search or input methods"
           onChange={(value) => {
             dispatch(updatePresetFilter({ methods: value }));
             const filter = createMethodsPresetFilterM();
@@ -133,6 +137,58 @@ const MethodPresetFilter: React.FunctionComponent<{
           ]}
         />
       </div>
+    </div>
+  );
+};
+
+const StatusCodePresetFilter: React.FunctionComponent<{
+  refreshLogList: () => void;
+  logViewId: string | undefined;
+  currentProject: ProjectM;
+}> = ({ logViewId, refreshLogList, currentProject }) => {
+  const presetFilterState = useAppSelector((state) => state.log.presetFilter);
+  const dispatch = useDispatch();
+  return (
+    <div
+      style={{
+        width: "200px",
+      }}
+    >
+      <div
+        style={{
+          paddingRight: "8px",
+          fontSize: "18px",
+          verticalAlign: "center",
+          fontFamily: "Arial",
+        }}
+      >
+        status code:
+      </div>
+      <Select
+        value={presetFilterState.statusCode}
+        size="small"
+        mode="tags"
+        style={{ width: "100%" }}
+        placeholder="input status code"
+        onChange={(value) => {
+          console.log(value);
+          dispatch(
+            updatePresetFilter({
+              statusCode: value,
+            })
+          );
+          const filter = createStatusCodePresetFilterM();
+          filter.value = value.map((item) => parseInt(item));
+          const updatePromise = updatePresetLogFilterReq({
+            projectId: currentProject.id,
+            logViewId: logViewId ?? "",
+            filter: filter,
+          }).then((res) => {
+            refreshLogList();
+          });
+          toastPromise(updatePromise);
+        }}
+      ></Select>
     </div>
   );
 };
@@ -181,6 +237,11 @@ const PresetFilterRowComponent: React.FunctionComponent<{
           getExpectationListQuery={getExpectationListQuery}
         />
         <MethodPresetFilter
+          refreshLogList={refreshLogList}
+          logViewId={logViewId}
+          currentProject={currentProject}
+        />
+        <StatusCodePresetFilter
           refreshLogList={refreshLogList}
           logViewId={logViewId}
           currentProject={currentProject}
