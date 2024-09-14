@@ -16,6 +16,7 @@ import {
 } from "core/struct/log";
 import { logViewEventEmitter } from "../common/logViewEvent";
 import { once } from "../util/commonUtils";
+import _ from "lodash";
 
 export function insertReqLog(
   logCollection: Collection<LogM>,
@@ -106,7 +107,8 @@ export function changeToLokijsFilter(filter: LogFilterM) {
     filter.type === FilterType.SIMPLE_FILTER ||
     filter.type === FilterType.PRESET_FILTER
   ) {
-    const isNumberValue = isNumberString(filter.value);
+    const isNumberValue =
+      !_.isArray(filter.value) && isNumberString(filter.value);
     switch (filter.condition) {
       case LogFilterCondition.EQUAL:
         return {
@@ -143,6 +145,15 @@ export function changeToLokijsFilter(filter: LogFilterM) {
         return { [filter.property]: { $gt: filter.value } };
       case LogFilterCondition.LESS:
         return { [filter.property]: { $lt: filter.value } };
+      case LogFilterCondition.IN:
+        let inArray: Array<string | number> = [];
+        (filter.value as Array<string>).forEach((element) => {
+          inArray.push(element);
+          if (isNumberString(element)) {
+            inArray.push(Number(element));
+          }
+        });
+        return { [filter.property]: { $in: inArray } };
     }
   } else {
     // todo

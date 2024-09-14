@@ -23,6 +23,7 @@ import {
 } from "../log/logUtils";
 import { FilterType, PresetFilterM } from "core/struct/log";
 import ipcMain = electron.ipcMain;
+import { isEmptyArray } from "../util/arrayUtils";
 
 export async function setLogFilterHandler(path: string): Promise<void> {
   ipcMain.handle(
@@ -134,7 +135,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
         );
       });
 
-      if (reqFilter.value === null) {
+      if (reqFilter.value === null || isEmptyArray(reqFilter.value)) {
         // remove the filter
         if (findIndex !== -1) {
           const presetFilter = logView.filters[findIndex];

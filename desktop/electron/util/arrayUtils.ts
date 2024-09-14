@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const first: <T>(
   array: Array<T>,
   callback: (item: T, index: number) => Promise<boolean>
@@ -25,4 +27,8 @@ const validAll: <T>(
 export default {
   first,
   validAll,
+};
+
+export const isEmptyArray = (testObj: any) => {
+  return _.isArray(testObj) && testObj.length === 0;
 };
