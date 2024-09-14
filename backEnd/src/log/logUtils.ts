@@ -146,7 +146,14 @@ export function changeToLokijsFilter(filter: LogFilterM) {
       case LogFilterCondition.LESS:
         return { [filter.property]: { $lt: filter.value } };
       case LogFilterCondition.IN:
-        return { [filter.property]: { $in: filter.value } };
+        let inArray: Array<string | number> = [];
+        (filter.value as Array<string>).forEach((element) => {
+          inArray.push(element);
+          if (isNumberString(element)) {
+            inArray.push(Number(element));
+          }
+        });
+        return { [filter.property]: { $in: inArray } };
     }
   } else {
     // todo

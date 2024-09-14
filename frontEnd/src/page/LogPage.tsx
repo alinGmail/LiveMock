@@ -152,6 +152,8 @@ const LogPage: React.FC = () => {
           presetFilterUpdate.expectationId = presetFilter.value as string;
         } else if (presetFilter.name === PresetFilterName.METHODS) {
           presetFilterUpdate.methods = presetFilter.value as string[];
+        } else if (presetFilter.name === PresetFilterName.STATUS_CODE) {
+          presetFilterUpdate.statusCode = presetFilter.value as string[];
         }
       });
       dispatch(updatePresetFilter(presetFilterUpdate));

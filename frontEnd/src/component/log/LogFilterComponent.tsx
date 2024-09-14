@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FilterType, LogFilterCondition, LogFilterM } from "core/struct/log";
 import mStyle from "./LogFilterComponent.module.scss";
-import { Button, Dropdown } from "antd";
+import { Button, Dropdown, Select } from "antd";
 import { getStringConditionWord } from "./utils";
 import { CloseSquareOutlined, DownOutlined } from "@ant-design/icons";
 import { NInput } from "../nui/NInput";
@@ -18,6 +18,7 @@ import {
   UpdateLogFilterReqBody,
 } from "core/struct/params/LogFilterParam";
 import { toastPromise } from "../common";
+import _ from "lodash";
 
 function ChevronDown({ fill }: { fill: string }) {
   return (
@@ -35,7 +36,10 @@ function ChevronDown({ fill }: { fill: string }) {
         marginTop: "1px",
       }}
     >
-      <polygon fill={"currentColor"} points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 " />
+      <polygon
+        fill={"currentColor"}
+        points="15,17.4 4.8,7 2,9.8 15,23 28,9.8 25.2,7 "
+      />
     </svg>
   );
 }
@@ -53,8 +57,8 @@ const LogFilterComponent: React.FC<{
       // update filter
       const updatePromise = updateLogFilterReq(logFilterId, param);
       toastPromise(updatePromise);
-      updatePromise.then(res =>{
-          refreshLogList();
+      updatePromise.then((res) => {
+        refreshLogList();
       });
     },
     { wait: debounceWait }
@@ -101,8 +105,17 @@ const LogFilterComponent: React.FC<{
                       return (
                         <div
                           onClick={() => {
+                            let value = filter.value;
+                            // clear the value
+                            if (item === LogFilterCondition.IN) {
+                              value = _.isArray(value) ? value : [];
+                            } else {
+                              value = _.isString(value) ? value : "";
+                            }
+
                             const modifiedFilter = Object.assign({}, filter, {
                               condition: item,
+                              value: value,
                             } as Partial<LogFilterM>);
                             dispatch(modifyLogFilter(modifiedFilter));
                             updateFilter(filter.id, {
@@ -143,23 +156,48 @@ const LogFilterComponent: React.FC<{
                 verticalAlign: "middle",
               }}
             >
-              <NInput
-                value={filter.value}
-                style={{
-                    whiteSpace:'pre',
-                }}
-                onChange={(value) => {
-                  const modifiedFilter = Object.assign({}, filter, {
-                    value: value,
-                  } as Partial<LogFilterM>);
-                  dispatch(modifyLogFilter(modifiedFilter));
-                  updateFilter(filter.id, {
-                    filter: modifiedFilter,
-                    projectId: projectId,
-                    logViewId: logViewId,
-                  });
-                }}
-              />
+              {filter.condition !== LogFilterCondition.IN && (
+                <NInput
+                  value={filter.value as string}
+                  style={{
+                    whiteSpace: "pre",
+                  }}
+                  onChange={(value) => {
+                    const modifiedFilter = Object.assign({}, filter, {
+                      value: value,
+                    } as Partial<LogFilterM>);
+                    dispatch(modifyLogFilter(modifiedFilter));
+                    updateFilter(filter.id, {
+                      filter: modifiedFilter,
+                      projectId: projectId,
+                      logViewId: logViewId,
+                    });
+                  }}
+                />
+              )}
+              {filter.condition === LogFilterCondition.IN && (
+                <Select
+                  value={filter.value}
+                  size="small"
+                  mode="tags"
+                  style={{
+                    width: "180px",
+                    marginTop: "2px",
+                  }}
+                  allowClear={true}
+                  onChange={(value) => {
+                    const modifiedFilter = Object.assign({}, filter, {
+                      value: value,
+                    } as Partial<LogFilterM>);
+                    dispatch(modifyLogFilter(modifiedFilter));
+                    updateFilter(filter.id, {
+                      filter: modifiedFilter,
+                      projectId: projectId,
+                      logViewId: logViewId,
+                    });
+                  }}
+                />
+              )}
             </div>
             <CloseSquareOutlined
               style={{ display: "inline-block", verticalAlign: "middle" }}
@@ -168,7 +206,7 @@ const LogFilterComponent: React.FC<{
                 const deletePromise = deleteLogFilterReq(filter.id, {
                   logViewId,
                   projectId,
-                }).then(res => {
+                }).then((res) => {
                   refreshLogList();
                 });
                 toastPromise(deletePromise);
@@ -197,7 +235,11 @@ const LogFilterComponent: React.FC<{
               {getStringConditionWord(filter.condition)}
             </div>
             {filter.value ? (
-              <div className={mStyle.value}>{filter.value}</div>
+              <div className={mStyle.value}>
+                {_.isArray(filter.value)
+                  ? filter.value.join(",")
+                  : filter.value}
+              </div>
             ) : (
               <span className={mStyle.placeHolder}>empty&nbsp;</span>
             )}

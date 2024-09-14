@@ -95,7 +95,7 @@ export interface SimpleFilterM {
   type: FilterType.SIMPLE_FILTER;
   id: string;
   property: string;
-  value: string;
+  value: string | Array<string>;
   condition: LogFilterCondition;
   activate: boolean;
 }
