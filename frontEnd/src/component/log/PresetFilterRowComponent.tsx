@@ -14,6 +14,7 @@ import {
   createMethodsPresetFilterM,
   createStatusCodePresetFilterM,
 } from "core/struct/log";
+import mStyle from "./PresetFilterRowComponent.module.scss";
 
 const ExpectationPresetFilter: React.FunctionComponent<{
   refreshLogList: () => void;
@@ -29,17 +30,8 @@ const ExpectationPresetFilter: React.FunctionComponent<{
   const presetFilterState = useAppSelector((state) => state.log.presetFilter);
   const dispatch = useDispatch();
   return (
-    <div>
-      <div
-        style={{
-          paddingRight: "8px",
-          fontSize: "18px",
-          verticalAlign: "center",
-          fontFamily: "Arial",
-        }}
-      >
-        expectation:
-      </div>
+    <div className={mStyle.presetFilterItem}>
+      <div className={mStyle.filterTil}>expectation:</div>
       <Select
         size={"small"}
         allowClear={true}
@@ -83,20 +75,12 @@ const MethodPresetFilter: React.FunctionComponent<{
   return (
     <div>
       <div
+        className={mStyle.presetFilterItem}
         style={{
           width: "200px",
         }}
       >
-        <div
-          style={{
-            paddingRight: "8px",
-            fontSize: "18px",
-            verticalAlign: "center",
-            fontFamily: "Arial",
-          }}
-        >
-          methods:
-        </div>
+        <div className={mStyle.filterTil}>methods:</div>
         <Select
           size="small"
           mode="tags"
@@ -150,20 +134,12 @@ const StatusCodePresetFilter: React.FunctionComponent<{
   const dispatch = useDispatch();
   return (
     <div
+      className={mStyle.filterTil}
       style={{
         width: "200px",
       }}
     >
-      <div
-        style={{
-          paddingRight: "8px",
-          fontSize: "18px",
-          verticalAlign: "center",
-          fontFamily: "Arial",
-        }}
-      >
-        status code:
-      </div>
+      <div className={mStyle.filterTil}>status code:</div>
       <Select
         value={presetFilterState.statusCode}
         size="small"
@@ -171,7 +147,6 @@ const StatusCodePresetFilter: React.FunctionComponent<{
         style={{ width: "100%" }}
         placeholder="input status code"
         onChange={(value) => {
-          console.log(value);
           dispatch(
             updatePresetFilter({
               statusCode: value,
