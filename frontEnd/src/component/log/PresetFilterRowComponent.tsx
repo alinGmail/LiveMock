@@ -73,54 +73,52 @@ const MethodPresetFilter: React.FunctionComponent<{
   const presetFilterState = useAppSelector((state) => state.log.presetFilter);
   const dispatch = useDispatch();
   return (
-    <div>
-      <div
-        className={mStyle.presetFilterItem}
-        style={{
-          width: "200px",
+    <div
+      className={mStyle.presetFilterItem}
+      style={{
+        width: "200px",
+      }}
+    >
+      <div className={mStyle.filterTil}>methods:</div>
+      <Select
+        size="small"
+        mode="tags"
+        allowClear={true}
+        value={presetFilterState.methods}
+        style={{ width: "100%" }}
+        placeholder="multiple select"
+        onChange={(value) => {
+          dispatch(updatePresetFilter({ methods: value }));
+          const filter = createMethodsPresetFilterM();
+          filter.value = value;
+          const updatePromise = updatePresetLogFilterReq({
+            projectId: currentProject.id,
+            logViewId: logViewId ?? "",
+            filter: filter,
+          }).then((res) => {
+            refreshLogList();
+          });
+          toastPromise(updatePromise);
         }}
-      >
-        <div className={mStyle.filterTil}>methods:</div>
-        <Select
-          size="small"
-          mode="tags"
-          allowClear={true}
-          value={presetFilterState.methods}
-          style={{ width: "100%" }}
-          placeholder="search or input methods"
-          onChange={(value) => {
-            dispatch(updatePresetFilter({ methods: value }));
-            const filter = createMethodsPresetFilterM();
-            filter.value = value;
-            const updatePromise = updatePresetLogFilterReq({
-              projectId: currentProject.id,
-              logViewId: logViewId ?? "",
-              filter: filter,
-            }).then((res) => {
-              refreshLogList();
-            });
-            toastPromise(updatePromise);
-          }}
-          options={[
-            {
-              value: "GET",
-              label: "GET",
-            },
-            {
-              value: "POST",
-              label: "POST",
-            },
-            {
-              value: "DELETE",
-              label: "DELETE",
-            },
-            {
-              value: "PUT",
-              label: "PUT",
-            },
-          ]}
-        />
-      </div>
+        options={[
+          {
+            value: "GET",
+            label: "GET",
+          },
+          {
+            value: "POST",
+            label: "POST",
+          },
+          {
+            value: "DELETE",
+            label: "DELETE",
+          },
+          {
+            value: "PUT",
+            label: "PUT",
+          },
+        ]}
+      />
     </div>
   );
 };
@@ -134,7 +132,7 @@ const StatusCodePresetFilter: React.FunctionComponent<{
   const dispatch = useDispatch();
   return (
     <div
-      className={mStyle.filterTil}
+      className={mStyle.presetFilterItem}
       style={{
         width: "200px",
       }}
@@ -145,7 +143,7 @@ const StatusCodePresetFilter: React.FunctionComponent<{
         size="small"
         mode="tags"
         style={{ width: "100%" }}
-        placeholder="input status code"
+        placeholder="multiple select"
         onChange={(value) => {
           dispatch(
             updatePresetFilter({
