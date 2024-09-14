@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuId } from "uuid";
-import {createSimpleFilter, FilterType, LogM, PresetFilterM, PresetFilterName} from "core/struct/log";
-import {AppDispatch, useAppSelector} from "../store";
+import {
+  createSimpleFilter,
+  FilterType,
+  LogM,
+  PresetFilterM,
+  PresetFilterName,
+} from "core/struct/log";
+import { AppDispatch, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { Button, Table } from "antd";
 import {
@@ -13,15 +19,15 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   addLogFilter,
   ColumnDisplayType,
-  hideColumnEditor, PresetFilterState,
+  hideColumnEditor,
+  PresetFilterState,
   resetLogFilter,
-  TableColumnItem, updatePresetFilter,
+  TableColumnItem,
+  updatePresetFilter,
 } from "../slice/logSlice";
 import ColumnConfig from "../component/table/ColumnConfig";
-import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { listLogViewReq, listLogViewLogs } from "../server/logServer";
-import { addLogFilterReq } from "../server/logFilterServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
@@ -29,10 +35,10 @@ import { LogViewEvents } from "core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
-import {setExpectationMap} from "../slice/expectationSlice";
-import {listExpectationListReq} from "../server/expectationServer";
+import { setExpectationMap } from "../slice/expectationSlice";
+import { listExpectationListReq } from "../server/expectationServer";
 import _ from "lodash";
-import {getExpectationSuccess} from "../slice/thunk";
+import { getExpectationSuccess } from "../slice/thunk";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -112,7 +118,7 @@ const LogPage: React.FC = () => {
     tableColumns,
   } = logState;
   const currentEditColumn = tableColumns[currentColumnEditIndex];
-  const dispatch:AppDispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
@@ -136,10 +142,16 @@ const LogPage: React.FC = () => {
       ) as Array<PresetFilterM>;
       const presetFilterUpdate: PresetFilterState = {
         expectationId: null,
+        methods: [],
+        statusCode: [],
       };
       presetFilters.forEach((presetFilter) => {
         if (presetFilter.name === PresetFilterName.EXPECTATION) {
-          presetFilterUpdate.expectationId = presetFilter.value;
+          presetFilterUpdate.expectationId = presetFilter.value as string;
+        } else if (presetFilter.name === PresetFilterName.METHODS) {
+          presetFilterUpdate.methods = presetFilter.value as string[];
+        } else if (presetFilter.name === PresetFilterName.STATUS_CODE) {
+          presetFilterUpdate.statusCode = presetFilter.value as string[];
         }
       });
       dispatch(updatePresetFilter(presetFilterUpdate));
@@ -190,7 +202,7 @@ const LogPage: React.FC = () => {
       logViewId,
       currentProject.id,
       logViewLogsQuery.refetch,
-      expectationState.expectationMap,
+      expectationState.expectationMap
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
@@ -203,7 +215,7 @@ const LogPage: React.FC = () => {
     systemConfigState.mode,
     logViewId,
     currentProject.id,
-    expectationState
+    expectationState,
   ]);
 
   useEffect(() => {
@@ -271,7 +283,7 @@ const LogPage: React.FC = () => {
     );
   }, [logColumn, logs, expectationState]);
   return (
-    <div style={{ padding: "10px" , marginTop:"10px"}}>
+    <div style={{ padding: "10px", marginTop: "10px" }}>
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}

@@ -1,0 +1,15 @@
+.presetFilterItem {
+  padding: 0px 10px;
+  border-right: 1px solid #efefef;
+  &:first-child {
+    padding-left: 0;
+  }
+  .filterTil {
+    padding-right: 8px;
+    font-size: 18px;
+    vertical-align: center;
+    font-family: Arial;
+  }
+  .filterContent {
+  }
+}
