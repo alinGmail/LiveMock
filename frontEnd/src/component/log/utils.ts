@@ -9,6 +9,7 @@ export function getStringConditionWord(condition: LogFilterCondition) {
     case LogFilterCondition.CONTAINS:
     case LogFilterCondition.GREATER:
     case LogFilterCondition.LESS:
+    case LogFilterCondition.IN:
       return condition.toLowerCase();
   }
 }

@@ -87,13 +87,15 @@ export enum FilterType {
 
 export enum PresetFilterName {
   EXPECTATION = "EXPECTATION",
+  METHODS = "METHODS",
+  STATUS_CODE = "STATUS_CODE",
 }
 
 export interface SimpleFilterM {
   type: FilterType.SIMPLE_FILTER;
   id: string;
   property: string;
-  value: string;
+  value: string | Array<string>;
   condition: LogFilterCondition;
   activate: boolean;
 }
@@ -103,7 +105,7 @@ export interface PresetFilterM {
   name: PresetFilterName;
   id: string;
   property: string;
-  value: string;
+  value: string | Array<string> | Array<number>;
   condition: LogFilterCondition;
   activate: boolean;
 }
@@ -123,6 +125,7 @@ export enum LogFilterCondition {
   CONTAINS = "CONTAINS",
   GREATER = "GREATER",
   LESS = "LESS",
+  IN = "IN",
 }
 
 export const LogFilterConditionMap: {
@@ -133,6 +136,7 @@ export const LogFilterConditionMap: {
   CONTAINS: "$contains",
   GREATER: "$gt",
   LESS: "$less",
+  IN: "$in",
 };
 
 function getKeyByValue<T extends Record<string, string>>(
@@ -164,5 +168,29 @@ export function createExpectationPresetFilterM(): PresetFilterM {
     type: FilterType.PRESET_FILTER,
     value: "",
     name: PresetFilterName.EXPECTATION,
+  };
+}
+
+export function createMethodsPresetFilterM(): PresetFilterM {
+  return {
+    activate: true,
+    name: PresetFilterName.METHODS,
+    condition: LogFilterCondition.IN,
+    id: uuId(),
+    property: "req.method",
+    type: FilterType.PRESET_FILTER,
+    value: "",
+  };
+}
+
+export function createStatusCodePresetFilterM(): PresetFilterM {
+  return {
+    activate: true,
+    name: PresetFilterName.STATUS_CODE,
+    condition: LogFilterCondition.IN,
+    id: uuId(),
+    property: "res.status",
+    type: FilterType.PRESET_FILTER,
+    value: "",
   };
 }

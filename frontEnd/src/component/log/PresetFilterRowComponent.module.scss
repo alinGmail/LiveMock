@@ -1,0 +1,22 @@
+.presetFilterItem {
+  padding: 0px 10px;
+  border-right: 1px solid #efefef;
+  &:first-child {
+    padding-left: 0;
+  }
+  &:last-child {
+    border-right: none !important;
+  }
+  .filterTil {
+    padding-right: 8px;
+    font-size: 18px;
+    vertical-align: center;
+    font-family: Arial;
+  }
+  .filterContent {
+  }
+}
+
+:global(.dark_mode) .presetFilterItem {
+  border-right: 1px solid #434343;
+}

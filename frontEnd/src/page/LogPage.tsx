@@ -144,10 +144,16 @@ const LogPage: React.FC = () => {
       ) as Array<PresetFilterM>;
       const presetFilterUpdate: PresetFilterState = {
         expectationId: null,
+        methods: [],
+        statusCode: [],
       };
       presetFilters.forEach((presetFilter) => {
         if (presetFilter.name === PresetFilterName.EXPECTATION) {
-          presetFilterUpdate.expectationId = presetFilter.value;
+          presetFilterUpdate.expectationId = presetFilter.value as string;
+        } else if (presetFilter.name === PresetFilterName.METHODS) {
+          presetFilterUpdate.methods = presetFilter.value as string[];
+        } else if (presetFilter.name === PresetFilterName.STATUS_CODE) {
+          presetFilterUpdate.statusCode = presetFilter.value as string[];
         }
       });
       dispatch(updatePresetFilter(presetFilterUpdate));
@@ -279,7 +285,7 @@ const LogPage: React.FC = () => {
     );
   }, [logColumn, logs, expectationState]);
   return (
-    <div style={{ padding: "10px",marginTop:"10px" }}>
+    <div style={{ padding: "10px", marginTop: "10px" }}>
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
