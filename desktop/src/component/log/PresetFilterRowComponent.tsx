@@ -117,6 +117,10 @@ const MethodPresetFilter: React.FunctionComponent<{
             value: "PUT",
             label: "PUT",
           },
+          {
+            value: "OPTIONS",
+            label: "OPTIONS",
+          },
         ]}
       />
     </div>

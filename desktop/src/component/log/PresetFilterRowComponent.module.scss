@@ -4,6 +4,10 @@
   &:first-child {
     padding-left: 0;
   }
+  &:last-child {
+    border-right: none !important;
+  }
+
   .filterTil {
     padding-right: 8px;
     font-size: 18px;
@@ -12,4 +16,8 @@
   }
   .filterContent {
   }
+}
+
+:global(.dark_mode) .presetFilterItem {
+  border-right: 1px solid #434343;
 }
