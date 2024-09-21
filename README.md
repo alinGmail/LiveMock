@@ -6,8 +6,13 @@
 <h1 align="center">
     LiveMock
 </h1>
-
+<h3 align="center">
+  <a href="https://alingmail.github.io/LiveMockDoc/docs/intro">document</a>
+</h3>
 LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
+
+
+
 ## 🎆 Preview
 ![image](https://github.com/alinGmail/LiveMock/blob/main/img/light1.png)
 ![image](https://github.com/alinGmail/LiveMock/blob/main/img/light2.png)
@@ -42,6 +47,11 @@ cd LiveMock
 yarn install
 ```
 
+> [!NOTE]
+> If you are in China, you can run the following command before 'yarn install' to set the ELECTRON MIRROR.
+> ```
+> yarn config set ELECTRON_MIRROR https://npmmirror.com/mirrors/electron/
+> ```
 
 #### 3.build the forntEnd code
 ```
