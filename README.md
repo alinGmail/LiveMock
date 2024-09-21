@@ -7,7 +7,7 @@
     LiveMock
 </h1>
 <h3 align="center">
-  <a href="https://alingmail.github.io/LiveMockDoc/docs/intro">document</a>
+  <a href="https://alingmail.github.io/LiveMockDoc/docs/intro">📚document</a>
 </h3>
 LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
 
