@@ -16,6 +16,11 @@ import { systemVersion } from "./config";
 import * as electron from "electron";
 import ipcMain = electron.ipcMain;
 import { SystemEvents } from "core/struct/events/desktopEvents";
+import log from 'electron-log/main';
+
+log.initialize();
+log.errorHandler.startCatching();
+
 // The built directory structure
 //
 // ├─┬─┬ dist
