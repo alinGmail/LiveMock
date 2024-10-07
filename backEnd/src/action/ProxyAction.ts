@@ -9,7 +9,7 @@ import * as http from "http";
 import { isRecordBody } from "../util/bodyParseUtil";
 import typeis from "type-is";
 import { LogM } from "core/struct/log";
-import ws from "ws";
+import { handleWebsocketProxy } from "./ProxyWebsocket";
 
 const inflateAsync = util.promisify(zlib.inflate);
 const unzipAsync = util.promisify(zlib.unzip);
@@ -188,18 +188,9 @@ export default class ProxyActionImpl implements IAction {
       req.headers.upgrade &&
       req.headers.upgrade.toLowerCase() === "websocket"
     ) {
-      // handle websocket
-      const wss = new ws.WebSocketServer({ noServer: true });
-
-      wss.on("connection", (ws) => {
-        ws.on("message", (message) => {
-          console.log(message);
-        });
-      });
-
-      const wsc = new ws.WebSocket(`ws://${this.action.host}`);
+      handleWebsocketProxy(req, res, logM, this.action);
+      return;
     }
-
     // handle cross
     if (this.action.handleCross && req.method.toUpperCase() === "OPTIONS") {
       return handleOptionsCross(req, res, this.action.crossAllowCredentials);
