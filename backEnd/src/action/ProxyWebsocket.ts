@@ -1,8 +1,8 @@
-import pino from "pino";
 import { LogM } from "core/struct/log";
 import express from "express";
 import ws from "ws";
 import { ProxyActionM } from "core/struct/action";
+import * as console from "console";
 
 export function handleSubProtocol(secProtocol: string | null | undefined) {
   if (secProtocol) {
@@ -11,6 +11,22 @@ export function handleSubProtocol(secProtocol: string | null | undefined) {
   } else {
     return undefined;
   }
+}
+
+const exclude_headers = ["upgrade","connection","sec-websocket-key","sec-websocket-version",
+"sec-websocket-protocol","sec-websocket-extensions",'host']
+export function exclude_ws_relative_header(rawHeaders:Array<string>): {
+  [key:string]:string
+} {
+  const headerMap = {}
+  rawHeaders.forEach((value, index) => {
+    if (index % 2 === 0){
+      if(!exclude_headers.includes(value.toLowerCase())){
+        headerMap[value] = rawHeaders[index + 1]
+      }
+    }
+  })
+  return headerMap
 }
 
 export function handleWebsocketProxy(
@@ -36,8 +52,10 @@ export function handleWebsocketProxy(
   wss.on("close", () => {
     wsc.close();
   });
-
-  const wsc = new ws.WebSocket(`ws://${action.host}`, protocolArray);
+  const send_header = exclude_ws_relative_header(req.rawHeaders)
+  const wsc = new ws.WebSocket(`ws://${action.host}${req.url}`, protocolArray,{
+    headers: send_header
+  });
   wsc.on("message", (message, isBinary) => {
     wss.clients.forEach((client) => {
       client.send(message.toString("utf8"));
