@@ -13,20 +13,27 @@ export function handleSubProtocol(secProtocol: string | null | undefined) {
   }
 }
 
-const exclude_headers = ["upgrade","connection","sec-websocket-key","sec-websocket-version",
-"sec-websocket-protocol","sec-websocket-extensions",'host']
-export function exclude_ws_relative_header(rawHeaders:Array<string>): {
-  [key:string]:string
+const exclude_headers = [
+  "upgrade",
+  "connection",
+  "sec-websocket-key",
+  "sec-websocket-version",
+  "sec-websocket-protocol",
+  "sec-websocket-extensions",
+  "host",
+];
+export function exclude_ws_relative_header(rawHeaders: Array<string>): {
+  [key: string]: string;
 } {
-  const headerMap = {}
+  const headerMap = {};
   rawHeaders.forEach((value, index) => {
-    if (index % 2 === 0){
-      if(!exclude_headers.includes(value.toLowerCase())){
-        headerMap[value] = rawHeaders[index + 1]
+    if (index % 2 === 0) {
+      if (!exclude_headers.includes(value.toLowerCase())) {
+        headerMap[value] = rawHeaders[index + 1];
       }
     }
-  })
-  return headerMap
+  });
+  return headerMap;
 }
 
 export function handleWebsocketProxy(
@@ -44,6 +51,9 @@ export function handleWebsocketProxy(
     ws.on("message", (message, isBinary) => {
       wsc.send(message.toString("utf8"));
     });
+    ws.on("close", () => {
+      wsc.close();
+    });
   });
 
   wss.on("error", (err) => {
@@ -52,9 +62,13 @@ export function handleWebsocketProxy(
   wss.on("close", () => {
     wsc.close();
   });
-  const send_header = exclude_ws_relative_header(req.rawHeaders)
-  const wsc = new ws.WebSocket(`ws://${action.host}${req.url}`, protocolArray,{
-    headers: send_header
+  const send_header = exclude_ws_relative_header(req.rawHeaders);
+  let url = req.url;
+  if (action.prefixRemove && req.url.startsWith(action.prefixRemove)) {
+    url = req.url.slice(action.prefixRemove.length);
+  }
+  const wsc = new ws.WebSocket(`ws://${action.host}${req.url}`, protocolArray, {
+    headers: send_header,
   });
   wsc.on("message", (message, isBinary) => {
     wss.clients.forEach((client) => {
@@ -65,7 +79,14 @@ export function handleWebsocketProxy(
     wss.close();
   });
   wsc.on("close", () => {
-    wss.close();
+    wss.clients.forEach((client) => {
+      client.close();
+    });
+    wss.close((error) => {
+      if (error) {
+        console.error(error);
+      }
+    });
   });
 
   wsc.on("open", () => {
