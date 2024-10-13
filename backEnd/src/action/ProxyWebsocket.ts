@@ -1,4 +1,9 @@
-import { LogM } from "core/struct/log";
+import {
+  createWebsocketInfo,
+  LogM,
+  WebsocketStatus,
+  WebsocketMessageM,
+} from "core/struct/log";
 import express from "express";
 import ws from "ws";
 import { ProxyActionM } from "core/struct/action";
@@ -40,18 +45,43 @@ export function handleWebsocketProxy(
   req: express.Request,
   res: express.Response,
   logM: LogM | undefined,
-  action: ProxyActionM
+  action: ProxyActionM,
+  logCollection: Collection<LogM>
 ) {
   // handle websocket
   const secProtocol = req.headers["sec-websocket-protocol"];
   const protocolArray = handleSubProtocol(secProtocol);
   const wss = new ws.WebSocketServer({ noServer: true });
+  // log websocket info
+  logM && (logM.websocketInfo = createWebsocketInfo());
 
   wss.on("connection", (ws) => {
+    if (logM && logM.websocketInfo) {
+      logM.websocketInfo.status = WebsocketStatus.OPEN;
+      logCollection.update(logM);
+    }
     ws.on("message", (message, isBinary) => {
-      wsc.send(message.toString("utf8"));
+      const websocketMessageItem: WebsocketMessageM = {
+        sendTime: new Date().getTime(),
+        sendFromClient: true,
+        isBinary: isBinary,
+        content: isBinary ? "" : message.toString("utf8"),
+        exceededMaxLength: false,
+      };
+      if (logM) {
+        logM.websocketInfo?.messages.push(websocketMessageItem);
+        logCollection.update(logM);
+      }
+      if (isBinary) {
+        wsc.send(message);
+      } else {
+        wsc.send(message.toString("utf8"));
+      }
     });
     ws.on("close", () => {
+      wsc.close();
+    });
+    ws.on("error", () => {
       wsc.close();
     });
   });
@@ -71,14 +101,35 @@ export function handleWebsocketProxy(
     headers: send_header,
   });
   wsc.on("message", (message, isBinary) => {
+    const websocketMessageItem: WebsocketMessageM = {
+      sendTime: new Date().getTime(),
+      sendFromClient: false,
+      isBinary: isBinary,
+      content: isBinary ? "" : message.toString("utf8"),
+      exceededMaxLength: false,
+    };
+    if (logM) {
+      logM.websocketInfo?.messages.push(websocketMessageItem);
+      logCollection.update(logM);
+    }
+
     wss.clients.forEach((client) => {
-      client.send(message.toString("utf8"));
+      if (isBinary) {
+        client.send(message);
+      } else {
+        client.send(message.toString("utf8"));
+      }
     });
   });
   wsc.on("error", (err) => {
     wss.close();
   });
   wsc.on("close", () => {
+    if (logM && logM.websocketInfo) {
+      logM.websocketInfo.status = WebsocketStatus.CLOSED;
+      logCollection.update(logM);
+    }
+
     wss.clients.forEach((client) => {
       client.close();
     });

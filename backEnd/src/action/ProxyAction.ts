@@ -180,7 +180,8 @@ export default class ProxyActionImpl implements IAction {
   async process(
     req: express.Request,
     res: express.Response,
-    logM: LogM | undefined
+    logM: LogM | undefined,
+    logCollection: Collection<LogM>
   ): Promise<void> {
     // handle websocket
     if (
@@ -188,7 +189,7 @@ export default class ProxyActionImpl implements IAction {
       req.headers.upgrade &&
       req.headers.upgrade.toLowerCase() === "websocket"
     ) {
-      handleWebsocketProxy(req, res, logM, this.action);
+      handleWebsocketProxy(req, res, logM, this.action, logCollection);
       return;
     }
     // handle cross

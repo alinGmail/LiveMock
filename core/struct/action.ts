@@ -84,6 +84,7 @@ export interface IAction {
     req: express.Request,
     res: express.Response,
     log: LogM | undefined,
+    logCollection: Collection<LogM>
   ) => Promise<void>;
 }
 export function createProxyAction(): ProxyActionM {
@@ -96,8 +97,8 @@ export function createProxyAction(): ProxyActionM {
     handleCross: false,
     crossAllowCredentials: false,
     headers: [],
-    requestHeaders:[],
-    prefixRemove:null
+    requestHeaders: [],
+    prefixRemove: null,
   };
 }
 

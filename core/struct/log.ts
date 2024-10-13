@@ -35,7 +35,7 @@ export enum WebsocketStatus {
 export interface WebsocketInfoM {
   isWebsocket: boolean;
   status: WebsocketStatus;
-  messages: Array<WebsocketInfoM>;
+  messages: Array<WebsocketMessageM>;
 }
 
 export interface ParsedQs {
