@@ -6,6 +6,7 @@ export interface LogM {
   res: ResponseLogM | null;
   proxyInfo: ProxyInfoM | null;
   expectationId: string | null;
+  websocketInfo: WebsocketInfoM | undefined | null;
 }
 
 export interface ProxyInfoM {
@@ -14,6 +15,27 @@ export interface ProxyInfoM {
   requestHeaders: Array<{ name: string; value: string }> | null | undefined;
   responseHeaders: Array<{ name: string; value: string }> | null | undefined;
   isProxy: boolean;
+}
+
+export interface WebsocketMessageM {
+  sendTime: number;
+  sendFromClient: boolean;
+  isBinary: boolean;
+  content: string;
+  exceededMaxLength: boolean;
+}
+
+export enum WebsocketStatus {
+  CONNECTING = "CONNECTING",
+  OPEN = "OPEN",
+  CLOSING = "CLOSING",
+  CLOSED = "CLOSED",
+}
+
+export interface WebsocketInfoM {
+  isWebsocket: boolean;
+  status: WebsocketStatus;
+  messages: Array<WebsocketInfoM>;
 }
 
 export interface ParsedQs {
@@ -51,6 +73,7 @@ export function createLog(id: number): LogM {
     proxyInfo: null,
     req: null,
     res: null,
+    websocketInfo: null,
   };
 }
 
@@ -63,6 +86,14 @@ export function createRequestLog(): RequestLogM {
     path: "",
     rawBody: null,
     requestDate: new Date(),
+  };
+}
+
+export function createWebsocketInfo(): WebsocketInfoM {
+  return {
+    isWebsocket: false,
+    messages: [],
+    status: WebsocketStatus.CONNECTING,
   };
 }
 
