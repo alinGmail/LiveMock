@@ -1,3 +1,4 @@
+import http from "http";
 import express, { Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import {
@@ -186,12 +187,24 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     if (!project) {
       throw new ServerError(500, "project not exist");
     }
-    let server = await getProjectServer(projectId, path);
+    let server = getProjectServer(projectId, path);
     setProjectStatus(projectId, ProjectStatus.STARTING);
     if (server == null) {
       let expServer = express();
+      server = http.createServer(expServer);
       expServer.all("*", await getMockRouter(path, projectId));
-      server = expServer.listen(project?.port, () => {
+      server.on("upgrade", async (req, socket, head) => {
+        const res_dummy = new http.ServerResponse(req);
+        const expressMiddleware = expServer._router.handle.bind(
+          expServer._router
+        );
+        expressMiddleware(req, res_dummy, (err) => {
+          if (err) {
+            socket.destroy();
+          }
+        });
+      });
+      server.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);
         onProjectStart(project);
