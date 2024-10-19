@@ -335,8 +335,18 @@ const WebsocketChatPanel: React.FunctionComponent<{
   messageList: Array<WebsocketMessageM> | undefined;
   onClose: () => void;
 }> = ({ show, messageList, onClose }) => {
+  useEffect(() => {
+    if (!messageList) {
+      return;
+    }
+    messageListContainer.concat(
+      messageList.slice(messageListContainer.messageList.length)
+    );
+  }, [messageList]);
   const [messageListContainer, setMessageListContainer] =
-    useState<MessageListContainer>(new MessageListContainer(messageList || []));
+    useState<MessageListContainer>(
+      new MessageListContainer(messageList ? [...messageList] : [])
+    );
   return (
     <Modal open={show} onCancel={onClose}>
       <ChatMainComponent messageListContainer={messageListContainer} />
