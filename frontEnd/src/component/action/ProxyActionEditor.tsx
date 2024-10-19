@@ -1,16 +1,16 @@
 import React from "react";
-import {Checkbox, Input, Select, Tooltip} from "antd";
+import { Checkbox, Input, Select, Tooltip } from "antd";
 import { ActionType, ProxyActionM, ProxyProtocol } from "core/struct/action";
 import HeaderEditor from "./HeaderEditor";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useActionContext } from "../context";
 import moduleStyle from "./ProxyActionEditor.module.scss";
-import {QuestionCircleOutlined} from "@ant-design/icons";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 const hostSelectBefore = (
   protocol: ProxyProtocol,
-  onChange: (value: ProxyProtocol) => void,
+  onChange: (value: ProxyProtocol) => void
 ) => (
   <Select
     defaultValue={ProxyProtocol.HTTP}
@@ -55,32 +55,35 @@ export const ProxyActionEditor: React.FunctionComponent<{
             </Tooltip>
           </div>
           <HeaderEditor
-          headers={action.requestHeaders || []}
-          onHeaderModify={(headerIndex, value) => {
-            let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
-            _headers[headerIndex] = value;
-            actionContext.onActionModify({
-              ...action,
-              requestHeaders: _headers
-            });
-          }}
-
-          onAddHeader={(header) => {
-            actionContext.onActionModify({
-              ...action,
-              requestHeaders: action.requestHeaders ? [...action.requestHeaders,header] : [],
-            });
-          }}
-
-          onDeleteHeader={(headerIndex) => {
-            let _headers = action.requestHeaders ? [...action.requestHeaders] : [];
-            _headers.splice(headerIndex, 1);
-            actionContext.onActionModify({
-              ...action,
-              requestHeaders: _headers,
-            });
-          }}
-
+            headers={action.requestHeaders || []}
+            onHeaderModify={(headerIndex, value) => {
+              let _headers = action.requestHeaders
+                ? [...action.requestHeaders]
+                : [];
+              _headers[headerIndex] = value;
+              actionContext.onActionModify({
+                ...action,
+                requestHeaders: _headers,
+              });
+            }}
+            onAddHeader={(header) => {
+              actionContext.onActionModify({
+                ...action,
+                requestHeaders: action.requestHeaders
+                  ? [...action.requestHeaders, header]
+                  : [],
+              });
+            }}
+            onDeleteHeader={(headerIndex) => {
+              let _headers = action.requestHeaders
+                ? [...action.requestHeaders]
+                : [];
+              _headers.splice(headerIndex, 1);
+              actionContext.onActionModify({
+                ...action,
+                requestHeaders: _headers,
+              });
+            }}
           />
         </div>
         <div className={moduleStyle.row}>
@@ -154,14 +157,18 @@ export const ProxyActionEditor: React.FunctionComponent<{
           <div>prefix remove</div>
           <div>
             <Input
-                placeholder={"example: /api"}
-                value={typeof action.prefixRemove === 'string' ? action.prefixRemove : undefined}
-                onChange={(event) => {
-                  actionContext.onActionModify({
-                    ...action,
-                    prefixRemove: event.target.value,
-                  });
-                }}
+              placeholder={"example: /api"}
+              value={
+                typeof action.prefixRemove === "string"
+                  ? action.prefixRemove
+                  : undefined
+              }
+              onChange={(event) => {
+                actionContext.onActionModify({
+                  ...action,
+                  prefixRemove: event.target.value,
+                });
+              }}
             />
           </div>
         </div>
@@ -189,6 +196,22 @@ export const ProxyActionEditor: React.FunctionComponent<{
               }}
             >
               allow Credentials
+            </Checkbox>
+          </div>
+        </div>
+        <div className={moduleStyle.row}>
+          <div>websocket config</div>
+          <div>
+            <Checkbox
+              checked={action.supportWebsocket}
+              onChange={(e) => {
+                actionContext.onActionModify({
+                  ...action,
+                  supportWebsocket: e.target.checked,
+                });
+              }}
+            >
+              support websocket
             </Checkbox>
           </div>
         </div>

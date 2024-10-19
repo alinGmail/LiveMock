@@ -44,6 +44,7 @@ export interface ProxyActionM {
   host: string;
   handleCross: boolean;
   crossAllowCredentials: boolean;
+  supportWebsocket: boolean;
   pathRewrite: Array<PathRewriteM>;
   prefixRemove: string | undefined | null;
   headers: Array<[string, string]> | undefined;
@@ -96,6 +97,7 @@ export function createProxyAction(): ProxyActionM {
     protocol: ProxyProtocol.HTTP,
     handleCross: false,
     crossAllowCredentials: false,
+    supportWebsocket: false,
     headers: [],
     requestHeaders: [],
     prefixRemove: null,

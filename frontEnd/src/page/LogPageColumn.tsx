@@ -4,6 +4,7 @@ import {
   PlusOutlined,
   DeleteOutlined,
   FilterOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
 import { Dispatch, useState } from "react";
@@ -17,6 +18,8 @@ import {
   modifyTableColumn,
   setColumnEdit,
   setDefaultColumnVisible,
+  setSelectedLogIndex,
+  setShowWebsocketChatPanel,
   showColumnConfig,
   showColumnEditor,
   TableColumnItem,
@@ -234,6 +237,16 @@ export function getDefaultColumn(
                 collapsed={true}
               />
             )}
+            {record.websocketInfo?.isWebsocket && "asdasd"}
+            <Button
+              type={"text"}
+              shape="circle"
+              icon={<MessageOutlined />}
+              onClick={() => {
+                dispatch(setShowWebsocketChatPanel(true));
+                dispatch(setSelectedLogIndex(index));
+              }}
+            ></Button>
           </div>
         );
       },

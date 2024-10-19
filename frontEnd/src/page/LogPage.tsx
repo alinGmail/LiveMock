@@ -5,11 +5,12 @@ import {
   LogM,
   PresetFilterM,
   PresetFilterName,
+  WebsocketMessageM,
 } from "core/struct/log";
 import { io, Socket } from "socket.io-client";
 import { AppDispatch, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
-import { Table } from "antd";
+import { Modal, Table } from "antd";
 import {
   getConfigColumn,
   getCustomColumn,
@@ -21,6 +22,7 @@ import {
   hideColumnEditor,
   PresetFilterState,
   resetLogFilter,
+  setShowWebsocketChatPanel,
   TableColumnItem,
   updatePresetFilter,
 } from "../slice/logSlice";
@@ -41,6 +43,9 @@ import {
   updateExpectationMap,
 } from "../slice/expectationSlice";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
+import ChatMainComponent, {
+  MessageListContainer,
+} from "src/component/chat/ChatMainComponent";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -286,6 +291,16 @@ const LogPage: React.FC = () => {
   }, [logColumn, logs, expectationState]);
   return (
     <div style={{ padding: "10px", marginTop: "10px" }}>
+      <WebsocketChatPanel
+        key={"wsChatPanel" + logState.selectedLogIndex}
+        show={logState.showWebsocketChatPannel}
+        messageList={
+          logs[logState.selectedLogIndex]?.websocketInfo?.messages ?? []
+        }
+        onClose={() => {
+          dispatch(setShowWebsocketChatPanel(false));
+        }}
+      ></WebsocketChatPanel>
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
@@ -312,6 +327,20 @@ const LogPage: React.FC = () => {
       />
       <ColumnConfig show={columnConfigShow} />
     </div>
+  );
+};
+
+const WebsocketChatPanel: React.FunctionComponent<{
+  show: boolean;
+  messageList: Array<WebsocketMessageM> | undefined;
+  onClose: () => void;
+}> = ({ show, messageList, onClose }) => {
+  const [messageListContainer, setMessageListContainer] =
+    useState<MessageListContainer>(new MessageListContainer(messageList || []));
+  return (
+    <Modal open={show} onCancel={onClose}>
+      <ChatMainComponent messageListContainer={messageListContainer} />
+    </Modal>
   );
 };
 

@@ -31,6 +31,8 @@ export interface LogState {
   logList: Array<LogM>;
   logFilter: Array<LogFilterM>;
   presetFilter: PresetFilterState;
+  showWebsocketChatPannel: boolean;
+  selectedLogIndex: number;
 }
 
 export const logSlice = createSlice({
@@ -48,6 +50,8 @@ export const logSlice = createSlice({
     columnEditorShow: false,
     columnConfigShow: false,
     defaultColumnVisible: [true, true, true, true, true, true],
+    showWebsocketChatPannel: false,
+    selectedLogIndex: 0,
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
@@ -157,6 +161,12 @@ export const logSlice = createSlice({
         return action.payload.visible;
       });
     },
+    setShowWebsocketChatPanel: (state, action: PayloadAction<boolean>) => {
+      state.showWebsocketChatPannel = action.payload;
+    },
+    setSelectedLogIndex: (state, action: PayloadAction<number>) => {
+      state.selectedLogIndex = action.payload;
+    },
   },
 });
 
@@ -181,6 +191,8 @@ let {
   deleteTableColumn,
   modifyAllTableColumnVisible,
   updatePresetFilter,
+  setShowWebsocketChatPanel,
+  setSelectedLogIndex,
 } = actions;
 
 export {
@@ -203,4 +215,6 @@ export {
   modifyLogFilter,
   modifyAllTableColumnVisible,
   updatePresetFilter,
+  setShowWebsocketChatPanel,
+  setSelectedLogIndex,
 };

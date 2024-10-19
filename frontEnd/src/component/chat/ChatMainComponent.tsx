@@ -1,9 +1,10 @@
 import { WebsocketMessageM } from "core/struct/log";
 import mStyle from "./ChatMainComponent.module.scss";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useThrottleFn } from "ahooks";
 
 const showStep = 5;
-const reservedHeight = 50;
+const reservedHeight = 150;
 
 const ChatMainComponent: React.FunctionComponent<{
   messageListContainer: MessageListContainer;
@@ -14,13 +15,42 @@ const ChatMainComponent: React.FunctionComponent<{
   const [startShowIndex, setStartShowIndex] = useState<number>(
     messageListContainer.messageList.length
   );
+
+  function keepToBottom() {
+    keepBottom.current =
+      scrollView.current!.scrollHeight -
+      scrollView.current!.scrollTop -
+      scrollView.current!.clientHeight;
+  }
+
+  const { run: onViewScroll } = useThrottleFn(
+    () => {
+      if (startShowIndex === 0) {
+        return;
+      }
+      if (!scrollView.current) {
+        return;
+      }
+      if (scrollView.current.scrollTop <= reservedHeight) {
+        setStartShowIndex(Math.max(0, startShowIndex - showStep));
+        // load more data
+        keepToBottom();
+      }
+    },
+    { wait: 500 }
+  );
+
   // loadFinish: not need to load date temporary
-  const [loadStatus, setLoadStatus] = useState<
-    "loading" | "allLoaded" | "loadFinish"
-  >("loading");
+  // const [loadStatus, setLoadStatus] = useState<"loading" | "allLoaded" | "loadFinish">("loading");
   useEffect(() => {
     const concatEvent: MessageConcatEventFun = (newMessage) => {
       setFlag(Math.random());
+      if (
+        scrollView.current &&
+        scrollView.current.scrollTop <= reservedHeight
+      ) {
+        keepToBottom();
+      }
     };
     messageListContainer.addConcatEvent(concatEvent);
     return () => {
@@ -40,10 +70,6 @@ const ChatMainComponent: React.FunctionComponent<{
       keepBottom.current = null;
     }
 
-    if (loadStatus === "allLoaded" || loadStatus === "loadFinish") {
-      return;
-    }
-
     if (startShowIndex === 0) {
       return;
     }
@@ -57,26 +83,27 @@ const ChatMainComponent: React.FunctionComponent<{
       // load more date
       // keep bottom position
       setStartShowIndex(Math.max(0, startShowIndex - showStep));
-      keepBottom.current =
-        scrollView.current.scrollHeight -
-        scrollView.current.scrollTop -
-        scrollView.current.clientHeight;
+      keepToBottom();
       return;
     }
   });
 
   return (
     <div className={mStyle.chatMain}>
-      {JSON.stringify(flag)}
-      {messageListContainer.messageList.length}
       <div className={mStyle.chatContainer}>
-        <div className={mStyle.chatScrollView} ref={scrollView}>
+        <div
+          className={mStyle.chatScrollView}
+          ref={scrollView}
+          onScroll={onViewScroll}
+        >
           {messageListContainer.messageList.map((messageItem, index) => {
             if (index < startShowIndex) {
               return null;
             }
             return (
-              <div className={mStyle.chatItemRow}>{messageItem.content}</div>
+              <div className={mStyle.chatItemRow} key={"chatItem" + index}>
+                {messageItem.content}
+              </div>
             );
           })}
         </div>

@@ -53,7 +53,11 @@ export function handleWebsocketProxy(
   const protocolArray = handleSubProtocol(secProtocol);
   const wss = new ws.WebSocketServer({ noServer: true });
   // log websocket info
-  logM && (logM.websocketInfo = createWebsocketInfo());
+  if (logM) {
+    logM.websocketInfo = createWebsocketInfo();
+    logM.websocketInfo.isWebsocket = true;
+    logCollection.update(logM);
+  }
 
   wss.on("connection", (ws) => {
     if (logM && logM.websocketInfo) {
