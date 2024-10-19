@@ -9,9 +9,44 @@
 .chatContainer {
   .chatScrollView {
     overflow-y: scroll;
-    height: 200px;
+    height: 400px;
     .chatItemRow {
       color: #000;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+    .chatItemLeft {
+      .chatAvatar {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+      .chatContent {
+        background-color: #e0e0e0;
+      }
+    }
+    .chatItemRight {
+      flex-direction: row-reverse;
+      .chatAvatar {
+        margin-left: 10px;
+        margin-right: 0;
+      }
+      .chatContent {
+        background-color: #dcf8c6;
+      }
+    }
+    .chatAvatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      flex-shrink: 0;
+      font-size: 30px;
+    }
+    .chatContent {
+      padding: 10px;
+      border-radius: 5px;
+      max-width: calc(80% - 40px);
     }
   }
 }

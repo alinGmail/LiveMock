@@ -2,6 +2,7 @@ import { WebsocketMessageM } from "core/struct/log";
 import mStyle from "./ChatMainComponent.module.scss";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useThrottleFn } from "ahooks";
+import { LaptopOutlined, CloudServerOutlined } from "@ant-design/icons";
 
 const showStep = 5;
 const reservedHeight = 150;
@@ -101,8 +102,23 @@ const ChatMainComponent: React.FunctionComponent<{
               return null;
             }
             return (
-              <div className={mStyle.chatItemRow} key={"chatItem" + index}>
-                {messageItem.content}
+              <div
+                className={[
+                  mStyle.chatItemRow,
+                  messageItem.sendFromClient
+                    ? mStyle.chatItemLeft
+                    : mStyle.chatItemRight,
+                ].join(" ")}
+                key={"chatItem" + index}
+              >
+                <div className={mStyle.chatAvatar}>
+                  {messageItem.sendFromClient ? (
+                    <LaptopOutlined />
+                  ) : (
+                    <CloudServerOutlined />
+                  )}
+                </div>
+                <div className={mStyle.chatContent}>{messageItem.content}</div>
               </div>
             );
           })}
