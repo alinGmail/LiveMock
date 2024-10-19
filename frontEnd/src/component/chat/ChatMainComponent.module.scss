@@ -1,0 +1,17 @@
+.chatMain {
+  color: #000;
+}
+
+.chatTil {
+  color: red;
+}
+
+.chatContainer {
+  .chatScrollView {
+    overflow-y: scroll;
+    height: 200px;
+    .chatItemRow {
+      color: #000;
+    }
+  }
+}
