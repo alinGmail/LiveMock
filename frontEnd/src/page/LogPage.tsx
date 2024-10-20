@@ -6,6 +6,7 @@ import {
   PresetFilterM,
   PresetFilterName,
   WebsocketMessageM,
+  WebsocketStatus,
 } from "core/struct/log";
 import { io, Socket } from "socket.io-client";
 import { AppDispatch, useAppSelector } from "../store";
@@ -46,6 +47,8 @@ import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent"
 import ChatMainComponent, {
   MessageListContainer,
 } from "src/component/chat/ChatMainComponent";
+import { LinkOutlined, DisconnectOutlined } from "@ant-design/icons";
+import { red, green } from "@ant-design/colors";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -289,18 +292,21 @@ const LogPage: React.FC = () => {
       />
     );
   }, [logColumn, logs, expectationState]);
+  const selLogM = logs[logState.selectedLogIndex];
   return (
     <div style={{ padding: "10px", marginTop: "10px" }}>
-      <WebsocketChatPanel
-        key={"wsChatPanel" + logState.selectedLogIndex}
-        show={logState.showWebsocketChatPannel}
-        messageList={
-          logs[logState.selectedLogIndex]?.websocketInfo?.messages ?? []
-        }
-        onClose={() => {
-          dispatch(setShowWebsocketChatPanel(false));
-        }}
-      ></WebsocketChatPanel>
+      {selLogM && (
+        <WebsocketChatPanel
+          path={selLogM.req?.path ?? ""}
+          key={"wsChatPanel" + selLogM.id}
+          show={logState.showWebsocketChatPannel}
+          messageList={selLogM.websocketInfo?.messages ?? []}
+          onClose={() => {
+            dispatch(setShowWebsocketChatPanel(false));
+          }}
+          status={selLogM.websocketInfo?.status ?? null}
+        ></WebsocketChatPanel>
+      )}
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
@@ -333,8 +339,10 @@ const LogPage: React.FC = () => {
 const WebsocketChatPanel: React.FunctionComponent<{
   show: boolean;
   messageList: Array<WebsocketMessageM> | undefined;
+  path: string;
+  status: WebsocketStatus | null;
   onClose: () => void;
-}> = ({ show, messageList, onClose }) => {
+}> = ({ show, messageList, onClose, path, status }) => {
   useEffect(() => {
     if (!messageList) {
       return;
@@ -348,7 +356,28 @@ const WebsocketChatPanel: React.FunctionComponent<{
       new MessageListContainer(messageList ? [...messageList] : [])
     );
   return (
-    <Modal open={show} onCancel={onClose}>
+    <Modal
+      open={show}
+      onCancel={onClose}
+      title={
+        <div>
+          {`${path}`}
+          &nbsp;&nbsp;&nbsp;
+          {status && status === WebsocketStatus.OPEN && (
+            <>
+              <LinkOutlined style={{ color: green[5] }} />
+              &nbsp;<span style={{ color: green[5] }}>{status}</span>
+            </>
+          )}
+          {status && status !== WebsocketStatus.OPEN && (
+            <>
+              <DisconnectOutlined style={{ color: red[5] }} />
+              &nbsp;<span style={{ color: red[5] }}>{status}</span>
+            </>
+          )}
+        </div>
+      }
+    >
       <ChatMainComponent messageListContainer={messageListContainer} />
     </Modal>
   );
