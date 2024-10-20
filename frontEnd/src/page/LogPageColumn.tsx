@@ -18,7 +18,8 @@ import {
   modifyTableColumn,
   setColumnEdit,
   setDefaultColumnVisible,
-  setSelectedLogIndex,
+  setSelectedLogId,
+  setSelectedLogItem,
   setShowWebsocketChatPanel,
   showColumnConfig,
   showColumnEditor,
@@ -237,16 +238,18 @@ export function getDefaultColumn(
                 collapsed={true}
               />
             )}
-            {record.websocketInfo?.isWebsocket && "asdasd"}
-            <Button
-              type={"text"}
-              shape="circle"
-              icon={<MessageOutlined />}
-              onClick={() => {
-                dispatch(setShowWebsocketChatPanel(true));
-                dispatch(setSelectedLogIndex(index));
-              }}
-            ></Button>
+            {record.websocketInfo?.isWebsocket && (
+              <Button
+                type={"text"}
+                shape="circle"
+                icon={<MessageOutlined />}
+                onClick={() => {
+                  dispatch(setShowWebsocketChatPanel(true));
+                  dispatch(setSelectedLogId(record.id));
+                  dispatch(setSelectedLogItem(record));
+                }}
+              ></Button>
+            )}
           </div>
         );
       },

@@ -1,5 +1,5 @@
 import http from "http";
-import express, { Request, Response } from "express";
+import express, { raw, Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import {
   getLogCollection,
@@ -36,6 +36,9 @@ import { createLogView } from "core/struct/logView";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
 import { deleteDatabase } from "../db/dbUtils";
+import { once } from "../util/commonUtils";
+import { LogM } from "core/build/struct/log";
+import { logEventEmitter, logViewEventEmitter } from "../common/logViewEvent";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
@@ -226,6 +229,13 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     server.once("error", (error) => {
       res.status(500);
       res.end("server start fail");
+    });
+    // add log update event
+    once(`addLogUpdateEvent:${projectId}:${path}`, async () => {
+      const updateCollection = await getLogCollection(projectId, path);
+      updateCollection.on("update", (newLog: LogM, oldLog: LogM) => {
+        logEventEmitter.emit("update", { projectId, log: newLog, oldLog });
+      });
     });
   });
 

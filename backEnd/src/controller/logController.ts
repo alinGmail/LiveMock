@@ -30,8 +30,9 @@ import {
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
-import { logViewEventEmitter } from "../common/logViewEvent";
+import { logEventEmitter, logViewEventEmitter } from "../common/logViewEvent";
 import { getLogDynamicView } from "../log/logUtils";
+import console from "console";
 
 const PAGE_SIZE = 100;
 
@@ -183,10 +184,7 @@ export async function addLogListener(io: Server, path: string) {
       console.error("log view is null,projectId:" + projectId);
       return;
     }
-    socket.join(logView?.id);
-    //socket.on('disconnect', () => {
-    // console.log(` disconnected`);
-    //});
+    socket.join(`logView:${logView.id}`);
     const chain = logCollection.chain();
     const logs = chain
       .find({})
@@ -196,29 +194,47 @@ export async function addLogListener(io: Server, path: string) {
     socket.on("initLogsReq", (args) => {
       socket.emit("initLogsRes", logs);
     });
-  });
-  io.on("disconnect", (socket) => {
-    console.log("disconnect");
+
+    socket.on("join_log_update", (logId: number) => {
+      socket.join(`log:${projectId}:${logId}`);
+    });
+    socket.on("leave_log_update", (logId: number) => {
+      socket.leave(`log:${projectId}:${logId}`);
+    });
+
+    socket.on("disconnect", () => {
+      socket.leave(`logView:${logView.id}`);
+    });
   });
 
   logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("insert", { log, logViewId });
+    io.to(`logView:${logViewId}`).emit("insert", { log, logViewId });
   });
 
   logViewEventEmitter.on("update", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("update", { log, logViewId });
+    io.to(`logView:${logViewId}`).emit("update", { log, logViewId });
   });
 
   logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
     let { log, logViewId } = arg;
-    io.to(logViewId).emit("delete", { log, logViewId });
+    io.to(`logView:${logViewId}`).emit("delete", { log, logViewId });
   });
 
-  logViewEventEmitter.on('updateExpectation',(arg:{projectId:string,expectation:ExpectationM}) => {
-    let {projectId,expectation} = arg;
-    io.emit('updateExpectation',{projectId,expectation})
-  })
+  logViewEventEmitter.on(
+    "updateExpectation",
+    (arg: { projectId: string; expectation: ExpectationM }) => {
+      let { projectId, expectation } = arg;
+      io.emit("updateExpectation", { projectId, expectation });
+    }
+  );
 
+  logEventEmitter.on(
+    "update",
+    (args: { projectId: string; log: LogM; oldLog: LogM }) => {
+      let { projectId, log, oldLog } = args;
+      io.to(`log:${projectId}:${log.id}`).emit("updateLog", { log, projectId });
+    }
+  );
 }
