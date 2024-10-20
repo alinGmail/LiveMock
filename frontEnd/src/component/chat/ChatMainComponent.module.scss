@@ -10,8 +10,10 @@
   .chatScrollView {
     overflow-y: scroll;
     height: 400px;
+    transition: scrollTop 0.5s ease-in-out;
     .chatItemRow {
       color: #000;
+      margin-right: 10px;
       margin-bottom: 15px;
       display: flex;
       align-items: flex-start;
@@ -42,11 +44,17 @@
       margin-right: 10px;
       flex-shrink: 0;
       font-size: 30px;
+      color: #262626;
     }
+
     .chatContent {
       padding: 10px;
       border-radius: 5px;
       max-width: calc(80% - 40px);
     }
   }
+}
+
+:global(.dark_mode) .chatAvatar{
+  color: #d9d9d9!important;
 }

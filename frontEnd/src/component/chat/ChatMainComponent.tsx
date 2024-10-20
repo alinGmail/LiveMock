@@ -3,9 +3,10 @@ import mStyle from "./ChatMainComponent.module.scss";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useThrottleFn } from "ahooks";
 import { LaptopOutlined, CloudServerOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 
 const showStep = 5;
-const reservedHeight = 150;
+const reservedHeight = 50;
 
 const ChatMainComponent: React.FunctionComponent<{
   messageListContainer: MessageListContainer;
@@ -46,11 +47,15 @@ const ChatMainComponent: React.FunctionComponent<{
   useEffect(() => {
     const concatEvent: MessageConcatEventFun = (newMessage) => {
       setFlag(Math.random());
-      if (
-        scrollView.current &&
-        scrollView.current.scrollTop <= reservedHeight
-      ) {
-        keepToBottom();
+      if (scrollView.current) {
+        if (
+          scrollView.current.scrollHeight -
+            scrollView.current.scrollTop -
+            scrollView.current.clientHeight <=
+          reservedHeight
+        ) {
+          keepToBottom();
+        }
       }
     };
     messageListContainer.addConcatEvent(concatEvent);
@@ -97,6 +102,11 @@ const ChatMainComponent: React.FunctionComponent<{
           ref={scrollView}
           onScroll={onViewScroll}
         >
+          <center style={{
+            height:"30px"
+          }}>
+            <Spin spinning={startShowIndex !== 0}></Spin>
+          </center>
           {messageListContainer.messageList.map((messageItem, index) => {
             if (index < startShowIndex) {
               return null;
