@@ -38,7 +38,7 @@ To install the desktop version, simply download from the [release page](https://
 ### Installation of the web service version
 #### 1.clone the project
 ```
-git clone git@github.com:alinGmail/LiveMock.git
+git clone https://github.com/alinGmail/LiveMock.git
 ```
 
 #### 2.install dependencies
