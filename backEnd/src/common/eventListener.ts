@@ -57,8 +57,34 @@ export function addWsEventListeners() {
       } else {
         project.unclosedWebsocketRequestLogIds = [logM.id];
       }
+      projectCollection.update(project);
     }
   );
 
   // websocket close
+  websocketEventEmitter.on(
+    WebsocketEvent.CLOSED,
+    async (
+      projectId: string,
+      wss: ws.WebSocketServer,
+      wsc: ws.WebSocket,
+      logM: LogM
+    ) => {
+      const projectCollection = await getProjectCollection("db");
+      const project = projectCollection.findOne({
+        id: {
+          $eq: projectId,
+        },
+      });
+      if (!project) {
+        return;
+      }
+      if (project.unclosedWebsocketRequestLogIds) {
+        project.unclosedWebsocketRequestLogIds =
+          project.unclosedWebsocketRequestLogIds.filter(
+            (item) => item !== logM.id
+          );
+      }
+    }
+  );
 }

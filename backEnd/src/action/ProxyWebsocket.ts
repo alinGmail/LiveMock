@@ -152,6 +152,13 @@ export function handleWebsocketProxy(
         console.error(error);
       }
     });
+    websocketEventEmitter.emit(
+      WebsocketEvent.CLOSED,
+      projectId,
+      wss,
+      wsc,
+      logM
+    );
   });
 
   wsc.on("open", () => {
