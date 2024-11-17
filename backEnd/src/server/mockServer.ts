@@ -111,7 +111,7 @@ const getMockRouter: (
               projectId,
               path
             );
-            await actionImpl?.process(req, res, logM, logCollection);
+            await actionImpl?.process(projectId, req, res, logM, logCollection);
             logM && insertResLog(logCollection, req, res, expectation.id, logM);
             return true;
           }

@@ -8,6 +8,8 @@ import express from "express";
 import ws from "ws";
 import { ProxyActionM } from "core/struct/action";
 import * as console from "console";
+import { websocketEventEmitter } from "../common/eventEmitters";
+import { WebsocketEvent } from "core/struct/events/systemEvent";
 
 export function handleSubProtocol(secProtocol: string | null | undefined) {
   if (secProtocol) {
@@ -42,6 +44,7 @@ export function exclude_ws_relative_header(rawHeaders: Array<string>): {
 }
 
 export function handleWebsocketProxy(
+  projectId: string,
   req: express.Request,
   res: express.Response,
   logM: LogM | undefined,
@@ -60,6 +63,13 @@ export function handleWebsocketProxy(
   }
 
   wss.on("connection", (ws) => {
+    websocketEventEmitter.emit(
+      WebsocketEvent.CONNECTION,
+      projectId,
+      wss,
+      wsc,
+      logM
+    );
     if (logM && logM.websocketInfo) {
       logM.websocketInfo.status = WebsocketStatus.OPEN;
       logCollection.update(logM);

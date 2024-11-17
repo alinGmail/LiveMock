@@ -82,10 +82,11 @@ export type PathRewriteM = AddPrefixM | RemovePrefixM;
 // 实现类的接口
 export interface IAction {
   process: (
+    projectId: string,
     req: express.Request,
     res: express.Response,
     log: LogM | undefined,
-    logCollection: Collection<LogM>
+    logCollection: Collection<LogM>,
   ) => Promise<void>;
 }
 export function createProxyAction(): ProxyActionM {

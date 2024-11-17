@@ -38,7 +38,7 @@ import * as console from "console";
 import { deleteDatabase } from "../db/dbUtils";
 import { once } from "../util/commonUtils";
 import { LogM } from "core/build/struct/log";
-import { logEventEmitter, logViewEventEmitter } from "../common/logViewEvent";
+import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);

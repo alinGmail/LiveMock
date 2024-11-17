@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { v4 as uuId } from "uuid";
 
 export interface ProjectM{
@@ -10,6 +9,7 @@ export interface ProjectM{
     status: ProjectStatus;
     error: boolean;
     errorMessage: string | null;
+    unclosedWebsocketRequestLogIds: Array<number>;
 }
 
 
@@ -30,5 +30,6 @@ export function createProject():ProjectM{
         name: "",
         port: "8088",
         status: ProjectStatus.STOPPED,
+        unclosedWebsocketRequestLogIds:[],
     }
 }

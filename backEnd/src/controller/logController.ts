@@ -30,7 +30,7 @@ import {
   ListLogViewLogsResponse,
   ListLogViewResponse,
 } from "core/struct/response/LogResponse";
-import { logEventEmitter, logViewEventEmitter } from "../common/logViewEvent";
+import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
 import { getLogDynamicView } from "../log/logUtils";
 import console from "console";
 

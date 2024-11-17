@@ -18,6 +18,7 @@ class CustomResponseActionImpl implements IAction {
   }
 
   async process(
+    projectId: string,
     req: express.Request,
     res: express.Response,
     logM: LogM | undefined
@@ -70,8 +71,8 @@ function insetProxyInfo(log: LogM | undefined) {
     isProxy: false,
     proxyHost: null,
     proxyPath: null,
-    requestHeaders:[],
-    responseHeaders:[],
+    requestHeaders: [],
+    responseHeaders: [],
   };
 }
 

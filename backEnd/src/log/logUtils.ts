@@ -14,7 +14,7 @@ import {
   LogFilterM,
   LogM,
 } from "core/struct/log";
-import { logViewEventEmitter } from "../common/logViewEvent";
+import { logViewEventEmitter } from "../common/eventEmitters";
 import { once } from "../util/commonUtils";
 import _ from "lodash";
 

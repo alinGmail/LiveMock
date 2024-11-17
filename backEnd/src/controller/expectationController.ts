@@ -26,7 +26,7 @@ import {
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "core/struct/response/ExpectationResponse";
-import { logViewEventEmitter } from "../common/logViewEvent";
+import { logViewEventEmitter } from "../common/eventEmitters";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());

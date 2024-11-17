@@ -178,6 +178,7 @@ export default class ProxyActionImpl implements IAction {
     this.delay = delay;
   }
   async process(
+    projectId: string,
     req: express.Request,
     res: express.Response,
     logM: LogM | undefined,
@@ -189,7 +190,7 @@ export default class ProxyActionImpl implements IAction {
       req.headers.upgrade &&
       req.headers.upgrade.toLowerCase() === "websocket"
     ) {
-      handleWebsocketProxy(req, res, logM, this.action, logCollection);
+      handleWebsocketProxy(projectId,req, res, logM, this.action, logCollection);
       return;
     }
     // handle cross

@@ -9,7 +9,7 @@ import {
   WebsocketStatus,
 } from "core/struct/log";
 import { io, Socket } from "socket.io-client";
-import { AppDispatch, useAppSelector } from "../store";
+import {AppDispatch, store, useAppSelector} from "../store";
 import { useDispatch } from "react-redux";
 import { Modal, Table } from "antd";
 import {
@@ -275,7 +275,7 @@ const LogPage: React.FC = () => {
     socket.on(
       "updateLog",
       ({ projectId, log }: { projectId: string; log: LogM }) => {
-        if (projectId === currentProject.id && log.id === logState.selectedLogId) {
+        if (projectId === currentProject.id && log.id === store.getState().log.selectedLogId) {
           dispatch(setSelectedLogItem(log));
         }
       }
