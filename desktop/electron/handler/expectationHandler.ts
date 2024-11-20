@@ -19,7 +19,7 @@ import {
 } from "core/struct/params/ExpectationParams";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
-import { logViewEventEmitter } from "../common/logViewEvent";
+import {logViewEventEmitter} from "../common/eventEmitters";
 
 const ipcMain = electron.ipcMain;
 

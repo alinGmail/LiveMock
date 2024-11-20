@@ -9,6 +9,7 @@ import * as http from "http";
 import { isRecordBody } from "../util/bodyParseUtil";
 import typeis from "type-is";
 import { LogM } from "core/struct/log";
+import {handleWebsocketProxy} from "./ProxyWebsocket";
 
 const inflateAsync = util.promisify(zlib.inflate);
 const unzipAsync = util.promisify(zlib.unzip);
@@ -30,7 +31,7 @@ proxy.on("proxyReq", function (proxyReq, req, res, options) {
   if (proxyAction.requestHeaders && proxyAction.requestHeaders.length > 0) {
     proxyAction.requestHeaders.forEach(([headerName, headerValue]) => {
       // ignore the blank header name
-      if(headerName.trim() === ''){
+      if (headerName.trim() === "") {
         return;
       }
       proxyReq.setHeader(headerName, headerValue);
@@ -130,7 +131,7 @@ function handleExternalHeaders(
 ) {
   headers.forEach((item) => {
     // ignore the empty header
-    if(item[0].trim() === ''){
+    if (item[0].trim() === "") {
       return;
     }
     res.headers[item[0].toLowerCase()] = item[1];
@@ -175,10 +176,20 @@ export default class ProxyActionImpl implements IAction {
     this.delay = delay;
   }
   async process(
+    projectId: string,
     req: express.Request,
     res: express.Response,
-    logM: LogM | undefined
+    logM: LogM | undefined,
+    logCollection: Collection<LogM>
   ): Promise<void> {
+    if (
+        req.method === "GET" &&
+        req.headers.upgrade &&
+        req.headers.upgrade.toLowerCase() === "websocket"
+    ) {
+      handleWebsocketProxy(projectId,req, res, logM, this.action, logCollection);
+      return;
+    }
     // handle cross
     if (this.action.handleCross && req.method.toUpperCase() === "OPTIONS") {
       return handleOptionsCross(req, res, this.action.crossAllowCredentials);
@@ -212,7 +223,7 @@ function insetProxyInfo(
   logM: LogM | undefined,
   proxyHost: string,
   proxyPath: string,
-  proxyAction: ProxyActionM,
+  proxyAction: ProxyActionM
 ) {
   let _proxyPath = proxyPath;
   if (!logM) {

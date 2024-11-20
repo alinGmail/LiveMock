@@ -14,9 +14,9 @@ import {
   LogFilterM,
   LogM,
 } from "core/struct/log";
-import { logViewEventEmitter } from "../common/logViewEvent";
 import { once } from "../util/commonUtils";
 import _ from "lodash";
+import {logViewEventEmitter} from "../common/eventEmitters";
 
 export function insertReqLog(
   logCollection: Collection<LogM>,

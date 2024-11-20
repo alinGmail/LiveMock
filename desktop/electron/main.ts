@@ -17,6 +17,8 @@ import * as electron from "electron";
 import ipcMain = electron.ipcMain;
 import { SystemEvents } from "core/struct/events/desktopEvents";
 import log from 'electron-log/main';
+import { sysEventEmitter } from "./common/eventEmitters";
+import { SystemEvent } from "core/struct/events/systemEvent";
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -41,14 +43,16 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 const env = process.env["PROJECT_ENV"];
 
-async function projectInit() {
+
+sysEventEmitter.on(SystemEvent.START,async () => {
   const systemCollection = await getSystemCollection(app.getPath("userData"));
   const systemConfig = systemCollection.findOne({});
   if (systemConfig) {
   } else {
     systemCollection.insertOne({ version: systemVersion });
   }
-}
+})
+
 
 async function createWindow() {
   buildMenu({
@@ -56,7 +60,10 @@ async function createWindow() {
       createAboutWindow();
     },
   });
-  await projectInit();
+  await Promise.all(
+      sysEventEmitter.listeners(SystemEvent.START).map((listener) => listener())
+  );
+
   await setProjectHandler(app.getPath("userData"));
   await setExpectationHandler(app.getPath("userData"));
   await setMatcherHandler(app.getPath("userData"));

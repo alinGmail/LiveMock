@@ -188,9 +188,17 @@ export default class ProxyActionImpl implements IAction {
     if (
       req.method === "GET" &&
       req.headers.upgrade &&
-      req.headers.upgrade.toLowerCase() === "websocket"
+      req.headers.upgrade.toLowerCase() === "websocket" &&
+      this.action.supportWebsocket
     ) {
-      handleWebsocketProxy(projectId,req, res, logM, this.action, logCollection);
+      handleWebsocketProxy(
+        projectId,
+        req,
+        res,
+        logM,
+        this.action,
+        logCollection
+      );
       return;
     }
     // handle cross
