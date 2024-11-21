@@ -6,10 +6,12 @@ import {
   LogM,
   PresetFilterM,
   PresetFilterName,
+  WebsocketMessageM,
+  WebsocketStatus,
 } from "core/struct/log";
-import { AppDispatch, useAppSelector } from "../store";
+import { AppDispatch, store, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
-import { Button, Table } from "antd";
+import { Button, Modal, Table } from "antd";
 import {
   getConfigColumn,
   getCustomColumn,
@@ -22,6 +24,8 @@ import {
   hideColumnEditor,
   PresetFilterState,
   resetLogFilter,
+  setSelectedLogItem,
+  setShowWebsocketChatPanel,
   TableColumnItem,
   updatePresetFilter,
 } from "../slice/logSlice";
@@ -31,7 +35,7 @@ import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
-import { LogViewEvents } from "core/struct/events/desktopEvents";
+import { LogEvents, LogViewEvents } from "core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
@@ -39,6 +43,11 @@ import { setExpectationMap } from "../slice/expectationSlice";
 import { listExpectationListReq } from "../server/expectationServer";
 import _ from "lodash";
 import { getExpectationSuccess } from "../slice/thunk";
+import ChatMainComponent, {
+  MessageListContainer,
+} from "../component/chat/ChatMainComponent";
+import { DisconnectOutlined, LinkOutlined } from "@ant-design/icons";
+import { red, green } from "@ant-design/colors";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -227,13 +236,13 @@ const LogPage: React.FC = () => {
 
   useEffect(() => {
     const id = uuId();
-    function onLogInsertHandle(
+    function onViewLogInsertHandle(
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) {
       onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
     }
-    window.api.event.on(LogViewEvents.OnLogAdd, onLogInsertHandle, id);
+    window.api.event.on(LogViewEvents.OnLogAdd, onViewLogInsertHandle, id);
     return () => {
       window.api.event.removeListener(LogViewEvents.OnLogAdd, id);
     };
@@ -241,13 +250,13 @@ const LogPage: React.FC = () => {
 
   useEffect(() => {
     const id = uuId();
-    const onLogUpdateHandle = (
+    const onViewLogUpdateHandle = (
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) => {
       onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
     };
-    window.api.event.on(LogViewEvents.OnLogUpdate, onLogUpdateHandle, id);
+    window.api.event.on(LogViewEvents.OnLogUpdate, onViewLogUpdateHandle, id);
     return () => {
       window.api.event.removeListener(LogViewEvents.OnLogUpdate, id);
     };
@@ -255,15 +264,38 @@ const LogPage: React.FC = () => {
 
   useEffect(() => {
     const id = uuId();
-    const onLogDeleteHandle = (
+    const onViewLogDeleteHandle = (
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) => {
       onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
     };
-    window.api.event.on(LogViewEvents.OnLogDelete, onLogDeleteHandle, id);
+    window.api.event.on(LogViewEvents.OnLogDelete, onViewLogDeleteHandle, id);
     return () => {
       window.api.event.removeListener(LogViewEvents.OnLogDelete, id);
+    };
+  }, [currentProject.id]);
+
+  /**
+   * update select log item
+   * use for websocket
+   */
+  useEffect(() => {
+    const id = uuId();
+    const onLogUpdateHandle = (
+      event: IpcRendererEvent,
+      { projectId, log, oldLog }: { projectId: string; log: LogM; oldLog: LogM }
+    ) => {
+      if (projectId !== currentProject.id) {
+        return;
+      }
+      if (log.id === store.getState().log.selectedLogId) {
+        dispatch(setSelectedLogItem(log));
+      }
+    };
+    window.api.event.on(LogEvents.OnLogUpdate, onLogUpdateHandle, id);
+    return () => {
+      window.api.event.removeListener(LogEvents.OnLogUpdate, id);
     };
   }, [currentProject.id]);
 
@@ -282,8 +314,21 @@ const LogPage: React.FC = () => {
       />
     );
   }, [logColumn, logs, expectationState]);
+  const selLogM = logState.selectedLogItem;
   return (
     <div style={{ padding: "10px", marginTop: "10px" }}>
+      {selLogM && (
+        <WebsocketChatPanel
+          path={selLogM.req?.path ?? ""}
+          key={"wsChatPanel" + selLogM.id}
+          show={logState.showWebsocketChatPanel}
+          messageList={selLogM.websocketInfo?.messages ?? []}
+          onClose={() => {
+            dispatch(setShowWebsocketChatPanel(false));
+          }}
+          status={selLogM.websocketInfo?.status ?? null}
+        ></WebsocketChatPanel>
+      )}
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
@@ -310,6 +355,53 @@ const LogPage: React.FC = () => {
       />
       <ColumnConfig show={columnConfigShow} />
     </div>
+  );
+};
+
+const WebsocketChatPanel: React.FunctionComponent<{
+  show: boolean;
+  messageList: Array<WebsocketMessageM> | undefined;
+  path: string;
+  status: WebsocketStatus | null;
+  onClose: () => void;
+}> = ({ show, messageList, onClose, path, status }) => {
+  useEffect(() => {
+    if (!messageList) {
+      return;
+    }
+    messageListContainer.concat(
+      messageList.slice(messageListContainer.messageList.length)
+    );
+  }, [messageList]);
+  const [messageListContainer, setMessageListContainer] =
+    useState<MessageListContainer>(
+      new MessageListContainer(messageList ? [...messageList] : [])
+    );
+  return (
+    <Modal
+      open={show}
+      onCancel={onClose}
+      title={
+        <div>
+          {`${path}`}
+          &nbsp;&nbsp;&nbsp;
+          {status && status === WebsocketStatus.OPEN && (
+            <>
+              <LinkOutlined style={{ color: green[5] }} />
+              &nbsp;<span style={{ color: green[5] }}>{status}</span>
+            </>
+          )}
+          {status && status !== WebsocketStatus.OPEN && (
+            <>
+              <DisconnectOutlined style={{ color: red[5] }} />
+              &nbsp;<span style={{ color: red[5] }}>{status}</span>
+            </>
+          )}
+        </div>
+      }
+    >
+      <ChatMainComponent messageListContainer={messageListContainer} />
+    </Modal>
   );
 };
 

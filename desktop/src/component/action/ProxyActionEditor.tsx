@@ -201,6 +201,22 @@ export const ProxyActionEditor: React.FunctionComponent<{
             </Checkbox>
           </div>
         </div>
+        <div className={moduleStyle.row}>
+          <div>websocket config</div>
+          <div>
+            <Checkbox
+              checked={action.supportWebsocket}
+              onChange={(e) => {
+                actionContext.onActionModify({
+                  ...action,
+                  supportWebsocket: e.target.checked,
+                });
+              }}
+            >
+              support websocket
+            </Checkbox>
+          </div>
+        </div>
       </div>
     </>
   );
