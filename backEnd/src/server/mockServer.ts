@@ -6,12 +6,12 @@ import {
   setNewestLogNumber,
 } from "../db/dbManager";
 import arrayUtils from "../util/arrayUtils";
-import { IMatcher } from "core/struct/matcher";
+import { IMatcher } from "livemock-core/struct/matcher";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
 import { insertReqLog, insertResLog } from "../log/logUtils";
 import * as http from "http";
-import { LogM } from "core/struct/log";
+import { LogM } from "livemock-core/struct/log";
 
 // default is 10mb
 const MaxRawBodySize = 10 * 1024 * 1024;

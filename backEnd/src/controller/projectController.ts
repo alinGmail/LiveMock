@@ -16,14 +16,14 @@ import {
   ListProjectReqQuery,
   UpdateProjectPathParam,
   UpdateProjectReqBody,
-} from "core/struct/params/ProjectParams";
+} from "livemock-core/struct/params/ProjectParams";
 import { isNotEmptyString } from "../common/utils";
 import {
   CreateProjectResponse,
   ListProjectResponse,
   UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
-import { ProjectM, ProjectStatus } from "core/struct/project";
+} from "livemock-core/struct/response/ProjectResponse";
+import { ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import { Collection } from "lokijs";
 import {
   getProjectServer,
@@ -32,13 +32,13 @@ import {
   setProjectStatus,
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
-import { createLogView } from "core/struct/logView";
+import { createLogView } from "livemock-core/struct/logView";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
 import { deleteDatabase } from "../db/dbUtils";
 import { once } from "../util/commonUtils";
-import { LogM } from "core/build/struct/log";
 import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
+import { LogM } from "livemock-core/struct/log";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);

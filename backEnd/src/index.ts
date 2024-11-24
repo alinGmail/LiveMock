@@ -8,7 +8,7 @@ import { addLogListener, getLogRouter } from "./controller/logController";
 import { getLogFilterRouter } from "./controller/logFilterController";
 import { getSystemCollection } from "./db/dbManager";
 import { sysEventEmitter } from "./common/eventEmitters";
-import { SystemEvent } from "core/struct/events/systemEvent";
+import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 import { addWsEventListeners } from "./common/eventListener";
 
 const { Server } = require("socket.io");

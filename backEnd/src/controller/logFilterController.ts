@@ -12,7 +12,7 @@ import {
   UpdatePresetLogFilterPathParam,
   UpdatePresetLogFilterReqBody,
   UpdatePresetLogFilterReqQuery,
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import { getLogViewCollection } from "../db/dbManager";
 import {
@@ -20,14 +20,14 @@ import {
   DeleteLogFilterResponse,
   UpdateLogFilterResponse,
   UpdatePresetLogFilterResponse,
-} from "core/struct/response/LogFilterResponse";
+} from "livemock-core/struct/response/LogFilterResponse";
 import bodyParser from "body-parser";
 import {
   applyDynamicViewFilter,
   getLogDynamicView,
   removeDynamicViewFilter,
 } from "../log/logUtils";
-import { FilterType, PresetFilterM } from "core/struct/log";
+import { FilterType, PresetFilterM } from "livemock-core/struct/log";
 import { isEmptyArray } from "../util/arrayUtils";
 
 export async function getLogFilterRouter(

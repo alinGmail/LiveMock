@@ -1,5 +1,5 @@
 import { Collection } from "lokijs";
-import { ExpectationM } from "core/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import {
   getExpectationDb,
   getLogCollection,
@@ -22,14 +22,14 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
-} from "core/struct/params/LogParams";
-import { LogM } from "core/struct/log";
+} from "livemock-core/struct/params/LogParams";
+import { LogM } from "livemock-core/struct/log";
 import { Server, Socket } from "socket.io";
 import {
   DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
-} from "core/struct/response/LogResponse";
+} from "livemock-core/struct/response/LogResponse";
 import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
 import { getLogDynamicView } from "../log/logUtils";
 import console from "console";

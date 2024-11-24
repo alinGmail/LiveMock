@@ -13,13 +13,13 @@ import {
   UpdateActionPathParam,
   UpdateActionReqBody,
   UpdateActionReqQuery,
-} from "core/struct/params/ActionParams";
+} from "livemock-core/struct/params/ActionParams";
 import {
   CreateActionResponse,
   DeleteActionResponse,
   UpdateActionResponse,
-} from "core/struct/response/ActionResponse";
-import { ExpectationM } from "core/struct/expectation";
+} from "livemock-core/struct/response/ActionResponse";
+import { ExpectationM } from "livemock-core/struct/expectation";
 
 
 

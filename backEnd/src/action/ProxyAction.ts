@@ -1,4 +1,4 @@
-import { IAction, ProxyActionM } from "core/struct/action";
+import { IAction, ProxyActionM } from "livemock-core/struct/action";
 import express from "express";
 import { delayPromise } from "./common";
 import * as zlib from "zlib";
@@ -8,7 +8,7 @@ import { fixRequestBody } from "./fixRequestBody";
 import * as http from "http";
 import { isRecordBody } from "../util/bodyParseUtil";
 import typeis from "type-is";
-import { LogM } from "core/struct/log";
+import { LogM } from "livemock-core/struct/log";
 import { handleWebsocketProxy } from "./ProxyWebsocket";
 
 const inflateAsync = util.promisify(zlib.inflate);

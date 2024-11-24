@@ -10,12 +10,12 @@ import {
   UpdateMatcherPathParam,
   UpdateMatcherReqBody,
   UpdateMatcherReqQuery,
-} from "core/struct/params/MatcherParams";
+} from "livemock-core/struct/params/MatcherParams";
 import {
   CreateMatcherResponse,
   DeleteMatcherResponse,
   UpdateMatcherResponse,
-} from "core/struct/response/MatcherResponse";
+} from "livemock-core/struct/response/MatcherResponse";
 import {getExpectationCollection} from "../db/dbManager";
 
 

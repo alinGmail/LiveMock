@@ -1,4 +1,4 @@
-import {ProjectStatus} from "core/struct/project";
+import {ProjectStatus} from "livemock-core/struct/project";
 import * as http from "http";
 
 

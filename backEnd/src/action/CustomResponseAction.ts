@@ -3,11 +3,11 @@ import {
   CustomResponseActionM,
   IAction,
   ResponseType,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import express from "express";
 import { delayPromise } from "./common";
 import Mock from "mockjs";
-import { LogM } from "core/struct/log";
+import { LogM } from "livemock-core/struct/log";
 
 class CustomResponseActionImpl implements IAction {
   action: CustomResponseActionM;

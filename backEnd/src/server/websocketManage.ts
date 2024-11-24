@@ -1,6 +1,6 @@
 
 import ws from "ws"
-import {WebsocketStatus} from "core/struct/log";
+import {WebsocketStatus} from "livemock-core/struct/log";
 
 let websocketGroupMap = new Map<number,WebsocketGroupItem>();
 
