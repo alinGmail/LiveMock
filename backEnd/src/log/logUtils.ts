@@ -60,7 +60,7 @@ export function insertResLog(
   const responseLogM = createResponseLog();
   logM.req &&
     (responseLogM.duration =
-      responseLogM.responseDate.getTime() - logM.req.requestDate.getTime());
+      responseLogM.responseTime - logM.req.requestTime);
   responseLogM.headers = getResponseHeaderMap(res);
   responseLogM.body = (res as any).body;
   responseLogM.rawBody = (res as any).rawBody;
