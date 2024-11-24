@@ -22,6 +22,7 @@
     "@types/supertest": "^2.0.12",
     "@types/type-is": "^1.6.3",
     "jest": "^28.1.1",
+    "livemock-core": "workspace:*",
     "mockserver-client": "^5.13.2",
     "mockserver-node": "^5.13.2",
     "mockttp": "^3.1.0",
