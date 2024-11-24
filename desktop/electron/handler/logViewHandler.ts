@@ -1,6 +1,6 @@
 import * as electron from "electron";
 import ipcMain = electron.ipcMain;
-import { LogEvents, LogViewEvents } from "core/struct/events/desktopEvents";
+import { LogEvents, LogViewEvents } from "livemock-core/struct/events/desktopEvents";
 import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
@@ -11,11 +11,11 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
-} from "core/struct/params/LogParams";
+} from "livemock-core/struct/params/LogParams";
 import { ServerError } from "./common";
 import { getLogCollection, getLogViewCollection } from "../db/dbManager";
 import { getLogDynamicView } from "../log/logUtils";
-import { LogM } from "core/struct/log";
+import { LogM } from "livemock-core/struct/log";
 import WebContents = electron.WebContents;
 import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
 

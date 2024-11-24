@@ -8,7 +8,7 @@ import {
   PresetFilterName,
   WebsocketMessageM,
   WebsocketStatus,
-} from "core/struct/log";
+} from "livemock-core/struct/log";
 import { AppDispatch, store, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { Button, Modal, Table } from "antd";
@@ -35,7 +35,7 @@ import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
-import { LogEvents, LogViewEvents } from "core/struct/events/desktopEvents";
+import { LogEvents, LogViewEvents } from "livemock-core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";

@@ -41,7 +41,7 @@ export enum LogViewEvents{
     OnLogDelete="OnLogVIewLogDelete"
 }
 
-export declare enum LogEvents{
+export enum LogEvents{
     OnLogUpdate="OnLogUpdate",
 }
 

@@ -1,4 +1,4 @@
-import {ActionM, ActionType, IAction} from "core/struct/action";
+import {ActionM, ActionType, IAction} from "livemock-core/struct/action";
 import {CustomResponseActionImpl} from "./CustomResponseAction";
 import ProxyActionImpl from "./ProxyAction";
 

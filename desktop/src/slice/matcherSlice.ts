@@ -1,6 +1,6 @@
 import {Draft, PayloadAction} from "@reduxjs/toolkit";
 import {ExpectationState} from "./expectationSlice";
-import {RequestMatcherM} from "core/struct/matcher";
+import {RequestMatcherM} from "livemock-core/struct/matcher";
 
 
 export const matcherReducers = {

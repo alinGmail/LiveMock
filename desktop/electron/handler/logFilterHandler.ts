@@ -1,5 +1,5 @@
 import * as electron from "electron";
-import { LogFilterEvents } from "core/struct/events/desktopEvents";
+import { LogFilterEvents } from "livemock-core/struct/events/desktopEvents";
 import {
   CreateLogFilterPathParam,
   CreateLogFilterReqBody,
@@ -13,7 +13,7 @@ import {
   UpdatePresetLogFilterPathParam,
   UpdatePresetLogFilterReqBody,
   UpdatePresetLogFilterReqQuery,
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 import { ServerError } from "./common";
 import { getLogViewCollection } from "../db/dbManager";
 import {
@@ -21,7 +21,7 @@ import {
   getLogDynamicView,
   removeDynamicViewFilter,
 } from "../log/logUtils";
-import { FilterType, PresetFilterM } from "core/struct/log";
+import { FilterType, PresetFilterM } from "livemock-core/struct/log";
 import ipcMain = electron.ipcMain;
 import { isEmptyArray } from "../util/arrayUtils";
 

@@ -1,4 +1,4 @@
-import { duplicateExpectation, ExpectationM } from "core/struct/expectation";
+import { duplicateExpectation, ExpectationM } from "livemock-core/struct/expectation";
 import { Button, Input, InputNumber, Switch } from "antd";
 import { ChangeEvent } from "react";
 import { AppDispatch } from "../../store";
@@ -24,7 +24,7 @@ import * as React from "react";
 import {MatcherContext, ActionContext, useExpectationContext} from "../context";
 import MatcherItem from "../matcher/MatcherItem";
 import { CopyOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { createPathMatcher } from "core/struct/matcher";
+import { createPathMatcher } from "livemock-core/struct/matcher";
 import {
   createMatcherReq,
   deleteMatcherReq,
@@ -35,7 +35,7 @@ import {
   ActionM,
   createCustomResponseAction,
   createProxyAction,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import {
   createActionReq,
   deleteActionReq,

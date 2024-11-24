@@ -2,7 +2,7 @@ import {
   IMatcher,
   MethodMatcherM,
   StringMatcherCondition,
-} from "core/struct/matcher";
+} from "livemock-core/struct/matcher";
 import express from "express";
 import * as matchUtils from "./matchUtils";
 

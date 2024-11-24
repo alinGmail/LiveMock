@@ -1,4 +1,4 @@
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
 import { createSlice } from "@reduxjs/toolkit";
 
 interface ProjectState {

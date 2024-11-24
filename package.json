@@ -1,5 +1,5 @@
 {
-  "name": "livemock",
+  "name": "livemock-monorepo",
   "version": "1.2.5",
   "description": "LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.",
   "main": "index.js",
@@ -38,12 +38,12 @@
   "devDependencies": {
     "@types/uuid": "^9.0.7",
     "concurrently": "^8.2.2",
-    "electron": "24.8.8",
     "prettier": "^3.2.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "express": "4.18.2",
     "uuid": "9.0.1"
-  }
+  },
+  "packageManager": "yarn@4.5.2"
 }

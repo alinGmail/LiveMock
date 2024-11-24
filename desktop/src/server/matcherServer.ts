@@ -1,9 +1,9 @@
-import {CreateMatcherResponse, UpdateMatcherResponse} from "core/struct/response/MatcherResponse";
-import { DeleteMatcherResponse } from "core/struct/response/MatcherResponse";
+import {CreateMatcherResponse, UpdateMatcherResponse} from "livemock-core/struct/response/MatcherResponse";
+import { DeleteMatcherResponse } from "livemock-core/struct/response/MatcherResponse";
 import {
   CreateMatcherReqBody,
   UpdateMatcherReqBody,
-} from "core/struct/params/MatcherParams";
+} from "livemock-core/struct/params/MatcherParams";
 
 export const createMatcherReq = async (
   param: CreateMatcherReqBody

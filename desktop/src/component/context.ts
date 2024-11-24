@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
-import { RequestMatcherM } from "core/struct/matcher";
-import { ActionM } from "core/struct/action";
+import { RequestMatcherM } from "livemock-core/struct/matcher";
+import { ActionM } from "livemock-core/struct/action";
 
 export interface ExpectationContextData {
   refreshExpectationList: () => void;

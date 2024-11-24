@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LogM, LogFilterM } from "core/struct/log";
+import { LogM, LogFilterM } from "livemock-core/struct/log";
 import _ from "lodash";
 
 export enum ColumnDisplayType {

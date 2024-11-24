@@ -15,10 +15,10 @@ import { getSystemCollection } from "./db/dbManager";
 import { systemVersion } from "./config";
 import * as electron from "electron";
 import ipcMain = electron.ipcMain;
-import { SystemEvents } from "core/struct/events/desktopEvents";
+import { SystemEvents } from "livemock-core/struct/events/desktopEvents";
 import log from 'electron-log/main';
 import { sysEventEmitter } from "./common/eventEmitters";
-import { SystemEvent } from "core/struct/events/systemEvent";
+import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 
 log.initialize();
 log.errorHandler.startCatching();

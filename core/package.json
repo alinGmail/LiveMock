@@ -1,6 +1,6 @@
 {
-  "name": "core",
-  "version": "1.0.1",
+  "name": "livemock-core",
+  "version": "1.0.2",
   "source": "index.ts",
   "scripts": {
     "build": "tsc",
@@ -14,7 +14,5 @@
       "require": "./build/struct/*.js",
       "import": "./struct/*.ts"
     }
-  },
-  "dependencies": {
   }
 }

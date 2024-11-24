@@ -13,7 +13,7 @@ import {
   LogFilterCondition,
   LogFilterM,
   LogM,
-} from "core/struct/log";
+} from "livemock-core/struct/log";
 import { once } from "../util/commonUtils";
 import _ from "lodash";
 import {logViewEventEmitter} from "../common/eventEmitters";

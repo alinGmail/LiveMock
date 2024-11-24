@@ -3,17 +3,17 @@ import { Select } from "antd";
 import { LogState, updatePresetFilter } from "../../slice/logSlice";
 import { updatePresetLogFilterReq } from "../../server/logFilterServer";
 import { toastPromise } from "../common";
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
 import { UseQueryResult } from "@tanstack/react-query";
-import { ListLogViewResponse } from "core/struct/response/LogResponse";
-import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
+import { ListLogViewResponse } from "livemock-core/struct/response/LogResponse";
+import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
 import { useAppSelector } from "../../store";
 import { useDispatch } from "react-redux";
 import {
   createExpectationPresetFilterM,
   createMethodsPresetFilterM,
   createStatusCodePresetFilterM,
-} from "core/struct/log";
+} from "livemock-core/struct/log";
 import mStyle from "./PresetFilterRowComponent.module.scss";
 
 const ExpectationPresetFilter: React.FunctionComponent<{

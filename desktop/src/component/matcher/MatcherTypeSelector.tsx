@@ -1,7 +1,7 @@
 import react, { useState } from "react";
 import { Dropdown } from "antd";
 import React from "react";
-import { RequestMatcherType } from "core/struct/matcher";
+import { RequestMatcherType } from "livemock-core/struct/matcher";
 
 const MatcherTypeMenu = ({
   onTypeChange,

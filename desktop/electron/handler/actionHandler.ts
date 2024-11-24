@@ -1,5 +1,5 @@
 import * as electron from "electron";
-import { ActionEvents } from "core/struct/events/desktopEvents";
+import { ActionEvents } from "livemock-core/struct/events/desktopEvents";
 import {
   CreateActionPathParam,
   CreateActionReqBody,
@@ -10,7 +10,7 @@ import {
   UpdateActionPathParam,
   UpdateActionReqBody,
   UpdateActionReqQuery,
-} from "core/struct/params/ActionParams";
+} from "livemock-core/struct/params/ActionParams";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
 const ipcMain = electron.ipcMain;

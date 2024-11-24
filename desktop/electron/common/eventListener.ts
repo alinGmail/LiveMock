@@ -1,7 +1,7 @@
 import { sysEventEmitter, websocketEventEmitter } from "./eventEmitters";
-import { SystemEvent, WebsocketEvent } from "core/struct/events/systemEvent";
+import { SystemEvent, WebsocketEvent } from "livemock-core/struct/events/systemEvent";
 import { getLogCollection, getProjectCollection } from "../db/dbManager";
-import { LogM, WebsocketStatus } from "core/struct/log";
+import { LogM, WebsocketStatus } from "livemock-core/struct/log";
 import ws from "ws";
 
 /**

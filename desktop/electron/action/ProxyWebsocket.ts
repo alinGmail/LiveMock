@@ -3,13 +3,13 @@ import {
     LogM,
     WebsocketStatus,
     WebsocketMessageM,
-} from "core/struct/log";
+} from "livemock-core/struct/log";
 import express from "express";
 import ws from "ws";
-import { ProxyActionM } from "core/struct/action";
+import { ProxyActionM } from "livemock-core/struct/action";
 import * as console from "console";
 import { websocketEventEmitter } from "../common/eventEmitters";
-import { WebsocketEvent } from "core/struct/events/systemEvent";
+import { WebsocketEvent } from "livemock-core/struct/events/systemEvent";
 
 export function handleSubProtocol(secProtocol: string | null | undefined) {
     if (secProtocol) {

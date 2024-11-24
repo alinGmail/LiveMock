@@ -1,4 +1,4 @@
-import { ProjectEvents } from "core/struct/events/desktopEvents";
+import { ProjectEvents } from "livemock-core/struct/events/desktopEvents";
 import * as electron from "electron";
 import http from "http";
 import {
@@ -11,8 +11,8 @@ import {
   UpdateProjectPathParam,
   UpdateProjectReqBody,
   UpdateProjectReqQuery,
-} from "core/struct/params/ProjectParams";
-import { ProjectM, ProjectStatus } from "core/struct/project";
+} from "livemock-core/struct/params/ProjectParams";
+import { ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import { Collection } from "lokijs";
 import {
   getLogCollection,
@@ -27,7 +27,7 @@ import {
 } from "../server/projectStatusManage";
 import { isNotEmptyString } from "../common/utils";
 import { ServerError } from "./common";
-import { createLogView } from "core/struct/logView";
+import { createLogView } from "livemock-core/struct/logView";
 import express from "express";
 import getMockRouter from "../server/mockServer";
 import { getLogDynamicView } from "../log/logUtils";
@@ -186,11 +186,11 @@ export async function setProjectHandler(path: string): Promise<void> {
       if (projectStatus !== ProjectStatus.STARTED) {
         throw new ServerError(500, "project status is " + projectStatus);
       }
-      const server = await getProjectServer(projectId, path);
+      const server = getProjectServer(projectId, path);
       if (server) {
         setProjectStatus(projectId, ProjectStatus.CLOSING);
-        server.closeIdleConnections();
-        server.closeAllConnections();
+        // server.closeIdleConnections();
+        // server.closeAllConnections();
         server.close((err) => {
           if (err) {
             console.log(err);
