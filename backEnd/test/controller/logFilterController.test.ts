@@ -1,15 +1,15 @@
 import express from "express";
-import {createProject, ProjectM} from "core/struct/project";
+import {createProject, ProjectM} from "livemock-core/struct/project";
 import {getProjectRouter} from "../../src/controller/projectController";
 import {getActionRouter} from "../../src/controller/actionController";
 import {CustomErrorMiddleware} from "../../src/controller/common";
 import {getLogFilterRouter} from "../../src/controller/logFilterController";
 import request from "supertest";
 import supertest from "supertest";
-import {createSimpleFilter, FilterType, SimpleFilterM} from "core/struct/log";
-import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "core/struct/params/LogFilterParam";
+import {createSimpleFilter, FilterType, SimpleFilterM} from "livemock-core/struct/log";
+import {CreateLogFilterReqBody, DeleteLogFilterReqQuery, UpdateLogFilterReqBody} from "livemock-core/struct/params/LogFilterParam";
 import {getLogViewDb, getProjectDb} from "../../src/db/dbManager";
-import {createLogView, LogViewM} from "core/struct/logView";
+import {createLogView, LogViewM} from "livemock-core/struct/logView";
 
 
 describe(`log filter controller`, () => {

@@ -1,14 +1,14 @@
 import express from "express";
 import request from "supertest";
-import { createProject } from "core/struct/project";
-import { createExpectation } from "core/struct/expectation";
-import { createProxyAction } from "core/struct/action";
+import { createProject } from "livemock-core/struct/project";
+import { createExpectation } from "livemock-core/struct/expectation";
+import { createProxyAction } from "livemock-core/struct/action";
 import { getProjectRouter } from "../../src/controller/projectController";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { getActionRouter } from "../../src/controller/actionController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { CreateActionReqBody, UpdateActionReqBody } from "core/struct/params/ActionParams";
+import { CreateActionReqBody, UpdateActionReqBody } from "livemock-core/struct/params/ActionParams";
 
 describe("action controller", () => {
   const server = express();

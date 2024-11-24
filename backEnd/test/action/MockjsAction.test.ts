@@ -1,10 +1,10 @@
-import {createProject} from "core/struct/project";
-import {createExpectation, ExpectationM} from "core/struct/expectation";
+import {createProject} from "livemock-core/struct/project";
+import {createExpectation, ExpectationM} from "livemock-core/struct/expectation";
 import express from "express";
 import {getExpectationCollection, getProjectCollection, getProjectDb,} from "../../src/db/dbManager";
-import {createPathMatcher, MatcherCondition} from "core/struct/matcher";
+import {createPathMatcher, MatcherCondition} from "livemock-core/struct/matcher";
 import getMockRouter from "../../src/server/mockServer";
-import {ContentHandler, createCustomResponseAction, ResponseType,} from "core/struct/action";
+import {ContentHandler, createCustomResponseAction, ResponseType,} from "livemock-core/struct/action";
 import request from "supertest";
 
 describe("test mock js action", () => {

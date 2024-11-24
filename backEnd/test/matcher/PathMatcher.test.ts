@@ -1,4 +1,4 @@
-import {createPathMatcher, MatcherCondition} from "core/struct/matcher";
+import {createPathMatcher, MatcherCondition} from "livemock-core/struct/matcher";
 import PathMatcher from "../../src/matcher/PathMatcher";
 import httpMocks from "node-mocks-http";
 

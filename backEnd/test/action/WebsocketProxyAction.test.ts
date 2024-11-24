@@ -1,10 +1,11 @@
+import http from "http";
 import { createServer, IncomingHttpHeaders } from "http";
 import express from "express";
 import { getLocal } from "mockttp";
 import { getBaseEnvProject, setUpBaseEnv } from "../controller/baseEnv";
-import { createExpectation } from "core/struct/expectation";
-import { createProxyAction } from "core/struct/action";
-import { createPathMatcher, MatcherCondition } from "core/struct/matcher";
+import { createExpectation } from "livemock-core/struct/expectation";
+import { createProxyAction } from "livemock-core/struct/action";
+import { createPathMatcher, MatcherCondition } from "livemock-core/struct/matcher";
 import { expectationCreation } from "../controller/common";
 import getMockRouter from "../../src/server/mockServer";
 import { WebSocket, Server } from "ws";
@@ -73,8 +74,26 @@ describe("test websocket proxy", () => {
     await expectationCreation(server, projectM, expectationM);
 
     proxyServer.all("*", await getMockRouter("test_db", projectM.id));
-    proxyServer.listen(8080, "localhost", () => {
-      console.log("proxy server start success");
+
+
+    const http_server = http.createServer(proxyServer);
+    http_server.on("upgrade", async (req, socket, head) => {
+      const res_dummy = new http.ServerResponse(req);
+      const expressMiddleware = proxyServer._router.handle.bind(
+          proxyServer._router
+      );
+      expressMiddleware(req, res_dummy, (err) => {
+        if (err) {
+          socket.destroy();
+        }
+      });
+    });
+
+    await new Promise((resolve, reject) => {
+      http_server.listen(8080, "localhost", () => {
+        console.log("proxy server start success");
+        resolve(null);
+      });
     });
   });
 

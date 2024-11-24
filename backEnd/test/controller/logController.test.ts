@@ -1,11 +1,11 @@
 import express from "express";
 import { CustomErrorMiddleware } from "../../src/controller/common";
-import { createProject, ProjectM } from "core/struct/project";
+import { createProject, ProjectM } from "livemock-core/struct/project";
 import { getLogCollection, getNewLogNumber, } from "../../src/db/dbManager";
-import { createLog, createSimpleFilter, LogFilterCondition } from "core/struct/log";
+import { createLog, createSimpleFilter, LogFilterCondition } from "livemock-core/struct/log";
 import { deleteFolderRecursive } from "../../src/common/utils";
 import supertest from "supertest";
-import { ListLogReqQuery } from "core/struct/params/LogParams";
+import { ListLogReqQuery } from "livemock-core/struct/params/LogParams";
 import { logFilterCreation, logFilterDeletion, logFilterUpdateAction, projectCreation, routerSetup } from "./common";
 
 describe("test log controller", () => {

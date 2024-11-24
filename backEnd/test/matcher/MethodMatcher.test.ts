@@ -1,4 +1,4 @@
-import { createMethodMatcher, MatcherCondition } from "core/struct/matcher";
+import { createMethodMatcher, MatcherCondition } from "livemock-core/struct/matcher";
 import express from "express";
 import MethodMatcher from "../../src/matcher/MethodMatcher";
 

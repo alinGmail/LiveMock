@@ -1,5 +1,5 @@
 import {getProjectCollection, getProjectDb} from "../../src/db/dbManager";
-import {createProject} from "core/struct/project";
+import {createProject} from "livemock-core/struct/project";
 import lokijs from "lokijs";
 
 describe('test lokijs',()=>{

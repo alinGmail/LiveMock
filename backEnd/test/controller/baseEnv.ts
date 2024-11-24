@@ -1,6 +1,6 @@
 import express from "express";
 import {projectCreation, routerSetup} from "./common";
-import {createProject, ProjectM} from "core/struct/project";
+import {createProject, ProjectM} from "livemock-core/struct/project";
 
 
 let projectM:ProjectM = createProject();

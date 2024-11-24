@@ -1,7 +1,7 @@
 import express from "express";
-import {createProject} from "core/struct/project";
-import {createExpectation} from "core/struct/expectation";
-import {createCustomResponseAction, ResponseType} from "core/struct/action";
+import {createProject} from "livemock-core/struct/project";
+import {createExpectation} from "livemock-core/struct/expectation";
+import {createCustomResponseAction, ResponseType} from "livemock-core/struct/action";
 import {getProjectRouter} from "../../src/controller/projectController";
 import {getExpectationRouter} from "../../src/controller/expectationController";
 import {getActionRouter} from "../../src/controller/actionController";
@@ -9,7 +9,7 @@ import {CustomErrorMiddleware} from "../../src/controller/common";
 import request from "supertest";
 import {deleteFolderRecursive} from "../../src/common/utils";
 import getMockRouter from "../../src/server/mockServer";
-import {createPathMatcher, MatcherCondition} from "core/struct/matcher";
+import {createPathMatcher, MatcherCondition} from "livemock-core/struct/matcher";
 import {getLogCollection, getLogDb} from "../../src/db/dbManager";
 
 

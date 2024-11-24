@@ -1,4 +1,4 @@
-import {createQueryMatcher, MatcherCondition} from "core/struct/matcher";
+import {createQueryMatcher, MatcherCondition} from "livemock-core/struct/matcher";
 import httpMocks from "node-mocks-http";
 import QueryMatcher from "../../src/matcher/QueryMatcher";
 

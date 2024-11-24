@@ -1,4 +1,4 @@
-import {createParamMatcher, MatcherCondition} from "core/struct/matcher";
+import {createParamMatcher, MatcherCondition} from "livemock-core/struct/matcher";
 import httpMocks from "node-mocks-http";
 import FormData from "form-data";
 import ParamMatcher from "../../src/matcher/ParamMatcher";
