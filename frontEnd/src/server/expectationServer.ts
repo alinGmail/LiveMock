@@ -1,9 +1,9 @@
 
-import { ExpectationM } from "core/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
-import {CreateExpectationResponse, ListExpectationResponse} from "core/struct/response/ExpectationResponse";
-import {CreateExpectationReqBody, UpdateExpectationReqBody} from "core/struct/params/ExpectationParams";
+import {CreateExpectationResponse, ListExpectationResponse} from "livemock-core/struct/response/ExpectationResponse";
+import {CreateExpectationReqBody, UpdateExpectationReqBody} from "livemock-core/struct/params/ExpectationParams";
 
 export const createExpectationReq = async (
   projectId: string,

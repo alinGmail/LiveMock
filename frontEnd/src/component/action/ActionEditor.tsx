@@ -11,10 +11,10 @@ import {
   getNewAction,
   ProxyActionM,
   ProxyProtocol,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import { Button, Checkbox, Col, Input, InputNumber, Row, Select } from "antd";
 import { useActionContext } from "../context";
-import { ResponseType } from "core/struct/action";
+import { ResponseType } from "livemock-core/struct/action";
 import TextArea from "antd/es/input/TextArea";
 import HeaderEditor from "./HeaderEditor";
 import mStyle from "./ActionEditor.module.scss";

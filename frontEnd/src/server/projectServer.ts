@@ -1,15 +1,15 @@
 import * as superagent from "superagent";
 import { ServerUrl } from "../config";
-import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
+import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
 import {
   CreateProjectReqBody,
   UpdateProjectReqBody,
-} from "core/struct/params/ProjectParams";
+} from "livemock-core/struct/params/ProjectParams";
 import {
   CreateProjectResponse,
   ListProjectResponse,
   UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
+} from "livemock-core/struct/response/ProjectResponse";
 
 export const getProjectListReq = async (): Promise<ListProjectResponse> => {
   const res = await superagent.get(`${ServerUrl}/project/`);

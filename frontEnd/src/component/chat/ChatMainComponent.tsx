@@ -1,4 +1,4 @@
-import { WebsocketMessageM } from "core/struct/log";
+import { WebsocketMessageM } from "livemock-core/struct/log";
 import mStyle from "./ChatMainComponent.module.scss";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useThrottleFn } from "ahooks";

@@ -1,8 +1,8 @@
 import mStyle from "./WelcomePage.module.scss";
 import { Updater, useImmer } from "use-immer";
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
 import { useEffect, useState } from "react";
-import { createProject } from "core/struct/project";
+import { createProject } from "livemock-core/struct/project";
 import ProjectEditor from "../component/project/ProjectEditor";
 import { EditorType } from "../struct/common";
 import { createProjectReq, getProjectListReq } from "../server/projectServer";

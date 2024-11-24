@@ -1,7 +1,7 @@
 import React from "react";
-import { ExpectationM } from "core/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import {Button, Tooltip} from "antd";
-import { ActionType } from "core/struct/action";
+import { ActionType } from "livemock-core/struct/action";
 
 const ExpectationBriefComponent: React.FC<{
   expectation: ExpectationM;

@@ -5,7 +5,7 @@ import {
   createExpectationReq,
   listExpectationReq,
 } from "../server/expectationServer";
-import { createExpectation, ExpectationM } from "core/struct/expectation";
+import { createExpectation, ExpectationM } from "livemock-core/struct/expectation";
 import {
   ActionColumn,
   ActivateColumn,

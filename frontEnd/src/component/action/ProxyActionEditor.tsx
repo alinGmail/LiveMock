@@ -1,6 +1,6 @@
 import React from "react";
 import { Checkbox, Input, Select, Tooltip } from "antd";
-import { ActionType, ProxyActionM, ProxyProtocol } from "core/struct/action";
+import { ActionType, ProxyActionM, ProxyProtocol } from "livemock-core/struct/action";
 import HeaderEditor from "./HeaderEditor";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
 import { useActionContext } from "../context";

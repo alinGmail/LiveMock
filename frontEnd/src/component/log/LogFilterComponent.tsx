@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FilterType, LogFilterCondition, LogFilterM } from "core/struct/log";
+import { FilterType, LogFilterCondition, LogFilterM } from "livemock-core/struct/log";
 import mStyle from "./LogFilterComponent.module.scss";
 import { Button, Dropdown, Select } from "antd";
 import { getStringConditionWord } from "./utils";
@@ -16,7 +16,7 @@ import { debounceWait } from "../../config";
 import {
   DeleteLogFilterReqQuery,
   UpdateLogFilterReqBody,
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 import { toastPromise } from "../common";
 import _ from "lodash";
 

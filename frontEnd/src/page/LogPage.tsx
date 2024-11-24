@@ -7,7 +7,7 @@ import {
   PresetFilterName,
   WebsocketMessageM,
   WebsocketStatus,
-} from "core/struct/log";
+} from "livemock-core/struct/log";
 import { io, Socket } from "socket.io-client";
 import {AppDispatch, store, useAppSelector} from "../store";
 import { useDispatch } from "react-redux";
