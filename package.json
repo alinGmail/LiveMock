@@ -5,11 +5,10 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "back-end-dev": "yarn workspace back-end start",
     "front-end-dev": "yarn workspace front-end dev",
     "web-dev": "concurrently \"npm run back-end-dev\" \"npm run front-end-dev\"",
-    "desktop-dev": "yarn workspace core build && yarn workspace desktop dev"
+    "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev"
   },
   "repository": {
     "type": "git",
