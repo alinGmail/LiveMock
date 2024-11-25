@@ -19,6 +19,7 @@ import { SystemEvents } from "livemock-core/struct/events/desktopEvents";
 import log from 'electron-log/main';
 import { sysEventEmitter } from "./common/eventEmitters";
 import { SystemEvent } from "livemock-core/struct/events/systemEvent";
+import {addWsEventListeners} from "./common/eventListener";
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -51,8 +52,9 @@ sysEventEmitter.on(SystemEvent.START,async () => {
   } else {
     systemCollection.insertOne({ version: systemVersion });
   }
-})
+});
 
+addWsEventListeners(app.getPath("userData"));
 
 async function createWindow() {
   buildMenu({
@@ -92,7 +94,7 @@ async function createWindow() {
         win?.loadURL("http://localhost:5173");
       },3000);
     });
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, "index.html"));

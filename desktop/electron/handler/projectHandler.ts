@@ -32,7 +32,11 @@ import express from "express";
 import getMockRouter from "../server/mockServer";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
-import {deleteDatabase} from "../db/dbUtils";
+import { deleteDatabase } from "../db/dbUtils";
+import log from "electron-log/main";
+import { once } from "../util/commonUtils";
+import { logEventEmitter } from "../common/eventEmitters";
+import { LogM } from "livemock-core/struct/log";
 
 const ipcMain = electron.ipcMain;
 
@@ -140,10 +144,10 @@ export async function setProjectHandler(path: string): Promise<void> {
         server = http.createServer(expServer);
         expServer.all("*", await getMockRouter(path, projectId));
 
-        server.on('upgrade',async (req, socket, head) => {
+        server.on("upgrade", async (req, socket, head) => {
           const res_dummy = new http.ServerResponse(req);
           const expressMiddleware = expServer._router.handle.bind(
-              expServer._router
+            expServer._router
           );
           expressMiddleware(req, res_dummy, (err) => {
             if (err) {
@@ -151,29 +155,24 @@ export async function setProjectHandler(path: string): Promise<void> {
             }
           });
         });
-
-        server.listen(project?.port, () => {
-          server!.removeAllListeners("error");
-          setProjectStatus(projectId, ProjectStatus.STARTED);
-          onProjectStart(project);
-          return {
-            message: "success",
-          };
-        });
         setProjectServer(projectId, server);
-      } else {
-        server.listen(project?.port, () => {
-          server!.removeAllListeners("error");
-          setProjectStatus(projectId, ProjectStatus.STARTED);
-          onProjectStart(project);
-          return {
-            message: "success",
-          };
-        });
       }
-      server.once("error", (error) => {
-        // res.status(500);
-        throw new ServerError(500, "server start fail");
+      server.on("error", (error) => {
+        // log error
+        log.error(error.message);
+      });
+
+      server.listen(project?.port, () => {
+        server!.removeAllListeners("error");
+        setProjectStatus(projectId, ProjectStatus.STARTED);
+        onProjectStart(project);
+      });
+      // add log update event
+      once(`addLogUpdateEvent:${projectId}:${path}`, async () => {
+        const updateCollection = await getLogCollection(projectId, path);
+        updateCollection.on("update", (newLog: LogM, oldLog: LogM) => {
+          logEventEmitter.emit("update", { projectId, log: newLog, oldLog });
+        });
       });
     }
   );
@@ -218,23 +217,24 @@ export async function setProjectHandler(path: string): Promise<void> {
     }
   }
 
-
-  ipcMain.handle(ProjectEvents.DeleteProject, async (event, projectId: string) => {
-    const project = collection.findOne({ id: projectId });
-    if (!project) {
-      throw new ServerError(500, "project not exist");
+  ipcMain.handle(
+    ProjectEvents.DeleteProject,
+    async (event, projectId: string) => {
+      const project = collection.findOne({ id: projectId });
+      if (!project) {
+        throw new ServerError(500, "project not exist");
+      }
+      const projectStatus = getProjectStatus(projectId);
+      if (projectStatus !== ProjectStatus.STOPPED) {
+        throw new ServerError(500, "project status is " + projectStatus);
+      }
+      await deleteDatabase(projectId, path, "expectation");
+      await deleteDatabase(projectId, path, "logView");
+      await deleteDatabase(projectId, path, "log");
+      collection.remove(project);
+      return {
+        message: "success",
+      };
     }
-    const projectStatus = getProjectStatus(projectId);
-    if (projectStatus !== ProjectStatus.STOPPED) {
-      throw new ServerError(500, "project status is " + projectStatus);
-    }
-    await deleteDatabase(projectId, path, "expectation");
-    await deleteDatabase(projectId, path, "logView");
-    await deleteDatabase(projectId, path, "log");
-    collection.remove(project);
-    return {
-      message: "success",
-    };
-  })
-
+  );
 }

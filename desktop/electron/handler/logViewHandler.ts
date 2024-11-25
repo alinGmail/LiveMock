@@ -115,7 +115,7 @@ export function logViewEventHandler(webContent: WebContents) {
   });
 
   logEventEmitter.on(
-    LogEvents.OnLogUpdate,
+    "update",
     (arg: { projectId: string; log: LogM; oldLog: LogM }) => {
       let { oldLog, log, projectId } = arg;
       webContent.send(LogEvents.OnLogUpdate, { log, projectId });

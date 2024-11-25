@@ -9,7 +9,7 @@
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "vite": "vite",
+    "vite-dev": "vite",
     "build": "tsc -project electron && vite build && electron-builder"
   },
   "dependencies": {

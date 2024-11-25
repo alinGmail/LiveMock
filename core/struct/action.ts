@@ -98,7 +98,7 @@ export function createProxyAction(): ProxyActionM {
     protocol: ProxyProtocol.HTTP,
     handleCross: false,
     crossAllowCredentials: false,
-    supportWebsocket: false,
+    supportWebsocket: true,
     headers: [],
     requestHeaders: [],
     prefixRemove: null,
