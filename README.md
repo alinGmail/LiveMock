@@ -36,31 +36,36 @@ There are two versions of liveMock, one is a desktop application and the other i
 To install the desktop version, simply download from the [release page](https://github.com/alinGmail/LiveMock/releases). It supports both macOS and Windows operating systems.
 
 ### Installation of the web service version
-#### 1.clone the project
+
+#### 1.This project uses Yarn Workspaces, so you need to install the latest version of Yarn.
+```
+corepack enable
+yarn set version stable
+```
+
+#### 2.clone the project
 ```
 git clone git@github.com:alinGmail/LiveMock.git
 ```
 
-#### 2.install dependencies
+#### 3.install dependencies
 ```
 cd LiveMock 
 yarn install
 ```
 
 > [!NOTE]
-> If you are in China, you can run the following command before 'yarn install' to set the ELECTRON MIRROR.
-> ```
-> yarn config set ELECTRON_MIRROR https://npmmirror.com/mirrors/electron/
-> ```
+> If you are in China, you can set the ELECTRON_MIRROR environment variables to https://npmmirror.com/mirrors/electron/
+>
 
-#### 3.build the forntEnd code
+#### 4.build the forntEnd code
 ```
-yarn workspace front-end build
+yarn run web-build
 ```
 
-#### 4.run the project
+#### 5.run the project
 ```
-yarn workspace back-end start
+yarn run web-start
 ```
 the server will running at http://localhost:9002 
 
