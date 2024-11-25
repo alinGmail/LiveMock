@@ -5433,6 +5433,7 @@ __metadata:
     socket.io-client: "npm:^4.6.2"
     superagent: "npm:^8.0.9"
     supertest: "npm:^6.3.3"
+    typescript: "npm:^5.3.3"
     use-immer: "npm:^0.9.0"
     vite: "npm:^4.3.0"
     vite-plugin-svgr: "npm:^3.2.0"

@@ -8,7 +8,9 @@
     "back-end-dev": "yarn workspace back-end start",
     "front-end-dev": "yarn workspace front-end dev",
     "web-dev": "concurrently \"npm run back-end-dev\" \"npm run front-end-dev\"",
-    "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev"
+    "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev",
+    "web-build": "yarn workspace livemock-core build && yarn workspace front-end build",
+    "web-start": " && yarn workspace back-end start"
   },
   "repository": {
     "type": "git",
