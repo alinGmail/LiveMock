@@ -1,4 +1,4 @@
-import { IMatcher, ParamMatcherM } from "core/struct/matcher";
+import { IMatcher, ParamMatcherM } from "livemock-core/struct/matcher";
 import express from "express";
 import typeis from "type-is";
 import _ from "lodash";

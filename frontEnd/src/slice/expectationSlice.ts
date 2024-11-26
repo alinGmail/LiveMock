@@ -1,4 +1,4 @@
-import { ExpectationM } from "core/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import { createSlice, Draft, PayloadAction } from "@reduxjs/toolkit";
 import { matcherReducers } from "./matcherSlice";
 import { actionReducers } from "./actionSlice";

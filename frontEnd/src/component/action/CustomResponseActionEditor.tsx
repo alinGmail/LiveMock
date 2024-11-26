@@ -4,7 +4,7 @@ import {
   ContentHandler,
   CustomResponseActionM,
   ResponseType,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import HeaderEditor from "./HeaderEditor";
 import React from "react";
 import { useActionContext } from "../context";

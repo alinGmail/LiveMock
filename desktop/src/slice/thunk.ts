@@ -1,5 +1,5 @@
 import {AppDispatch, AppThunk, RootState} from "../store";
-import { ExpectationM } from "core/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import { setExpectationList } from "./expectationSlice";
 
 export const getExpectationSuccess =

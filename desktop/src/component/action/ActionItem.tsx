@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ActionM, ActionType } from "core/struct/action";
+import { ActionM, ActionType } from "livemock-core/struct/action";
 import mStyle from "./ActionItem.module.scss";
 import { CloseSquareOutlined } from "@ant-design/icons";
 import { useActionContext } from "../context";

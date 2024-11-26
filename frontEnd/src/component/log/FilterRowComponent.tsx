@@ -2,17 +2,17 @@ import React from "react";
 import mStyle from "./FilterRowComponent.module.scss";
 import LogFilterComponent from "./LogFilterComponent";
 import { addLogFilter, LogState } from "../../slice/logSlice";
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
 import { useDispatch } from "react-redux";
 import { App, Button, Select } from "antd";
-import { createSimpleFilter } from "core/struct/log";
+import { createSimpleFilter } from "livemock-core/struct/log";
 import { addLogFilterReq } from "../../server/logFilterServer";
 import { toastPromise } from "../common";
 import { ClearOutlined, PlusOutlined } from "@ant-design/icons";
 import { UseQueryResult } from "@tanstack/react-query";
-import { ListLogViewResponse } from "core/struct/response/LogResponse";
+import { ListLogViewResponse } from "livemock-core/struct/response/LogResponse";
 import { deleteAllRequestLogs } from "../../server/logServer";
-import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
+import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
 
 const FilterRowComponent: React.FunctionComponent<{
   logViewId: string | undefined;

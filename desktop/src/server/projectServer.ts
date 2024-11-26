@@ -2,12 +2,12 @@
 import {
   CreateProjectReqBody,
   UpdateProjectReqBody,
-} from "core/struct/params/ProjectParams";
+} from "livemock-core/struct/params/ProjectParams";
 import {
   CreateProjectResponse,
   ListProjectResponse,
   UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
+} from "livemock-core/struct/response/ProjectResponse";
 
 export const getProjectListReq = async (): Promise<ListProjectResponse> => {
   return window.api.project.listProject({}, {}, {});

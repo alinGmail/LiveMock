@@ -13,10 +13,10 @@ import {
   LogFilterCondition,
   LogFilterM,
   LogM,
-} from "core/struct/log";
-import { logViewEventEmitter } from "../common/logViewEvent";
+} from "livemock-core/struct/log";
 import { once } from "../util/commonUtils";
 import _ from "lodash";
+import { logViewEventEmitter } from "../common/eventEmitters";
 
 export function insertReqLog(
   logCollection: Collection<LogM>,
@@ -60,7 +60,7 @@ export function insertResLog(
   const responseLogM = createResponseLog();
   logM.req &&
     (responseLogM.duration =
-      responseLogM.responseDate.getTime() - logM.req.requestDate.getTime());
+      responseLogM.responseTime - logM.req.requestTime);
   responseLogM.headers = getResponseHeaderMap(res);
   responseLogM.body = (res as any).body;
   responseLogM.rawBody = (res as any).rawBody;

@@ -5,7 +5,7 @@ import Icon, { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import {Dropdown, Modal, Switch} from "antd";
 import { useEffect, useState } from "react";
 import { Updater, useImmer } from "use-immer";
-import { createProject, ProjectM, ProjectStatus } from "core/struct/project";
+import { createProject, ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import ProjectEditor from "./ProjectEditor";
 import { EditorType } from "../../struct/common";
 import {

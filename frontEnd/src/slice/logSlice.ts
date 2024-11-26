@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LogM, LogFilterM } from "core/struct/log";
+import { LogM, LogFilterM } from "livemock-core/struct/log";
 import _ from "lodash";
 
 export enum ColumnDisplayType {
@@ -31,6 +31,9 @@ export interface LogState {
   logList: Array<LogM>;
   logFilter: Array<LogFilterM>;
   presetFilter: PresetFilterState;
+  showWebsocketChatPanel: boolean;
+  selectedLogId: number | null;
+  selectedLogItem: LogM | null;
 }
 
 export const logSlice = createSlice({
@@ -48,6 +51,9 @@ export const logSlice = createSlice({
     columnEditorShow: false,
     columnConfigShow: false,
     defaultColumnVisible: [true, true, true, true, true, true],
+    showWebsocketChatPanel: false,
+    selectedLogId: null,
+    selectedLogItem: null,
   } as LogState,
   reducers: {
     setLogList(state, action: PayloadAction<Array<LogM>>) {
@@ -157,6 +163,15 @@ export const logSlice = createSlice({
         return action.payload.visible;
       });
     },
+    setShowWebsocketChatPanel: (state, action: PayloadAction<boolean>) => {
+      state.showWebsocketChatPanel = action.payload;
+    },
+    setSelectedLogId: (state, action: PayloadAction<number | null>) => {
+      state.selectedLogId = action.payload;
+    },
+    setSelectedLogItem : (state,action:PayloadAction<LogM | null>) => {
+      state.selectedLogItem = action.payload;
+    }
   },
 });
 
@@ -181,6 +196,9 @@ let {
   deleteTableColumn,
   modifyAllTableColumnVisible,
   updatePresetFilter,
+  setShowWebsocketChatPanel,
+  setSelectedLogId,
+  setSelectedLogItem,
 } = actions;
 
 export {
@@ -203,4 +221,7 @@ export {
   modifyLogFilter,
   modifyAllTableColumnVisible,
   updatePresetFilter,
+  setShowWebsocketChatPanel,
+  setSelectedLogId,
+  setSelectedLogItem
 };

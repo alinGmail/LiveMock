@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ActionM, ActionType, getNewAction } from "core/struct/action";
+import { ActionM, ActionType, getNewAction } from "livemock-core/struct/action";
 import { useActionContext } from "../context";
 import mStyle from "./ActionEditor.module.scss";
 import CustomResponseActionEditor from "./CustomResponseActionEditor";

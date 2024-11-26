@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import http from "http";
+import express, { raw, Request, Response } from "express";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import {
   getLogCollection,
@@ -15,14 +16,14 @@ import {
   ListProjectReqQuery,
   UpdateProjectPathParam,
   UpdateProjectReqBody,
-} from "core/struct/params/ProjectParams";
+} from "livemock-core/struct/params/ProjectParams";
 import { isNotEmptyString } from "../common/utils";
 import {
   CreateProjectResponse,
   ListProjectResponse,
   UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
-import { ProjectM, ProjectStatus } from "core/struct/project";
+} from "livemock-core/struct/response/ProjectResponse";
+import { ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import { Collection } from "lokijs";
 import {
   getProjectServer,
@@ -31,10 +32,13 @@ import {
   setProjectStatus,
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
-import { createLogView } from "core/struct/logView";
+import { createLogView } from "livemock-core/struct/logView";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
 import { deleteDatabase } from "../db/dbUtils";
+import { once } from "../util/commonUtils";
+import { logEventEmitter, logViewEventEmitter } from "../common/eventEmitters";
+import { LogM } from "livemock-core/struct/log";
 
 async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
@@ -186,12 +190,24 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     if (!project) {
       throw new ServerError(500, "project not exist");
     }
-    let server = await getProjectServer(projectId, path);
+    let server = getProjectServer(projectId, path);
     setProjectStatus(projectId, ProjectStatus.STARTING);
     if (server == null) {
       let expServer = express();
+      server = http.createServer(expServer);
       expServer.all("*", await getMockRouter(path, projectId));
-      server = expServer.listen(project?.port, () => {
+      server.on("upgrade", async (req, socket, head) => {
+        const res_dummy = new http.ServerResponse(req);
+        const expressMiddleware = expServer._router.handle.bind(
+          expServer._router
+        );
+        expressMiddleware(req, res_dummy, (err) => {
+          if (err) {
+            socket.destroy();
+          }
+        });
+      });
+      server.listen(project?.port, () => {
         server!.removeAllListeners("error");
         setProjectStatus(projectId, ProjectStatus.STARTED);
         onProjectStart(project);
@@ -213,6 +229,13 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     server.once("error", (error) => {
       res.status(500);
       res.end("server start fail");
+    });
+    // add log update event
+    once(`addLogUpdateEvent:${projectId}:${path}`, async () => {
+      const updateCollection = await getLogCollection(projectId, path);
+      updateCollection.on("update", (newLog: LogM, oldLog: LogM) => {
+        logEventEmitter.emit("update", { projectId, log: newLog, oldLog });
+      });
     });
   });
 

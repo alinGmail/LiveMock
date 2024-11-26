@@ -4,8 +4,8 @@ import {
   CreateActionReqQuery,
   DeleteActionReqQuery,
   UpdateActionReqBody,
-} from "core/struct/params/ActionParams";
-import { CreateActionResponse } from "core/struct/response/ActionResponse";
+} from "livemock-core/struct/params/ActionParams";
+import { CreateActionResponse } from "livemock-core/struct/response/ActionResponse";
 import { ServerUrl } from "../config";
 
 export const createActionReq = async (

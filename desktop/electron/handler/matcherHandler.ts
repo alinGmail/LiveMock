@@ -1,4 +1,4 @@
-import { MatcherEvents } from "core/struct/events/desktopEvents";
+import { MatcherEvents } from "livemock-core/struct/events/desktopEvents";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
 import {
@@ -10,7 +10,7 @@ import {
     UpdateMatcherPathParam,
     UpdateMatcherReqBody,
     UpdateMatcherReqQuery,
-} from "core/struct/params/MatcherParams";
+} from "livemock-core/struct/params/MatcherParams";
 import * as electron from "electron";
 const ipcMain = electron.ipcMain;
 

@@ -2,12 +2,12 @@ import {
   DeleteAllRequestLogsReqQuery,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
-} from "core/struct/params/LogParams";
+} from "livemock-core/struct/params/LogParams";
 import {
   DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
-} from "core/struct/response/LogResponse";
+} from "livemock-core/struct/response/LogResponse";
 
 export async function listLogViewReq(
   query: ListLogViewReqQuery

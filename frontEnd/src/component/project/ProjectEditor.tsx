@@ -1,5 +1,5 @@
 import { EditorType } from "../../struct/common";
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
 import { FC } from "react";
 import { Button, Col, Input, InputNumber, Row } from "antd";
 import mStyle from "./ProjectEditor.module.scss";

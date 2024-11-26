@@ -36,9 +36,13 @@ export enum LogViewEvents{
     ListLogView="ListLogView",
     ListLogViewLogs="ListLogViewLogs",
     DeleteAllRequestLogs="DeleteAllRequestLogs",
-    OnLogAdd="OnLogAdd",
+    OnLogAdd="OnLogViewLogAdd",
+    OnLogUpdate="OnLogViewLogUpdate",
+    OnLogDelete="OnLogVIewLogDelete"
+}
+
+export enum LogEvents{
     OnLogUpdate="OnLogUpdate",
-    OnLogDelete="OnLogDelete"
 }
 
 export enum LogFilterEvents{

@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionType, ProxyActionM, ProxyProtocol } from "core/struct/action";
+import { ActionType, ProxyActionM, ProxyProtocol } from "livemock-core/struct/action";
 import { Checkbox, Input, Select, Tooltip } from "antd";
 import HeaderEditor from "./HeaderEditor";
 import { CheckboxChangeEvent } from "antd/es/checkbox";
@@ -198,6 +198,22 @@ export const ProxyActionEditor: React.FunctionComponent<{
               }}
             >
               allow Credentials
+            </Checkbox>
+          </div>
+        </div>
+        <div className={moduleStyle.row}>
+          <div>websocket config</div>
+          <div>
+            <Checkbox
+              checked={action.supportWebsocket}
+              onChange={(e) => {
+                actionContext.onActionModify({
+                  ...action,
+                  supportWebsocket: e.target.checked,
+                });
+              }}
+            >
+              support websocket
             </Checkbox>
           </div>
         </div>

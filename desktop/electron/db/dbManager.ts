@@ -1,10 +1,10 @@
 import lokijs from "lokijs";
 import { getCollection, getDb } from "./dbUtils";
-import { ProjectM } from "core/struct/project";
-import { ExpectationM } from "core/struct/expectation";
-import { LogViewM } from "core/struct/logView";
-import { LogM } from "core/struct/log";
-import {SystemConfigM} from "core/struct/systemConfig";
+import { ProjectM } from "livemock-core/struct/project";
+import { ExpectationM } from "livemock-core/struct/expectation";
+import { LogViewM } from "livemock-core/struct/logView";
+import { LogM } from "livemock-core/struct/log";
+import {SystemConfigM} from "livemock-core/struct/systemConfig";
 
 
 const projectDbPromiseMap = new Map<string, Promise<Loki>>();

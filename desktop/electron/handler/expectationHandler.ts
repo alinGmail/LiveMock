@@ -1,5 +1,5 @@
 import * as electron from "electron";
-import { ExpectationEvents } from "core/struct/events/desktopEvents";
+import { ExpectationEvents } from "livemock-core/struct/events/desktopEvents";
 import {
   CreateExpectationPathParam,
   CreateExpectationReqBody,
@@ -16,10 +16,10 @@ import {
   UpdateExpectationPathParam,
   UpdateExpectationReqBody,
   UpdateExpectationReqQuery,
-} from "core/struct/params/ExpectationParams";
+} from "livemock-core/struct/params/ExpectationParams";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
-import { logViewEventEmitter } from "../common/logViewEvent";
+import {logViewEventEmitter} from "../common/eventEmitters";
 
 const ipcMain = electron.ipcMain;
 

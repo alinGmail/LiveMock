@@ -9,8 +9,5 @@ module.exports = {
     "transformIgnorePatterns": [
         "/node_modules/(?!core)"
     ],
-    moduleNameMapper: {
-        '^core/(.*)$': '<rootDir>/../core/$1',
-    },
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

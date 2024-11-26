@@ -4,8 +4,9 @@ import {
   PlusOutlined,
   DeleteOutlined,
   FilterOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
-import { createSimpleFilter, FilterType, LogM } from "core/struct/log";
+import { createSimpleFilter, FilterType, LogM } from "livemock-core/struct/log";
 import { Dispatch, useState } from "react";
 import { ColumnsType, ColumnType } from "antd/es/table";
 import { AnyAction } from "@reduxjs/toolkit";
@@ -17,6 +18,9 @@ import {
   modifyTableColumn,
   setColumnEdit,
   setDefaultColumnVisible,
+  setSelectedLogId,
+  setSelectedLogItem,
+  setShowWebsocketChatPanel,
   showColumnConfig,
   showColumnEditor,
   TableColumnItem,
@@ -32,7 +36,7 @@ import TextColumn from "../component/table/TextColumn";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
-import {ExpectationM} from "core/build/struct/expectation";
+import { ExpectationM } from "livemock-core/build/struct/expectation";
 
 export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
   return [
@@ -233,6 +237,18 @@ export function getDefaultColumn(
                 src={record.res?.body}
                 collapsed={true}
               />
+            )}
+            {record.websocketInfo?.isWebsocket && (
+              <Button
+                type={"text"}
+                shape="circle"
+                icon={<MessageOutlined />}
+                onClick={() => {
+                  dispatch(setShowWebsocketChatPanel(true));
+                  dispatch(setSelectedLogId(record.id));
+                  dispatch(setSelectedLogItem(record));
+                }}
+              ></Button>
             )}
           </div>
         );

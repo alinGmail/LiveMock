@@ -3,7 +3,7 @@ import {
   DeleteLogFilterReqQuery,
   UpdateLogFilterReqBody,
   UpdatePresetLogFilterReqBody
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 import * as superagent from "superagent";
 import {ServerUrl} from "../config";
 

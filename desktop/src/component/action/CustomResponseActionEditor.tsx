@@ -4,7 +4,7 @@ import {
   ContentHandler,
   CustomResponseActionM,
   ResponseType,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import { Col, InputNumber, Row, Select, Tooltip } from "antd";
 import HeaderEditor from "./HeaderEditor";
 import TextArea from "antd/es/input/TextArea";

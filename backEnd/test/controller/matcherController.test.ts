@@ -2,17 +2,17 @@ import express from "express";
 import { getProjectRouter } from "../../src/controller/projectController";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
-import { createProject } from "core/struct/project";
+import { createProject } from "livemock-core/struct/project";
 import request from "supertest";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { createExpectation, ExpectationM } from "core/struct/expectation";
-import { CreateExpectationReqBody } from "core/struct/params/ExpectationParams";
-import { createPathMatcher, RequestMatcherType } from "core/struct/matcher";
+import { createExpectation, ExpectationM } from "livemock-core/struct/expectation";
+import { CreateExpectationReqBody } from "livemock-core/struct/params/ExpectationParams";
+import { createPathMatcher, RequestMatcherType } from "livemock-core/struct/matcher";
 import { getMatcherRouter } from "../../src/controller/matcherController";
 import {
   CreateMatcherReqBody,
   UpdateMatcherReqBody,
-} from "core/struct/params/MatcherParams";
+} from "livemock-core/struct/params/MatcherParams";
 
 describe("matcher controller", () => {
   const server = express();

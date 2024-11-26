@@ -1,4 +1,4 @@
-import { LogFilterCondition } from "core/struct/log";
+import { LogFilterCondition } from "livemock-core/struct/log";
 import { ColumnDisplayType } from "../../slice/logSlice";
 
 export function getStringConditionWord(condition: LogFilterCondition) {

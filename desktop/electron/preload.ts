@@ -8,12 +8,12 @@ import {
   UpdateProjectPathParam,
   UpdateProjectReqBody,
   UpdateProjectReqQuery,
-} from "core/struct/params/ProjectParams";
+} from "livemock-core/struct/params/ProjectParams";
 import {
   CreateProjectResponse,
   ListProjectResponse,
   UpdateProjectResponse,
-} from "core/struct/response/ProjectResponse";
+} from "livemock-core/struct/response/ProjectResponse";
 import * as electron from "electron";
 import {
   ActionEvents,
@@ -22,7 +22,7 @@ import {
   LogViewEvents,
   MatcherEvents,
   ProjectEvents,
-} from "core/struct/events/desktopEvents";
+} from "livemock-core/struct/events/desktopEvents";
 import {
   CreateExpectationPathParam,
   CreateExpectationReqBody,
@@ -39,8 +39,8 @@ import {
   UpdateExpectationPathParam,
   UpdateExpectationReqBody,
   UpdateExpectationReqQuery,
-} from "core/struct/params/ExpectationParams";
-import { ListExpectationResponse } from "core/struct/response/ExpectationResponse";
+} from "livemock-core/struct/params/ExpectationParams";
+import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
 import {
   CreateMatcherPathParam,
   CreateMatcherReqBody,
@@ -51,7 +51,7 @@ import {
   UpdateMatcherPathParam,
   UpdateMatcherReqBody,
   UpdateMatcherReqQuery,
-} from "core/struct/params/MatcherParams";
+} from "livemock-core/struct/params/MatcherParams";
 import {
   CreateActionPathParam,
   CreateActionReqBody,
@@ -62,7 +62,7 @@ import {
   UpdateActionPathParam,
   UpdateActionReqBody,
   UpdateActionReqQuery,
-} from "core/struct/params/ActionParams";
+} from "livemock-core/struct/params/ActionParams";
 import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
@@ -73,7 +73,7 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
-} from "core/struct/params/LogParams";
+} from "livemock-core/struct/params/LogParams";
 import {
   CreateLogFilterPathParam,
   CreateLogFilterReqBody,
@@ -87,7 +87,7 @@ import {
   UpdatePresetLogFilterPathParam,
   UpdatePresetLogFilterReqBody,
   UpdatePresetLogFilterReqQuery,
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 import IpcRendererEvent = electron.IpcRendererEvent;
 const ipcRenderer = electron.ipcRenderer;
 

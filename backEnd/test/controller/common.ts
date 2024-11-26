@@ -1,8 +1,8 @@
 import request from "supertest";
 import supertest from "supertest";
 import express from "express";
-import { ProjectM } from "core/struct/project";
-import { ExpectationM } from "core/struct/expectation";
+import { ProjectM } from "livemock-core/struct/project";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import { getProjectRouter } from "../../src/controller/projectController";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { getActionRouter } from "../../src/controller/actionController";
@@ -12,8 +12,8 @@ import {
   CreateLogFilterReqBody,
   DeleteLogFilterReqQuery,
   UpdateLogFilterReqBody,
-} from "core/struct/params/LogFilterParam";
-import { LogFilterM } from "core/struct/log";
+} from "livemock-core/struct/params/LogFilterParam";
+import { LogFilterM } from "livemock-core/struct/log";
 import { getLogFilterRouter } from "../../src/controller/logFilterController";
 
 export async function projectCreation(

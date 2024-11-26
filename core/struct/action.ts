@@ -44,6 +44,7 @@ export interface ProxyActionM {
   host: string;
   handleCross: boolean;
   crossAllowCredentials: boolean;
+  supportWebsocket: boolean;
   pathRewrite: Array<PathRewriteM>;
   prefixRemove: string | undefined | null;
   headers: Array<[string, string]> | undefined;
@@ -81,9 +82,11 @@ export type PathRewriteM = AddPrefixM | RemovePrefixM;
 // 实现类的接口
 export interface IAction {
   process: (
+    projectId: string,
     req: express.Request,
     res: express.Response,
     log: LogM | undefined,
+    logCollection: Collection<LogM>,
   ) => Promise<void>;
 }
 export function createProxyAction(): ProxyActionM {
@@ -95,9 +98,10 @@ export function createProxyAction(): ProxyActionM {
     protocol: ProxyProtocol.HTTP,
     handleCross: false,
     crossAllowCredentials: false,
+    supportWebsocket: true,
     headers: [],
-    requestHeaders:[],
-    prefixRemove:null
+    requestHeaders: [],
+    prefixRemove: null,
   };
 }
 

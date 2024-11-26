@@ -5,11 +5,13 @@ import {
   LogM,
   PresetFilterM,
   PresetFilterName,
-} from "core/struct/log";
+  WebsocketMessageM,
+  WebsocketStatus,
+} from "livemock-core/struct/log";
 import { io, Socket } from "socket.io-client";
-import { AppDispatch, useAppSelector } from "../store";
+import {AppDispatch, store, useAppSelector} from "../store";
 import { useDispatch } from "react-redux";
-import { Table } from "antd";
+import { Modal, Table } from "antd";
 import {
   getConfigColumn,
   getCustomColumn,
@@ -19,8 +21,11 @@ import { ColumnEditor } from "../component/table/ColumnEditor";
 import {
   ColumnDisplayType,
   hideColumnEditor,
+  logSlice,
   PresetFilterState,
   resetLogFilter,
+  setSelectedLogItem,
+  setShowWebsocketChatPanel,
   TableColumnItem,
   updatePresetFilter,
 } from "../slice/logSlice";
@@ -41,6 +46,11 @@ import {
   updateExpectationMap,
 } from "../slice/expectationSlice";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
+import ChatMainComponent, {
+  MessageListContainer,
+} from "src/component/chat/ChatMainComponent";
+import { LinkOutlined, DisconnectOutlined } from "@ant-design/icons";
+import { red, green } from "@ant-design/colors";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -104,7 +114,6 @@ const placeHolderColumn: TableColumnItem = {
   displayType: ColumnDisplayType.TEXT,
   visible: true,
 };
-// const pageId:string = uuId();
 
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
@@ -263,12 +272,37 @@ const LogPage: React.FC = () => {
         dispatch(deleteExpectationMap(expectation));
       }
     });
+    socket.on(
+      "updateLog",
+      ({ projectId, log }: { projectId: string; log: LogM }) => {
+        if (projectId === currentProject.id && log.id === store.getState().log.selectedLogId) {
+          dispatch(setSelectedLogItem(log));
+        }
+      }
+    );
+
+    if (logState.selectedLogId) {
+      socket.emit("join_log_update", logState.selectedLogId);
+    }
 
     setSocketInstance(socket);
     return () => {
+      setSocketInstance(null);
       socket.disconnect();
     };
   }, [currentProject.id]);
+
+  useEffect(() => {
+    if (socketInstance && logState.selectedLogId) {
+      socketInstance.emit("join_log_update", logState.selectedLogId);
+    }
+    return () => {
+      if (socketInstance && logState.selectedLogId) {
+        socketInstance.emit("leave_log_update", logState.selectedLogId);
+      }
+    };
+  }, [logState.selectedLogId]);
+
   const listTable = useMemo(() => {
     return (
       <Table
@@ -284,8 +318,21 @@ const LogPage: React.FC = () => {
       />
     );
   }, [logColumn, logs, expectationState]);
+  const selLogM = logState.selectedLogItem;
   return (
     <div style={{ padding: "10px", marginTop: "10px" }}>
+      {selLogM && (
+        <WebsocketChatPanel
+          path={selLogM.req?.path ?? ""}
+          key={"wsChatPanel" + selLogM.id}
+          show={logState.showWebsocketChatPanel}
+          messageList={selLogM.websocketInfo?.messages ?? []}
+          onClose={() => {
+            dispatch(setShowWebsocketChatPanel(false));
+          }}
+          status={selLogM.websocketInfo?.status ?? null}
+        ></WebsocketChatPanel>
+      )}
       <PresetFilterRowComponent
         getExpectationListQuery={getExpectationListQuery}
         getLogViewQuery={getLogViewQuery}
@@ -312,6 +359,53 @@ const LogPage: React.FC = () => {
       />
       <ColumnConfig show={columnConfigShow} />
     </div>
+  );
+};
+
+const WebsocketChatPanel: React.FunctionComponent<{
+  show: boolean;
+  messageList: Array<WebsocketMessageM> | undefined;
+  path: string;
+  status: WebsocketStatus | null;
+  onClose: () => void;
+}> = ({ show, messageList, onClose, path, status }) => {
+  useEffect(() => {
+    if (!messageList) {
+      return;
+    }
+    messageListContainer.concat(
+      messageList.slice(messageListContainer.messageList.length)
+    );
+  }, [messageList]);
+  const [messageListContainer, setMessageListContainer] =
+    useState<MessageListContainer>(
+      new MessageListContainer(messageList ? [...messageList] : [])
+    );
+  return (
+    <Modal
+      open={show}
+      onCancel={onClose}
+      title={
+        <div>
+          {`${path}`}
+          &nbsp;&nbsp;&nbsp;
+          {status && status === WebsocketStatus.OPEN && (
+            <>
+              <LinkOutlined style={{ color: green[5] }} />
+              &nbsp;<span style={{ color: green[5] }}>{status}</span>
+            </>
+          )}
+          {status && status !== WebsocketStatus.OPEN && (
+            <>
+              <DisconnectOutlined style={{ color: red[5] }} />
+              &nbsp;<span style={{ color: red[5] }}>{status}</span>
+            </>
+          )}
+        </div>
+      }
+    >
+      <ChatMainComponent messageListContainer={messageListContainer} />
+    </Modal>
   );
 };
 

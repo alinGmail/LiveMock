@@ -1,16 +1,16 @@
 import express from "express";
 import { getProjectRouter } from "../../src/controller/projectController";
-import { createProject } from "core/struct/project";
+import { createProject } from "livemock-core/struct/project";
 import request from "supertest";
-import { createExpectation } from "core/struct/expectation";
+import { createExpectation } from "livemock-core/struct/expectation";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import {
   CreateExpectationReqBody, UpdateExpectationReqBody
 
-} from "core/struct/params/ExpectationParams";
+} from "livemock-core/struct/params/ExpectationParams";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { createProxyAction } from "core/struct/action";
+import { createProxyAction } from "livemock-core/struct/action";
 
 async function deleteExpectation(
   server: express.Express,

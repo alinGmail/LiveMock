@@ -6,11 +6,11 @@ import {
   getProjectCollection,
   getProjectDb,
 } from "../../src/db/dbManager";
-import { createProject } from "core/struct/project";
-import { createExpectation, ExpectationM } from "core/struct/expectation";
-import { createPathMatcher, MatcherCondition } from "core/struct/matcher";
+import { createProject } from "livemock-core/struct/project";
+import { createExpectation, ExpectationM } from "livemock-core/struct/expectation";
+import { createPathMatcher, MatcherCondition } from "livemock-core/struct/matcher";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { createCustomResponseAction, ResponseType } from "core/struct/action";
+import { createCustomResponseAction, ResponseType } from "livemock-core/struct/action";
 import express from "express";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";

@@ -3,11 +3,11 @@ import {
   CustomResponseActionM,
   IAction,
   ResponseType,
-} from "core/struct/action";
+} from "livemock-core/struct/action";
 import express from "express";
 import { delayPromise } from "./common";
 import Mock from "mockjs";
-import { LogM } from "core/struct/log";
+import { LogM } from "livemock-core/struct/log";
 
 class CustomResponseActionImpl implements IAction {
   action: CustomResponseActionM;
@@ -18,6 +18,7 @@ class CustomResponseActionImpl implements IAction {
   }
 
   async process(
+    projectId: string,
     req: express.Request,
     res: express.Response,
     logM: LogM | undefined
@@ -70,8 +71,8 @@ function insetProxyInfo(log: LogM | undefined) {
     isProxy: false,
     proxyHost: null,
     proxyPath: null,
-    requestHeaders:[],
-    responseHeaders:[],
+    requestHeaders: [],
+    responseHeaders: [],
   };
 }
 

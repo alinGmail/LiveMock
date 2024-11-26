@@ -3,7 +3,7 @@ import {
   RequestMatcherM,
   RequestMatcherType,
   StringMatcherCondition,
-} from "core/struct/matcher";
+} from "livemock-core/struct/matcher";
 import _ from "lodash";
 import MethodMatcher from "./MethodMatcher";
 import PathMatcher from "./PathMatcher";

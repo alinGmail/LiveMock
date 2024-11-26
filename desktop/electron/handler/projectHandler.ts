@@ -1,5 +1,6 @@
-import { ProjectEvents } from "core/struct/events/desktopEvents";
+import { ProjectEvents } from "livemock-core/struct/events/desktopEvents";
 import * as electron from "electron";
+import http from "http";
 import {
   CreateProjectPathParam,
   CreateProjectReqBody,
@@ -10,8 +11,8 @@ import {
   UpdateProjectPathParam,
   UpdateProjectReqBody,
   UpdateProjectReqQuery,
-} from "core/struct/params/ProjectParams";
-import { ProjectM, ProjectStatus } from "core/struct/project";
+} from "livemock-core/struct/params/ProjectParams";
+import { ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import { Collection } from "lokijs";
 import {
   getLogCollection,
@@ -26,12 +27,16 @@ import {
 } from "../server/projectStatusManage";
 import { isNotEmptyString } from "../common/utils";
 import { ServerError } from "./common";
-import { createLogView } from "core/struct/logView";
+import { createLogView } from "livemock-core/struct/logView";
 import express from "express";
 import getMockRouter from "../server/mockServer";
 import { getLogDynamicView } from "../log/logUtils";
 import * as console from "console";
-import {deleteDatabase} from "../db/dbUtils";
+import { deleteDatabase } from "../db/dbUtils";
+import log from "electron-log/main";
+import { once } from "../util/commonUtils";
+import { logEventEmitter } from "../common/eventEmitters";
+import { LogM } from "livemock-core/struct/log";
 
 const ipcMain = electron.ipcMain;
 
@@ -132,33 +137,42 @@ export async function setProjectHandler(path: string): Promise<void> {
       if (!project) {
         throw new ServerError(500, "project not exist");
       }
-      let server = await getProjectServer(projectId, path);
+      let server = getProjectServer(projectId, path);
       setProjectStatus(projectId, ProjectStatus.STARTING);
       if (server == null) {
         let expServer = express();
+        server = http.createServer(expServer);
         expServer.all("*", await getMockRouter(path, projectId));
-        server = expServer.listen(project?.port, () => {
-          server!.removeAllListeners("error");
-          setProjectStatus(projectId, ProjectStatus.STARTED);
-          onProjectStart(project);
-          return {
-            message: "success",
-          };
+
+        server.on("upgrade", async (req, socket, head) => {
+          const res_dummy = new http.ServerResponse(req);
+          const expressMiddleware = expServer._router.handle.bind(
+            expServer._router
+          );
+          expressMiddleware(req, res_dummy, (err) => {
+            if (err) {
+              socket.destroy();
+            }
+          });
         });
         setProjectServer(projectId, server);
-      } else {
-        server.listen(project?.port, () => {
-          server!.removeAllListeners("error");
-          setProjectStatus(projectId, ProjectStatus.STARTED);
-          onProjectStart(project);
-          return {
-            message: "success",
-          };
-        });
       }
-      server.once("error", (error) => {
-        // res.status(500);
-        throw new ServerError(500, "server start fail");
+      server.on("error", (error) => {
+        // log error
+        log.error(error.message);
+      });
+
+      server.listen(project?.port, () => {
+        server!.removeAllListeners("error");
+        setProjectStatus(projectId, ProjectStatus.STARTED);
+        onProjectStart(project);
+      });
+      // add log update event
+      once(`addLogUpdateEvent:${projectId}:${path}`, async () => {
+        const updateCollection = await getLogCollection(projectId, path);
+        updateCollection.on("update", (newLog: LogM, oldLog: LogM) => {
+          logEventEmitter.emit("update", { projectId, log: newLog, oldLog });
+        });
       });
     }
   );
@@ -171,11 +185,11 @@ export async function setProjectHandler(path: string): Promise<void> {
       if (projectStatus !== ProjectStatus.STARTED) {
         throw new ServerError(500, "project status is " + projectStatus);
       }
-      const server = await getProjectServer(projectId, path);
+      const server = getProjectServer(projectId, path);
       if (server) {
         setProjectStatus(projectId, ProjectStatus.CLOSING);
-        server.closeIdleConnections();
-        server.closeAllConnections();
+        // server.closeIdleConnections();
+        // server.closeAllConnections();
         server.close((err) => {
           if (err) {
             console.log(err);
@@ -203,23 +217,24 @@ export async function setProjectHandler(path: string): Promise<void> {
     }
   }
 
-
-  ipcMain.handle(ProjectEvents.DeleteProject, async (event, projectId: string) => {
-    const project = collection.findOne({ id: projectId });
-    if (!project) {
-      throw new ServerError(500, "project not exist");
+  ipcMain.handle(
+    ProjectEvents.DeleteProject,
+    async (event, projectId: string) => {
+      const project = collection.findOne({ id: projectId });
+      if (!project) {
+        throw new ServerError(500, "project not exist");
+      }
+      const projectStatus = getProjectStatus(projectId);
+      if (projectStatus !== ProjectStatus.STOPPED) {
+        throw new ServerError(500, "project status is " + projectStatus);
+      }
+      await deleteDatabase(projectId, path, "expectation");
+      await deleteDatabase(projectId, path, "logView");
+      await deleteDatabase(projectId, path, "log");
+      collection.remove(project);
+      return {
+        message: "success",
+      };
     }
-    const projectStatus = getProjectStatus(projectId);
-    if (projectStatus !== ProjectStatus.STOPPED) {
-      throw new ServerError(500, "project status is " + projectStatus);
-    }
-    await deleteDatabase(projectId, path, "expectation");
-    await deleteDatabase(projectId, path, "logView");
-    await deleteDatabase(projectId, path, "log");
-    collection.remove(project);
-    return {
-      message: "success",
-    };
-  })
-
+  );
 }

@@ -1,17 +1,19 @@
 import express from "express";
 import { getBaseEnvProject, setUpBaseEnv } from "../controller/baseEnv";
 import { getLocal } from "mockttp";
-import { createExpectation, ExpectationM } from "core/struct/expectation";
-import { createPathMatcher, MatcherCondition } from "core/struct/matcher";
+import { createExpectation, ExpectationM } from "livemock-core/struct/expectation";
+import { createPathMatcher, MatcherCondition } from "livemock-core/struct/matcher";
 import { expectationCreation } from "../controller/common";
-import { createProxyAction, ProxyActionM } from "core/struct/action";
+import { createProxyAction, ProxyActionM } from "livemock-core/struct/action";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
 import {
   getExpectationCollection,
   getLogCollection,
 } from "../../src/db/dbManager";
-import { ProjectM } from "core/struct/project";
+import { ProjectM } from "livemock-core/struct/project";
+
+const mockServerPort = "8025";
 
 async function testJsonResponse(
   response: request.Response,
@@ -50,7 +52,7 @@ describe("test proxy action", () => {
     expectationM.matchers = [pathMatcherM];
     expectationM.activate = true;
     expectationM.priority = 1;
-    proxyActionM.host = "localhost:8085";
+    proxyActionM.host = `localhost:${mockServerPort}`;
     expectationM.actions.push(proxyActionM);
 
     const expectationCrossM = createExpectation();
@@ -61,7 +63,7 @@ describe("test proxy action", () => {
     expectationCrossM.activate = true;
     expectationCrossM.priority = 2;
     const proxyCrossActionM = createProxyAction();
-    proxyCrossActionM.host = "localhost:8085";
+    proxyCrossActionM.host = `localhost:${mockServerPort}`;
     proxyCrossActionM.handleCross = true;
     proxyCrossActionM.crossAllowCredentials = true;
     proxyCrossActionM.headers?.push(["myToken", "myTokenValue"]);
@@ -71,7 +73,7 @@ describe("test proxy action", () => {
     await expectationCreation(server, projectM, expectationCrossM);
 
     // set up the server
-    await mockServer.start(8085);
+    await mockServer.start(parseInt(mockServerPort));
 
     await mockServer.forGet("/testProxy").thenReply(200, "A mocked response", {
       token: "this is a token!!!",
@@ -159,7 +161,7 @@ describe("test proxy action", () => {
     expect(log.req!.path).toBe("/testProxy");
     // test the proxy info
     expect(log.proxyInfo!.isProxy).toEqual(true);
-    expect(log.proxyInfo!.proxyHost === "http://localhost:8085").toBe(true);
+    expect(log.proxyInfo!.proxyHost === `http://localhost:${mockServerPort}`).toBe(true);
     expect(log.proxyInfo!.proxyPath === "/testProxy").toBe(true);
   });
 
@@ -183,7 +185,7 @@ describe("test proxy action", () => {
     expect(log.res!.status).toBe(200);
     expect(log.res!.body.message).toEqual("success");
     expect(log.proxyInfo!.isProxy).toEqual(true);
-    expect(log.proxyInfo!.proxyHost).toEqual("http://localhost:8085");
+    expect(log.proxyInfo!.proxyHost).toEqual(`http://localhost:${mockServerPort}`);
     expect(log.proxyInfo!.proxyPath).toEqual("/testRequestHeader");
     expect(log.proxyInfo!.requestHeaders).toEqual([
       {
@@ -243,7 +245,7 @@ describe("test proxy action", () => {
 
     // test the proxy info
     expect(log.proxyInfo!.isProxy).toBe(true);
-    expect(log.proxyInfo!.proxyHost).toBe("http://localhost:8085");
+    expect(log.proxyInfo!.proxyHost).toBe(`http://localhost:${mockServerPort}`);
     expect(log.proxyInfo!.proxyPath).toBe("/testNoContentType");
   });
 

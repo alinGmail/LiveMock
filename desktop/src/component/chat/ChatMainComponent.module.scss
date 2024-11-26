@@ -1,0 +1,60 @@
+.chatMain {
+  color: #000;
+}
+
+.chatTil {
+  color: red;
+}
+
+.chatContainer {
+  .chatScrollView {
+    overflow-y: scroll;
+    height: 400px;
+    transition: scrollTop 0.5s ease-in-out;
+    .chatItemRow {
+      color: #000;
+      margin-right: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+    .chatItemLeft {
+      .chatAvatar {
+        margin-left: 0;
+        margin-right: 10px;
+      }
+      .chatContent {
+        background-color: #e0e0e0;
+      }
+    }
+    .chatItemRight {
+      flex-direction: row-reverse;
+      .chatAvatar {
+        margin-left: 10px;
+        margin-right: 0;
+      }
+      .chatContent {
+        background-color: #dcf8c6;
+      }
+    }
+    .chatAvatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      flex-shrink: 0;
+      font-size: 30px;
+      color: #262626;
+    }
+
+    .chatContent {
+      padding: 10px;
+      border-radius: 5px;
+      max-width: calc(80% - 40px);
+    }
+  }
+}
+
+:global(.dark_mode) .chatAvatar{
+  color: #d9d9d9!important;
+}

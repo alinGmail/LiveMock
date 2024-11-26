@@ -8,7 +8,7 @@ import {
   RequestMatcherM,
   RequestMatcherHasName,
   RequestMatcherType, matcherHasValue,
-} from "core/struct/matcher";
+} from "livemock-core/struct/matcher";
 import styles from "./MatcherItem.module.css";
 import { Dropdown } from "antd";
 import { useMatcherContext } from "../context";

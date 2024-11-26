@@ -1,15 +1,16 @@
 {
-  "name": "livemock",
+  "name": "livemock-monorepo",
   "version": "1.2.5",
   "description": "LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "back-end-dev": "yarn workspace back-end start",
     "front-end-dev": "yarn workspace front-end dev",
     "web-dev": "concurrently \"npm run back-end-dev\" \"npm run front-end-dev\"",
-    "desktop-dev": "yarn workspace core build && yarn workspace desktop dev"
+    "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev",
+    "web-build": "yarn workspace livemock-core build && yarn workspace front-end build",
+    "web-start": " && yarn workspace back-end start"
   },
   "repository": {
     "type": "git",
@@ -38,12 +39,12 @@
   "devDependencies": {
     "@types/uuid": "^9.0.7",
     "concurrently": "^8.2.2",
-    "electron": "24.8.8",
     "prettier": "^3.2.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "express": "4.18.2",
     "uuid": "9.0.1"
-  }
+  },
+  "packageManager": "yarn@4.5.2"
 }

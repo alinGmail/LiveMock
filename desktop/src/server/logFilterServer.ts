@@ -3,7 +3,7 @@ import {
   DeleteLogFilterReqQuery,
   UpdateLogFilterReqBody,
   UpdatePresetLogFilterReqBody
-} from "core/struct/params/LogFilterParam";
+} from "livemock-core/struct/params/LogFilterParam";
 
 export const addLogFilterReq = async (param:CreateLogFilterReqBody)=>{
     return window.api.logFilter.createLogFilter({}, {}, param);

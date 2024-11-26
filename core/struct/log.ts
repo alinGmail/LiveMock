@@ -6,6 +6,7 @@ export interface LogM {
   res: ResponseLogM | null;
   proxyInfo: ProxyInfoM | null;
   expectationId: string | null;
+  websocketInfo: WebsocketInfoM | undefined | null;
 }
 
 export interface ProxyInfoM {
@@ -16,6 +17,27 @@ export interface ProxyInfoM {
   isProxy: boolean;
 }
 
+export interface WebsocketMessageM {
+  sendTime: number;
+  sendFromClient: boolean;
+  isBinary: boolean;
+  content: string;
+  exceededMaxLength: boolean;
+}
+
+export enum WebsocketStatus {
+  CONNECTING = "CONNECTING",
+  OPEN = "OPEN",
+  CLOSING = "CLOSING",
+  CLOSED = "CLOSED",
+}
+
+export interface WebsocketInfoM {
+  isWebsocket: boolean;
+  status: WebsocketStatus;
+  messages: Array<WebsocketMessageM>;
+}
+
 export interface ParsedQs {
   [key: string]: string | undefined | null | string[] | ParsedQs | ParsedQs[];
 }
@@ -23,7 +45,8 @@ export interface ParsedQs {
 export interface RequestLogM {
   body: any | null;
   rawBody: string | null;
-  requestDate: Date;
+  requestTime: number;
+  requestTimeStr: string;
   method: string;
   path: string;
   headers: {
@@ -41,7 +64,8 @@ type ResponseLogM = {
   status: number;
   statusMessage: string;
   duration: number;
-  responseDate: Date;
+  responseTime: number;
+  responseTimeStr: string;
 };
 
 export function createLog(id: number): LogM {
@@ -51,10 +75,12 @@ export function createLog(id: number): LogM {
     proxyInfo: null,
     req: null,
     res: null,
+    websocketInfo: null,
   };
 }
 
 export function createRequestLog(): RequestLogM {
+  const _now = new Date();
   return {
     body: null,
     headers: {},
@@ -62,7 +88,16 @@ export function createRequestLog(): RequestLogM {
     method: "get",
     path: "",
     rawBody: null,
-    requestDate: new Date(),
+    requestTime: _now.getTime(),
+    requestTimeStr: _now.toString(),
+  };
+}
+
+export function createWebsocketInfo(): WebsocketInfoM {
+  return {
+    isWebsocket: false,
+    messages: [],
+    status: WebsocketStatus.CONNECTING,
   };
 }
 
@@ -73,7 +108,8 @@ export function createResponseLog(): ResponseLogM {
     duration: 0,
     headers: {},
     rawBody: "",
-    responseDate: _now,
+    responseTime: _now.getTime(),
+    responseTimeStr: _now.toString(),
     status: 0,
     statusMessage: "",
   };
@@ -141,7 +177,7 @@ export const LogFilterConditionMap: {
 
 function getKeyByValue<T extends Record<string, string>>(
   enumObject: T,
-  value: string
+  value: string,
 ): keyof T | undefined {
   const entries = Object.entries(enumObject);
   const foundEntry = entries.find(([key, val]) => val === value);

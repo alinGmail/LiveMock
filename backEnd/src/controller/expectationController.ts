@@ -18,15 +18,15 @@ import {
   UpdateExpectationPathParam,
   UpdateExpectationReqBody,
   UpdateExpectationReqQuery,
-} from "core/struct/params/ExpectationParams";
+} from "livemock-core/struct/params/ExpectationParams";
 import {
   CreateExpectationResponse,
   DeleteExpectationResponse,
   GetExpectationResponse,
   ListExpectationResponse,
   UpdateExpectationResponse,
-} from "core/struct/response/ExpectationResponse";
-import { logViewEventEmitter } from "../common/logViewEvent";
+} from "livemock-core/struct/response/ExpectationResponse";
+import { logViewEventEmitter } from "../common/eventEmitters";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());

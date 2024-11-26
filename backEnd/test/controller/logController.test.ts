@@ -1,12 +1,12 @@
 import express from "express";
-import {CustomErrorMiddleware} from "../../src/controller/common";
-import {createProject, ProjectM} from "core/struct/project";
-import {getLogCollection, getNewLogNumber,} from "../../src/db/dbManager";
-import {createLog, createSimpleFilter, LogFilterCondition} from "core/struct/log";
-import {deleteFolderRecursive} from "../../src/common/utils";
+import { CustomErrorMiddleware } from "../../src/controller/common";
+import { createProject, ProjectM } from "livemock-core/struct/project";
+import { getLogCollection, getNewLogNumber, } from "../../src/db/dbManager";
+import { createLog, createSimpleFilter, LogFilterCondition } from "livemock-core/struct/log";
+import { deleteFolderRecursive } from "../../src/common/utils";
 import supertest from "supertest";
-import {ListLogReqQuery} from "core/struct/params/LogParams";
-import {logFilterCreation, logFilterDeletion, logFilterUpdateAction, projectCreation, routerSetup} from "./common";
+import { ListLogReqQuery } from "livemock-core/struct/params/LogParams";
+import { logFilterCreation, logFilterDeletion, logFilterUpdateAction, projectCreation, routerSetup } from "./common";
 
 describe("test log controller", () => {
   const server = express();
@@ -16,48 +16,53 @@ describe("test log controller", () => {
   const log2 = createLog(getNewLogNumber(projectM.id, "test_db"));
   const log3 = createLog(getNewLogNumber(projectM.id, "test_db"));
   const log4 = createLog(getNewLogNumber(projectM.id, "test_db"));
+  const _now = new Date();
   log1.req = {
     body: undefined,
     headers: {
-        token:"abc"
+      token: "abc"
     },
-    query:{},
+    query: {},
     method: "",
     rawBody: "",
-    requestDate: new Date(),
+    requestTime: _now.getTime(),
+    requestTimeStr: _now.toString(),
     path: "log1_path",
   };
   log2.req = {
     body: undefined,
     headers: {
-        token:"abcde"
+      token: "abcde"
     },
-    query:{},
+    query: {},
     method: "",
     rawBody: "",
-    requestDate: new Date(),
+    requestTime: _now.getTime(),
+    requestTimeStr: _now.toString(),
     path: "log2_path",
   };
   log3.req = {
     body: undefined,
     headers: {
-        token:"efg"
+      token: "efg"
     },
-    query:{},
+    query: {},
     method: "",
     rawBody: "",
-    requestDate: new Date(),
+    requestTime: _now.getTime(),
+    requestTimeStr: _now.toString(),
     path: "log3_path",
   };
   log4.req = {
     body: undefined,
     headers: {
-        token:"opq"
+      token: "opq"
     },
-    query:{},
+    query: {},
     method: "",
     rawBody: "",
-    requestDate: new Date(),
+    requestTime: _now.getTime(),
+    requestTimeStr: _now.toString(),
     path: "log4_path",
   };
 
@@ -101,32 +106,32 @@ describe("test log controller", () => {
       .expect(200);
     expect(logViewRes.body.length).toBe(1);
     const logView = logViewRes.body.at(0);
-    const logViewLogsRes =await getLogViewLogs(server,logView,projectM);
+    const logViewLogsRes = await getLogViewLogs(server, logView, projectM);
     expect(logViewLogsRes.body.length).toBe(4);
     const simpleFilterM = createSimpleFilter();
     simpleFilterM.condition = LogFilterCondition.CONTAINS;
     simpleFilterM.property = "req.headers.token";
     simpleFilterM.value = "abc";
-    await logFilterCreation(server,simpleFilterM,logView.id,projectM.id);
-    const logViewLogsRes2 =await getLogViewLogs(server,logView,projectM);
+    await logFilterCreation(server, simpleFilterM, logView.id, projectM.id);
+    const logViewLogsRes2 = await getLogViewLogs(server, logView, projectM);
     expect(logViewLogsRes2.body.length).toBe(2);
 
 
     simpleFilterM.value = "opq";
-    await logFilterUpdateAction(server,simpleFilterM,logView.id,projectM.id);
-    const logViewLogsRes3 =await getLogViewLogs(server,logView,projectM);
+    await logFilterUpdateAction(server, simpleFilterM, logView.id, projectM.id);
+    const logViewLogsRes3 = await getLogViewLogs(server, logView, projectM);
     expect(logViewLogsRes3.body.length).toBe(1);
 
-    await logFilterDeletion(server,simpleFilterM.id,logView.id,projectM.id);
-    const logViewLogsRes4 =await getLogViewLogs(server,logView,projectM);
+    await logFilterDeletion(server, simpleFilterM.id, logView.id, projectM.id);
+    const logViewLogsRes4 = await getLogViewLogs(server, logView, projectM);
     expect(logViewLogsRes4.body.length).toBe(4);
 
   });
 });
 
 
-async function getLogViewLogs(server:express.Express,logView,projectM:ProjectM){
-    return supertest(server).get(
-        `/log/logViewLogs/${logView.id}`
-    ).query({projectId: projectM.id});
+async function getLogViewLogs(server: express.Express, logView, projectM: ProjectM) {
+  return supertest(server).get(
+    `/log/logViewLogs/${logView.id}`
+  ).query({ projectId: projectM.id });
 }

@@ -1,5 +1,5 @@
 import { Draft, PayloadAction } from "@reduxjs/toolkit";
-import { ActionM } from "core/struct/action";
+import { ActionM } from "livemock-core/struct/action";
 import { ExpectationState } from "./expectationSlice";
 
 export const actionReducers = {
