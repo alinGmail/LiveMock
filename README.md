@@ -37,15 +37,14 @@ To install the desktop version, simply download from the [release page](https://
 
 ### Installation of the web service version
 
-#### 1.This project uses Yarn Workspaces, so you need to install the latest version of Yarn.
+#### 1.This project uses Yarn Workspaces, so you need to enable corepack.
 ```
 corepack enable
-yarn set version stable
 ```
 
 #### 2.clone the project
 ```
-git clone git@github.com:alinGmail/LiveMock.git
+git clone https://github.com/alinGmail/LiveMock.git
 ```
 
 #### 3.install dependencies
