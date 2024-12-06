@@ -5,7 +5,11 @@ import Icon, { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { Dropdown, Modal, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { Updater, useImmer } from "use-immer";
-import { createProject, ProjectM, ProjectStatus } from "livemock-core/struct/project";
+import {
+  createProject,
+  ProjectM,
+  ProjectStatus,
+} from "livemock-core/struct/project";
 import ProjectEditor from "./ProjectEditor";
 import { EditorType } from "../../struct/common";
 import {
@@ -59,19 +63,45 @@ const ProjectInfo = () => {
     switch (projectStatus) {
       case ProjectStatus.STARTED:
         return (
-          <div className={mStyle.projectStatus}>running on port {port}</div>
+          <div
+            className={[mStyle.projectStatus, mStyle.projectStatusRunning].join(
+              " "
+            )}
+          >
+            running on port {port}
+          </div>
         );
       case ProjectStatus.STOPPED:
         return (
-          <div className={mStyle.projectStatus}>stopped on port {port}</div>
+          <div
+            className={[mStyle.projectStatus, mStyle.projectStatusStopped].join(
+              " "
+            )}
+          >
+            stopped on port {port}
+          </div>
         );
       case ProjectStatus.STARTING:
         return (
-          <div className={mStyle.projectStatus}>starting on port {port}</div>
+          <div
+            className={[
+              mStyle.projectStatus,
+              mStyle.projectStatusStarting,
+            ].join(" ")}
+          >
+            starting on port {port}
+          </div>
         );
       case ProjectStatus.CLOSING:
         return (
-          <div className={mStyle.projectStatus}>stopping on port {port}</div>
+          <div
+            className={[
+              mStyle.projectStatus,
+              mStyle.projectStatusStopping,
+            ].join(" ")}
+          >
+            stopping on port {port}
+          </div>
         );
     }
   };
@@ -130,9 +160,13 @@ const ProjectInfo = () => {
                           dispatch(setCurProjectIndex(index));
                           setProjectListDropdown(false);
                         }}
-                        className={"menuItem"}
+                        className={"projectMenuItem"}
                       >
                         {project.name}
+                        <ProjectStatusComponent
+                            projectStatus={project.status}
+                            port={project.port}
+                        />
                       </div>
                     );
                   })}
