@@ -1,3 +1,24 @@
+/* this is use for project list */
+.projectStatus {
+  font-size: 12px;
+  line-height: 12px;
+  color: rgba(0, 0, 0, 0.8);
+}
+:global(.dark_mode) .projectStatus {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.projectStatusRunning {
+  color: rgba(62, 175, 14, 0.8) !important;
+}
+.projectStatusStopped {
+   // color: rgba(234, 8, 27, 0.7) !important;
+}
+.projectStatusStarting,
+.projectStatusStopping {
+  color: rgba(234, 118, 9, 0.7) !important;
+}
+
 .projectInfo {
   display: inline-block;
   padding-right: 20px;
@@ -19,6 +40,7 @@
     }
     .projectStatus {
       font-size: 14px;
+      line-height: 1.4em;
       color: #999;
     }
     .startIcon {
