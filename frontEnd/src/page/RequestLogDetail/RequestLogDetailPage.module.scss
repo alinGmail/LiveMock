@@ -1,0 +1,79 @@
+.req_log_detail {
+  .req_tile {
+    color: #fff;
+    background-color: rgb(37, 99, 235);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .til_left {
+    display: flex;
+    align-items: center;
+  }
+  .til_right {
+    display: flex;
+    align-items: center;
+  }
+  .req_method {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 35px;
+  }
+  .req_path {
+    font-size: 22px;
+    line-height: 35px;
+  }
+  .req_time {
+    font-size: 18px;
+    line-height: 25px;
+  }
+  .req_status {
+    font-size: 18px;
+    line-height: 25px;
+    background-color: rgb(16, 185, 129);
+    padding: 5px 20px;
+    border-radius: 99px;
+  }
+
+  .req_content {
+    display: grid;
+    padding: 30px;
+    gap: 30px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    .request_col {
+    }
+    .response_col {
+    }
+    .card {
+      padding: 20px;
+      background-color: rgb(249, 250, 251);
+      border-radius: 10px;
+      color: #000;
+    }
+    .card_til {
+      font-size: 22px;
+      line-height: 35px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    .card_content {
+    }
+    .property_row {
+      font-size: 18px;
+      line-height: 22px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 10px;
+      margin-bottom: 10px;
+      .pro_label {
+        color: rgb(75 85 99 );
+      }
+      .pro_value {
+      }
+    }
+  }
+}
