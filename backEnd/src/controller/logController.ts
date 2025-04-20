@@ -13,6 +13,10 @@ import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
   DeleteAllRequestLogsReqQuery,
+  GetLogDetailPathParam,
+  GetLogDetailReqBody,
+  GetLogDetailReqQuery,
+  GetLogDetailResponse,
   ListLogPathParam,
   ListLogReqBody,
   ListLogReqQuery,
@@ -78,6 +82,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
     }
   );
 
+
   /**
    * list the log view
    */
@@ -102,6 +107,39 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       const logViews = logViewCollection.find({});
       res.json(logViews);
     }
+  );
+
+
+  /**
+   * get log item
+   */
+  router.get(
+      `/detail/:logId`,
+      async (
+          req: Request<
+              GetLogDetailPathParam,
+              GetLogDetailResponse,
+              GetLogDetailReqBody,
+              GetLogDetailReqQuery
+          >,
+          res: Response<GetLogDetailResponse>
+      ) => {
+        addCross(res);
+        const logId = parseInt(req.params.logId);
+        if (!logId) {
+          throw new ServerError(400, "log id not exist!");
+        }
+        const projectId = req.body.projectId;
+        const collection = await getLogCollection(projectId, path);
+
+        const logItem = collection.findOne({ id: logId });
+        if (logItem === null) {
+          throw new ServerError(500, "log item not found!");
+        }
+        res.json({
+          logItem,
+        });
+      }
   );
 
   /**

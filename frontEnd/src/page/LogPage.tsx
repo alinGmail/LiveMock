@@ -51,6 +51,7 @@ import ChatMainComponent, {
 } from "src/component/chat/ChatMainComponent";
 import { LinkOutlined, DisconnectOutlined } from "@ant-design/icons";
 import { red, green } from "@ant-design/colors";
+import {useNavigate} from "react-router-dom";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -134,6 +135,7 @@ const LogPage: React.FC = () => {
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
+  const navigate = useNavigate();
 
   const expectationState = useAppSelector((state) => state.expectation);
   const getLogViewQuery = useQuery([currentProject.id], () => {
@@ -217,7 +219,7 @@ const LogPage: React.FC = () => {
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
-      .concat(getConfigColumn(dispatch));
+      .concat(getConfigColumn(dispatch,navigate));
     updateLogColumn(newLogColumn);
   }, [
     tableColumns,

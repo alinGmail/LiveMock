@@ -1,11 +1,10 @@
 import mStyle from "./RequestLogDetailPage.module.scss";
 import RequestHeadersCard from "./RequestHeadersCard";
-
-
-
-
+import RequestBodyCard from "./RequestBodyCard";
+import { useParams } from "react-router-dom";
 
 const RequestLogDetailPage = () => {
+  const params = useParams();
   return (
     <div className={mStyle.req_log_detail}>
       <div className={mStyle.req_tile}>
@@ -22,9 +21,11 @@ const RequestLogDetailPage = () => {
       <div className={mStyle.req_content}>
         <div className={mStyle.request_col}>
           <RequestHeadersCard />
+          <RequestBodyCard />
         </div>
         <div className={mStyle.response_col}></div>
       </div>
+      <div>{JSON.stringify(params)}</div>
     </div>
   );
 };

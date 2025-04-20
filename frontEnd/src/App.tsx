@@ -68,7 +68,7 @@ function App() {
                     />
                   </Route>
                   <Route
-                    path={"requestLog/detail"}
+                    path={"requestLog/detail/:logId"}
                     element={<RequestLogDetailPage />}
                   />
                 </Routes>
