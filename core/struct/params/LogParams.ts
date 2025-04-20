@@ -20,10 +20,11 @@ export interface GetLogDetailPathParam {
 }
 
 export interface GetLogDetailReqBody {
-  projectId: string;
 }
 
-export interface GetLogDetailReqQuery {}
+export interface GetLogDetailReqQuery {
+  projectId: string;
+}
 
 export interface GetLogDetailResponse {
   logItem: LogM;

@@ -129,7 +129,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
         if (!logId) {
           throw new ServerError(400, "log id not exist!");
         }
-        const projectId = req.body.projectId;
+        const projectId = req.query.projectId;
         const collection = await getLogCollection(projectId, path);
 
         const logItem = collection.findOne({ id: logId });
