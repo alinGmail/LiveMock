@@ -43,6 +43,7 @@ import { NavigateFunction } from "react-router-dom";
 export function getConfigColumn(
   dispatch: Dispatch<AnyAction>,
   navigate: NavigateFunction,
+  projectId:string,
 ) {
   return [
     {
@@ -58,7 +59,7 @@ export function getConfigColumn(
             onClick={() => {
               const currentUrl = window.location.href.split("#")[0];
               const newUrl =
-                currentUrl + "#" + `/requestLog/detail/${record.id}`;
+                currentUrl + "#" + `/requestLog/detail/${record.id}?projectId=${projectId}`;
               window.open(newUrl, "_blank");
             }}
           />

@@ -219,7 +219,7 @@ const LogPage: React.FC = () => {
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
-      .concat(getConfigColumn(dispatch,navigate));
+      .concat(getConfigColumn(dispatch,navigate,currentProject.id));
     updateLogColumn(newLogColumn);
   }, [
     tableColumns,

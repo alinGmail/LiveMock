@@ -19,6 +19,7 @@
     font-size: 22px;
     font-weight: bold;
     line-height: 35px;
+    margin-right: 20px;
   }
   .req_path {
     font-size: 22px;
@@ -27,6 +28,7 @@
   .req_time {
     font-size: 18px;
     line-height: 25px;
+    margin-right: 20px;
   }
   .req_status {
     font-size: 18px;
@@ -41,6 +43,7 @@
     padding: 30px;
     gap: 30px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    background:#fff;
 
     .request_col {
     }
@@ -69,6 +72,7 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       margin-top: 10px;
       margin-bottom: 10px;
+      word-break: break-all;
       .pro_label {
         color: rgb(75 85 99);
       }
