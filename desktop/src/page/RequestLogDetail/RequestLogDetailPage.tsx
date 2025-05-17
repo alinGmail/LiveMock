@@ -21,6 +21,20 @@ const RequestLogDetailPage = () => {
     }
     return getRequestLogDetail(params.logId, projectId);
   });
+  function getStatusClass(reqCode: number | undefined) {
+    if (!reqCode) {
+      return "";
+    }
+    if (reqCode < 200) {
+      return mStyle.req_status_processing;
+    } else if (reqCode < 300) {
+      return mStyle.req_status_success;
+    } else if (reqCode < 400) {
+      return mStyle.req_status_processing;
+    } else {
+      return mStyle.req_status_error;
+    }
+  }
   return (
     <div className={mStyle.req_log_detail}>
       <div className={mStyle.req_tile}>
@@ -37,9 +51,10 @@ const RequestLogDetailPage = () => {
             <ClockCircleOutlined /> 2025-01-10 12:00:00
           </div>
           <div
-            className={[mStyle.req_status, mStyle.req_status_processing].join(
-              " "
-            )}
+            className={[
+              mStyle.req_status,
+              getStatusClass(getLogDetailQuery.data?.logItem.res?.status),
+            ].join(" ")}
           >
             {getLogDetailQuery.data?.logItem.res?.status}
           </div>
