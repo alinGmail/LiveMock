@@ -1,10 +1,16 @@
 import * as electron from "electron";
 import ipcMain = electron.ipcMain;
-import { LogEvents, LogViewEvents } from "livemock-core/struct/events/desktopEvents";
+import {
+  LogEvents,
+  LogViewEvents,
+} from "livemock-core/struct/events/desktopEvents";
 import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
   DeleteAllRequestLogsReqQuery,
+  GetLogDetailPathParam,
+  GetLogDetailReqBody,
+  GetLogDetailReqQuery,
   ListLogViewLogsPathParam,
   ListLogViewLogsReqBody,
   ListLogViewLogsReqQuery,
@@ -48,7 +54,7 @@ export async function setLogViewHandler(path: string) {
       reqQuery: ListLogViewLogsReqQuery,
       reqBody: ListLogViewLogsReqBody
     ) => {
-      let { maxLogId, projectId } = reqQuery;
+      const { maxLogId, projectId } = reqQuery;
       const lovViewId = reqParam.logViewId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -70,6 +76,29 @@ export async function setLogViewHandler(path: string) {
         .limit(PAGE_SIZE)
         .data();
       return logs;
+    }
+  );
+
+  ipcMain.handle(
+    LogViewEvents.GetLogDetail,
+    async (
+      event,
+      reqParam: GetLogDetailPathParam,
+      reqQuery: GetLogDetailReqQuery,
+      reqBody: GetLogDetailReqBody
+    ) => {
+      const logId = parseInt(reqParam.logId);
+      if (!logId) {
+        throw new ServerError(400, "log id not exist!");
+      }
+      const projectId = reqQuery.projectId;
+      const collection = await getLogCollection(projectId, path);
+
+      const logItem = collection.findOne({ id: logId });
+      if (logItem === null) {
+        throw new ServerError(500, "log item not found!");
+      }
+      return { logItem };
     }
   );
 
@@ -100,24 +129,24 @@ export function logViewEventHandler(webContent: WebContents) {
   }
   logViewEventHandlerInit = true;
   logViewEventEmitter.on("insert", (arg: { log: LogM; logViewId: string }) => {
-    let { log, logViewId } = arg;
+    const { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogAdd, { log, logViewId });
   });
 
   logViewEventEmitter.on("update", (arg: { log: LogM; logViewId: string }) => {
-    let { log, logViewId } = arg;
+    const { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogUpdate, { log, logViewId });
   });
 
   logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
-    let { log, logViewId } = arg;
+    const { log, logViewId } = arg;
     webContent.send(LogViewEvents.OnLogDelete, { log, logViewId });
   });
 
   logEventEmitter.on(
     "update",
     (arg: { projectId: string; log: LogM; oldLog: LogM }) => {
-      let { oldLog, log, projectId } = arg;
+      const { oldLog, log, projectId } = arg;
       webContent.send(LogEvents.OnLogUpdate, { log, projectId });
     }
   );

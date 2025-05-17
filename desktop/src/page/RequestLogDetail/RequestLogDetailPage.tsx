@@ -1,11 +1,10 @@
 import mStyle from "./RequestLogDetailPage.module.scss";
 import RequestHeadersCard from "./RequestHeadersCard";
 import RequestBodyCard from "./RequestBodyCard";
-import {useLocation, useParams, useSearchParams} from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRequestLogDetail } from "../../server/logServer";
-import { useAppSelector } from "../../store";
-import {ClockCircleOutlined} from "@ant-design/icons";
+import { ClockCircleOutlined } from "@ant-design/icons";
 
 const RequestLogDetailPage = () => {
   const params = useParams<{
@@ -20,9 +19,7 @@ const RequestLogDetailPage = () => {
     if (!params.logId) {
       throw new Error("No log detail found.");
     }
-    return getRequestLogDetail(parseInt(params.logId), {
-      projectId: projectId,
-    });
+    return getRequestLogDetail(params.logId, projectId);
   });
   return (
     <div className={mStyle.req_log_detail}>
@@ -36,8 +33,14 @@ const RequestLogDetailPage = () => {
           </div>
         </div>
         <div className={mStyle.til_right}>
-          <div className={mStyle.req_time}><ClockCircleOutlined /> 2025-01-10 12:00:00</div>
-          <div className={[mStyle.req_status,mStyle.req_status_processing].join(" ")}>
+          <div className={mStyle.req_time}>
+            <ClockCircleOutlined /> 2025-01-10 12:00:00
+          </div>
+          <div
+            className={[mStyle.req_status, mStyle.req_status_processing].join(
+              " "
+            )}
+          >
             {getLogDetailQuery.data?.logItem.res?.status}
           </div>
         </div>
