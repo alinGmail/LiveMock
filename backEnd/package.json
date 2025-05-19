@@ -22,16 +22,12 @@
     "@types/supertest": "^2.0.12",
     "@types/type-is": "^1.6.3",
     "jest": "^28.1.1",
-    "livemock-core": "workspace:*",
     "mockserver-client": "^5.13.2",
     "mockserver-node": "^5.13.2",
     "mockttp": "^3.1.0",
     "nodemon": "^2.0.16",
     "prettier": "2.8.7",
-    "supertest": "^6.3.3",
-    "ts-jest": "^28.0.5",
-    "ts-node": "^10.7.0",
-    "tsconfig-paths": "^4.2.0"
+    "ts-jest": "^28.0.5"
   },
   "dependencies": {
     "@types/micromatch": "^4.0.7",
@@ -39,7 +35,6 @@
     "express": "4.18.1",
     "form-data": "^4.0.0",
     "http-proxy": "^1.18.1",
-    "livemock-core": "workspace:*",
     "lodash": "^4.17.21",
     "lokijs": "git+https://github.com/alinGmail/LokiJS.git#265bbcaeafccac11ab556599e478380cd07ffca7",
     "micromatch": "^4.0.5",
@@ -48,6 +43,10 @@
     "node-mocks-http": "^1.12.2",
     "requires-port": "^1.0.0",
     "socket.io": "^4.6.2",
+    "ts-node": "^10.7.0",
+    "tsconfig-paths": "^4.2.0",
+    "livemock-core": "workspace:*",
+    "supertest": "^6.3.3",
     "type-is": "^1.6.18"
   }
 }
