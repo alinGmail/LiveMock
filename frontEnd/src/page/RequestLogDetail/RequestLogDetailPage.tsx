@@ -6,6 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getRequestLogDetail } from "../../server/logServer";
 import { useAppSelector } from "../../store";
 import { ClockCircleOutlined } from "@ant-design/icons";
+import RequestQueryCard from "./RequestQueryCard";
+
+
+function isEmptyObject(obj: any): boolean {
+  if(!obj){
+    return true;
+  }
+  return Object.keys(obj).length === 0;
+}
 
 const RequestLogDetailPage = () => {
   const params = useParams<{
@@ -71,6 +80,14 @@ const RequestLogDetailPage = () => {
           <RequestHeadersCard
             headers={getLogDetailQuery.data?.logItem.req?.headers ?? {}}
           />
+          {!isEmptyObject(getLogDetailQuery.data?.logItem.req?.query) && (
+            <>
+              <div className={"blank20"}></div>
+              <RequestQueryCard
+                query={getLogDetailQuery.data?.logItem.req?.query}
+              />
+            </>
+          )}
           <div className={"blank20"}></div>
           <RequestBodyCard body={getLogDetailQuery.data?.logItem.req?.body} />
         </div>
