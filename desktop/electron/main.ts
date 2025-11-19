@@ -16,10 +16,10 @@ import { systemVersion } from "./config";
 import * as electron from "electron";
 import ipcMain = electron.ipcMain;
 import { SystemEvents } from "livemock-core/struct/events/desktopEvents";
-import log from 'electron-log/main';
+import log from "electron-log/main";
 import { sysEventEmitter } from "./common/eventEmitters";
 import { SystemEvent } from "livemock-core/struct/events/systemEvent";
-import {addWsEventListeners} from "./common/eventListener";
+import { addWsEventListeners } from "./common/eventListener";
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -44,8 +44,7 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 const env = process.env["PROJECT_ENV"];
 
-
-sysEventEmitter.on(SystemEvent.START,async () => {
+sysEventEmitter.on(SystemEvent.START, async () => {
   const systemCollection = await getSystemCollection(app.getPath("userData"));
   const systemConfig = systemCollection.findOne({});
   if (systemConfig) {
@@ -63,7 +62,7 @@ async function createWindow() {
     },
   });
   await Promise.all(
-      sysEventEmitter.listeners(SystemEvent.START).map((listener) => listener())
+    sysEventEmitter.listeners(SystemEvent.START).map((listener) => listener())
   );
 
   await setProjectHandler(app.getPath("userData"));
@@ -89,15 +88,40 @@ async function createWindow() {
 
   if (env === "dev") {
     win.loadURL("http://localhost:5173");
-    win.webContents.on('did-fail-load', () => {
+    win.webContents.on("did-fail-load", () => {
       setTimeout(() => {
         win?.loadURL("http://localhost:5173");
-      },3000);
+      }, 3000);
     });
     win.webContents.openDevTools();
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, "index.html"));
+  }
+}
+
+function openNewWindow(hash: string, width: number, height: number) {
+  if (!win) {
+    return;
+  }
+  const newWin = new BrowserWindow({
+    modal: false,
+    show: true,
+    width: width,
+    height: height,
+    icon: path.join(process.env.PUBLIC, "logo.png"),
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+    },
+  });
+  if (env === "dev") {
+    newWin.loadURL(`http://localhost:5173/#${hash}`);
+    newWin.webContents.openDevTools();
+  } else {
+    newWin.loadFile(path.join(process.env.DIST, "index.html"), {
+      hash: hash,
+    });
   }
 }
 
@@ -121,16 +145,27 @@ function createAboutWindow() {
     aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
   }
   aboutWin.webContents.on("did-finish-load", () => {
-    aboutWin.webContents.executeJavaScript(`
+    aboutWin.webContents
+      .executeJavaScript(
+        `
       const ele = document.querySelector("#version");
       ele.innerHTML = '${app.getVersion()}';
-    `).catch(console.error);
+    `
+      )
+      .catch(console.error);
   });
 }
 
 ipcMain.handle(SystemEvents.OpenAboutWindow, () => {
   createAboutWindow();
 });
+
+ipcMain.handle(
+  SystemEvents.OpenNewWindow,
+  (event,hash: string, width: number, height: number) => {
+    openNewWindow(hash, width, height);
+  }
+);
 
 app.on("window-all-closed", () => {
   win = null;

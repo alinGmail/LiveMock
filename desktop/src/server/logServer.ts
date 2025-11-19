@@ -1,5 +1,6 @@
 import {
   DeleteAllRequestLogsReqQuery,
+  GetLogDetailResponse,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
 } from "livemock-core/struct/params/LogParams";
@@ -26,4 +27,15 @@ export async function deleteAllRequestLogs(
   query: DeleteAllRequestLogsReqQuery
 ): Promise<DeleteAllRequestLogsResponse> {
   return window.api.logView.deleteAllRequestLogs({}, query, {});
+}
+
+export async function getRequestLogDetail(
+  logId: string,
+  projectId: string
+): Promise<GetLogDetailResponse> {
+  return window.api.logView.getLogDetail(
+    { logId },
+    { projectId: projectId },
+    {}
+  );
 }

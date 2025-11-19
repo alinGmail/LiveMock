@@ -27,7 +27,7 @@
     "http-proxy": "^1.18.1",
     "livemock-core": "workspace:*",
     "lodash": "^4.17.21",
-    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#94aa10183ab444d3f11d59a19314db39d3cb6ef3",
+    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#265bbcaeafccac11ab556599e478380cd07ffca7",
     "micromatch": "^4.0.5",
     "mockjs": "^1.1.0",
     "modern-css-reset": "^1.4.0",

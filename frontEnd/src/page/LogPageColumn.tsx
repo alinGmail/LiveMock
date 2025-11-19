@@ -5,6 +5,7 @@ import {
   DeleteOutlined,
   FilterOutlined,
   MessageOutlined,
+  FileSearchOutlined,
 } from "@ant-design/icons";
 import { createSimpleFilter, FilterType, LogM } from "livemock-core/struct/log";
 import { Dispatch, useState } from "react";
@@ -29,7 +30,7 @@ import mStyle from "./LogPageColumn.module.scss";
 import { ReactComponent as Equalizer } from "../svg/equalizer.svg";
 import { ReactComponent as Eye } from "../svg/eye.svg";
 import { ReactComponent as EyeBlocked } from "../svg/eye-blocked.svg";
-import _ from "lodash";
+import _, { after } from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
@@ -37,14 +38,33 @@ import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
+import { NavigateFunction } from "react-router-dom";
 
-export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
+export function getConfigColumn(
+  dispatch: Dispatch<AnyAction>,
+  navigate: NavigateFunction,
+  projectId:string,
+) {
   return [
     {
       dataIndex: "config",
       key: "config",
       width: "100px",
-      render: () => <div></div>,
+      render: (text: string, record: LogM) => (
+        <div>
+          <Button
+            type={"text"}
+            icon={<FileSearchOutlined />}
+            shape={"circle"}
+            onClick={() => {
+              const currentUrl = window.location.href.split("#")[0];
+              const newUrl =
+                currentUrl + "#" + `/requestLog/detail/${record.id}?projectId=${projectId}`;
+              window.open(newUrl, "_blank");
+            }}
+          />
+        </div>
+      ),
       title: () => {
         return (
           <div>
@@ -61,7 +81,7 @@ export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
                     path: "",
                     displayType: ColumnDisplayType.TEXT,
                     visible: true,
-                  })
+                  }),
                 );
               }}
               type={"text"}
@@ -91,7 +111,7 @@ export function getDefaultColumn(
   refreshLogList: () => void,
   expectationMap: {
     [key: string]: ExpectationM;
-  }
+  },
 ): ColumnsType<LogM> {
   const res = [
     {
@@ -306,7 +326,7 @@ export function getDefaultColumnTitles() {
 function getDefaultColumnHead(
   name: string,
   dispatch: Dispatch<AnyAction>,
-  index: number
+  index: number,
 ) {
   //const dispatch = useDispatch();
 
@@ -323,7 +343,7 @@ function getDefaultColumnHead(
                   setDefaultColumnVisible({
                     index,
                     visible: false,
-                  })
+                  }),
                 );
               }}
             >
@@ -385,7 +405,7 @@ const CustomColumnHead = ({
                   modifyTableColumn({
                     ...item,
                     visible: false,
-                  })
+                  }),
                 );
               }}
             >
@@ -418,7 +438,7 @@ const CustomColumnHead = ({
 export function getCustomColumn(
   items: Array<TableColumnItem>,
   dispatch: Dispatch<AnyAction>,
-  mode: "light" | "dark"
+  mode: "light" | "dark",
 ) {
   let res: ColumnType<LogM>[] = [];
   items.forEach((item) => {
@@ -429,7 +449,7 @@ export function getCustomColumn(
 export function transferColumn(
   item: TableColumnItem,
   dispatch: Dispatch<AnyAction>,
-  mode: "light" | "dark"
+  mode: "light" | "dark",
 ): ColumnType<LogM> {
   return {
     title: (

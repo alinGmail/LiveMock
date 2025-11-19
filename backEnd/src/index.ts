@@ -10,6 +10,7 @@ import { getSystemCollection } from "./db/dbManager";
 import { sysEventEmitter } from "./common/eventEmitters";
 import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 import { addWsEventListeners } from "./common/eventListener";
+import { getConfig } from "./config/config";
 
 const { Server } = require("socket.io");
 
@@ -22,8 +23,11 @@ const io = new Server(http, {
 });
 export const systemVersion = 801;
 
+const config = getConfig();
+const dbPath = config.database.path;
+
 sysEventEmitter.on(SystemEvent.START, async () => {
-  const systemCollection = await getSystemCollection("db");
+  const systemCollection = await getSystemCollection(dbPath);
   const systemConfig = systemCollection.findOne({});
   if (systemConfig) {
   } else {
@@ -39,17 +43,17 @@ addWsEventListeners();
     sysEventEmitter.listeners(SystemEvent.START).map((listener) => listener())
   );
 
-  server.use("/project", await getProjectRouter("db"));
-  server.use("/expectation", getExpectationRouter("db"));
-  server.use("/matcher", getMatcherRouter("db"));
-  server.use("/action", await getActionRouter("db"));
-  server.use("/logFilter", await getLogFilterRouter("db"));
-  server.use("/log", await getLogRouter("db"));
+  server.use("/project", await getProjectRouter(dbPath));
+  server.use("/expectation", getExpectationRouter(dbPath));
+  server.use("/matcher", getMatcherRouter(dbPath));
+  server.use("/action", await getActionRouter(dbPath));
+  server.use("/logFilter", await getLogFilterRouter(dbPath));
+  server.use("/log", await getLogRouter(dbPath));
   server.use("/dashboard", express.static("../frontEnd/dist"));
   server.all("/", (req, res) => {
     res.redirect("/dashboard");
   });
-  await addLogListener(io, "db");
+  await addLogListener(io, dbPath);
 
   server.use(CustomErrorMiddleware);
   http.listen(9002, () => {

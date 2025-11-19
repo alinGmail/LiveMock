@@ -10,7 +10,11 @@
     "web-dev": "concurrently \"npm run back-end-dev\" \"npm run front-end-dev\"",
     "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev",
     "web-build": "yarn workspace livemock-core build && yarn workspace front-end build",
-    "web-start": "yarn workspace back-end start"
+    "web-start": "yarn workspace back-end start",
+    "test": "yarn workspaces foreach run test",
+    "test:back-end": "yarn workspace back-end test",
+    "test:core": "yarn workspace livemock-core test",
+    "test:watch": "yarn workspaces foreach run test --watch"
   },
   "repository": {
     "type": "git",
@@ -46,5 +50,5 @@
     "express": "4.18.2",
     "uuid": "9.0.1"
   },
-  "packageManager": "yarn@4.5.2"
+  "packageManager": "yarn@4.5.3"
 }
