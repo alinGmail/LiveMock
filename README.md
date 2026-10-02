@@ -80,7 +80,7 @@ For example, to run on another port:
 LIVEMOCK_PORT=8100 yarn run web-start
 ```
 
-In development (`yarn web-dev`), the front-end calls relative URLs and the Vite dev server proxies the API and Socket.IO to the backend, so no server URL needs to be configured. In production the backend serves the UI at `/dashboard` on the same origin.
+The control-plane API is served under `/api` (for example `http://localhost:9002/api/project/`) and the Socket.IO endpoint is `/api/socket.io`. In development (`yarn web-dev`), the front-end calls relative URLs and the Vite dev server proxies `/api` (websocket upgrade included) to the backend, so no server URL needs to be configured. In production the backend serves the UI at `/dashboard` on the same origin.
 
 With Docker Compose the same variable controls both the listener and the published port:
 ```

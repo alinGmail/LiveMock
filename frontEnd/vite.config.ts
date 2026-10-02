@@ -15,13 +15,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       },
       server: {
         proxy: {
-          "/project": backendUrl,
-          "/expectation": backendUrl,
-          "/matcher": backendUrl,
-          "/action": backendUrl,
-          "/log": backendUrl,
-          "/logFilter": backendUrl,
-          "/socket.io": {
+          "/api": {
             target: backendUrl,
             ws: true,
           },

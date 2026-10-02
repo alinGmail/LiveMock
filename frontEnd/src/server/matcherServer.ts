@@ -1,4 +1,5 @@
 import * as superagent from "superagent";
+import { ServerUrl } from "../config";
 import {CreateMatcherResponse, UpdateMatcherResponse} from "livemock-core/struct/response/MatcherResponse";
 import { DeleteMatcherResponse } from "livemock-core/struct/response/MatcherResponse";
 import {
@@ -9,7 +10,7 @@ import {
 export const createMatcherReq = async (
   param: CreateMatcherReqBody
 ): Promise<CreateMatcherResponse> => {
-  const res = await superagent.post(`/matcher`).send(param);
+  const res = await superagent.post(`${ServerUrl}/matcher`).send(param);
   return res.body;
 };
 
@@ -23,7 +24,7 @@ export const deleteMatcherReq = async ({
   expectationId: string;
 }): Promise<DeleteMatcherResponse> => {
   const response = await superagent.delete(
-    `/matcher/${matcherId}?projectId=${projectId}&expectationId=${expectationId}`
+    `${ServerUrl}/matcher/${matcherId}?projectId=${projectId}&expectationId=${expectationId}`
   );
   return response.body;
 };
@@ -32,7 +33,7 @@ export const updateMatcherReq = async (
   matcherId: string,
   param: UpdateMatcherReqBody
 ) :Promise<UpdateMatcherResponse>=> {
-  const response = await superagent.put(`/matcher/${matcherId}`)
+  const response = await superagent.put(`${ServerUrl}/matcher/${matcherId}`)
       .send(param);
   return response.body;
 };

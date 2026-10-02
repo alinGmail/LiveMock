@@ -1,6 +1,7 @@
 
 import { ExpectationM } from "livemock-core/struct/expectation";
 import * as superagent from "superagent";
+import { ServerUrl } from "../config";
 import {CreateExpectationResponse, ListExpectationResponse} from "livemock-core/struct/response/ExpectationResponse";
 import {CreateExpectationReqBody, UpdateExpectationReqBody} from "livemock-core/struct/params/ExpectationParams";
 import type { BatchImportOptions, BatchImportReqBody, BatchImportResult } from "livemock-core/import/types";
@@ -13,7 +14,7 @@ export const createExpectationReq = async (
     projectId,
     expectation,
   };
-  const res = await superagent.post(`/expectation/`).send(param);
+  const res = await superagent.post(`${ServerUrl}/expectation/`).send(param);
   return res.body;
 };
 
@@ -27,20 +28,20 @@ export const updateExpectationReq = async (
     expectationUpdate,
   };
   const res = await superagent
-    .put(`/expectation/${expectationId}`)
+    .put(`${ServerUrl}/expectation/${expectationId}`)
     .send(param);
   return res.body;
 };
 
 export const listExpectationReq = async (projectId: string):Promise<ListExpectationResponse> => {
   const res = await superagent.get(
-    `/expectation/?projectId=${projectId}`
+    `${ServerUrl}/expectation/?projectId=${projectId}`
   );
   return res.body;
 };
 
 export const deleteExpectationReq = async (projectId:string,expectationId:string) =>{
-  const res = await superagent.delete(`/expectation/${expectationId}`)
+  const res = await superagent.delete(`${ServerUrl}/expectation/${expectationId}`)
       .query({projectId:projectId});
   return res.body;
 }
@@ -56,7 +57,7 @@ export const batchImportExpectationReq = async (
     options,
   };
   const res = await superagent
-    .post(`/expectation/batchImport`)
+    .post(`${ServerUrl}/expectation/batchImport`)
     .send(param);
   return res.body;
 };

@@ -1,4 +1,5 @@
 import * as superagent from "superagent";
+import { ServerUrl } from "../config";
 import {
   CreateActionReqBody,
   CreateActionReqQuery,
@@ -10,7 +11,7 @@ import { CreateActionResponse } from "livemock-core/struct/response/ActionRespon
 export const createActionReq = async (
   params: CreateActionReqBody
 ): Promise<CreateActionResponse> => {
-  const res = await superagent.post(`/action`).send(params);
+  const res = await superagent.post(`${ServerUrl}/action`).send(params);
   return res.body;
 };
 
@@ -19,7 +20,7 @@ export const deleteActionReq = async (
   query: DeleteActionReqQuery
 ) => {
   const res = await superagent
-    .delete(`/action/${actionId}`)
+    .delete(`${ServerUrl}/action/${actionId}`)
     .query(query);
   return res.body;
 };
@@ -29,7 +30,7 @@ export const updateActionReq = async (
   params: UpdateActionReqBody
 ) => {
   const res = await superagent
-    .put(`/action/${actionId}`)
+    .put(`${ServerUrl}/action/${actionId}`)
     .send(params);
   return res.body;
 };

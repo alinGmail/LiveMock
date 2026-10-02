@@ -25,6 +25,7 @@ const corsOrigins = parsedCorsOrigins.length
   ? parsedCorsOrigins
   : defaultCorsOrigins;
 const io = new Server(http, {
+  path: "/api/socket.io",
   cors: {
     origin: corsOrigins,
   },
@@ -51,12 +52,14 @@ addWsEventListeners();
     sysEventEmitter.listeners(SystemEvent.START).map((listener) => listener())
   );
 
-  server.use("/project", await getProjectRouter(dbPath));
-  server.use("/expectation", getExpectationRouter(dbPath));
-  server.use("/matcher", getMatcherRouter(dbPath));
-  server.use("/action", await getActionRouter(dbPath));
-  server.use("/logFilter", await getLogFilterRouter(dbPath));
-  server.use("/log", await getLogRouter(dbPath));
+  const apiRouter = express.Router();
+  apiRouter.use("/project", await getProjectRouter(dbPath));
+  apiRouter.use("/expectation", getExpectationRouter(dbPath));
+  apiRouter.use("/matcher", getMatcherRouter(dbPath));
+  apiRouter.use("/action", await getActionRouter(dbPath));
+  apiRouter.use("/logFilter", await getLogFilterRouter(dbPath));
+  apiRouter.use("/log", await getLogRouter(dbPath));
+  server.use("/api", apiRouter);
   server.use("/dashboard", express.static("../frontEnd/dist"));
   server.all("/", (req, res) => {
     res.redirect("/dashboard");

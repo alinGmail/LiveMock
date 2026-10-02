@@ -35,6 +35,7 @@ import { listLogViewLogs, listLogViewReq } from "../server/logServer";
 import { binarySearch } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
+import { ServerUrl } from "../config";
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import { listExpectationReq } from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
@@ -232,6 +233,7 @@ const LogPage: React.FC = () => {
 
   useEffect(() => {
     const socket = io({
+      path: `${ServerUrl}/socket.io`,
       query: {
         projectId: currentProject.id,
       },

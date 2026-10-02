@@ -6,6 +6,7 @@ import {
   ListLogViewReqQuery,
 } from "livemock-core/struct/params/LogParams";
 import * as superagent from "superagent";
+import { ServerUrl } from "../config";
 import {
   DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
@@ -16,7 +17,7 @@ export async function listLogViewReq(
   query: ListLogViewReqQuery,
 ): Promise<ListLogViewResponse> {
   const response = await superagent
-    .get(`/log/logView`)
+    .get(`${ServerUrl}/log/logView`)
     .query(query);
   return response.body;
 }
@@ -26,7 +27,7 @@ export async function listLogViewLogs(
   query: ListLogViewLogsReqQuery,
 ): Promise<ListLogViewLogsResponse> {
   const response = await superagent
-    .get(`/log/logViewLogs/${logViewId}`)
+    .get(`${ServerUrl}/log/logViewLogs/${logViewId}`)
     .query(query);
   return response.body;
 }
@@ -34,7 +35,7 @@ export async function listLogViewLogs(
 export async function deleteAllRequestLogs(
   query: DeleteAllRequestLogsReqQuery,
 ): Promise<DeleteAllRequestLogsResponse> {
-  const response = await superagent.delete(`/log`).query(query);
+  const response = await superagent.delete(`${ServerUrl}/log`).query(query);
   return response.body;
 }
 
@@ -43,7 +44,7 @@ export async function getRequestLogDetail(
   query: GetLogDetailReqQuery,
 ): Promise<GetLogDetailResponse> {
   const response = await superagent
-    .get(`/log/detail/${logId}`)
+    .get(`${ServerUrl}/log/detail/${logId}`)
     .query(query);
   return response.body;
 }
