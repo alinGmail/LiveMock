@@ -113,7 +113,18 @@ export function getGroupRouter(path: string): express.Router {
       if (groupUpdate.name !== undefined) {
         ensureGroupNameAvailable(collection, groupUpdate.name, group.id);
       }
-      Object.assign(group, groupUpdate);
+      // only the editable fields are copied; id, createTime and $loki stay put
+      const allowedUpdate: Partial<ExpectationGroupM> = {};
+      if (groupUpdate.name !== undefined) {
+        allowedUpdate.name = groupUpdate.name;
+      }
+      if (groupUpdate.activate !== undefined) {
+        allowedUpdate.activate = groupUpdate.activate;
+      }
+      if (groupUpdate.priority !== undefined) {
+        allowedUpdate.priority = groupUpdate.priority;
+      }
+      Object.assign(group, allowedUpdate);
       const result = collection.update(group);
       res.json(result);
     }

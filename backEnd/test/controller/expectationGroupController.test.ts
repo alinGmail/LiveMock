@@ -96,6 +96,33 @@ describe("expectation group controller", () => {
     expect(listed.priority).toBe(7);
   });
 
+  test("updating a group ignores fields outside name, activate and priority", async () => {
+    const group = createExpectationGroup("stable group");
+    const createRes = await request(server)
+      .post("/group/")
+      .send({ group, projectId })
+      .expect(200);
+    const originalCreateTime = createRes.body.createTime;
+
+    const updateParam = {
+      projectId,
+      groupUpdate: {
+        id: "hacked-id",
+        createTime: "1999-01-01T00:00:00.000Z",
+        name: "stable group renamed",
+        priority: 3,
+      },
+    } as unknown as UpdateExpectationGroupReqBody;
+    const updateRes = await request(server)
+      .put(`/group/${createRes.body.id}`)
+      .send(updateParam)
+      .expect(200);
+    expect(updateRes.body.id).toEqual(createRes.body.id);
+    expect(updateRes.body.createTime).toEqual(originalCreateTime);
+    expect(updateRes.body.name).toEqual("stable group renamed");
+    expect(updateRes.body.priority).toBe(3);
+  });
+
   test("reject renaming a group onto an existing name", async () => {
     const taken = createExpectationGroup("taken-name");
     await request(server)
