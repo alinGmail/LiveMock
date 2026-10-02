@@ -77,7 +77,7 @@ export const NameColumn = ({
   return (
     <div
       style={{
-        width: "150px",
+        minWidth: "150px",
         display: "flex",
         alignItems: "center",
       }}

@@ -40,7 +40,7 @@ import { ImportExpectationModal } from "../component/expectation/ImportExpectati
 type ExpectationRow = ExpectationM & { rowType: "expectation" };
 interface GroupRow extends ExpectationGroupM {
   rowType: "group";
-  children: Array<ExpectationRow>;
+  children?: Array<ExpectationRow>;
 }
 type ExpectationTableRow = GroupRow | ExpectationRow;
 
@@ -133,10 +133,12 @@ const ExpectationPage = () => {
       groupList,
     ).map((block) => {
       if (block.group) {
+        const children = block.expectations.map(toExpectationRow);
         const groupRow: GroupRow = {
           ...block.group,
           rowType: "group",
-          children: block.expectations.map(toExpectationRow),
+          // no member rows means no expand control ([] would still be truthy)
+          children: children.length > 0 ? children : undefined,
         };
         return groupRow;
       }
