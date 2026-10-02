@@ -310,6 +310,24 @@ describe("mock server match order with expectation groups", () => {
     expect(res.text).toEqual("newer member");
   });
 
+  test("a later-created ungrouped expectation wins a priority tie without any groups", async () => {
+    await createRespondingExpectation({
+      groupId: null,
+      priority: 5,
+      createTime: "2026-01-01T00:00:00.000Z",
+      body: "older ungrouped",
+    });
+    await createRespondingExpectation({
+      groupId: null,
+      priority: 5,
+      createTime: "2026-01-02T00:00:00.000Z",
+      body: "newer ungrouped",
+    });
+
+    const res = await request(server).get("/anything").expect(200);
+    expect(res.text).toEqual("newer ungrouped");
+  });
+
   test("an expectation whose group is missing matches as ungrouped", async () => {
     await createRespondingExpectation({
       groupId: "missing-group-id",
