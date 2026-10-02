@@ -6,9 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "9002:9002"
+      - "${LIVEMOCK_PORT:-9002}:${LIVEMOCK_PORT:-9002}"
     environment:
       - NODE_ENV=production
+      - LIVEMOCK_PORT=${LIVEMOCK_PORT:-9002}
       - LIVEMOCK_DB_PATH=/app/data/db
     restart: unless-stopped
     volumes:

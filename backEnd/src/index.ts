@@ -16,9 +16,13 @@ const { Server } = require("socket.io");
 
 const server = express();
 const http = require("http").Server(server);
+const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const io = new Server(http, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: corsOrigins,
   },
 });
 export const systemVersion = 801;
@@ -56,8 +60,9 @@ addWsEventListeners();
   await addLogListener(io, dbPath);
 
   server.use(CustomErrorMiddleware);
-  http.listen(9002, () => {
-    console.log("server start on 9002");
+  const port = Number(process.env.LIVEMOCK_PORT) || 9002;
+  http.listen(port, () => {
+    console.log(`server start on ${port}`);
   });
 })();
 

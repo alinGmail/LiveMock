@@ -44,7 +44,7 @@ RUN chown -R node:node /app/data
 # Switch to non-root user
 USER node
 
-# Expose port
+# Default port (override at runtime with LIVEMOCK_PORT)
 EXPOSE 9002
 
 # Start application

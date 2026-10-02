@@ -68,6 +68,19 @@ yarn run web-start
 ```
 the server will running at http://localhost:9002 
 
+#### configuration
+| environment variable | default | description |
+|---|---|---|
+| `LIVEMOCK_PORT` | `9002` | port the web server listens on |
+| `CORS_ORIGIN` | `http://localhost:5173` | comma-separated list of origins allowed to open the Socket.IO connection during development |
+| `LIVEMOCK_DB_PATH` | `db` | directory where the database files are stored |
+
+For example, to run on another port:
+```
+LIVEMOCK_PORT=8100 yarn run web-start
+```
+
+
 
 ## 📌Quick Start
 After installing liveMock, you will be able to access the welcome page (a page to create a project). Simply input the project name and submit the form, and you will be redirected to the dashboard page.
