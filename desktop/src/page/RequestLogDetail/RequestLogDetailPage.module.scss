@@ -1,0 +1,114 @@
+.req_log_detail {
+  .req_tile {
+    color: #fff;
+    background-color: rgb(37, 99, 235);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .til_left {
+    display: flex;
+    align-items: center;
+  }
+  .til_right {
+    display: flex;
+    align-items: center;
+  }
+  .req_method {
+    font-size: 2.2rem;
+    font-weight: bold;
+    line-height: 3.5rem;
+    margin-right: 2rem;
+  }
+  .req_path {
+    font-size: 2.2rem;
+    line-height: 3.5rem;
+  }
+  .req_time {
+    font-size: 1.8rem;
+    line-height: 2.5rem;
+    margin-right: 2rem;
+  }
+  .req_status {
+    font-size: 1.8rem;
+    line-height: 2.5rem;
+    padding: .5rem 2rem;
+    border-radius: 9.9rem;
+  }
+
+  .req_status_processing{
+    background-color: #ff7a45;
+  }
+  .req_status_error{
+    background-color: #ff4d4f;
+  }
+  .req_status_success{
+    // background-color: #52c41a;
+    background-color: rgb(16, 185, 129);
+  }
+
+  .req_content {
+    display: grid;
+    padding: 2rem;
+    gap: 2rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    background:#fff;
+
+    .request_col {
+    }
+    .response_col {
+    }
+    .card {
+      padding: 2rem;
+      background-color: rgb(249, 250, 251);
+      border-radius: 1rem;
+      color: #000;
+    }
+    .card_til {
+      font-size: 2.2rem;
+      line-height: 3.5rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    .card_content {
+    }
+    .property_row {
+      font-size: 1.6rem;
+      line-height: 2.2rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      word-break: break-all;
+      .pro_label {
+        color: rgb(75 85 99);
+      }
+      .pro_value {
+      }
+    }
+  }
+
+  .json_pre {
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    padding: 2rem;
+    white-space: pre-wrap;
+    color: rgb(52 211 153);
+    background-color: rgb(17 24 39);
+    border-radius: 1rem;
+  }
+}
+
+html{
+  font-size: 8px;
+  @media (min-width: 768px) {
+    font-size: 10px;
+  }
+  @media (min-width: 1024px) {
+   font-size: 12px;
+  }
+}
+

@@ -36,6 +36,7 @@ export enum ActionEvents {
 export enum LogViewEvents{
     ListLogView="ListLogView",
     ListLogViewLogs="ListLogViewLogs",
+    GetLogDetail="GetLogDetail",
     DeleteAllRequestLogs="DeleteAllRequestLogs",
     OnLogAdd="OnLogViewLogAdd",
     OnLogUpdate="OnLogViewLogUpdate",
@@ -55,4 +56,5 @@ export enum LogFilterEvents{
 
 export enum SystemEvents{
     OpenAboutWindow = "OpenAboutWindow",
+    OpenNewWindow = "OpenNewWindow",
 }

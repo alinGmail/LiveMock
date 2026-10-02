@@ -9,11 +9,12 @@ import { setProjectList } from "./slice/projectSlice";
 import { useAppSelector } from "./store";
 import { Toaster } from "react-hot-toast";
 import { Spin, ConfigProvider, theme, App as AntApp } from "antd";
-import { Route, Routes, Navigate } from "react-router-dom";
+import {Route, Routes, Navigate, HashRouter} from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import ConfigPage from "./page/ConfigPage";
 import LogPage from "./page/LogPage";
 import { useEffect } from "react";
+import RequestLogDetailPage from "./page/RequestLogDetail/RequestLogDetailPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -54,14 +55,21 @@ function App() {
             projectList.length === 0 ? (
               <WelcomePage />
             ) : (
-              <Layout>
-                <Routes>
-                  <Route path={"expectation"} element={<ExpectationPage />} />
-                  <Route path={"requestLog"} element={<LogPage />}></Route>
-                  <Route path={"config"} element={<ConfigPage />} />
-                  <Route path={"*"} element={<Navigate to={"expectation"} />} />
-                </Routes>
-              </Layout>
+                <HashRouter>
+                    <Routes>
+                      <Route element={<Layout />}>
+                        <Route path={"expectation"} element={<ExpectationPage />} />
+                        <Route path={"requestLog"} element={<LogPage />}></Route>
+                        <Route path={"config"} element={<ConfigPage />} />
+                        <Route path={"*"} element={<Navigate to={"expectation"} />} />
+                      </Route>
+                      <Route
+                          path={"requestLog/detail/:logId"}
+                          element={<RequestLogDetailPage />}
+                      />
+                    </Routes>
+                </HashRouter>
+
             )
           ) : (
             <Spin tip="Loading" size="large">

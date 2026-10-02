@@ -35,7 +35,10 @@ import { listLogViewReq, listLogViewLogs } from "../server/logServer";
 import { binarySearch, toastPromise } from "../component/common";
 import { Updater, useImmer } from "use-immer";
 import { ColumnsType } from "antd/es/table/interface";
-import { LogEvents, LogViewEvents } from "livemock-core/struct/events/desktopEvents";
+import {
+  LogEvents,
+  LogViewEvents,
+} from "livemock-core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import FilterRowComponent from "../component/log/FilterRowComponent";
 import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
@@ -48,6 +51,7 @@ import ChatMainComponent, {
 } from "../component/chat/ChatMainComponent";
 import { DisconnectOutlined, LinkOutlined } from "@ant-design/icons";
 import { red, green } from "@ant-design/colors";
+import { useNavigate } from "react-router-dom";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -131,6 +135,7 @@ const LogPage: React.FC = () => {
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
+  const navigate = useNavigate();
 
   const expectationState = useAppSelector((state) => state.expectation);
 
@@ -215,7 +220,7 @@ const LogPage: React.FC = () => {
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
-      .concat(getConfigColumn(dispatch));
+      .concat(getConfigColumn(dispatch, navigate, currentProject.id));
     updateLogColumn(newLogColumn);
   }, [
     tableColumns,

@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  livemock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9002:9002"
+    environment:
+      - NODE_ENV=production
+      - LIVEMOCK_DB_PATH=/app/data/db
+    restart: unless-stopped
+    volumes:
+      - livemock_data:/app/data
+
+volumes:
+  livemock_data:
