@@ -1,7 +1,7 @@
 import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { Button, Input, InputNumber, Select, Switch, Tag } from "antd";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import { useRequest } from "ahooks";
 import { DeleteOutlined } from "@ant-design/icons";
 import { debounceWait } from "../../config";
@@ -14,6 +14,59 @@ import { HookAPI as ModalHookAPI } from "antd/es/modal/useModal";
 
 function onSettled(promise: Promise<unknown>, callback: () => void) {
   promise.then(callback).catch(callback);
+}
+
+export interface GroupExpandIconProps<RecordType> {
+  prefixCls: string;
+  expanded: boolean;
+  expandable: boolean;
+  record: RecordType;
+  onExpand: (
+    record: RecordType,
+    event: MouseEvent<HTMLElement>,
+  ) => void;
+}
+
+/**
+ * antd fits the expand icon to a single ~22px text line; the first cell now
+ * holds a 32px input, so the icon needs its own top margin to sit centred:
+ * 32 / 2 - 17 / 2.
+ */
+export const EXPAND_ICON_MARGIN_TOP = 7.5;
+
+/**
+ * Matches antd's default ExpandIcon markup (button + class names) so the
+ * +/− states and the hidden leaf placeholder keep their styling; the only
+ * difference is the top margin that centres the icon with a 32px control.
+ */
+export function renderGroupExpandIcon<RecordType>({
+  prefixCls,
+  expanded,
+  expandable,
+  record,
+  onExpand,
+}: GroupExpandIconProps<RecordType>) {
+  const iconPrefix = `${prefixCls}-row-expand-icon`;
+  const className = [iconPrefix];
+  if (!expandable) {
+    // keep the (invisible) placeholder so leaf rows line up with group rows
+    className.push(`${iconPrefix}-spaced`);
+  } else {
+    className.push(`${iconPrefix}-${expanded ? "expanded" : "collapsed"}`);
+  }
+  return (
+    <button
+      type="button"
+      aria-label={expanded ? "collapse" : "expand"}
+      aria-expanded={expanded}
+      className={className.join(" ")}
+      style={{ marginTop: EXPAND_ICON_MARGIN_TOP }}
+      onClick={(event) => {
+        onExpand(record, event);
+        event.stopPropagation();
+      }}
+    />
+  );
 }
 
 export const GroupNameColumn = ({
