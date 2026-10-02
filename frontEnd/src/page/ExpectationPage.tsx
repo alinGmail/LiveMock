@@ -32,7 +32,7 @@ import { useDispatch } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
-import { Key, useEffect, useMemo, useState } from "react";
+import { Key, MouseEvent, useEffect, useMemo, useState } from "react";
 import { ExpectationContext } from "../component/context";
 import { ImportExpectationModal } from "../component/expectation/ImportExpectationModal";
 
@@ -42,6 +42,55 @@ interface GroupRow extends ExpectationGroupM {
   children: Array<ExpectationRow>;
 }
 type ExpectationTableRow = GroupRow | ExpectationRow;
+
+interface GroupExpandIconProps {
+  prefixCls: string;
+  expanded: boolean;
+  expandable: boolean;
+  record: ExpectationTableRow;
+  onExpand: (
+    record: ExpectationTableRow,
+    event: MouseEvent<HTMLElement>,
+  ) => void;
+}
+
+/**
+ * antd fits the expand icon to a single ~22px text line; the first cell now
+ * holds a 32px input, so the icon needs its own top margin to sit centred:
+ * 32 / 2 - 17 / 2.
+ */
+const EXPAND_ICON_MARGIN_TOP = 7.5;
+
+function renderGroupExpandIcon({
+  prefixCls,
+  expanded,
+  expandable,
+  record,
+  onExpand,
+}: GroupExpandIconProps) {
+  const expandIconClass = `${prefixCls}-row-expand-icon`;
+  if (!expandable) {
+    // keep the (invisible) placeholder so leaf rows line up with group rows
+    return (
+      <span
+        className={`${expandIconClass} ${prefixCls}-row-spaced`}
+        style={{ marginTop: EXPAND_ICON_MARGIN_TOP }}
+      />
+    );
+  }
+  return (
+    <span
+      className={`${expandIconClass} ${
+        expanded ? `${prefixCls}-row-expanded` : `${prefixCls}-row-collapsed`
+      }`}
+      style={{ marginTop: EXPAND_ICON_MARGIN_TOP }}
+      onClick={(event) => {
+        onExpand(record, event);
+        event.stopPropagation();
+      }}
+    />
+  );
+}
 
 function toExpectationRow(expectation: ExpectationM): ExpectationRow {
   return { ...expectation, rowType: "expectation" };
@@ -415,6 +464,7 @@ const ExpectationPage = () => {
               onExpandedRowsChange: (keys) => {
                 setExpandedGroupKeys(keys);
               },
+              expandIcon: renderGroupExpandIcon,
             }}
             onRow={(record: ExpectationTableRow) => {
               const inactive =
