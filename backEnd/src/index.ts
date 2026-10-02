@@ -16,10 +16,14 @@ const { Server } = require("socket.io");
 
 const server = express();
 const http = require("http").Server(server);
-const corsOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+const defaultCorsOrigins = ["http://localhost:5173"];
+const parsedCorsOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const corsOrigins = parsedCorsOrigins.length
+  ? parsedCorsOrigins
+  : defaultCorsOrigins;
 const io = new Server(http, {
   cors: {
     origin: corsOrigins,

@@ -66,18 +66,25 @@ yarn run web-build
 ```
 yarn run web-start
 ```
-the server will running at http://localhost:9002 
+the server will be running at http://localhost:9002 by default
 
 #### configuration
 | environment variable | default | description |
 |---|---|---|
 | `LIVEMOCK_PORT` | `9002` | port the web server listens on |
-| `CORS_ORIGIN` | `http://localhost:5173` | comma-separated list of origins allowed to open the Socket.IO connection during development |
+| `CORS_ORIGIN` | `http://localhost:5173` | comma-separated list of browser origins allowed to open the Socket.IO connection (needed for the Vite dev origin; production is served same-origin and does not need it) |
 | `LIVEMOCK_DB_PATH` | `db` | directory where the database files are stored |
 
 For example, to run on another port:
 ```
 LIVEMOCK_PORT=8100 yarn run web-start
+```
+
+In development (`yarn web-dev`), the front-end calls relative URLs and the Vite dev server proxies the API and Socket.IO to the backend, so no server URL needs to be configured. In production the backend serves the UI at `/dashboard` on the same origin.
+
+With Docker Compose the same variable controls both the listener and the published port:
+```
+LIVEMOCK_PORT=8100 docker compose up
 ```
 
 
