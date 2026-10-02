@@ -36,11 +36,10 @@ export interface GroupExpandIconProps<RecordType> {
 export const EXPAND_ICON_MARGIN_TOP = 7.5;
 
 /**
- * Matches antd's default ExpandIcon markup (button + class names) so the
- * +/− and collapsed states keep their styling, with a top margin that centres
- * the icon with a 32px control. Rows without members have nothing to expand,
- * so they render no control at all (the first-cell offset is applied by the
- * name columns themselves).
+ * Renders antd's default ExpandIcon markup (button + class names) with a top
+ * margin that centres it with a 32px control. Every group row shows the
+ * control so users can recognise a group at a glance; a group with no members
+ * shows it disabled. Non-group rows render no control.
  */
 export function renderGroupExpandIcon<RecordType>({
   prefixCls,
@@ -49,20 +48,25 @@ export function renderGroupExpandIcon<RecordType>({
   record,
   onExpand,
 }: GroupExpandIconProps<RecordType>) {
-  if (!expandable) {
+  const rowType = (record as { rowType?: string } | undefined)?.rowType;
+  if (rowType !== "group") {
     return null;
   }
+  const hasMembers = Boolean(expandable);
   return (
     <button
       type="button"
       aria-label={expanded ? "collapse" : "expand"}
       aria-expanded={expanded}
+      disabled={!hasMembers}
       className={`${prefixCls}-row-expand-icon ${prefixCls}-row-expand-icon-${
         expanded ? "expanded" : "collapsed"
       }`}
       style={{ marginTop: EXPAND_ICON_MARGIN_TOP }}
       onClick={(event) => {
-        onExpand(record, event);
+        if (hasMembers) {
+          onExpand(record, event);
+        }
         event.stopPropagation();
       }}
     />
