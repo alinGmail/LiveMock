@@ -1,4 +1,4 @@
-import { App, Button, Table } from "antd";
+import { Alert, App, Button, Table } from "antd";
 import { PlusOutlined, ImportOutlined } from "@ant-design/icons";
 import { AppDispatch, useAppSelector } from "../store";
 import {
@@ -86,6 +86,7 @@ const ExpectationPage = () => {
     () => getGroupListQuery.data ?? [],
     [getGroupListQuery.data],
   );
+  const groupsLoaded = getGroupListQuery.data !== undefined;
 
   useEffect(() => {
     setExpandedGroupKeys(null);
@@ -123,6 +124,9 @@ const ExpectationPage = () => {
   }, [groupList]);
 
   const tableRows = useMemo<Array<ExpectationTableRow>>(() => {
+    if (!groupsLoaded) {
+      return [];
+    }
     return buildMatchOrderBlocks(
       expectationState.expectationList,
       groupList,
@@ -137,7 +141,7 @@ const ExpectationPage = () => {
       }
       return toExpectationRow(block.expectations[0]);
     });
-  }, [expectationState.expectationList, groupList]);
+  }, [expectationState.expectationList, groupList, groupsLoaded]);
 
   const allGroupRowKeys = useMemo(
     () => groupList.map((group) => `group-${group.id}`),
@@ -389,6 +393,14 @@ const ExpectationPage = () => {
           </Button>
         </div>
         <div>
+          {getGroupListQuery.isError && (
+            <Alert
+              type={"error"}
+              showIcon
+              message={"failed to load groups, please refresh"}
+              style={{ marginBottom: "8px" }}
+            />
+          )}
           <Table
             columns={expectationColumn}
             size={"small"}

@@ -28,9 +28,13 @@ export const GroupNameColumn = ({
   onChanged: () => void;
 }) => {
   const [name, setName] = useState(group.name);
+  const [editing, setEditing] = useState(false);
   useEffect(() => {
-    setName(group.name);
-  }, [group.name]);
+    // do not overwrite the input while it is being edited
+    if (!editing) {
+      setName(group.name);
+    }
+  }, [group.name, editing]);
 
   const { run } = useRequest(
     async (projectId: string, groupId: string, groupName: string) => {
@@ -59,6 +63,12 @@ export const GroupNameColumn = ({
       <Input
         placeholder={"empty"}
         value={name}
+        onFocus={() => {
+          setEditing(true);
+        }}
+        onBlur={() => {
+          setEditing(false);
+        }}
         onChange={(event: ChangeEvent<{ value: string }>) => {
           setName(event.target.value);
           run(projectId, group.id, event.target.value);
