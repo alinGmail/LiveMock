@@ -6,13 +6,22 @@
     "build": "tsc",
     "tsc": "tsc"
   },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "swagger2openapi": "^7.0.8"
+  },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "typescript": "^4.6.4"
   },
   "exports": {
     "./struct/*": {
       "require": "./build/struct/*.js",
       "import": "./struct/*.ts"
+    },
+    "./import/*": {
+      "require": "./build/import/*.js",
+      "import": "./import/*.ts"
     }
   }
 }

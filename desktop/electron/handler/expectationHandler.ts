@@ -20,6 +20,13 @@ import {
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
 import {logViewEventEmitter} from "../common/eventEmitters";
+import { ExpectationM } from "livemock-core/struct/expectation";
+import { RequestMatcherType } from "livemock-core/struct/matcher";
+import {
+  BatchImportReqBody,
+  BatchImportResult,
+  parseImportContent,
+} from "livemock-core/import/index";
 
 const ipcMain = electron.ipcMain;
 
@@ -136,4 +143,102 @@ export async function setExpectationHandler(path: string): Promise<void> {
       return expectation;
     }
   );
+
+  ipcMain.handle(
+    ExpectationEvents.BatchImportExpectation,
+    async (
+      event,
+      reqParam: {},
+      reqQuery: {},
+      reqBody: BatchImportReqBody
+    ): Promise<BatchImportResult> => {
+      const projectId = reqBody && reqBody.projectId;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      if (!reqBody.content || typeof reqBody.content !== "string") {
+        throw new ServerError(400, "file content not exist!");
+      }
+      const options = reqBody.options || {};
+      let parsed;
+      try {
+        parsed = await parseImportContent(reqBody.content, {
+          preserveServerPrefix: options.preserveServerPrefix,
+        });
+      } catch (error) {
+        throw new ServerError(400, errorMessage(error));
+      }
+      const collection = await getExpectationCollection(projectId, path);
+      const index = new Map<string, ExpectationM>();
+      collection.find({}).forEach((expectation) => {
+        const key = expectationKey(expectation);
+        if (!index.has(key)) {
+          index.set(key, expectation);
+        }
+      });
+
+      const toInsert: Array<ExpectationM> = [];
+      let created = 0;
+      let overwritten = 0;
+      let skipped = 0;
+      parsed.expectations.forEach(({ expectation }) => {
+        const key = expectationKey(expectation);
+        const existing = index.get(key);
+        if (existing) {
+          if (options.overwrite) {
+            existing.name = expectation.name;
+            existing.matchers = expectation.matchers;
+            existing.actions = expectation.actions;
+            collection.update(existing);
+            logViewEventEmitter.emit("updateExpectation", {
+              projectId,
+              expectation: existing,
+            });
+            overwritten++;
+          } else {
+            skipped++;
+          }
+          return;
+        }
+        toInsert.push(expectation);
+        index.set(key, expectation);
+        created++;
+      });
+      if (toInsert.length > 0) {
+        collection.insert(toInsert);
+        toInsert.forEach((expectation) => {
+          logViewEventEmitter.emit("insertExpectation", {
+            projectId,
+            expectation,
+          });
+        });
+      }
+      return {
+        format: parsed.format,
+        created,
+        overwritten,
+        skipped,
+        failures: parsed.failures,
+      };
+    }
+  );
+}
+
+function expectationKey(expectation: ExpectationM): string {
+  const methodMatcher = expectation.matchers.find(
+    (matcher) => matcher.type === RequestMatcherType.METHOD
+  );
+  const pathMatcher = expectation.matchers.find(
+    (matcher) => matcher.type === RequestMatcherType.PATH
+  );
+  const method = methodMatcher ? methodMatcher.value.toUpperCase() : "";
+  const pathValue = pathMatcher ? pathMatcher.value : "";
+  return `${method}::${pathValue}`;
+}
+
+function errorMessage(error: any): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return String(error);
 }

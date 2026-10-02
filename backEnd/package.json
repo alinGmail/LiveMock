@@ -48,5 +48,10 @@
     "livemock-core": "workspace:*",
     "supertest": "^6.3.3",
     "type-is": "^1.6.18"
+  },
+  "dependenciesMeta": {
+    "lokijs": {
+      "built": false
+    }
   }
 }

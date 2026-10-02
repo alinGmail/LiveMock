@@ -1,5 +1,5 @@
 import { App, Button, Table } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, ImportOutlined } from "@ant-design/icons";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
@@ -20,6 +20,8 @@ import { useQuery } from "@tanstack/react-query";
 import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
 import { ExpectationContext } from "src/component/context";
+import { ImportExpectationModal } from "../component/expectation/ImportExpectationModal";
+import { useState } from "react";
 
 const ExpectationPage = () => {
   const { modal } = App.useApp();
@@ -27,6 +29,7 @@ const ExpectationPage = () => {
   const expectationState = useAppSelector((state) => state.expectation);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const dispatch: AppDispatch = useDispatch();
+  const [importOpen, setImportOpen] = useState(false);
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
     () => {
@@ -179,6 +182,15 @@ const ExpectationPage = () => {
           >
             Add Expectation
           </Button>
+          <Button
+            type={"text"}
+            icon={<ImportOutlined />}
+            onClick={() => {
+              setImportOpen(true);
+            }}
+          >
+            Import
+          </Button>
         </div>
         <div>
           <Table
@@ -189,6 +201,16 @@ const ExpectationPage = () => {
             loading={getExpectationListQuery.isFetching}
           />
         </div>
+        <ImportExpectationModal
+          projectId={currentProject.id}
+          open={importOpen}
+          onClose={() => {
+            setImportOpen(false);
+          }}
+          onImported={() => {
+            getExpectationListQuery.refetch();
+          }}
+        />
       </div>
     </ExpectationContext.Provider>
   );

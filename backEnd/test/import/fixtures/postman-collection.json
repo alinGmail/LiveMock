@@ -1,0 +1,78 @@
+{
+  "info": {
+    "name": "Demo Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "3b3d6a1e-0000-0000-0000-000000000000"
+  },
+  "item": [
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "Get user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id?verbose=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "query": [
+                {
+                  "key": "verbose",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "ok",
+              "originalRequest": {
+                "method": "GET",
+                "url": "{{baseUrl}}/users/:id"
+              },
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\"id\":1,\"name\":\"alin\"}"
+            }
+          ]
+        },
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "request": "{{baseUrl}}/health",
+      "response": [
+        {
+          "name": "ok",
+          "code": 200,
+          "_postman_previewlanguage": "text",
+          "body": "OK"
+        }
+      ]
+    },
+    {
+      "name": "Unresolved",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/orders/{{orderId}}"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

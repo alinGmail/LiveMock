@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { getExpectationCollection, getExpectationDb } from "../db/dbManager";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
@@ -26,6 +26,13 @@ import {
   ListExpectationResponse,
   UpdateExpectationResponse,
 } from "livemock-core/struct/response/ExpectationResponse";
+import { ExpectationM } from "livemock-core/struct/expectation";
+import { RequestMatcherType } from "livemock-core/struct/matcher";
+import {
+  BatchImportReqBody,
+  BatchImportResult,
+  parseImportContent,
+} from "livemock-core/import/index";
 import { logViewEventEmitter } from "../common/eventEmitters";
 
 export function getExpectationRouter(path: string): express.Router {
@@ -62,6 +69,89 @@ export function getExpectationRouter(path: string): express.Router {
       } else {
         throw new ServerError(400, "expectation not exist!");
       }
+    }
+  );
+
+  /**
+   * batch import expectations (OpenAPI / Swagger / Postman)
+   */
+  router.post(
+    "/batchImport",
+    bodyParser.json({ limit: "50mb" }),
+    async (
+      req: Request<{}, BatchImportResult, BatchImportReqBody>,
+      res: Response<BatchImportResult>
+    ) => {
+      addCross(res);
+      const projectId = req.body && req.body.projectId;
+      if (!projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      if (!req.body.content || typeof req.body.content !== "string") {
+        throw new ServerError(400, "file content not exist!");
+      }
+      const options = req.body.options || {};
+      let parsed;
+      try {
+        parsed = await parseImportContent(req.body.content, {
+          preserveServerPrefix: options.preserveServerPrefix,
+        });
+      } catch (error) {
+        throw new ServerError(400, errorMessage(error));
+      }
+      const collection = await getExpectationCollection(projectId, path);
+      const index = new Map<string, ExpectationM>();
+      collection.find({}).forEach((expectation) => {
+        const key = expectationKey(expectation);
+        if (!index.has(key)) {
+          index.set(key, expectation);
+        }
+      });
+
+      const toInsert: Array<ExpectationM> = [];
+      let created = 0;
+      let overwritten = 0;
+      let skipped = 0;
+      parsed.expectations.forEach(({ expectation }) => {
+        const key = expectationKey(expectation);
+        const existing = index.get(key);
+        if (existing) {
+          if (options.overwrite) {
+            existing.name = expectation.name;
+            existing.matchers = expectation.matchers;
+            existing.actions = expectation.actions;
+            collection.update(existing);
+            logViewEventEmitter.emit("updateExpectation", {
+              projectId,
+              expectation: existing,
+            });
+            overwritten++;
+          } else {
+            skipped++;
+          }
+          return;
+        }
+        toInsert.push(expectation);
+        index.set(key, expectation);
+        created++;
+      });
+      if (toInsert.length > 0) {
+        collection.insert(toInsert);
+        toInsert.forEach((expectation) => {
+          logViewEventEmitter.emit("insertExpectation", {
+            projectId,
+            expectation,
+          });
+        });
+      }
+      const result: BatchImportResult = {
+        format: parsed.format,
+        created,
+        overwritten,
+        skipped,
+        failures: parsed.failures,
+      };
+      res.json(result);
     }
   );
 
@@ -186,4 +276,23 @@ export function getExpectationRouter(path: string): express.Router {
   );
 
   return router;
+}
+
+function expectationKey(expectation: ExpectationM): string {
+  const methodMatcher = expectation.matchers.find(
+    (matcher) => matcher.type === RequestMatcherType.METHOD
+  );
+  const pathMatcher = expectation.matchers.find(
+    (matcher) => matcher.type === RequestMatcherType.PATH
+  );
+  const method = methodMatcher ? methodMatcher.value.toUpperCase() : "";
+  const pathValue = pathMatcher ? pathMatcher.value : "";
+  return `${method}::${pathValue}`;
+}
+
+function errorMessage(error: any): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return String(error);
 }

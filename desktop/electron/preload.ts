@@ -43,6 +43,10 @@ import {
   UpdateExpectationReqQuery,
 } from "livemock-core/struct/params/ExpectationParams";
 import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
+import type {
+  BatchImportReqBody,
+  BatchImportResult,
+} from "livemock-core/import/types";
 import {
   CreateMatcherPathParam,
   CreateMatcherReqBody,
@@ -225,6 +229,18 @@ export const api = {
     ) => {
       return ipcRenderer.invoke(
         ExpectationEvents.GetExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    batchImportExpectation: (
+      reqParam: {},
+      reqQuery: {},
+      reqBody: BatchImportReqBody
+    ): Promise<BatchImportResult> => {
+      return ipcRenderer.invoke(
+        ExpectationEvents.BatchImportExpectation,
         reqParam,
         reqQuery,
         reqBody
