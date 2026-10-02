@@ -10,6 +10,7 @@ import { updateExpectationReq } from "../../server/expectationServer";
 import { toastPromise } from "../common";
 import { AppDispatch } from "../../store";
 import { updateExpectationItem } from "../../slice/expectationSlice";
+import { FIRST_CELL_OFFSET } from "./listColumnCompoment";
 import { HookAPI as ModalHookAPI } from "antd/es/modal/useModal";
 
 function onSettled(promise: Promise<unknown>, callback: () => void) {
@@ -111,6 +112,8 @@ export const GroupNameColumn = ({
         display: "flex",
         gap: "8px",
         alignItems: "center",
+        marginLeft: `${FIRST_CELL_OFFSET}px`,
+        width: `calc(100% - ${FIRST_CELL_OFFSET}px)`,
       }}
     >
       <Input

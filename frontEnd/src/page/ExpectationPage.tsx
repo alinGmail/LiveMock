@@ -37,15 +37,21 @@ import { Key, useEffect, useMemo, useState } from "react";
 import { ExpectationContext } from "../component/context";
 import { ImportExpectationModal } from "../component/expectation/ImportExpectationModal";
 
-type ExpectationRow = ExpectationM & { rowType: "expectation" };
+type ExpectationRow = ExpectationM & {
+  rowType: "expectation";
+  isChild?: boolean;
+};
 interface GroupRow extends ExpectationGroupM {
   rowType: "group";
   children?: Array<ExpectationRow>;
 }
 type ExpectationTableRow = GroupRow | ExpectationRow;
 
-function toExpectationRow(expectation: ExpectationM): ExpectationRow {
-  return { ...expectation, rowType: "expectation" };
+function toExpectationRow(
+  expectation: ExpectationM,
+  isChild = false,
+): ExpectationRow {
+  return { ...expectation, rowType: "expectation", isChild };
 }
 
 function nextGroupName(groups: Array<ExpectationGroupM>): string {
@@ -133,7 +139,9 @@ const ExpectationPage = () => {
       groupList,
     ).map((block) => {
       if (block.group) {
-        const children = block.expectations.map(toExpectationRow);
+        const children = block.expectations.map((expectation) =>
+          toExpectationRow(expectation, true),
+        );
         const groupRow: GroupRow = {
           ...block.group,
           rowType: "group",
@@ -182,6 +190,7 @@ const ExpectationPage = () => {
             expectation={record}
             index={expectationIndex(record)}
             dispatch={dispatch}
+            indent={record.isChild}
           />
         );
       },

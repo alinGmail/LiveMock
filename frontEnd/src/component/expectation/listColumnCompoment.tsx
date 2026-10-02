@@ -63,29 +63,40 @@ async function updateExpectation(
   return updatePromise;
 }
 
+const CHILD_INDENT = 15;
+/** antd floats the expand icon (17px + 8px margin) in the first cell */
+export const FIRST_CELL_OFFSET = 17 + 8 + 2;
+/** a child row keeps the float space plus one indent step */
+export const CHILD_CELL_OFFSET = FIRST_CELL_OFFSET + CHILD_INDENT;
+
 export const NameColumn = ({
   projectId,
   text,
   expectation,
   index,
   dispatch,
+  indent,
 }: {
   projectId: string;
   text: string;
   expectation: ExpectationM;
   index: number;
   dispatch: AppDispatch;
+  indent?: boolean;
 }) => {
   const { data, run } = useRequest(updateExpectation, {
     debounceWait: debounceWait,
     manual: true,
   });
+  const offset = indent ? CHILD_CELL_OFFSET : FIRST_CELL_OFFSET;
   return (
     <div
       style={{
         minWidth: "150px",
         display: "flex",
         alignItems: "center",
+        marginLeft: `${offset}px`,
+        width: `calc(100% - ${offset}px)`,
       }}
     >
       <Input
