@@ -5,6 +5,7 @@ import {
   DeleteOutlined,
   FilterOutlined,
   MessageOutlined,
+  FileSearchOutlined,
 } from "@ant-design/icons";
 import { createSimpleFilter, FilterType, LogM } from "livemock-core/struct/log";
 import { Dispatch, useState } from "react";
@@ -29,7 +30,7 @@ import mStyle from "./LogPageColumn.module.scss";
 import { ReactComponent as Equalizer } from "../svg/equalizer.svg";
 import { ReactComponent as Eye } from "../svg/eye.svg";
 import { ReactComponent as EyeBlocked } from "../svg/eye-blocked.svg";
-import _ from "lodash";
+import _, { after } from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
@@ -37,14 +38,36 @@ import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
 import { ExpectationM } from "livemock-core/build/struct/expectation";
+import { NavigateFunction } from "react-router-dom";
 
-export function getConfigColumn(dispatch: Dispatch<AnyAction>) {
+export function getConfigColumn(
+  dispatch: Dispatch<AnyAction>,
+  navigate: NavigateFunction,
+  projectId: string
+) {
   return [
     {
       dataIndex: "config",
       key: "config",
       width: "100px",
-      render: () => <div></div>,
+      render: (text: string, record: LogM) => {
+        return (
+          <div>
+            <Button
+              type="text"
+              icon={<FileSearchOutlined />}
+              shape={"circle"}
+              onClick={() => {
+                window.api.system.openNewWindow(
+                  `/requestLog/detail/${record.id}?projectId=${projectId}`,
+                  800,
+                  500
+                );
+              }}
+            />
+          </div>
+        );
+      },
       title: () => {
         return (
           <div>

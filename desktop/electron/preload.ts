@@ -18,10 +18,12 @@ import * as electron from "electron";
 import {
   ActionEvents,
   ExpectationEvents,
+  LogEvents,
   LogFilterEvents,
   LogViewEvents,
   MatcherEvents,
   ProjectEvents,
+  SystemEvents,
 } from "livemock-core/struct/events/desktopEvents";
 import {
   CreateExpectationPathParam,
@@ -67,6 +69,9 @@ import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
   DeleteAllRequestLogsReqQuery,
+  GetLogDetailPathParam,
+  GetLogDetailReqBody,
+  GetLogDetailReqQuery,
   ListLogViewLogsPathParam,
   ListLogViewLogsReqBody,
   ListLogViewLogsReqQuery,
@@ -143,7 +148,7 @@ export const api = {
       );
     },
     deleteProject: ({ projectId }: { projectId: string }) => {
-      return ipcRenderer.invoke(ProjectEvents.DeleteProject,projectId);
+      return ipcRenderer.invoke(ProjectEvents.DeleteProject, projectId);
     },
     startProject: ({ projectId }: { projectId: string }) => {
       return ipcRenderer.invoke(ProjectEvents.StartProject, projectId);
@@ -339,6 +344,18 @@ export const api = {
         reqBody
       );
     },
+    getLogDetail: (
+      reqParam: GetLogDetailPathParam,
+      reqQuery: GetLogDetailReqQuery,
+      reqBody: GetLogDetailReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogViewEvents.GetLogDetail,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
   },
   logFilter: {
     createLogFilter: (
@@ -387,6 +404,16 @@ export const api = {
         reqParam,
         reqQuery,
         reqBody
+      );
+    },
+  },
+  system: {
+    openNewWindow: (hash: string, width: number, height: number) => {
+      return ipcRenderer.invoke(
+        SystemEvents.OpenNewWindow,
+        hash,
+        width,
+        height
       );
     },
   },

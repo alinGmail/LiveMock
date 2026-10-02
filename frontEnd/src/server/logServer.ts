@@ -1,5 +1,7 @@
 import {
   DeleteAllRequestLogsReqQuery,
+  GetLogDetailReqQuery,
+  GetLogDetailResponse,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
 } from "livemock-core/struct/params/LogParams";
@@ -34,5 +36,15 @@ export async function deleteAllRequestLogs(
   query: DeleteAllRequestLogsReqQuery,
 ): Promise<DeleteAllRequestLogsResponse> {
   const response = await superagent.delete(`${ServerUrl}/log`).query(query);
+  return response.body;
+}
+
+export async function getRequestLogDetail(
+  logId: number,
+  query: GetLogDetailReqQuery,
+): Promise<GetLogDetailResponse> {
+  const response = await superagent
+    .get(`${ServerUrl}/log/detail/${logId}`)
+    .query(query);
   return response.body;
 }

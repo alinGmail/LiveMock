@@ -130,3 +130,17 @@ html {
     )
     repeat-x;
 }
+
+.blank10,
+.blank20 {
+  height: 10px;
+  width: 100%;
+  clear: both;
+  display: block;
+  overflow: hidden;
+  line-height: 10px;
+}
+.blank20{
+  height: 20px;
+  line-height: 20px;
+}
