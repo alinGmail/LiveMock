@@ -37,8 +37,10 @@ export const EXPAND_ICON_MARGIN_TOP = 7.5;
 
 /**
  * Matches antd's default ExpandIcon markup (button + class names) so the
- * +/− states and the hidden leaf placeholder keep their styling; the only
- * difference is the top margin that centres the icon with a 32px control.
+ * +/− and collapsed states keep their styling, with a top margin that centres
+ * the icon with a 32px control. Rows without members have nothing to expand,
+ * so they render no control at all (the first-cell offset is applied by the
+ * name columns themselves).
  */
 export function renderGroupExpandIcon<RecordType>({
   prefixCls,
@@ -47,20 +49,17 @@ export function renderGroupExpandIcon<RecordType>({
   record,
   onExpand,
 }: GroupExpandIconProps<RecordType>) {
-  const iconPrefix = `${prefixCls}-row-expand-icon`;
-  const className = [iconPrefix];
   if (!expandable) {
-    // keep the (invisible) placeholder so leaf rows line up with group rows
-    className.push(`${iconPrefix}-spaced`);
-  } else {
-    className.push(`${iconPrefix}-${expanded ? "expanded" : "collapsed"}`);
+    return null;
   }
   return (
     <button
       type="button"
       aria-label={expanded ? "collapse" : "expand"}
       aria-expanded={expanded}
-      className={className.join(" ")}
+      className={`${prefixCls}-row-expand-icon ${prefixCls}-row-expand-icon-${
+        expanded ? "expanded" : "collapsed"
+      }`}
       style={{ marginTop: EXPAND_ICON_MARGIN_TOP }}
       onClick={(event) => {
         onExpand(record, event);
