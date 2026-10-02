@@ -21,6 +21,13 @@ export enum ExpectationEvents{
 
 }
 
+export enum GroupEvents{
+    ListGroup="ListGroup",
+    CreateGroup="CreateGroup",
+    UpdateGroup="UpdateGroup",
+    DeleteGroup="DeleteGroup"
+}
+
 export enum MatcherEvents {
     CreateMatcher="CreateMatcher",
     UpdateMatcher="UpdateMatcher",

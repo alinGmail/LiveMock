@@ -18,6 +18,7 @@ import * as electron from "electron";
 import {
   ActionEvents,
   ExpectationEvents,
+  GroupEvents,
   LogEvents,
   LogFilterEvents,
   LogViewEvents,
@@ -43,6 +44,21 @@ import {
   UpdateExpectationReqQuery,
 } from "livemock-core/struct/params/ExpectationParams";
 import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
+import {
+  CreateExpectationGroupPathParam,
+  CreateExpectationGroupReqBody,
+  CreateExpectationGroupReqQuery,
+  DeleteExpectationGroupPathParam,
+  DeleteExpectationGroupReqBody,
+  DeleteExpectationGroupReqQuery,
+  ListExpectationGroupPathParam,
+  ListExpectationGroupReqBody,
+  ListExpectationGroupReqQuery,
+  UpdateExpectationGroupPathParam,
+  UpdateExpectationGroupReqBody,
+  UpdateExpectationGroupReqQuery,
+} from "livemock-core/struct/params/ExpectationGroupParams";
+import { ListExpectationGroupResponse } from "livemock-core/struct/response/ExpectationGroupResponse";
 import type {
   BatchImportReqBody,
   BatchImportResult,
@@ -241,6 +257,56 @@ export const api = {
     ): Promise<BatchImportResult> => {
       return ipcRenderer.invoke(
         ExpectationEvents.BatchImportExpectation,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+  },
+  group: {
+    createGroup: (
+      reqParam: CreateExpectationGroupPathParam,
+      reqQuery: CreateExpectationGroupReqQuery,
+      reqBody: CreateExpectationGroupReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        GroupEvents.CreateGroup,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    listGroup: (
+      reqParam: ListExpectationGroupPathParam,
+      reqQuery: ListExpectationGroupReqQuery,
+      reqBody: ListExpectationGroupReqBody
+    ): Promise<ListExpectationGroupResponse> => {
+      return ipcRenderer.invoke(
+        GroupEvents.ListGroup,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    updateGroup: (
+      reqParam: UpdateExpectationGroupPathParam,
+      reqQuery: UpdateExpectationGroupReqQuery,
+      reqBody: UpdateExpectationGroupReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        GroupEvents.UpdateGroup,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    deleteGroup: (
+      reqParam: DeleteExpectationGroupPathParam,
+      reqQuery: DeleteExpectationGroupReqQuery,
+      reqBody: DeleteExpectationGroupReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        GroupEvents.DeleteGroup,
         reqParam,
         reqQuery,
         reqBody
