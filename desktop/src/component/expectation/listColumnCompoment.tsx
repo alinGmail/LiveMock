@@ -75,9 +75,13 @@ export const NameColumn = ({
     manual: true,
   });
   return (
-    <div style={{
-      width:"150px"
-    }}>
+    <div
+      style={{
+        width: "150px",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
       <Input
         placeholder={"empty"}
         value={expectation.name}

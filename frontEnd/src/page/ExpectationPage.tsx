@@ -359,7 +359,7 @@ const ExpectationPage = () => {
                 createExpectation(),
               );
               toastPromise(createPromise);
-              createPromise.then((res) => {
+              createPromise.then(() => {
                 getExpectationListQuery.refetch();
               });
             }}
