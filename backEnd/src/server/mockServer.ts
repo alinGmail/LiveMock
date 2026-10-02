@@ -2,11 +2,13 @@ import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import {
   getExpectationCollection,
+  getGroupCollection,
   getLogCollection,
   setNewestLogNumber,
 } from "../db/dbManager";
 import arrayUtils from "../util/arrayUtils";
 import { IMatcher } from "livemock-core/struct/matcher";
+import { sortExpectationsByMatchOrder } from "livemock-core/struct/expectationGroup";
 import { getMatcherImpl } from "../matcher/matchUtils";
 import { getActionImpl } from "../action/common";
 import { insertReqLog, insertResLog } from "../log/logUtils";
@@ -22,6 +24,7 @@ const getMockRouter: (
 ) => Promise<express.Router> = async (path, projectId) => {
   let router = express.Router();
   const expectationCollection = await getExpectationCollection(projectId, path);
+  const groupCollection = await getGroupCollection(projectId, path);
   const logCollection = await getLogCollection(projectId, path);
   let newestLogIndex = 100000;
   // set the newest log number;
@@ -75,14 +78,22 @@ const getMockRouter: (
     })
   );
   router.all("*", async (req: Request, res: Response) => {
-    const expectations = expectationCollection
-      .chain()
+    const groups = groupCollection.find({});
+    const groupMap = new Map(groups.map((group) => [group.id, group]));
+    const activeExpectations = expectationCollection
       .find({ activate: true })
-      .compoundsort([
-        ["priority", true],
-        ["createTime", false],
-      ])
-      .data();
+      .filter((expectation) => {
+        if (!expectation.groupId) {
+          return true;
+        }
+        const group = groupMap.get(expectation.groupId);
+        // an expectation whose group is missing is treated as ungrouped
+        return group ? group.activate : true;
+      });
+    const expectations = sortExpectationsByMatchOrder(
+      activeExpectations,
+      groups
+    );
     await arrayUtils.first(
       expectations,
       async (expectation, expectationIndex) => {

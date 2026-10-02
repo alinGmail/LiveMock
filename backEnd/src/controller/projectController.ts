@@ -168,6 +168,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     }
 
     await deleteDatabase(projectId, path, "expectation");
+    await deleteDatabase(projectId, path, "group");
     await deleteDatabase(projectId, path, "logView");
     await deleteDatabase(projectId, path, "log");
     collection.remove(project);

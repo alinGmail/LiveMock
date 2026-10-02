@@ -12,6 +12,7 @@ export interface ExpectationM {
   matchers: Array<RequestMatcherM>;
   actions: Array<ActionM>;
   createTime: Date;
+  groupId?: string | null;
   $loki?: number;
 }
 
@@ -21,6 +22,7 @@ export function createExpectation(): ExpectationM {
     activate: true,
     createTime: new Date(),
     delay: 0,
+    groupId: null,
     id: uuId(),
     matchers: [],
     name: "",

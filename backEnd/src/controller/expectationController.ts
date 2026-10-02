@@ -1,5 +1,9 @@
 import express, { Request, Response } from "express";
-import { getExpectationCollection, getExpectationDb } from "../db/dbManager";
+import {
+  getExpectationCollection,
+  getExpectationDb,
+  getGroupCollection,
+} from "../db/dbManager";
 import { addCross, ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
@@ -27,6 +31,7 @@ import {
   UpdateExpectationResponse,
 } from "livemock-core/struct/response/ExpectationResponse";
 import { ExpectationM } from "livemock-core/struct/expectation";
+import { sortExpectationsByMatchOrder } from "livemock-core/struct/expectationGroup";
 import { RequestMatcherType } from "livemock-core/struct/matcher";
 import {
   BatchImportReqBody,
@@ -175,7 +180,11 @@ export function getExpectationRouter(path: string): express.Router {
         throw new ServerError(400, "project id not exist!");
       }
       const collection = await getExpectationCollection(projectId, path);
-      const expectations = collection.find({}).reverse();
+      const groupCollection = await getGroupCollection(projectId, path);
+      const expectations = sortExpectationsByMatchOrder(
+        collection.find({}),
+        groupCollection.find({})
+      );
       res.json(expectations);
     }
   );
