@@ -4,6 +4,7 @@ import * as superagent from "superagent";
 import { ServerUrl } from "../config";
 import {CreateExpectationResponse, ListExpectationResponse} from "livemock-core/struct/response/ExpectationResponse";
 import {CreateExpectationReqBody, UpdateExpectationReqBody} from "livemock-core/struct/params/ExpectationParams";
+import type { BatchImportOptions, BatchImportReqBody, BatchImportResult } from "livemock-core/import/types";
 
 export const createExpectationReq = async (
   projectId: string,
@@ -44,3 +45,19 @@ export const deleteExpectationReq = async (projectId:string,expectationId:string
       .query({projectId:projectId});
   return res.body;
 }
+
+export const batchImportExpectationReq = async (
+  projectId: string,
+  content: string,
+  options?: BatchImportOptions
+): Promise<BatchImportResult> => {
+  const param: BatchImportReqBody = {
+    projectId,
+    content,
+    options,
+  };
+  const res = await superagent
+    .post(`${ServerUrl}/expectation/batchImport`)
+    .send(param);
+  return res.body;
+};

@@ -2,6 +2,7 @@
 import { ExpectationM } from "livemock-core/struct/expectation";
 import {CreateExpectationResponse, ListExpectationResponse} from "livemock-core/struct/response/ExpectationResponse";
 import {CreateExpectationReqBody, UpdateExpectationReqBody} from "livemock-core/struct/params/ExpectationParams";
+import type { BatchImportOptions, BatchImportReqBody, BatchImportResult } from "livemock-core/import/types";
 
 export const createExpectationReq = async (
   projectId: string,
@@ -33,3 +34,16 @@ export const listExpectationListReq = async (projectId: string):Promise<ListExpe
 export const deleteExpectationReq = async (projectId:string,expectationId:string) =>{
   return window.api.expectation.deleteExpectation({expectationId},{projectId},{});
 }
+
+export const batchImportExpectationReq = async (
+  projectId: string,
+  content: string,
+  options?: BatchImportOptions
+): Promise<BatchImportResult> => {
+  const param: BatchImportReqBody = {
+    projectId,
+    content,
+    options,
+  };
+  return window.api.expectation.batchImportExpectation({}, {}, param);
+};

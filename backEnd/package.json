@@ -49,5 +49,10 @@
     "requires-port": "^1.0.0",
     "socket.io": "^4.6.2",
     "type-is": "^1.6.18"
+  },
+  "dependenciesMeta": {
+    "lokijs": {
+      "built": false
+    }
   }
 }
