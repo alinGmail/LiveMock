@@ -18,10 +18,11 @@ import {
   UpdateExpectationReqQuery,
 } from "livemock-core/struct/params/ExpectationParams";
 import { ServerError } from "./common";
-import { getExpectationCollection } from "../db/dbManager";
-import {logViewEventEmitter} from "../common/eventEmitters";
+import { getExpectationCollection, getGroupCollection } from "../db/dbManager";
+import { logViewEventEmitter } from "../common/eventEmitters";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { RequestMatcherType } from "livemock-core/struct/matcher";
+import { sortExpectationsByMatchOrder } from "livemock-core/struct/expectationGroup";
 import {
   BatchImportReqBody,
   BatchImportResult,
@@ -67,7 +68,11 @@ export async function setExpectationHandler(path: string): Promise<void> {
         throw new ServerError(400, "project id not exist!");
       }
       const collection = await getExpectationCollection(projectId, path);
-      const expectations = collection.find({}).reverse();
+      const groupCollection = await getGroupCollection(projectId, path);
+      const expectations = sortExpectationsByMatchOrder(
+        collection.find({}),
+        groupCollection.find({})
+      );
       return expectations;
     }
   );

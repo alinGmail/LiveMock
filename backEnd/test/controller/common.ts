@@ -4,6 +4,7 @@ import express from "express";
 import { ProjectM } from "livemock-core/struct/project";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { getProjectRouter } from "../../src/controller/projectController";
+import { getGroupRouter } from "../../src/controller/expectationGroupController";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { getActionRouter } from "../../src/controller/actionController";
 import { CustomErrorMiddleware } from "../../src/controller/common";
@@ -94,6 +95,7 @@ export const logFilterDeletion = async (
 
 export const routerSetup = async (server: express.Express) => {
   server.use("/project", await getProjectRouter("test_db"));
+  server.use("/group", getGroupRouter("test_db"));
   server.use("/expectation", getExpectationRouter("test_db"));
   server.use("/action", await getActionRouter("test_db"));
   server.use("/log", await getLogRouter("test_db"));

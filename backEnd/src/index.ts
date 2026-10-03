@@ -1,5 +1,6 @@
 import express from "express";
 import { getProjectRouter } from "./controller/projectController";
+import { getGroupRouter } from "./controller/expectationGroupController";
 import { getExpectationRouter } from "./controller/expectationController";
 import { CustomErrorMiddleware } from "./controller/common";
 import { getMatcherRouter } from "./controller/matcherController";
@@ -54,6 +55,7 @@ addWsEventListeners();
 
   const apiRouter = express.Router();
   apiRouter.use("/project", await getProjectRouter(dbPath));
+  apiRouter.use("/group", getGroupRouter(dbPath));
   apiRouter.use("/expectation", getExpectationRouter(dbPath));
   apiRouter.use("/matcher", getMatcherRouter(dbPath));
   apiRouter.use("/action", await getActionRouter(dbPath));

@@ -229,6 +229,7 @@ export async function setProjectHandler(path: string): Promise<void> {
         throw new ServerError(500, "project status is " + projectStatus);
       }
       await deleteDatabase(projectId, path, "expectation");
+      await deleteDatabase(projectId, path, "group");
       await deleteDatabase(projectId, path, "logView");
       await deleteDatabase(projectId, path, "log");
       collection.remove(project);

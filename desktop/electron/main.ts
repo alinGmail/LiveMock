@@ -3,6 +3,7 @@ import path from "node:path";
 import { setProjectHandler } from "./handler/projectHandler";
 import * as process from "process";
 import { setExpectationHandler } from "./handler/expectationHandler";
+import { setGroupHandler } from "./handler/groupHandler";
 import { setMatcherHandler } from "./handler/matcherHandler";
 import { setActionHandler } from "./handler/actionHandler";
 import {
@@ -67,6 +68,7 @@ async function createWindow() {
 
   await setProjectHandler(app.getPath("userData"));
   await setExpectationHandler(app.getPath("userData"));
+  await setGroupHandler(app.getPath("userData"));
   await setMatcherHandler(app.getPath("userData"));
   await setActionHandler(app.getPath("userData"));
   await setLogViewHandler(app.getPath("userData"));

@@ -2,6 +2,7 @@ import lokijs from "lokijs";
 import { getCollection, getDb } from "./dbUtils";
 import { ProjectM } from "livemock-core/struct/project";
 import { ExpectationM } from "livemock-core/struct/expectation";
+import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
 import { LogViewM } from "livemock-core/struct/logView";
 import { LogM } from "livemock-core/struct/log";
 import {SystemConfigM} from "livemock-core/struct/systemConfig";
@@ -41,6 +42,13 @@ export async function getLogViewDb(projectId: string, path: string) {
   return getDb(projectId, path, "logView");
 }
 
+export async function getGroupDb(
+  projectId: string,
+  path: string
+): Promise<Loki> {
+  return getDb(projectId, path, "group");
+}
+
 export async function getLogDb(projectId: string, path: string): Promise<Loki> {
   return getDb(projectId, path, "log");
 }
@@ -73,6 +81,10 @@ export async function getExpectationCollection(
 
 export async function getLogViewCollection(projectId: string, path: string) {
   return getCollection<LogViewM>(projectId, path, "logView");
+}
+
+export async function getGroupCollection(projectId: string, path: string) {
+  return getCollection<ExpectationGroupM>(projectId, path, "group");
 }
 
 export async function getLogCollection(projectId: string, path: string) {
