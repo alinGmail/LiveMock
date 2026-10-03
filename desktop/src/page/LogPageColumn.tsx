@@ -31,7 +31,8 @@ import Equalizer from "../svg/equalizer.svg?react";
 import Eye from "../svg/eye.svg?react";
 import EyeBlocked from "../svg/eye-blocked.svg?react";
 import _, { after } from "lodash";
-import ReactJson from "react-json-view";
+import ReactJsonImport from "react-json-view";
+import { interopDefault } from "../util/interopDefault";
 import { v4 as uuId } from "uuid";
 import TextColumn from "../component/table/TextColumn";
 import { addLogFilterReq } from "../server/logFilterServer";
@@ -39,6 +40,8 @@ import { toastPromise } from "../component/common";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
 import { ExpectationM } from "livemock-core/build/struct/expectation";
 import { NavigateFunction } from "react-router-dom";
+
+const ReactJson = interopDefault(ReactJsonImport);
 
 export function getConfigColumn(
   dispatch: Dispatch<AnyAction>,
