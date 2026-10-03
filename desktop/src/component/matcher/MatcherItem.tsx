@@ -32,7 +32,7 @@ const MatcherConditionMenu = ({
               key={matcherCondition}
               className={"menuItem"}
               onClick={(event) => {
-                onConditionChange && onConditionChange(matcherCondition);
+                if (onConditionChange) onConditionChange(matcherCondition);
               }}
             >
               {matcherCondition}
@@ -53,7 +53,7 @@ const MatcherItem: FC<{
   const onTypeChange = useCallback(
     (type: RequestMatcherType) => {
       switch (type) {
-        case RequestMatcherType.METHOD:
+        case RequestMatcherType.METHOD: {
           let _matcher: RequestMatcherM = {
             id: matcher.id,
             type: RequestMatcherType.METHOD,
@@ -62,7 +62,8 @@ const MatcherItem: FC<{
           };
           matcherContext.onMatcherModify(_matcher);
           break;
-        case RequestMatcherType.PATH:
+        }
+        case RequestMatcherType.PATH: {
           let _pathMatcher: RequestMatcherM = {
             id: matcher.id,
             type: RequestMatcherType.PATH,
@@ -71,7 +72,8 @@ const MatcherItem: FC<{
           };
           matcherContext.onMatcherModify(_pathMatcher);
           break;
-        case RequestMatcherType.QUERY:
+        }
+        case RequestMatcherType.QUERY: {
           let _queryMatcher: QueryMatcherM = {
             id: matcher.id,
             type: RequestMatcherType.QUERY,
@@ -81,7 +83,8 @@ const MatcherItem: FC<{
           };
           matcherContext.onMatcherModify(_queryMatcher);
           break;
-        case RequestMatcherType.HEADER:
+        }
+        case RequestMatcherType.HEADER: {
           let _headerMatcher: HeaderMatcherM = {
             id: matcher.id,
             type: RequestMatcherType.HEADER,
@@ -91,7 +94,8 @@ const MatcherItem: FC<{
           };
           matcherContext.onMatcherModify(_headerMatcher);
           break;
-        case RequestMatcherType.PARAM:
+        }
+        case RequestMatcherType.PARAM: {
           let _paramMatcher: ParamMatcherM = {
             id: matcher.id,
             type: RequestMatcherType.PARAM,
@@ -101,6 +105,7 @@ const MatcherItem: FC<{
           };
           matcherContext.onMatcherModify(_paramMatcher);
           break;
+        }
         default:
           break;
       }

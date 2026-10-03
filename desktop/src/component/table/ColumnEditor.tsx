@@ -6,7 +6,7 @@ import Icon, {
   RightOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Input, Typography } from "antd";
-import {ReactComponent as BracketIcon} from "../../svg/brackets-curly.svg";
+import BracketIcon from "../../svg/brackets-curly.svg?react";
 import { useClickAway, useDebounce, useUpdateEffect } from "ahooks";
 import {
   ColumnDisplayType,

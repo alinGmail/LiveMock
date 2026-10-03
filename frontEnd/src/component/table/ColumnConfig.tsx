@@ -6,9 +6,9 @@ import Icon, {
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { ReactComponent as Eye } from "../../svg/eye.svg";
-import { ReactComponent as EyeBlock } from "../../svg/eye-blocked.svg";
-import { ReactComponent as BracketsIcon } from "../../svg/brackets-curly.svg";
+import Eye from "../../svg/eye.svg?react";
+import EyeBlock from "../../svg/eye-blocked.svg?react";
+import BracketsIcon from "../../svg/brackets-curly.svg?react";
 import classNames from "classnames";
 import {
   ColumnDisplayType,

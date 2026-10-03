@@ -17,7 +17,7 @@ const MatcherTypeMenu = ({
               key={matcherType}
               className={"menuItem"}
               onClick={(event) => {
-                onTypeChange && onTypeChange(matcherType);
+                if (onTypeChange) onTypeChange(matcherType);
               }}
             >
               {matcherType}

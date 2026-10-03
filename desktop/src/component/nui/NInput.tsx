@@ -1,7 +1,12 @@
 import { CSSProperties, FC, memo, useRef, useState } from "react";
-import ContentEditable from "react-contenteditable";
+import ContentEditableImport from "react-contenteditable";
 import styles from "./NInput.module.css";
 import sanitizeHtml from "sanitize-html";
+import { interopDefault } from "../../util/interopDefault";
+
+// react-contenteditable is CJS with `__esModule` + `exports.default`; Vite 8
+// / Rolldown can hand back the exports object instead of the component.
+const ContentEditable = interopDefault(ContentEditableImport);
 
 const NInput: FC<{
   value?: string;
@@ -37,7 +42,7 @@ const NInput: FC<{
             allowedTags: [],
             allowedAttributes: {},
           });
-          onChange && onChange(curValue.current);
+          if (onChange) onChange(curValue.current);
         }}
       />
     </div>

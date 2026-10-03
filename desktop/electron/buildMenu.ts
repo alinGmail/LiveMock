@@ -1,4 +1,4 @@
-import { app, Menu, MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 
 export function buildMenu({onAboutClick}) {
   const template: Array<MenuItemConstructorOptions> = [
@@ -47,7 +47,7 @@ export function buildMenu({onAboutClick}) {
           label: "Reload",
           accelerator: "CmdOrCtrl+R",
           click: function(item, focusedWindow) {
-            if (focusedWindow) focusedWindow.reload();
+            if (focusedWindow instanceof BrowserWindow) focusedWindow.reload();
           },
         },
         {

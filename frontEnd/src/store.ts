@@ -34,7 +34,7 @@ if (localStorage) {
       const sysCon = JSON.parse(systemConfig);
       const mode = sysCon.mode ? sysCon.mode : "light";
       store.dispatch(setMode(mode));
-    } catch (e) {}
+    } catch (e) { /* ignore parse errors */ }
   }
 }
 
