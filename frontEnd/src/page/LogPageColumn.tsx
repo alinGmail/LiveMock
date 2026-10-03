@@ -27,9 +27,9 @@ import {
   TableColumnItem,
 } from "../slice/logSlice";
 import mStyle from "./LogPageColumn.module.scss";
-import { ReactComponent as Equalizer } from "../svg/equalizer.svg";
-import { ReactComponent as Eye } from "../svg/eye.svg";
-import { ReactComponent as EyeBlocked } from "../svg/eye-blocked.svg";
+import Equalizer from "../svg/equalizer.svg?react";
+import Eye from "../svg/eye.svg?react";
+import EyeBlocked from "../svg/eye-blocked.svg?react";
 import _, { after } from "lodash";
 import ReactJson from "react-json-view";
 import { v4 as uuId } from "uuid";

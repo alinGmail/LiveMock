@@ -11,10 +11,10 @@
     "desktop-dev": "yarn workspace livemock-core build && yarn workspace livemock dev",
     "web-build": "yarn workspace livemock-core build && yarn workspace front-end build",
     "web-start": "yarn workspace back-end start",
-    "test": "yarn workspaces foreach run test",
+    "test": "yarn workspaces foreach -A --exclude livemock-monorepo run test",
     "test:back-end": "yarn workspace back-end test",
     "test:core": "yarn workspace livemock-core test",
-    "test:watch": "yarn workspaces foreach run test --watch"
+    "test:watch": "yarn workspaces foreach -A --exclude livemock-monorepo run test --watch"
   },
   "repository": {
     "type": "git",
@@ -41,27 +41,46 @@
   },
   "homepage": "https://github.com/alinGmail/LiveMock#readme",
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "prettier": "^3.2.2",
-    "typescript": "^5.3.3"
+    "concurrently": "^10.0.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "uuid": "11.1.1"
   },
   "resolutions": {
+    "@babel/core@^7.21.3": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "basic-ftp": "^6.2.1",
     "body-parser": "^1.20.8",
+    "brace-expansion@^1.1.7": "^1.1.21",
+    "brace-expansion@^2.0.1": "^2.1.7",
+    "browserslist@^4.24.0": "^4.29.3",
     "engine.io@~6.6.0": "^6.6.11",
+    "flatted@^3.2.9": "^3.4.4",
+    "follow-redirects": "^1.16.1",
     "form-data": "^4.0.6",
+    "ip-address": "^10.7.3",
     "js-cookie@^3.0.5": "^3.0.8",
     "js-yaml@^3.13.1": "^3.15.2",
     "js-yaml@^4.1.0": "^4.3.2",
     "lodash": "^4.18.1",
+    "minimatch@^3.0.4": "^3.1.5",
+    "minimatch@^3.0.5": "^3.1.5",
+    "minimatch@^3.1.1": "^3.1.5",
+    "minimatch@^3.1.2": "^3.1.5",
+    "minimatch@^5.0.1": "^5.1.9",
+    "minimatch@^9.0.4": "^9.0.9",
+    "node-gyp": "^12.4.0",
     "picomatch@^2.0.4": "^2.3.2",
     "picomatch@^2.2.1": "^2.3.2",
     "picomatch@^2.2.3": "^2.3.2",
     "picomatch@^2.3.1": "^2.3.2",
     "picomatch@^4.0.2": "^4.0.7",
+    "plist@3.1.0": "3.1.1",
+    "plist@^3.0.5": "3.1.1",
     "socket.io-parser@~4.2.4": "^4.2.7",
+    "tmp@^0.2.0": "^0.2.7",
     "ws": "^8.22.0"
   },
   "packageManager": "yarn@4.18.1"

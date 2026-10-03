@@ -4,7 +4,7 @@ import { HashRouter, Outlet } from "react-router-dom";
 import ProjectInfo from "./project/ProjectInfo";
 import * as React from "react";
 
-const Layout: React.FC<{}> = () => {
+const Layout: React.FC = () => {
   return (
     <div className={mStyle.layout}>
       <div className={mStyle.headRow}>

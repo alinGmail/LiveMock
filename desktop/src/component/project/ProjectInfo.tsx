@@ -1,6 +1,6 @@
 import mStyle from "./ProjectInfo.module.scss";
-import { ReactComponent as StartIcon } from "../../assets/svg/play2.svg";
-import { ReactComponent as StopIcon } from "../../assets/svg/stop.svg";
+import StartIcon from "../../assets/svg/play2.svg?react";
+import StopIcon from "../../assets/svg/stop.svg?react";
 import Icon, { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { Dropdown, Modal, Switch } from "antd";
 import { useEffect, useState } from "react";
@@ -23,8 +23,8 @@ import { getErrorMessage, toastPromise } from "../common";
 import { useAppSelector } from "../../store";
 import { useDispatch } from "react-redux";
 import { setCurProjectIndex, setProjectList } from "../../slice/projectSlice";
-import { ReactComponent as DarkIcon } from "../../assets/svg/dark.svg";
-import { ReactComponent as LightIcon } from "../../assets/svg/light.svg";
+import DarkIcon from "../../assets/svg/dark.svg?react";
+import LightIcon from "../../assets/svg/light.svg?react";
 import { setMode } from "../../slice/systemConfigSlice";
 
 const ProjectInfo = () => {

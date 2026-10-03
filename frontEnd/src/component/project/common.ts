@@ -22,7 +22,7 @@ export function register<T>(
   return {
     onChange: (event: ChangeEvent<{ value: string }>) => {
       updater((draft: Draft<T>) => {
-        // @ts-ignore;
+        // @ts-expect-error -- TS cannot prove the keyed write for generic T; runtime value type is enforced by the updater contract
         draft[name] = event.target.value;
       });
     },
@@ -39,10 +39,10 @@ export function registerNumber<T>(
     onChange: (value: (number | string) | null) => {
       updater((draft: Draft<T>) => {
         if (typeof value === "string") {
-          // @ts-ignore
+          // @ts-expect-error -- TS cannot prove the keyed write for generic T; runtime value type is enforced by the updater contract
           draft[name] = parseInt(value);
         } else if (typeof value === "number") {
-          // @ts-ignore
+          // @ts-expect-error -- TS cannot prove the keyed write for generic T; runtime value type is enforced by the updater contract
           draft[name] = value;
         }
       });

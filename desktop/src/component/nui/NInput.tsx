@@ -37,7 +37,7 @@ const NInput: FC<{
             allowedTags: [],
             allowedAttributes: {},
           });
-          onChange && onChange(curValue.current);
+          if (onChange) onChange(curValue.current);
         }}
       />
     </div>

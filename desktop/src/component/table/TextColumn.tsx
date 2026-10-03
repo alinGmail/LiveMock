@@ -1,7 +1,7 @@
 import { Component } from "react";
 import { Tooltip } from "antd";
 
-class TextColumn extends Component<{ content: string }, {}> {
+class TextColumn extends Component<{ content: string }> {
   render() {
     return (
       <Tooltip

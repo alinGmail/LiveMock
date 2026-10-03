@@ -28,9 +28,9 @@ const ActionEditor: React.FC<{
 }> = ({ action }) => {
   const actionContext = useActionContext();
   const [fullScreen, setFullScreen] = useState<boolean>(false);
-  const fullScreenCB = useRef<Function | null>(null);
+  const fullScreenCB = useRef<(() => void) | null>(null);
   useEffect(() => {
-    fullScreenCB.current && fullScreenCB.current();
+    if (fullScreenCB.current) fullScreenCB.current();
     fullScreenCB.current = null;
   }, [fullScreen]);
   const typeChange = useCallback(
