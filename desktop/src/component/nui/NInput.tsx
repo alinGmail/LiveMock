@@ -1,7 +1,13 @@
 import { CSSProperties, FC, memo, useRef, useState } from "react";
-import ContentEditable from "react-contenteditable";
+import ContentEditableImport from "react-contenteditable";
 import styles from "./NInput.module.css";
 import sanitizeHtml from "sanitize-html";
+
+// react-contenteditable is CJS with `__esModule` + `exports.default`; under
+// Vite 8/Rolldown the default import can arrive as the whole exports object
+// ({ default: Component }) instead of the Component itself. Unwrap defensively.
+const ContentEditable = ((ContentEditableImport as any)?.default ??
+  ContentEditableImport) as typeof ContentEditableImport;
 
 const NInput: FC<{
   value?: string;
