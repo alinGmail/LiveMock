@@ -11,6 +11,8 @@ services:
       - NODE_ENV=production
       - LIVEMOCK_PORT=${LIVEMOCK_PORT:-9002}
       - LIVEMOCK_DB_PATH=/app/data/db
+      - LIVEMOCK_COOKIE_SECURE=${LIVEMOCK_COOKIE_SECURE:-false}
+      - LIVEMOCK_TRUST_PROXY=${LIVEMOCK_TRUST_PROXY:-}
     restart: unless-stopped
     volumes:
       - livemock_data:/app/data

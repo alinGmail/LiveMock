@@ -1,4 +1,4 @@
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 import {CreateMatcherResponse, UpdateMatcherResponse} from "livemock-core/struct/response/MatcherResponse";
 import { DeleteMatcherResponse } from "livemock-core/struct/response/MatcherResponse";

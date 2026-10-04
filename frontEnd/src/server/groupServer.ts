@@ -1,5 +1,5 @@
 import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 import {
   CreateExpectationGroupReqBody,

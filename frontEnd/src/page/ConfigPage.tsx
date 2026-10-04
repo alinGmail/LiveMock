@@ -9,13 +9,16 @@ import {
   getProjectListReq,
   updateProjectReq,
 } from "../server/projectServer";
-import { toastPromise } from "../component/common";
+import { getErrorMessage, toastPromise } from "../component/common";
+import { changePasswordReq } from "../server/authServer";
+import { confirmPasswordRules, passwordRules } from "../component/formRules";
 import {setCurProjectIndex, setProjectList} from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from "react";
-import { Button, Input, Modal } from "antd";
+import { Button, Card, Form, Input, Modal } from "antd";
 import { message } from "antd/lib";
 import { DeleteOutlined } from "@ant-design/icons";
+import toast from "react-hot-toast";
 
 const ConfigPage = () => {
   const dispatch = useDispatch();
@@ -53,6 +56,24 @@ const ConfigPage = () => {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [projectNameInp, setProjectNameInp] = useState<string>("");
   const [deleteModalShow, setDeleteModalShow] = useState(false);
+  const [passwordForm] = Form.useForm();
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const onChangePassword = async (values: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    setChangingPassword(true);
+    try {
+      await changePasswordReq(values.currentPassword, values.newPassword);
+      toast.success("Password changed");
+      passwordForm.resetFields();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   return (
     <div style={{ padding: "20px 10px" }}>
@@ -108,6 +129,47 @@ const ConfigPage = () => {
         onSubmit={onProjectEditorSubmit}
         updaterProjectM={updateModifyProject}
       />
+      <div
+        style={{
+          width: "560px",
+          margin: "20px auto",
+        }}
+      >
+        <Card title="Change Password">
+          <Form form={passwordForm} layout="vertical" onFinish={onChangePassword}>
+            <Form.Item
+              name="currentPassword"
+              label="Current password"
+              rules={[
+                { required: true, message: "Please input the current password" },
+              ]}
+            >
+              <Input.Password autoComplete="current-password" />
+            </Form.Item>
+            <Form.Item
+              name="newPassword"
+              label="New password"
+              rules={passwordRules("Please input the new password")}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+            <Form.Item
+              name="confirmPassword"
+              label="Confirm new password"
+              dependencies={["newPassword"]}
+              rules={confirmPasswordRules(
+                "newPassword",
+                "Please confirm the new password"
+              )}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" loading={changingPassword}>
+              Change Password
+            </Button>
+          </Form>
+        </Card>
+      </div>
       <div style={{
         width:'560px',
         margin:'20px auto',

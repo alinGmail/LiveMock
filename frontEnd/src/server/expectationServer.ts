@@ -1,6 +1,6 @@
 
 import { ExpectationM } from "livemock-core/struct/expectation";
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 import {CreateExpectationResponse, ListExpectationResponse} from "livemock-core/struct/response/ExpectationResponse";
 import {CreateExpectationReqBody, UpdateExpectationReqBody} from "livemock-core/struct/params/ExpectationParams";

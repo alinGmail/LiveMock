@@ -1,4 +1,4 @@
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 import { ListExpectationResponse } from "livemock-core/struct/response/ExpectationResponse";
 import {

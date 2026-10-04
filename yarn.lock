@@ -3879,6 +3879,7 @@ __metadata:
     "@types/node": "npm:^20.19.0"
     "@types/supertest": "npm:^7.2.1"
     "@types/type-is": "npm:^1.6.3"
+    bcryptjs: "npm:^3.0.3"
     body-parser: "npm:^1.20.8"
     cross-env: "npm:^10.1.0"
     express: "npm:4.22.3"
@@ -3898,6 +3899,7 @@ __metadata:
     prettier: "npm:2.8.7"
     requires-port: "npm:^1.0.0"
     socket.io: "npm:^4.8.4"
+    socket.io-client: "npm:^4.8.4"
     supertest: "npm:^7.3.1"
     ts-jest: "npm:^29.4.14"
     ts-node: "npm:^10.7.0"
@@ -3964,6 +3966,15 @@ __metadata:
   version: 6.2.1
   resolution: "basic-ftp@npm:6.2.1"
   checksum: 10c0/7b6d8cdf8e9a7ba71697d55554e56a82c2329ffbdc5a8da8143d840105d7b48bc169c1b5d2f1cc340e453ba362b1c151eece811d6fe478f847ebfe57ffc677b2
+  languageName: node
+  linkType: hard
+
+"bcryptjs@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "bcryptjs@npm:3.0.3"
+  bin:
+    bcrypt: bin/bcrypt
+  checksum: 10c0/127c94699f07eab5fbbb89d600c3f0e36ae6fd001e028139740b41fffb62a23a2743523fb88f442ae3308a27d4843b97ccb9e436d78f5c5899be187d0972c6d5
   languageName: node
   linkType: hard
 

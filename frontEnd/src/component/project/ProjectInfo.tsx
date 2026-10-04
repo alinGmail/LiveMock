@@ -1,8 +1,12 @@
 import mStyle from "./ProjectInfo.module.scss";
 import StartIcon from "../../assets/svg/play2.svg?react";
 import StopIcon from "../../assets/svg/stop.svg?react";
-import Icon, { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { Dropdown, Modal, Switch } from "antd";
+import Icon, {
+  LoadingOutlined,
+  LogoutOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { Button, Dropdown, Modal, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { Updater, useImmer } from "use-immer";
 import {
@@ -18,6 +22,7 @@ import {
   startProjectReq,
   stopProjectReq,
 } from "../../server/projectServer";
+import { logoutReq } from "../../server/authServer";
 import toast from "react-hot-toast";
 import { getErrorMessage, toastPromise } from "../common";
 import { useAppSelector } from "../../store";
@@ -245,13 +250,13 @@ const ProjectInfo = () => {
                 )}
                 {(currentProject.status === ProjectStatus.STARTING ||
                   currentProject.status === ProjectStatus.CLOSING) && (
-                  <LoadingOutlined
-                    style={{
-                      color: "#ffec3d",
-                      fontSize: "36px",
-                    }}
-                  />
-                )}
+                    <LoadingOutlined
+                      style={{
+                        color: "#ffec3d",
+                        fontSize: "36px",
+                      }}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -276,6 +281,18 @@ const ProjectInfo = () => {
           <LightIcon
             style={{ fill: "#d9d9d9", stroke: "white", margin: "0px 6px" }}
           />
+          <Button
+            type="text"
+            icon={<LogoutOutlined />}
+            style={{ marginLeft: "12px", color:"white"}}
+            onClick={() => {
+              logoutReq().catch((error) => {
+                toast.error(getErrorMessage(error));
+              });
+            }}
+          >
+            Logout
+          </Button>
         </div>
       </div>
     </div>

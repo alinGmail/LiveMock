@@ -5,7 +5,7 @@ import {
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
 } from "livemock-core/struct/params/LogParams";
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 import {
   DeleteAllRequestLogsResponse,
