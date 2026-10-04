@@ -1,16 +1,7 @@
 import express from "express";
-import util from "util";
 import { IAction, StaticDirectoryActionM } from "livemock-core/struct/action";
 import { LogM } from "livemock-core/struct/log";
-
-function delay(t, cb) {
-  setTimeout(function () {
-    let err: null | Error = null;
-    cb(err, "Success");
-  }, t);
-}
-
-let delayPromise = util.promisify(delay);
+import { delayPromise, insertProxyInfo } from "./common";
 
 // one express.static middleware per configured folder, reused across requests
 const staticMiddlewareCache = new Map<string, express.RequestHandler>();
@@ -37,7 +28,7 @@ function normalizePrefix(urlPrefix: string | null | undefined): string {
     return "";
   }
   let prefix = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  while (prefix.length > 1 && prefix.endsWith("/")) {
+  while (prefix.endsWith("/")) {
     prefix = prefix.slice(0, -1);
   }
   return prefix;
@@ -124,19 +115,6 @@ function notFound(res: express.Response) {
   if (!res.headersSent) {
     res.status(404).send("Not Found");
   }
-}
-
-function insertProxyInfo(log: LogM | undefined) {
-  if (!log) {
-    return;
-  }
-  log.proxyInfo = {
-    isProxy: false,
-    proxyHost: null,
-    proxyPath: null,
-    requestHeaders: [],
-    responseHeaders: [],
-  };
 }
 
 export { StaticDirectoryActionImpl };

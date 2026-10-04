@@ -13,6 +13,7 @@ import {
 } from "livemock-core/struct/params/ActionParams";
 import { ServerError } from "./common";
 import { getExpectationCollection } from "../db/dbManager";
+import { ActionM } from "livemock-core/struct/action";
 const ipcMain = electron.ipcMain;
 
 export async function setActionHandler(path: string): Promise<void> {
@@ -63,7 +64,16 @@ export async function setActionHandler(path: string): Promise<void> {
       if (actionIndex === -1) {
         throw new ServerError(500, "action not exist");
       }
-      Object.assign(expectation.actions[actionIndex], actionUpdate);
+      if (
+        actionUpdate.type &&
+        actionUpdate.type !== expectation.actions[actionIndex].type
+      ) {
+        // a type switch replaces the action; merging would keep stale fields
+        // from the previous action shape
+        expectation.actions[actionIndex] = actionUpdate as ActionM;
+      } else {
+        Object.assign(expectation.actions[actionIndex], actionUpdate);
+      }
       collection.update(expectation);
 
       return expectation.actions[actionIndex];

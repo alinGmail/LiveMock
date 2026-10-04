@@ -5,7 +5,7 @@ import {
   ResponseType,
 } from "livemock-core/struct/action";
 import express from "express";
-import { delayPromise } from "./common";
+import { delayPromise, insertProxyInfo } from "./common";
 import Mock from "mockjs";
 import { LogM } from "livemock-core/struct/log";
 
@@ -26,7 +26,7 @@ class CustomResponseActionImpl implements IAction {
     if (this.delay > 0) {
       await delayPromise(this.delay);
     }
-    insetProxyInfo(logM);
+    insertProxyInfo(logM);
     if (this.action.responseContent.type === ResponseType.JSON) {
       //addCross(res);
       res.setHeader("Content-Type", "application/json");
@@ -61,19 +61,6 @@ function getResponseContentStr(action: CustomResponseActionM): string {
     responseVal = JSON.stringify(responseVal);
   }
   return responseVal;
-}
-
-function insetProxyInfo(log: LogM | undefined) {
-  if (!log) {
-    return;
-  }
-  log.proxyInfo = {
-    isProxy: false,
-    proxyHost: null,
-    proxyPath: null,
-    requestHeaders: [],
-    responseHeaders: [],
-  };
 }
 
 function handleHeaders(action: CustomResponseActionM, res: express.Response) {

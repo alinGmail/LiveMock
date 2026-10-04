@@ -20,6 +20,7 @@ import {
   UpdateActionResponse,
 } from "livemock-core/struct/response/ActionResponse";
 import { ExpectationM } from "livemock-core/struct/expectation";
+import { ActionM } from "livemock-core/struct/action";
 
 
 
@@ -93,7 +94,16 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       if (actionIndex === -1) {
         throw new ServerError(500, "action not exist");
       }
-      Object.assign(expectation.actions[actionIndex], actionUpdate);
+      if (
+        actionUpdate.type &&
+        actionUpdate.type !== expectation.actions[actionIndex].type
+      ) {
+        // a type switch replaces the action; merging would keep stale fields
+        // from the previous action shape
+        expectation.actions[actionIndex] = actionUpdate as ActionM;
+      } else {
+        Object.assign(expectation.actions[actionIndex], actionUpdate);
+      }
       collection.update(expectation);
       res.json(expectation.actions[actionIndex]);
     }

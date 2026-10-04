@@ -1,4 +1,5 @@
 import {ActionM, ActionType, IAction} from "livemock-core/struct/action";
+import { LogM } from "livemock-core/struct/log";
 import {CustomResponseActionImpl} from "./CustomResponseAction";
 import ProxyActionImpl from "./ProxyAction";
 import {StaticDirectoryActionImpl} from "./StaticDirectoryAction";
@@ -30,6 +31,21 @@ export function getActionImpl(
         default:
             return null;
     }
+}
+
+
+
+export function insertProxyInfo(log: LogM | undefined) {
+    if (!log) {
+        return;
+    }
+    log.proxyInfo = {
+        isProxy: false,
+        proxyHost: null,
+        proxyPath: null,
+        requestHeaders: [],
+        responseHeaders: [],
+    };
 }
 
 

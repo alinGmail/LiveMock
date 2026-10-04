@@ -72,6 +72,16 @@ describe("test static directory action", () => {
     expectationCollection.update(expectation!);
   }
 
+  async function latestLog() {
+    const logCollection = await getLogCollection(project.id, dbFolder);
+    const logs = logCollection
+      .chain()
+      .find({})
+      .simplesort("id", { desc: true })
+      .data();
+    return logs[0];
+  }
+
   test("serves a nested file under the prefix and logs it", async () => {
     setAction(fixtureFolder, "/static");
     const testRes = await request(server)
@@ -80,13 +90,7 @@ describe("test static directory action", () => {
     expect(testRes.text).toBe("console.log('hi');");
     expect(testRes.get("content-type")).toContain("javascript");
 
-    const logCollection = await getLogCollection(project.id, dbFolder);
-    const logs = logCollection
-      .chain()
-      .find({})
-      .simplesort("id", { desc: true })
-      .data();
-    const log = logs[0];
+    const log = await latestLog();
     expect(log.req!.path).toBe("/static/js/app.js");
     expect(log.res!.status).toBe(200);
     expect(log.res!.headers["content-type"]).toContain("javascript");
@@ -121,14 +125,9 @@ describe("test static directory action", () => {
     setAction(fixtureFolder, "/static");
     await request(server).get("/static/js/missing.js").expect(404);
 
-    const logCollection = await getLogCollection(project.id, dbFolder);
-    const logs = logCollection
-      .chain()
-      .find({})
-      .simplesort("id", { desc: true })
-      .data();
-    expect(logs[0].res!.status).toBe(404);
-    expect(logs[0].proxyInfo?.isProxy).toBe(false);
+    const log = await latestLog();
+    expect(log.res!.status).toBe(404);
+    expect(log.proxyInfo?.isProxy).toBe(false);
   });
 
   test("404 for non-GET methods", async () => {
@@ -151,6 +150,11 @@ describe("test static directory action", () => {
   test("normalizes the prefix (leading/trailing slashes and whitespace)", async () => {
     setAction(fixtureFolder, " static/ ");
     await request(server).get("/static/js/app.js").expect(200);
+  });
+
+  test("a prefix of only slashes behaves as no prefix", async () => {
+    setAction(fixtureFolder, "//", { matcherPrefix: "/" });
+    await request(server).get("/js/app.js").expect(200);
   });
 
   test("an empty or root prefix serves without stripping", async () => {
