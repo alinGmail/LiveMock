@@ -4,7 +4,7 @@ import {
   UpdateLogFilterReqBody,
   UpdatePresetLogFilterReqBody
 } from "livemock-core/struct/params/LogFilterParam";
-import * as superagent from "superagent";
+import * as superagent from "./http";
 import { ServerUrl } from "../config";
 
 export const addLogFilterReq = async (param:CreateLogFilterReqBody)=>{

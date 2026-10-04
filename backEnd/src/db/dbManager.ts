@@ -105,6 +105,20 @@ export function setNewestLogNumber(
 ) {
   logIndexMap.set(`${path}/${projectId}`, newestLogIndex);
 }
+
+/**
+ * Persist the platform database and stop its autosave timers. Used by CLI
+ * scripts that run with the backend stopped, so their changes reach disk
+ * before the process exits.
+ */
+export async function saveAndCloseProjectDb(path: string): Promise<void> {
+  const db = await getProjectDb(path);
+  await new Promise<void>((resolve, reject) => {
+    db.saveDatabase((err) => (err ? reject(err) : resolve()));
+  });
+  db.close();
+}
+
 export async function getSystemCollection(path:string){
   const projectDb = await getProjectDb(path);
   let entries = projectDb.getCollection<SystemConfigM>("system");

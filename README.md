@@ -74,6 +74,8 @@ the server will be running at http://localhost:9002 by default
 | `LIVEMOCK_PORT` | `9002` | port the web server listens on |
 | `CORS_ORIGIN` | `http://localhost:5173` | comma-separated list of browser origins allowed to open the Socket.IO connection (needed for the Vite dev origin; production is served same-origin and does not need it) |
 | `LIVEMOCK_DB_PATH` | `db` | directory where the database files are stored |
+| `LIVEMOCK_COOKIE_SECURE` | `false` | set to `true` when the dashboard is served over HTTPS so the session cookie is only sent over TLS (HTTPS itself is terminated by your reverse proxy) |
+| `LIVEMOCK_TRUST_PROXY` | *(unset)* | comma-separated list of reverse-proxy IPs/CIDRs whose `X-Forwarded-For` header is trusted (for example `127.0.0.1,10.0.0.0/8`). Unset or `false` ignores forwarding headers entirely. A "trust everyone" mode is intentionally not supported; an invalid entry stops the server at startup |
 
 For example, to run on another port:
 ```
@@ -87,10 +89,32 @@ With Docker Compose the same variable controls both the listener and the publish
 LIVEMOCK_PORT=8100 docker compose up
 ```
 
+### Authentication (web version only)
+
+The web version is protected by a **single account**. The desktop version has no login and is unaffected.
+
+- **First run:** the first visit shows an initialization form. Create the account (username + password) and you are signed in. After that, the registration endpoint is permanently closed and every visit requires signing in.
+- **Sessions:** the login is kept in an httpOnly cookie for 7 days of activity and survives backend restarts. Logging out ends only the current session, so several devices can stay signed in at the same time.
+- **Protection:** the dashboard, every `/api` endpoint and the Socket.IO connection require a login. The mock listener ports (for example `http://localhost:8088`) stay public so mocked APIs and test clients keep working.
+- **Brute force:** repeated failed logins from one IP back off exponentially, capped at 30 minutes. The account itself is never locked.
+- **Password changes** are available on the Config page and end all other sessions.
+- **Public deployments:** register immediately after starting the server — the first caller to register owns the account. There is no setup token by design. Behind a reverse proxy, set `LIVEMOCK_TRUST_PROXY` so the login throttle sees the real client IP, and `LIVEMOCK_COOKIE_SECURE=true` when serving over HTTPS.
+
+If you lose the credentials, stop the backend and run:
+```
+yarn workspace back-end reset-admin <new-username>
+```
+You are prompted for the new password (hidden, entered twice). The command resets the username and password and invalidates all sessions; start the backend again and log in. The backend must be stopped first because the database is written from memory while the server runs.
+
+With Docker Compose the optional settings can be passed through the environment:
+```
+LIVEMOCK_COOKIE_SECURE=true LIVEMOCK_TRUST_PROXY=127.0.0.1 docker compose up
+```
+
 
 
 ## 📌Quick Start
-After installing liveMock, you will be able to access the welcome page (a page to create a project). Simply input the project name and submit the form, and you will be redirected to the dashboard page.
+After installing liveMock, the first visit asks you to create the account for the instance. After that, sign in and you will be able to access the welcome page (a page to create a project). Simply input the project name and submit the form, and you will be redirected to the dashboard page.
 
 ### Creating an Expectation
 An expectation consists of several matchers and an action. When a request matches all its matchers, the defined action will be taken, such as responding with a JSON.
