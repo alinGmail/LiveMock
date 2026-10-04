@@ -3888,7 +3888,7 @@ __metadata:
     jest: "npm:^30.5.2"
     livemock-core: "workspace:*"
     lodash: "npm:^4.18.1"
-    lokijs: "git+https://github.com/alinGmail/LokiJS.git#265bbcaeafccac11ab556599e478380cd07ffca7"
+    lokijs: "git+https://github.com/alinGmail/LokiJS.git#e23e26b5eea4f63a0c9101bfbcc832c40feac707"
     micromatch: "npm:^4.0.5"
     mockjs: "npm:^1.1.0"
     mockserver-client: "npm:^8.0.0"
@@ -7902,7 +7902,7 @@ __metadata:
     http-proxy: "npm:^1.18.1"
     livemock-core: "workspace:*"
     lodash: "npm:^4.18.1"
-    lokijs: "git+https://github.com/alinGmail/LokiJS.git#265bbcaeafccac11ab556599e478380cd07ffca7"
+    lokijs: "git+https://github.com/alinGmail/LokiJS.git#e23e26b5eea4f63a0c9101bfbcc832c40feac707"
     micromatch: "npm:^4.0.5"
     mockjs: "npm:^1.1.0"
     modern-css-reset: "npm:^1.4.0"
@@ -7997,10 +7997,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lokijs@git+https://github.com/alinGmail/LokiJS.git#265bbcaeafccac11ab556599e478380cd07ffca7":
+"lokijs@git+https://github.com/alinGmail/LokiJS.git#e23e26b5eea4f63a0c9101bfbcc832c40feac707":
   version: 1.5.12
-  resolution: "lokijs@https://github.com/alinGmail/LokiJS.git#commit=265bbcaeafccac11ab556599e478380cd07ffca7"
-  checksum: 10c0/13d430448d867d5c267e2e6770aee370ddf35d72a5757e5e8de7a4010669c22774949fb86712584d7876ca8dd6c40aa3d15c28202e1bc40a6b68b99e0983fdea
+  resolution: "lokijs@https://github.com/alinGmail/LokiJS.git#commit=e23e26b5eea4f63a0c9101bfbcc832c40feac707"
+  checksum: 10c0/647e02a546a2c5591fe92d2592da58707200037e5e83b74e36893f13a1d6008051092d4424a97f736e2172f614a1cbefa22dc49137be40cc1c31d5c544689e89
   languageName: node
   linkType: hard
 
