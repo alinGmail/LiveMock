@@ -55,6 +55,18 @@ const ActionItem: React.FC<{
               />
             </div>
           )}
+          {action.type === ActionType.STATIC_DIRECTORY && (
+            <div className={mStyle.actionWrap}>
+              static {action.urlPrefix} -&gt; {action.folderPath}
+              &nbsp;&nbsp;
+              <CloseSquareOutlined
+                className={mStyle.closeBtn}
+                onClick={() => {
+                  actionContext.onActionRemove(action.id);
+                }}
+              />
+            </div>
+          )}
         </div>
       </Dropdown>
     </div>

@@ -10,6 +10,7 @@ import { useActionContext } from "../context";
 import mStyle from "./ActionEditor.module.scss";
 import CustomResponseActionEditor from "./CustomResponseActionEditor";
 import ProxyActionEditor from "./ProxyActionEditor";
+import StaticDirectoryActionEditor from "./StaticDirectoryActionEditor";
 import { FullscreenExitOutlined, FullscreenOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 
@@ -26,11 +27,10 @@ const ActionEditor: React.FC<{
   const typeChange = useCallback(
     (type: ActionType) => {
       if (type !== action.type) {
-        const newAction = getNewAction(action.id, action.type);
-        actionContext.onActionModify({
-          ...action,
-          type: type,
-        } as ActionM);
+        const newAction = getNewAction(action.id, type);
+        if (newAction) {
+          actionContext.onActionModify(newAction);
+        }
       }
     },
     [action]
@@ -73,6 +73,9 @@ const ActionEditor: React.FC<{
         )}
         {action.type === ActionType.PROXY && (
           <ProxyActionEditor action={action} typeChange={typeChange} />
+        )}
+        {action.type === ActionType.STATIC_DIRECTORY && (
+          <StaticDirectoryActionEditor action={action} typeChange={typeChange} />
         )}
       </div>
     );

@@ -2,7 +2,7 @@ import express from "express";
 import request from "supertest";
 import { createProject } from "livemock-core/struct/project";
 import { createExpectation } from "livemock-core/struct/expectation";
-import { createProxyAction } from "livemock-core/struct/action";
+import { createProxyAction, createStaticDirectoryAction } from "livemock-core/struct/action";
 import { getProjectRouter } from "../../src/controller/projectController";
 import { getExpectationRouter } from "../../src/controller/expectationController";
 import { getActionRouter } from "../../src/controller/actionController";
@@ -92,4 +92,44 @@ describe("action controller", () => {
   };
 
   test("create and update action", actionTest);
+
+  const staticActionTest = async () => {
+    const staticAction = createStaticDirectoryAction();
+    staticAction.folderPath = "/tmp/static-folder";
+    staticAction.urlPrefix = "/static";
+
+    await request(server)
+        .post("/action/")
+        .send({
+          projectId: projectM.id,
+          expectationId: expectationM.id,
+          action: staticAction,
+        } as CreateActionReqBody)
+        .expect(200);
+
+    const expectStaticAction = async (folderPath: string, urlPrefix: string) => {
+      const expectationRes: request.Response = await request(server)
+          .get(`/expectation/${expectationM.id}?projectId=${projectM.id}`)
+          .expect(200);
+      expect(expectationRes.body.actions.length).toBe(1);
+      expect(expectationRes.body.actions[0].type).toEqual("STATIC_DIRECTORY");
+      expect(expectationRes.body.actions[0].folderPath).toEqual(folderPath);
+      expect(expectationRes.body.actions[0].urlPrefix).toEqual(urlPrefix);
+    };
+
+    await expectStaticAction("/tmp/static-folder", "/static");
+
+    await request(server)
+        .put(`/action/${staticAction.id}`)
+        .send({
+          projectId: projectM.id,
+          expectationId: expectationM.id,
+          actionUpdate: { urlPrefix: "/assets" },
+        } as UpdateActionReqBody)
+        .expect(200);
+
+    await expectStaticAction("/tmp/static-folder", "/assets");
+  };
+
+  test("create and update static directory action", staticActionTest);
 });
