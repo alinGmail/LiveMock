@@ -250,13 +250,13 @@ const ProjectInfo = () => {
                 )}
                 {(currentProject.status === ProjectStatus.STARTING ||
                   currentProject.status === ProjectStatus.CLOSING) && (
-                  <LoadingOutlined
-                    style={{
-                      color: "#ffec3d",
-                      fontSize: "36px",
-                    }}
-                  />
-                )}
+                    <LoadingOutlined
+                      style={{
+                        color: "#ffec3d",
+                        fontSize: "36px",
+                      }}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -282,9 +282,9 @@ const ProjectInfo = () => {
             style={{ fill: "#d9d9d9", stroke: "white", margin: "0px 6px" }}
           />
           <Button
-            size="small"
+            type="text"
             icon={<LogoutOutlined />}
-            style={{ marginLeft: "12px" }}
+            style={{ marginLeft: "12px", color:"white"}}
             onClick={() => {
               logoutReq().catch((error) => {
                 toast.error(getErrorMessage(error));
