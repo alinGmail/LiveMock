@@ -2,8 +2,12 @@ import express from "express";
 import request from "supertest";
 import { getApiRouter } from "../../src/apiRouter";
 import { deleteFolderRecursive } from "../../src/common/utils";
+import { SESSION_DURATION_MS } from "../../src/auth/authStore";
 
 const TEST_DB = "test_db_auth";
+// Max-Age is emitted in whole seconds (express floors the millisecond value),
+// so the measured lifetime can be up to a second short; allow a little slack.
+const MAX_AGE_TOLERANCE_MS = 2000;
 
 describe("auth controller", () => {
   let app: express.Express;
@@ -53,7 +57,12 @@ describe("auth controller", () => {
     expect(setCookie).toContain("HttpOnly");
     expect(setCookie).toContain("SameSite=Lax");
     expect(setCookie).toContain("Path=/");
-    expect(setCookie).toContain("Max-Age=604800");
+    const maxAgeMatch = /Max-Age=(\d+)/.exec(setCookie);
+    expect(maxAgeMatch).not.toBeNull();
+    const cookieLifetimeMs = Number(maxAgeMatch![1]) * 1000;
+    expect(
+      Math.abs(cookieLifetimeMs - SESSION_DURATION_MS)
+    ).toBeLessThanOrEqual(MAX_AGE_TOLERANCE_MS);
 
     // session identifies the account and opens protected routes
     res = await agent.get("/api/auth/me").expect(200);
