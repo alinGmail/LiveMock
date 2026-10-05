@@ -1,6 +1,6 @@
 {
   "name": "livemock-core",
-  "version": "1.0.3",
+  "version": "1.4.0",
   "source": "index.ts",
   "scripts": {
     "build": "tsc",

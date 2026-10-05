@@ -36,7 +36,7 @@ COPY --from=builder /app/core ./core
 
 RUN corepack enable
 # Install production dependencies
-RUN yarn workspace back-end install
+RUN yarn workspace livemock install
 
 # Set data directory permissions
 RUN chown -R node:node /app/data

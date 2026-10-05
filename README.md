@@ -101,7 +101,7 @@ The web version is protected by a **single account**. The desktop version has no
 
 If you lose the credentials, stop the backend and run:
 ```
-yarn workspace back-end reset-admin <new-username>
+yarn workspace livemock reset-admin <new-username>
 ```
 You are prompted for the new password (hidden, entered twice). The command resets the username and password and invalidates all sessions; start the backend again and log in. The backend must be stopped first because the database is written from memory while the server runs.
 

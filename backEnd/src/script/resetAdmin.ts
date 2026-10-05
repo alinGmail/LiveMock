@@ -70,7 +70,7 @@ async function main() {
   const username = process.argv[2];
   if (!username) {
     console.error(
-      "usage: yarn workspace back-end reset-admin <new-username>"
+      "usage: yarn workspace livemock reset-admin <new-username>"
     );
     process.exit(1);
   }
