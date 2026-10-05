@@ -28,7 +28,6 @@ class CustomResponseActionImpl implements IAction {
     }
     insertProxyInfo(logM);
     if (this.action.responseContent.type === ResponseType.JSON) {
-      //addCross(res);
       res.setHeader("Content-Type", "application/json");
       handleHeaders(this.action, res);
       res.status(this.action.status);
@@ -42,7 +41,6 @@ class CustomResponseActionImpl implements IAction {
       } catch (e) {}
       (res as any).rawBody = responseVal;
     } else if (this.action.responseContent.type === ResponseType.TEXT) {
-      //addCross(res);
       res.setHeader("Content-Type", "text/plain");
       handleHeaders(this.action, res);
       res.status(this.action.status);

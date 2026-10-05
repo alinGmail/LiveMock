@@ -4,7 +4,7 @@ import {
   getExpectationCollection,
   getGroupCollection,
 } from "../db/dbManager";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import {
   CreateExpectationGroupPathParam,
   CreateExpectationGroupReqBody,
@@ -48,10 +48,6 @@ function ensureGroupNameAvailable(
 
 export function getGroupRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
 
   /**
    * create group
@@ -68,7 +64,6 @@ export function getGroupRouter(path: string): express.Router {
       >,
       res: Response<CreateExpectationGroupResponse>
     ) => {
-      addCross(res);
       const projectId = req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -99,7 +94,6 @@ export function getGroupRouter(path: string): express.Router {
       >,
       res: Response<UpdateExpectationGroupResponse>
     ) => {
-      addCross(res);
       const projectId = req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -144,7 +138,6 @@ export function getGroupRouter(path: string): express.Router {
       >,
       res: Response<DeleteExpectationGroupResponse>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -185,7 +178,6 @@ export function getGroupRouter(path: string): express.Router {
       >,
       res: Response<ListExpectationGroupResponse>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");

@@ -72,7 +72,6 @@ the server will be running at http://localhost:9002 by default
 | environment variable | default | description |
 |---|---|---|
 | `LIVEMOCK_PORT` | `9002` | port the web server listens on |
-| `CORS_ORIGIN` | `http://localhost:5173` | comma-separated list of browser origins allowed to open the Socket.IO connection (needed for the Vite dev origin; production is served same-origin and does not need it) |
 | `LIVEMOCK_DB_PATH` | `db` | directory where the database files are stored |
 | `LIVEMOCK_COOKIE_SECURE` | `false` | set to `true` when the dashboard is served over HTTPS so the session cookie is only sent over TLS (HTTPS itself is terminated by your reverse proxy) |
 | `LIVEMOCK_TRUST_PROXY` | *(unset)* | comma-separated list of reverse-proxy IPs/CIDRs whose `X-Forwarded-For` header is trusted (for example `127.0.0.1,10.0.0.0/8`). Unset or `false` ignores forwarding headers entirely. A "trust everyone" mode is intentionally not supported; an invalid entry stops the server at startup |

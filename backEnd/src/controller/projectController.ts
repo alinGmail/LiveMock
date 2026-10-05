@@ -1,6 +1,6 @@
 import http from "http";
 import express, { raw, Request, Response } from "express";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import {
   getLogCollection,
   getLogViewCollection,
@@ -44,11 +44,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
   const collection: Collection<ProjectM> = await getProjectCollection(path);
   let router = toAsyncRouter(express());
 
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
-
   /**
    * get all project
    */
@@ -63,7 +58,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListProjectResponse>
     ) => {
-      addCross(res);
       let projects = collection.find({});
       projects.forEach((project) => {
         const projectStatus = getProjectStatus(project.id);
@@ -88,7 +82,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       >,
       res: Response<CreateProjectResponse>
     ) => {
-      addCross(res);
       if (req.body.project) {
         if (!isNotEmptyString(req.body.project.name)) {
           throw new ServerError(400, "project name can not be empty!");
@@ -122,7 +115,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       >,
       res: Response<UpdateProjectResponse>
     ) => {
-      addCross(res);
       const project = collection.findOne({ id: req.params.projectId });
       if (!project) {
         throw new ServerError(500, "project not exist");
@@ -155,7 +147,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
    * delete project
    */
   router.delete("/:projectId", bodyParser.json(), async (req, res) => {
-    addCross(res);
     const projectId = req.params.projectId;
     const project = collection.findOne({ id: req.params.projectId });
     if (!project) {
@@ -186,7 +177,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       throw new ServerError(500, "project status is " + projectStatus);
     }
 
-    addCross(res);
     const project = collection.findOne({ id: req.params.projectId });
     if (!project) {
       throw new ServerError(500, "project not exist");
@@ -255,7 +245,6 @@ async function getProjectRouter(path: string): Promise<express.Router> {
    * stop the project
    */
   router.post("/stop/:projectId", bodyParser.json(), async (req, res) => {
-    addCross(res);
     const projectId = req.params.projectId;
     const projectStatus = getProjectStatus(projectId);
 

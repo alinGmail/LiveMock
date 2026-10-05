@@ -13,7 +13,7 @@ import {
   UpdatePresetLogFilterReqBody,
   UpdatePresetLogFilterReqQuery,
 } from "livemock-core/struct/params/LogFilterParam";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import { getLogViewCollection } from "../db/dbManager";
 import {
   AddLogFilterResponse,
@@ -42,7 +42,6 @@ export async function getLogFilterRouter(
     >,
     res: Response<AddLogFilterResponse>
   ) {
-    addCross(res);
     let { filter, logViewId, projectId } = req.body;
     if (!projectId) {
       throw new ServerError(400, "project id not exist!");
@@ -68,7 +67,6 @@ export async function getLogFilterRouter(
     >,
     res: Response<UpdateLogFilterResponse>
   ) {
-    addCross(res);
     let { filter, logViewId, projectId } = req.body;
     if (!projectId) {
       throw new ServerError(400, "project id not exist!");
@@ -103,7 +101,6 @@ export async function getLogFilterRouter(
     >,
     res: Response<UpdatePresetLogFilterResponse>
   ) {
-    addCross(res);
     let { filter, logViewId, projectId } = req.body;
     if (filter.type !== FilterType.PRESET_FILTER) {
       throw new ServerError(400, "not preset filter!");
@@ -164,7 +161,6 @@ export async function getLogFilterRouter(
     >,
     res: Response<DeleteLogFilterResponse>
   ) {
-    addCross(res);
     let { logViewId, projectId } = req.query;
     let filterId = req.params.logFilterId;
     if (!projectId) {
@@ -183,10 +179,6 @@ export async function getLogFilterRouter(
   }
 
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
 
   /**
    * update preset filter

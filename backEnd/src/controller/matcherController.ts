@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
   CreateMatcherPathParam,
@@ -18,13 +18,8 @@ import {
 } from "livemock-core/struct/response/MatcherResponse";
 import {getExpectationCollection} from "../db/dbManager";
 
-
 export function getMatcherRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
   /**
    * create matcher
    */
@@ -39,7 +34,6 @@ export function getMatcherRouter(path: string): express.Router {
       >,
       res: Response<CreateMatcherResponse>
     ) => {
-      addCross(res);
       let { expectationId, matcher, projectId } = req.body;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -73,7 +67,6 @@ export function getMatcherRouter(path: string): express.Router {
       >,
       res: Response<DeleteMatcherResponse>
     ) => {
-      addCross(res);
       let { expectationId, projectId } = req.query;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -106,7 +99,6 @@ export function getMatcherRouter(path: string): express.Router {
       >,
       res: Response<UpdateMatcherResponse>
     ) => {
-      addCross(res);
       let { expectationId, projectId, matcherUpdate } = req.body;
       let matcherId = req.params.matcherId;
       if (!projectId) {

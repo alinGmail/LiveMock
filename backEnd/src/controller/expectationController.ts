@@ -4,7 +4,7 @@ import {
   getExpectationDb,
   getGroupCollection,
 } from "../db/dbManager";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import bodyParser from "body-parser";
 import {
   CreateExpectationPathParam,
@@ -42,10 +42,6 @@ import { logViewEventEmitter } from "../common/eventEmitters";
 
 export function getExpectationRouter(path: string): express.Router {
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
   /**
    * create expectation
    */
@@ -61,7 +57,6 @@ export function getExpectationRouter(path: string): express.Router {
       >,
       res: Response<CreateExpectationResponse>
     ) => {
-      addCross(res);
       const projectId = req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -87,7 +82,6 @@ export function getExpectationRouter(path: string): express.Router {
       req: Request<{}, BatchImportResult, BatchImportReqBody>,
       res: Response<BatchImportResult>
     ) => {
-      addCross(res);
       const projectId = req.body && req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -174,7 +168,6 @@ export function getExpectationRouter(path: string): express.Router {
       >,
       res: Response<ListExpectationResponse>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -203,7 +196,6 @@ export function getExpectationRouter(path: string): express.Router {
       >,
       res: Response<DeleteExpectationResponse>
     ) => {
-      addCross(res);
       const expectationId = req.params.expectationId;
       const projectId = req.query.projectId;
 
@@ -236,7 +228,6 @@ export function getExpectationRouter(path: string): express.Router {
       >,
       res: Response<UpdateExpectationResponse>
     ) => {
-      addCross(res);
       const projectId = req.body.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -269,7 +260,6 @@ export function getExpectationRouter(path: string): express.Router {
       >,
       res: Response<GetExpectationResponse>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");

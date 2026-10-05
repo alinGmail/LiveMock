@@ -8,7 +8,7 @@ import {
   getLogViewDb,
 } from "../db/dbManager";
 import express, { Request, Response } from "express";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import {
   DeleteAllRequestLogsPathParam,
   DeleteAllRequestLogsReqBody,
@@ -42,10 +42,6 @@ const PAGE_SIZE = 100;
 
 export async function getLogRouter(path: string): Promise<express.Router> {
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
 
   /**
    * list the log
@@ -61,7 +57,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<Array<LogM>>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -82,7 +77,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
     }
   );
 
-
   /**
    * list the log view
    */
@@ -97,7 +91,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListLogViewResponse>
     ) => {
-      addCross(res);
       const projectId = req.query.projectId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -108,7 +101,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       res.json(logViews);
     }
   );
-
 
   /**
    * get log item
@@ -124,7 +116,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
           >,
           res: Response<GetLogDetailResponse>
       ) => {
-        addCross(res);
         const logId = parseInt(req.params.logId);
         if (!logId) {
           throw new ServerError(400, "log id not exist!");
@@ -156,7 +147,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListLogViewLogsResponse>
     ) => {
-      addCross(res);
       let { maxLogId, projectId } = req.query;
       const lovViewId = req.params.logViewId;
       if (!projectId) {
@@ -194,7 +184,6 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<DeleteAllRequestLogsResponse>
     ) => {
-      addCross(res);
       let { projectId } = req.query;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");

@@ -15,19 +15,8 @@ const { Server } = require("socket.io");
 const server = express();
 applyTrustProxy(server);
 const http = require("http").Server(server);
-const defaultCorsOrigins = ["http://localhost:5173"];
-const parsedCorsOrigins = (process.env.CORS_ORIGIN || "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-const corsOrigins = parsedCorsOrigins.length
-  ? parsedCorsOrigins
-  : defaultCorsOrigins;
 const io = new Server(http, {
   path: "/api/socket.io",
-  cors: {
-    origin: corsOrigins,
-  },
 });
 export const systemVersion = 801;
 

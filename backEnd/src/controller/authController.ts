@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import { requireAuth, AuthRequest } from "./authMiddleware";
 import {
   clearSessionCookie,
@@ -27,11 +27,6 @@ export function getAuthRouter(
 ): express.Router {
   const router = toAsyncRouter(express.Router());
   const auth = requireAuth(dbPath);
-
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
 
   router.use(bodyParser.json());
 

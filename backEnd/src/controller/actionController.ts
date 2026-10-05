@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { addCross, ServerError, toAsyncRouter } from "./common";
+import { ServerError, toAsyncRouter } from "./common";
 import { Collection } from "lokijs";
 import {getExpectationCollection, getExpectationDb} from "../db/dbManager";
 import bodyParser from "body-parser";
@@ -22,14 +22,8 @@ import {
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { ActionM } from "livemock-core/struct/action";
 
-
-
 export async function getActionRouter(path: string): Promise<express.Router> {
   let router = toAsyncRouter(express());
-  router.options("*", (req, res) => {
-    addCross(res);
-    res.end();
-  });
 
   /**
    * create action
@@ -46,7 +40,6 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       >,
       res: Response<CreateActionResponse>
     ) => {
-      addCross(res);
       let { expectationId, action, projectId } = req.body;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -77,7 +70,6 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       >,
       res: Response<UpdateActionResponse>
     ) => {
-      addCross(res);
       let { expectationId, actionUpdate, projectId } = req.body;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -124,7 +116,6 @@ export async function getActionRouter(path: string): Promise<express.Router> {
       >,
       res: Response<DeleteActionResponse>
     ) => {
-      addCross(res);
       let { expectationId, projectId } = req.query;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
