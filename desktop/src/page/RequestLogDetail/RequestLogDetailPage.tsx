@@ -6,10 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getRequestLogDetail } from "../../server/logServer";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import RequestQueryCard from "front-end/src/page/RequestLogDetail/RequestQueryCard";
+import ResponseBodyCard from "./ResponseBodyCard";
+import ResponseHeadersCard from "./ResponseHeadersCard";
 
 
 function isEmptyObject(obj: any): boolean {
-  if(!obj){
+  if (!obj) {
     return true;
   }
   return Object.keys(obj).length === 0;
@@ -77,22 +79,22 @@ const RequestLogDetailPage = () => {
             headers={getLogDetailQuery.data?.logItem.req?.headers ?? {}}
           />
           {!isEmptyObject(getLogDetailQuery.data?.logItem.req?.query) && (
-              <>
-                <div className={"blank20"}></div>
-                <RequestQueryCard
-                    query={getLogDetailQuery.data?.logItem.req?.query}
-                />
-              </>
+            <>
+              <div className={"blank20"}></div>
+              <RequestQueryCard
+                query={getLogDetailQuery.data?.logItem.req?.query}
+              />
+            </>
           )}
           <div className={"blank20"}></div>
           <RequestBodyCard body={getLogDetailQuery.data?.logItem.req?.body} />
         </div>
         <div className={mStyle.response_col}>
-          <RequestHeadersCard
+          <ResponseHeadersCard
             headers={getLogDetailQuery.data?.logItem.res?.headers ?? {}}
           />
           <div className={"blank20"}></div>
-          <RequestBodyCard body={getLogDetailQuery.data?.logItem.res?.body} />
+          <ResponseBodyCard body={getLogDetailQuery.data?.logItem.res?.body} />
         </div>
       </div>
     </div>

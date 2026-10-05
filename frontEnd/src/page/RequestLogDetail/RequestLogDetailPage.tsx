@@ -1,16 +1,17 @@
 import mStyle from "./RequestLogDetailPage.module.scss";
 import RequestHeadersCard from "./RequestHeadersCard";
 import RequestBodyCard from "./RequestBodyCard";
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRequestLogDetail } from "../../server/logServer";
-import { useAppSelector } from "../../store";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import RequestQueryCard from "./RequestQueryCard";
+import ResponseHeadersCard from "./ResponseHeadersCard";
+import ResponseBodyCard from "./ResponseBodyCard";
 
 
 function isEmptyObject(obj: any): boolean {
-  if(!obj){
+  if (!obj) {
     return true;
   }
   return Object.keys(obj).length === 0;
@@ -92,11 +93,11 @@ const RequestLogDetailPage = () => {
           <RequestBodyCard body={getLogDetailQuery.data?.logItem.req?.body} />
         </div>
         <div className={mStyle.response_col}>
-          <RequestHeadersCard
+          <ResponseHeadersCard
             headers={getLogDetailQuery.data?.logItem.res?.headers ?? {}}
           />
           <div className={"blank20"}></div>
-          <RequestBodyCard body={getLogDetailQuery.data?.logItem.res?.body} />
+          <ResponseBodyCard body={getLogDetailQuery.data?.logItem.res?.body} />
         </div>
       </div>
     </div>
