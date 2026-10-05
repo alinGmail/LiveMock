@@ -40,7 +40,7 @@
     "http-proxy": "^1.18.1",
     "livemock-core": "workspace:*",
     "lodash": "^4.18.1",
-    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#e23e26b5eea4f63a0c9101bfbcc832c40feac707",
+    "lokijs": "npm:@alin_gmail/lokijs@^1.5.13",
     "micromatch": "^4.0.5",
     "mockjs": "^1.1.0",
     "node-mocks-http": "^1.18.1",
@@ -50,10 +50,5 @@
     "ts-node": "^10.7.0",
     "tsconfig-paths": "^4.2.0",
     "type-is": "^1.6.18"
-  },
-  "dependenciesMeta": {
-    "lokijs": {
-      "built": false
-    }
   }
 }
