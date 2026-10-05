@@ -5,6 +5,7 @@ import { LogM } from "./log";
 export enum ActionType {
   PROXY = "PROXY",
   CUSTOM_RESPONSE = "CUSTOM_RESPONSE",
+  STATIC_DIRECTORY = "STATIC_DIRECTORY",
 }
 
 export enum ResponseType {
@@ -58,7 +59,17 @@ export interface CustomResponseActionM {
   responseContent: ResponseContentM;
 }
 
-export type ActionM = ProxyActionM | CustomResponseActionM;
+export interface StaticDirectoryActionM {
+  id: string;
+  type: ActionType.STATIC_DIRECTORY;
+  folderPath: string;
+  urlPrefix: string;
+}
+
+export type ActionM =
+  | ProxyActionM
+  | CustomResponseActionM
+  | StaticDirectoryActionM;
 
 export enum PathRewriteType {
   ADD_PREFIX = "ADD_PREFIX",
@@ -119,6 +130,15 @@ export function createCustomResponseAction(): CustomResponseActionM {
   };
 }
 
+export function createStaticDirectoryAction(): StaticDirectoryActionM {
+  return {
+    id: uuId(),
+    type: ActionType.STATIC_DIRECTORY,
+    folderPath: "",
+    urlPrefix: "",
+  };
+}
+
 export function getNewAction(id: string, type: ActionType) {
   let newAction: ActionM;
   switch (type) {
@@ -128,6 +148,10 @@ export function getNewAction(id: string, type: ActionType) {
       return newAction;
     case ActionType.CUSTOM_RESPONSE:
       newAction = createCustomResponseAction();
+      newAction.id = id;
+      return newAction;
+    case ActionType.STATIC_DIRECTORY:
+      newAction = createStaticDirectoryAction();
       newAction.id = id;
       return newAction;
   }

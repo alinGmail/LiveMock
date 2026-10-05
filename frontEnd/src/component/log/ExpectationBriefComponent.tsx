@@ -17,6 +17,9 @@ const ExpectationBriefComponent: React.FC<{
     case ActionType.PROXY:
       briefDescribe = `proxy to ${action.host}`;
       break;
+    case ActionType.STATIC_DIRECTORY:
+      briefDescribe = `static ${action.urlPrefix} -> ${action.folderPath}`;
+      break;
   }
 
   return (

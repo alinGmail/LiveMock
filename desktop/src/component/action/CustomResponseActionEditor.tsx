@@ -40,6 +40,10 @@ export const CustomResponseActionEditor: React.FunctionComponent<{
                 value: ActionType.CUSTOM_RESPONSE,
                 label: ActionType.CUSTOM_RESPONSE,
               },
+              {
+                value: ActionType.STATIC_DIRECTORY,
+                label: ActionType.STATIC_DIRECTORY,
+              },
             ]}
           />
         </div>
