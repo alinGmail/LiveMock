@@ -6,6 +6,7 @@
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "start": "ts-node ./src/index.ts",
+    "build": "node scripts/build.mjs",
     "reset-admin": "ts-node ./src/script/resetAdmin.ts",
     "testAll": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=test/"
   },
@@ -22,6 +23,7 @@
     "@types/supertest": "^7.2.1",
     "@types/type-is": "^1.6.3",
     "cross-env": "^10.1.0",
+    "esbuild": "^0.28.2",
     "jest": "^30.5.2",
     "mockserver-client": "^8.0.0",
     "mockserver-node": "^8.0.0",

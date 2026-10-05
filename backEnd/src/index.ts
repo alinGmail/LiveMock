@@ -1,4 +1,6 @@
 import express from "express";
+import path from "path";
+import fs from "fs";
 import { getApiRouter } from "./apiRouter";
 import { addLogListener } from "./controller/logController";
 import { getSystemCollection } from "./db/dbManager";
@@ -50,7 +52,14 @@ addWsEventListeners();
 
   const apiRouter = await getApiRouter(dbPath);
   server.use("/api", apiRouter);
-  server.use("/dashboard", express.static("../frontEnd/dist"));
+  // Served next to the bundle in an npm install (`dist/dashboard`), or from the
+  // sibling frontEnd workspace during ts-node development.
+  const dashboardDir =
+    process.env.LIVEMOCK_STATIC_DIR ||
+    (fs.existsSync(path.join(__dirname, "dashboard"))
+      ? path.join(__dirname, "dashboard")
+      : path.resolve(process.cwd(), "../frontEnd/dist"));
+  server.use("/dashboard", express.static(dashboardDir));
   server.all("/", (req, res) => {
     res.redirect("/dashboard");
   });
