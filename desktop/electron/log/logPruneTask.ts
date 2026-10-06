@@ -1,5 +1,5 @@
 import { getProjectCollection } from "../db/dbManager";
-import { ProjectStatus } from "livemock-core/struct/project";
+import { ProjectM, ProjectStatus } from "livemock-core/struct/project";
 import { getProjectStatus } from "../server/projectStatusManage";
 import { pruneProjectLogs } from "./logUtils";
 
@@ -7,14 +7,14 @@ export const LOG_PRUNE_INTERVAL_MS = 60 * 1000;
 
 let pruneRunning = false;
 
-/**
- * Trim every running project's request logs down to its configured maximum.
- */
-export async function pruneRunningProjects(path: string): Promise<void> {
+async function pruneProjects(
+  path: string,
+  shouldPrune: (project: ProjectM) => boolean
+): Promise<void> {
   const projectCollection = await getProjectCollection(path);
   const projects = projectCollection.find({});
   for (const project of projects) {
-    if (getProjectStatus(project.id) !== ProjectStatus.STARTED) {
+    if (!shouldPrune(project)) {
       continue;
     }
     await pruneProjectLogs(project, path);
@@ -22,15 +22,21 @@ export async function pruneRunningProjects(path: string): Promise<void> {
 }
 
 /**
+ * Trim every running project's request logs down to its configured maximum.
+ */
+export async function pruneRunningProjects(path: string): Promise<void> {
+  return pruneProjects(
+    path,
+    (project) => getProjectStatus(project.id) === ProjectStatus.STARTED
+  );
+}
+
+/**
  * Trim every project's request logs, regardless of status. Used once at
  * startup to clear any overflow that predates this process.
  */
 export async function pruneAllProjects(path: string): Promise<void> {
-  const projectCollection = await getProjectCollection(path);
-  const projects = projectCollection.find({});
-  for (const project of projects) {
-    await pruneProjectLogs(project, path);
-  }
+  return pruneProjects(path, () => true);
 }
 
 /**
@@ -38,7 +44,7 @@ export async function pruneAllProjects(path: string): Promise<void> {
  * process, it does not keep the process alive, and a tick is skipped if the
  * previous one has not finished.
  */
-export function startLogPruneTask(path: string): NodeJS.Timeout {
+export function startLogPruneTask(path: string): void {
   const timer = setInterval(async () => {
     if (pruneRunning) {
       return;
@@ -52,6 +58,7 @@ export function startLogPruneTask(path: string): NodeJS.Timeout {
       pruneRunning = false;
     }
   }, LOG_PRUNE_INTERVAL_MS);
-  timer.unref();
-  return timer;
+  if (typeof timer.unref === "function") {
+    timer.unref();
+  }
 }
