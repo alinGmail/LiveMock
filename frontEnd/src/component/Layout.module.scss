@@ -6,26 +6,41 @@
     min-height: 70px;
   }
   .mainRow {
-    display: flex;
-    background: linear-gradient(to right, rgb(247, 246, 243) 0, rgb(247, 246, 243) 200px, white 200px) repeat-y;
+    position: relative;
+    min-height: calc(100vh - 78px);
+    background: white;
   }
 
   .leftCol {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     width: 200px;
     background: rgb(247, 246, 243);
-    height: calc(100vh - 78px);
-    flex-shrink: 0;
+    overflow: hidden;
+    z-index: 10;
+    transition: width ease-in 200ms;
+  }
+
+  .leftColCollapsed {
+    width: 64px;
   }
 
   .rightCol {
-    flex: 1;
+    margin-left: 200px;
+    min-height: calc(100vh - 78px);
+  }
+
+  .rightColCollapsed {
+    margin-left: 64px;
   }
 }
 
 :global(.dark_mode){
   .layout{
     .mainRow{
-      background: linear-gradient(to right,#1f1f1f 0,#1f1f1f 200px,#262626 2000px) repeat-y;
+      background: #262626;
     }
     .headRow{
       background: #262626;

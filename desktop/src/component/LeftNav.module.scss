@@ -1,6 +1,32 @@
 .leftNav {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
   margin-top: 20px;
-
+  .collapseBtnRow {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+  .collapseBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #595959;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background ease-in 200ms;
+  }
+  .collapseBtn:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
   .linkRow {
     margin: 3px 10px;
     border-radius: 8px;
@@ -11,6 +37,8 @@
     color: #595959;
     transition: all ease-in 200ms;
     text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
   }
   .linkRow:hover {
     background: rgba(0, 0, 0, 0.08);
@@ -22,10 +50,37 @@
   .linkActivate:hover {
     background: rgba(0, 0, 0, 0.18);
   }
+
+  .linkIcon {
+    margin-right: 8px;
+  }
+
+  .linkText {
+    transition: opacity ease-in 200ms;
+  }
 }
+
+.leftNavCollapsed {
+  .collapseBtnRow {
+    padding: 0 16px;
+  }
+  .linkRow {
+    padding-left: 15px;
+  }
+  .linkIcon {
+    margin-right: 0;
+  }
+  .linkText {
+    opacity: 0;
+  }
+}
+
 :global(.dark_mode){
   .leftNav{
     .linkRow{
+      color: rgb(191, 191, 191);
+    }
+    .collapseBtn{
       color: rgb(191, 191, 191);
     }
   }
