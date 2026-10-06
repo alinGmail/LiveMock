@@ -10,6 +10,7 @@ import { ProxyActionM } from "livemock-core/struct/action";
 import * as console from "console";
 import { websocketEventEmitter } from "../common/eventEmitters";
 import { WebsocketEvent } from "livemock-core/struct/events/systemEvent";
+import { updateLogIfPresent } from "../log/logUtils";
 
 export function handleSubProtocol(secProtocol: string | null | undefined) {
   if (secProtocol) {
@@ -59,7 +60,7 @@ export function handleWebsocketProxy(
   if (logM) {
     logM.websocketInfo = createWebsocketInfo();
     logM.websocketInfo.isWebsocket = true;
-    logCollection.update(logM);
+    updateLogIfPresent(logCollection, logM);
   }
 
   wss.on("connection", (ws) => {
@@ -72,7 +73,7 @@ export function handleWebsocketProxy(
     );
     if (logM && logM.websocketInfo) {
       logM.websocketInfo.status = WebsocketStatus.OPEN;
-      logCollection.update(logM);
+      updateLogIfPresent(logCollection, logM);
     }
     ws.on("message", (message, isBinary) => {
       const websocketMessageItem: WebsocketMessageM = {
@@ -84,7 +85,7 @@ export function handleWebsocketProxy(
       };
       if (logM) {
         logM.websocketInfo?.messages.push(websocketMessageItem);
-        logCollection.update(logM);
+        updateLogIfPresent(logCollection, logM);
       }
       if (isBinary) {
         wsc.send(message);
@@ -124,7 +125,7 @@ export function handleWebsocketProxy(
     };
     if (logM) {
       logM.websocketInfo?.messages.push(websocketMessageItem);
-      logCollection.update(logM);
+      updateLogIfPresent(logCollection, logM);
     }
 
     wss.clients.forEach((client) => {
@@ -141,7 +142,7 @@ export function handleWebsocketProxy(
   wsc.on("close", () => {
     if (logM && logM.websocketInfo) {
       logM.websocketInfo.status = WebsocketStatus.CLOSED;
-      logCollection.update(logM);
+      updateLogIfPresent(logCollection, logM);
     }
 
     wss.clients.forEach((client) => {

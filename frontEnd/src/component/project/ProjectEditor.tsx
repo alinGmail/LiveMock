@@ -1,5 +1,10 @@
 import { EditorType } from "../../struct/common";
-import { ProjectM } from "livemock-core/struct/project";
+import {
+  DEFAULT_MAX_REQUEST_LOG_NUMBER,
+  getMaxRequestLogNumber,
+  MIN_MAX_REQUEST_LOG_NUMBER,
+  ProjectM,
+} from "livemock-core/struct/project";
 import { FC } from "react";
 import { Button, Col, Input, InputNumber, Row } from "antd";
 import mStyle from "./ProjectEditor.module.scss";
@@ -31,6 +36,34 @@ const ProjectEditor: FC<{
             <InputNumber
               {...registerNumber(projectM, "port", updaterProjectM)}
               style={{ width: "100%" }}
+              placeholder={""}
+            />
+          </div>
+        </Col>
+      </Row>
+      <Row gutter={16}>
+        <Col span={24}>
+          <div className={mStyle.inpLabel}>max request log:</div>
+          <div>
+            <InputNumber
+              style={{ width: "100%" }}
+              min={MIN_MAX_REQUEST_LOG_NUMBER}
+              step={1}
+              precision={0}
+              value={projectM.maxRequestLogNumber ?? DEFAULT_MAX_REQUEST_LOG_NUMBER}
+              onChange={(value) => {
+                updaterProjectM((draft) => {
+                  draft.maxRequestLogNumber =
+                    typeof value === "number" && isFinite(value)
+                      ? value
+                      : DEFAULT_MAX_REQUEST_LOG_NUMBER;
+                });
+              }}
+              onBlur={() => {
+                updaterProjectM((draft) => {
+                  draft.maxRequestLogNumber = getMaxRequestLogNumber(draft);
+                });
+              }}
               placeholder={""}
             />
           </div>

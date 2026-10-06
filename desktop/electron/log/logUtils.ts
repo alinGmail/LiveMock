@@ -3,6 +3,7 @@ import {
   getLogCollection,
   getLogViewCollection,
   getNewLogNumber,
+  getProjectCollection,
 } from "../db/dbManager";
 import { Collection } from "lokijs";
 import {
@@ -13,7 +14,12 @@ import {
   LogFilterCondition,
   LogFilterM,
   LogM,
+  WebsocketStatus,
 } from "livemock-core/struct/log";
+import {
+  getMaxRequestLogNumber,
+  ProjectM,
+} from "livemock-core/struct/project";
 import { once } from "../util/commonUtils";
 import _ from "lodash";
 import { logViewEventEmitter } from "../common/eventEmitters";
@@ -67,7 +73,80 @@ export function insertResLog(
   responseLogM.status = res.statusCode;
   responseLogM.statusMessage = res.statusMessage;
   logM.res = responseLogM;
-  logCollection.update(logM);
+  updateLogIfPresent(logCollection, logM);
+}
+
+/**
+ * Update a log unless it has already been removed (for example by a concurrent
+ * trim). Loki throws when updating a document that is no longer in the
+ * collection, so a racing response or websocket update must not surface as an
+ * error.
+ */
+export function updateLogIfPresent(
+  logCollection: Collection<LogM>,
+  logM: LogM
+): void {
+  try {
+    logCollection.update(logM);
+  } catch (err) {
+    // the log was removed after it was created (e.g. by request log trimming)
+  }
+}
+
+/**
+ * Remove the oldest request logs so at most `max` remain, keeping the newest.
+ * Logs whose websocket is still open are never removed, since they may still be
+ * updated. Returns the ids of the removed logs. The caller supplies the
+ * effective max; this function applies no default or minimum of its own.
+ */
+export function pruneLogCollection(
+  logCollection: Collection<LogM>,
+  max: number
+): number[] {
+  const logs = logCollection.find({});
+  const overflow = logs.length - max;
+  if (overflow <= 0) {
+    return [];
+  }
+  const removableLogs = logs
+    .filter((log) => log.websocketInfo?.status !== WebsocketStatus.OPEN)
+    .sort((a, b) => a.id - b.id)
+    .slice(0, overflow);
+  if (removableLogs.length === 0) {
+    return [];
+  }
+  const removedIds = removableLogs.map((log) => log.id);
+  logCollection.remove(removableLogs);
+  return removedIds;
+}
+
+/**
+ * Trim a project's request logs down to its effective maximum, then drop the
+ * removed ids from the project's unclosed websocket bookkeeping.
+ */
+export async function pruneProjectLogs(
+  project: ProjectM,
+  path: string
+): Promise<void> {
+  const logCollection = await getLogCollection(project.id, path);
+  const removedIds = pruneLogCollection(
+    logCollection,
+    getMaxRequestLogNumber(project)
+  );
+  if (removedIds.length === 0) {
+    return;
+  }
+  if (project.unclosedWebsocketRequestLogIds?.length) {
+    const removedIdSet = new Set(removedIds);
+    const remainingIds = project.unclosedWebsocketRequestLogIds.filter(
+      (id) => !removedIdSet.has(id)
+    );
+    if (remainingIds.length !== project.unclosedWebsocketRequestLogIds.length) {
+      project.unclosedWebsocketRequestLogIds = remainingIds;
+      const projectCollection = await getProjectCollection(path);
+      projectCollection.update(project);
+    }
+  }
 }
 
 export function getResponseHeaderMap(res: Response): {
@@ -222,7 +301,7 @@ export async function getLogDynamicView(
       logViewEventEmitter.emit("update", { log, logViewId: logView.id });
     });
     dynamicView.on("delete", (log: LogM) => {
-      logViewEventEmitter.emit("delete", { log, logViewId: logView.id });
+      logViewEventEmitter.emit("delete", { id: log.id, logViewId: logView.id });
     });
   });
 

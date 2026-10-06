@@ -138,9 +138,9 @@ export function logViewEventHandler(webContent: WebContents) {
     webContent.send(LogViewEvents.OnLogUpdate, { log, logViewId });
   });
 
-  logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
-    const { log, logViewId } = arg;
-    webContent.send(LogViewEvents.OnLogDelete, { log, logViewId });
+  logViewEventEmitter.on("delete", (arg: { id: number; logViewId: string }) => {
+    const { id, logViewId } = arg;
+    webContent.send(LogViewEvents.OnLogDelete, { id, logViewId });
   });
 
   logEventEmitter.on(
