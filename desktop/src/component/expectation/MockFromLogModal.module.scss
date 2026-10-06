@@ -1,0 +1,144 @@
+.body {
+  max-height: 64vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.fieldLine {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  text-align: right;
+  opacity: 0.72;
+}
+
+.panel {
+  border: 1px solid rgba(130, 130, 130, 0.28);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(130, 130, 130, 0.08);
+  border-bottom: 1px solid rgba(130, 130, 130, 0.2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.panelHeadHint {
+  font-weight: 400;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.panelBody {
+  padding: 10px 12px;
+}
+
+.subHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin: 12px 0 3px;
+}
+
+.subCount {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) 136px minmax(200px, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(130, 130, 130, 0.1);
+  }
+}
+
+/* Rows without a condition column (response headers) drop the empty middle
+   column so the value sits next to the field name. */
+.rowNoCondition {
+  grid-template-columns: minmax(150px, 220px) minmax(200px, 1fr);
+}
+
+.rowField {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.rowLabel {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.rowCondition {
+  width: 100%;
+}
+
+.rowValue {
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.empty {
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.55;
+  padding: 4px;
+}
+
+.editorWrap {
+  border: 1px solid rgba(130, 130, 130, 0.32);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.editorError {
+  border-color: #ff4d4f;
+}
+
+.errorText {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(130, 130, 130, 0.2);
+}

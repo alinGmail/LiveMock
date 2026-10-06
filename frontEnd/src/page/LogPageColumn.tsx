@@ -1,4 +1,4 @@
-import { Button, Dropdown, Tag } from "antd";
+import { Button, Dropdown, Tag, Tooltip } from "antd";
 import {
   EllipsisOutlined,
   PlusOutlined,
@@ -6,6 +6,7 @@ import {
   FilterOutlined,
   MessageOutlined,
   FileSearchOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 import { createSimpleFilter, FilterType, LogM } from "livemock-core/struct/log";
 import { Dispatch, useState } from "react";
@@ -47,14 +48,25 @@ export function getConfigColumn(
   dispatch: Dispatch<AnyAction>,
   navigate: NavigateFunction,
   projectId:string,
+  onMockClick: (log: LogM) => void,
 ) {
   return [
     {
       dataIndex: "config",
       key: "config",
-      width: "100px",
+      width: "120px",
       render: (text: string, record: LogM) => (
         <div>
+          <Tooltip title={"Mock this request"}>
+            <Button
+              type={"text"}
+              icon={<ThunderboltOutlined />}
+              shape={"circle"}
+              onClick={() => {
+                onMockClick(record);
+              }}
+            />
+          </Tooltip>
           <Button
             type={"text"}
             icon={<FileSearchOutlined />}

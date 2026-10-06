@@ -1,4 +1,4 @@
-import { Button, Dropdown, Tag } from "antd";
+import { Button, Dropdown, Tag, Tooltip } from "antd";
 import {
   EllipsisOutlined,
   PlusOutlined,
@@ -6,6 +6,7 @@ import {
   FilterOutlined,
   MessageOutlined,
   FileSearchOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 import { createSimpleFilter, FilterType, LogM } from "livemock-core/struct/log";
 import { Dispatch, useState } from "react";
@@ -38,7 +39,7 @@ import TextColumn from "../component/table/TextColumn";
 import { addLogFilterReq } from "../server/logFilterServer";
 import { toastPromise } from "../component/common";
 import ExpectationBriefComponent from "../component/log/ExpectationBriefComponent";
-import { ExpectationM } from "livemock-core/build/struct/expectation";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import { NavigateFunction } from "react-router-dom";
 
 const ReactJson = interopDefault(ReactJsonImport);
@@ -46,16 +47,27 @@ const ReactJson = interopDefault(ReactJsonImport);
 export function getConfigColumn(
   dispatch: Dispatch<AnyAction>,
   navigate: NavigateFunction,
-  projectId: string
+  projectId: string,
+  onMockClick: (log: LogM) => void
 ) {
   return [
     {
       dataIndex: "config",
       key: "config",
-      width: "100px",
+      width: "120px",
       render: (text: string, record: LogM) => {
         return (
           <div>
+            <Tooltip title={"Mock this request"}>
+              <Button
+                type="text"
+                icon={<ThunderboltOutlined />}
+                shape={"circle"}
+                onClick={() => {
+                  onMockClick(record);
+                }}
+              />
+            </Tooltip>
             <Button
               type="text"
               icon={<FileSearchOutlined />}

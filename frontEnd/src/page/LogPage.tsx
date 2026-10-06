@@ -52,6 +52,7 @@ import ChatMainComponent, {
 import { LinkOutlined, DisconnectOutlined } from "@ant-design/icons";
 import { red, green } from "@ant-design/colors";
 import {useNavigate} from "react-router-dom";
+import { MockFromLogModal } from "../component/expectation/MockFromLogModal";
 
 function onLogsInsert(
   insertLog: LogM,
@@ -135,6 +136,7 @@ const LogPage: React.FC = () => {
   const currentProject = projectState.projectList[projectState.curProjectIndex];
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
+  const [mockLog, setMockLog] = useState<LogM | null>(null);
   const navigate = useNavigate();
 
   const expectationState = useAppSelector((state) => state.expectation);
@@ -219,7 +221,7 @@ const LogPage: React.FC = () => {
     )
       .filter((item, index) => defaultColumnVisible[index])
       .concat(customColumns)
-      .concat(getConfigColumn(dispatch,navigate,currentProject.id));
+      .concat(getConfigColumn(dispatch, navigate, currentProject.id, setMockLog));
     updateLogColumn(newLogColumn);
   }, [
     tableColumns,
@@ -361,6 +363,17 @@ const LogPage: React.FC = () => {
         tableColumnItem={currentEditColumn || placeHolderColumn}
       />
       <ColumnConfig show={columnConfigShow} />
+      <MockFromLogModal
+        projectId={currentProject.id}
+        log={mockLog}
+        open={!!mockLog}
+        onClose={() => {
+          setMockLog(null);
+        }}
+        onSaved={() => {
+          getExpectationListQuery.refetch();
+        }}
+      />
     </div>
   );
 };
