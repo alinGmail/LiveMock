@@ -81,8 +81,7 @@ function onLogsUpdate(
   updateLog: LogM,
   logViewId: string,
   currentLogViewId: string | undefined,
-  setLogs: Updater<Array<LogM>>,
-  isDelete: boolean
+  setLogs: Updater<Array<LogM>>
 ) {
   if (logViewId !== currentLogViewId) {
     return;
@@ -100,10 +99,23 @@ function onLogsUpdate(
     if (updateLogIndex === -1) {
       return;
     }
-    if (isDelete) {
-      logs.splice(updateLogIndex, 1);
-    } else {
-      logs[updateLogIndex] = updateLog;
+    logs[updateLogIndex] = updateLog;
+  });
+}
+
+function onLogsDelete(
+  logId: number,
+  logViewId: string,
+  currentLogViewId: string | undefined,
+  setLogs: Updater<Array<LogM>>
+) {
+  if (logViewId !== currentLogViewId) {
+    return;
+  }
+  setLogs((logs) => {
+    const deleteLogIndex = logs.findIndex((log) => log.id === logId);
+    if (deleteLogIndex !== -1) {
+      logs.splice(deleteLogIndex, 1);
     }
   });
 }
@@ -252,13 +264,13 @@ const LogPage: React.FC = () => {
     socket.on(
       "update",
       ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, false);
+        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs);
       }
     );
     socket.on(
       "delete",
-      ({ log, logViewId }: { log: LogM; logViewId: string }) => {
-        onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs, true);
+      ({ id, logViewId }: { id: number; logViewId: string }) => {
+        onLogsDelete(id, logViewId, logViewIdRef.current, setLogs);
       }
     );
 

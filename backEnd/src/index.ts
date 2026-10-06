@@ -11,6 +11,7 @@ import { getConfig } from "./config/config";
 import { applyTrustProxy } from "./auth/trustProxy";
 import { createSocketAuthMiddleware } from "./auth/socketAuth";
 import { sweepExpiredSessions } from "./auth/authStore";
+import { pruneAllProjects, startLogPruneTask } from "./log/logPruneTask";
 
 const { Server } = require("socket.io");
 
@@ -40,6 +41,17 @@ sysEventEmitter.on(SystemEvent.START, async () => {
   } else {
     systemCollection.insertOne({ version: systemVersion });
   }
+});
+
+// trim request logs over each project's configured maximum, once at boot and
+// then on a timer
+sysEventEmitter.on(SystemEvent.START, async () => {
+  try {
+    await pruneAllProjects(dbPath);
+  } catch (err) {
+    console.error(err);
+  }
+  startLogPruneTask(dbPath);
 });
 
 addWsEventListeners();

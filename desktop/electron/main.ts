@@ -21,6 +21,7 @@ import log from "electron-log/main";
 import { sysEventEmitter } from "./common/eventEmitters";
 import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 import { addWsEventListeners } from "./common/eventListener";
+import { pruneAllProjects, startLogPruneTask } from "./log/logPruneTask";
 
 log.initialize();
 log.errorHandler.startCatching();
@@ -52,6 +53,18 @@ sysEventEmitter.on(SystemEvent.START, async () => {
   } else {
     systemCollection.insertOne({ version: systemVersion });
   }
+});
+
+// trim request logs over each project's configured maximum, once at boot and
+// then on a timer
+sysEventEmitter.on(SystemEvent.START, async () => {
+  const userDataPath = app.getPath("userData");
+  try {
+    await pruneAllProjects(userDataPath);
+  } catch (err) {
+    console.error(err);
+  }
+  startLogPruneTask(userDataPath);
 });
 
 addWsEventListeners(app.getPath("userData"));

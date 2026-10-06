@@ -244,9 +244,9 @@ export async function addLogListener(io: Server, path: string) {
     io.to(`logView:${logViewId}`).emit("update", { log, logViewId });
   });
 
-  logViewEventEmitter.on("delete", (arg: { log: LogM; logViewId: string }) => {
-    let { log, logViewId } = arg;
-    io.to(`logView:${logViewId}`).emit("delete", { log, logViewId });
+  logViewEventEmitter.on("delete", (arg: { id: number; logViewId: string }) => {
+    let { id, logViewId } = arg;
+    io.to(`logView:${logViewId}`).emit("delete", { id, logViewId });
   });
 
   logViewEventEmitter.on(
