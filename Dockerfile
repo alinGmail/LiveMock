@@ -1,51 +1,44 @@
-# Build stage
-FROM node:20-alpine as builder
+# ---------- build stage ----------
+FROM node:20-alpine AS builder
 
 WORKDIR /app
-
 RUN apk add --no-cache git
-
-# Copy source code
-COPY . .
-
 RUN corepack enable
 
+# Source (see .dockerignore — node_modules / dist / build are excluded)
+COPY . .
 
-# Install dependencies
 RUN yarn install
 
-# Build application
-RUN yarn web-build
+# Build core types and the UI, then bundle the server with esbuild
+# (core is inlined; frontEnd/dist is copied to backEnd/dist/dashboard)
+RUN yarn workspace livemock-core build \
+ && yarn workspace front-end build \
+ && yarn workspace livemock build
 
-# Production stage
+# ---------- production stage ----------
 FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production \
+    LIVEMOCK_PORT=9002 \
+    LIVEMOCK_DB_PATH=/app/data/db
 
-RUN apk add --no-cache git
+# Bundled server + built UI
+COPY --from=builder /app/backEnd/dist ./dist
+COPY --from=builder /app/backEnd/package.json ./
 
-# Create data directory
-RUN mkdir -p /app/data
+# Runtime dependencies only. devDependencies must be removed first: npm rejects
+# the Yarn-only "workspace:*" protocol even when --omit=dev is used.
+RUN npm pkg delete devDependencies scripts \
+ && npm install --omit=dev --no-audit --no-fund \
+ && mkdir -p /app/data \
+ && chown -R node:node /app
 
-# Copy necessary files
-COPY --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
-COPY --from=builder /app/backEnd ./backEnd
-COPY --from=builder /app/frontEnd/dist ./frontEnd/dist
-COPY --from=builder /app/core ./core
-
-RUN corepack enable
-# Install production dependencies
-RUN yarn workspace back-end install
-
-# Set data directory permissions
-RUN chown -R node:node /app/data
-
-# Switch to non-root user
 USER node
 
-# Default port (override at runtime with LIVEMOCK_PORT)
-EXPOSE 9002
+EXPOSE 9002 8088
+VOLUME ["/app/data"]
 
-# Start application
-CMD ["yarn", "web-start"]
+CMD ["node", "dist/index.js"]

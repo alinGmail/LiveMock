@@ -1,7 +1,7 @@
 {
-  "name": "livemock",
+  "name": "livemock-desktop",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "commonjs",
   "scripts": {
     "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev electron dist-electron/main.js\" \"vite\"",
@@ -27,7 +27,7 @@
     "http-proxy": "^1.18.1",
     "livemock-core": "workspace:*",
     "lodash": "^4.18.1",
-    "lokijs": "git+https://github.com/alinGmail/LokiJS.git#e23e26b5eea4f63a0c9101bfbcc832c40feac707",
+    "lokijs": "npm:@alin_gmail/lokijs@^1.5.13",
     "micromatch": "^4.0.5",
     "mockjs": "^1.1.0",
     "modern-css-reset": "^1.4.0",
@@ -73,10 +73,5 @@
     "vite-plugin-electron-renderer": "^1.0.0",
     "vite-tsconfig-paths": "^6.1.1"
   },
-  "main": "dist-electron/main.js",
-  "dependenciesMeta": {
-    "lokijs": {
-      "built": false
-    }
-  }
+  "main": "dist-electron/main.js"
 }
