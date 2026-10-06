@@ -328,6 +328,7 @@ const LogPage: React.FC = () => {
         dataSource={logs}
         size={"small"}
         tableLayout={"fixed"}
+        scroll={{ x: "max-content" }}
         rowKey={"id"}
         pagination={{
           pageSize: 200,

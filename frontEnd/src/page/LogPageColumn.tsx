@@ -44,6 +44,50 @@ import { NavigateFunction } from "react-router-dom";
 
 const ReactJson = interopDefault(ReactJsonImport);
 
+function LogJsonCell({
+  value,
+  mode,
+}: {
+  value: any;
+  mode: "light" | "dark";
+}) {
+  const containerStyle = {
+    lineHeight: "1.2em",
+    wordBreak: "break-all",
+  } as const;
+  if (value == null) {
+    return <div style={containerStyle} />;
+  }
+  const valueType = typeof value;
+  if (valueType === "string") {
+    return (
+      <div style={containerStyle}>
+        <TextColumn content={value} />
+      </div>
+    );
+  }
+  if (valueType === "object") {
+    const isEmpty = Array.isArray(value)
+      ? value.length === 0
+      : Object.keys(value).length === 0;
+    if (isEmpty) {
+      return <div style={containerStyle} />;
+    }
+    return (
+      <div style={containerStyle}>
+        <ReactJson
+          theme={mode === "dark" ? "ashes" : "rjv-default"}
+          style={{ backgroundColor: "none" }}
+          collapseStringsAfterLength={1000}
+          src={value}
+          collapsed={true}
+        />
+      </div>
+    );
+  }
+  return <div style={containerStyle}>{String(value)}</div>;
+}
+
 export function getConfigColumn(
   dispatch: Dispatch<AnyAction>,
   navigate: NavigateFunction,
@@ -313,29 +357,64 @@ export function getDefaultColumn(
         );
       },
     },
+    {
+      title: getDefaultColumnHead("query", dispatch, 6),
+      dataIndex: "req.query",
+      key: "req.query",
+      width: "200px",
+      render: (text: string, record: LogM) => {
+        if (record.req == null) {
+          return <div />;
+        }
+        return <LogJsonCell value={record.req.query} mode={mode} />;
+      },
+    },
+    {
+      title: getDefaultColumnHead("req body", dispatch, 7),
+      dataIndex: "req.body",
+      key: "req.body",
+      width: "300px",
+      render: (text: string, record: LogM) => {
+        if (record.req == null) {
+          return <div />;
+        }
+        return <LogJsonCell value={record.req.body} mode={mode} />;
+      },
+    },
+    {
+      title: getDefaultColumnHead("request time", dispatch, 8),
+      dataIndex: "req.requestTimeStr",
+      key: "req.requestTimeStr",
+      width: "180px",
+      render: (text: string, record: LogM) => {
+        if (record.req == null) {
+          return <div />;
+        }
+        return (
+          <div style={{ lineHeight: "1.2em", wordBreak: "break-all" }}>
+            {record.req.requestTimeStr}
+          </div>
+        );
+      },
+    },
+    {
+      title: getDefaultColumnHead("response time", dispatch, 9),
+      dataIndex: "res.responseTimeStr",
+      key: "res.responseTimeStr",
+      width: "180px",
+      render: (text: string, record: LogM) => {
+        if (record.res == null) {
+          return <div />;
+        }
+        return (
+          <div style={{ lineHeight: "1.2em", wordBreak: "break-all" }}>
+            {record.res.responseTimeStr}
+          </div>
+        );
+      },
+    },
   ];
   return res;
-}
-
-export function getDefaultColumnTitles() {
-  return [
-    {
-      title: "method",
-      displayType: ColumnDisplayType.TEXT,
-    },
-    {
-      title: "path",
-      displayType: ColumnDisplayType.TEXT,
-    },
-    {
-      title: "body",
-      displayType: ColumnDisplayType.JSON,
-    },
-    {
-      title: "json",
-      displayType: ColumnDisplayType.JSON,
-    },
-  ];
 }
 
 function getDefaultColumnHead(
