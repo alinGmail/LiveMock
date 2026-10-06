@@ -83,6 +83,18 @@ export function matchAnyValue(
       matcher.conditions as StringMatcherCondition,
       matcher.value
     );
+  } else if (
+    value === null ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    // JSON bodies commonly carry numbers/booleans/null; compare them as
+    // strings so that string-based matcher conditions keep working.
+    return stringMatchCondition(
+      value === null ? "" : String(value),
+      matcher.conditions as StringMatcherCondition,
+      matcher.value
+    );
   } else if (typeof value === "object") {
     if (_.isArray(value)) {
       switch (matcher.conditions) {
