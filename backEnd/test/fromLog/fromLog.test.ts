@@ -164,6 +164,24 @@ describe("buildDraftFromLog", () => {
     expect(draft.content).toBe("{}");
     expect(draft.header.length).toBe(1);
   });
+
+  test("ignores a parsed body when the content type is not JSON", () => {
+    const draft = buildDraftFromLog(
+      createMockLog({
+        res: {
+          headers: { "content-type": "text/plain" },
+          body: { a: 1 },
+          rawBody: '{"a":1}',
+          status: 200,
+          statusMessage: "OK",
+          duration: 0,
+          responseTime: 0,
+          responseTimeStr: "",
+        },
+      } as Partial<LogM>)
+    );
+    expect(draft.content).toBe("{}");
+  });
 });
 
 describe("buildResponseContent", () => {

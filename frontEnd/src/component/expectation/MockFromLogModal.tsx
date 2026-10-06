@@ -337,7 +337,6 @@ const MatcherRow = React.memo(function MatcherRow({
         size="small"
         className={moduleStyle.rowValue}
         value={row.value}
-        disabled={!row.checked}
         placeholder="value"
         aria-label={`${label} value`}
         onChange={(event) =>

@@ -4,6 +4,8 @@ import {
   createPathMatcher,
   createQueryMatcher,
   MatcherCondition,
+  ParamMatcherM,
+  QueryMatcherM,
   RequestMatcherM,
 } from "../struct/matcher";
 import {
@@ -65,7 +67,7 @@ export const SYSTEM_RESPONSE_HEADERS = [
   "proxy-connection",
 ];
 
-function isPlainContainer(value: unknown): boolean {
+function isContainer(value: unknown): boolean {
   return value !== null && typeof value === "object";
 }
 
@@ -121,7 +123,7 @@ export function flattenForMatch(
   if (Array.isArray(input)) {
     input.forEach((item, index) => {
       const path = prefix === "" ? String(index) : `${prefix}.${index}`;
-      if (isPlainContainer(item)) {
+      if (isContainer(item)) {
         result.push(...flattenForMatch(item, path));
       } else if (item !== undefined) {
         result.push({ path, value: stringifyMatchValue(item) });
@@ -134,7 +136,7 @@ export function flattenForMatch(
     Object.keys(record).forEach((key) => {
       const value = record[key];
       const path = prefix === "" ? key : `${prefix}.${key}`;
-      if (isPlainContainer(value)) {
+      if (isContainer(value)) {
         result.push(...flattenForMatch(value, path));
       } else if (value !== undefined) {
         result.push({ path, value: stringifyMatchValue(value) });
@@ -153,10 +155,11 @@ function isJsonResponse(res: LogM["res"]): boolean {
     return false;
   }
   const contentType = getHeaderValue(res.headers, "content-type");
-  if (contentType && contentType.toLowerCase().indexOf("json") !== -1) {
-    return true;
+  if (contentType) {
+    return contentType.toLowerCase().indexOf("json") !== -1;
   }
-  return isPlainContainer(res.body);
+  // Without a content type, only an already-parsed body implies JSON.
+  return isContainer(res.body);
 }
 
 /**
@@ -168,7 +171,7 @@ export function buildResponseContent(res: LogM["res"]): string {
     return "{}";
   }
   const body = res.body;
-  if (isPlainContainer(body)) {
+  if (isContainer(body)) {
     try {
       return JSON.stringify(body, null, 2);
     } catch (error) {
@@ -213,6 +216,16 @@ function buildHeaderRows(res: LogM["res"]): Array<DraftRow> {
   return result;
 }
 
+function buildFlatRows(prefix: string, source: unknown): Array<DraftRow> {
+  return flattenForMatch(source).map((entry) => ({
+    key: `${prefix}:${entry.path}`,
+    name: entry.path,
+    checked: false,
+    condition: MatcherCondition.IS,
+    value: entry.value,
+  }));
+}
+
 /**
  * Build the initial dialog state from a captured request log. Method and path
  * are selected by default; query/params are listed but unselected so the user
@@ -237,28 +250,27 @@ export function buildDraftFromLog(log: LogM): LogExpectationDraft {
       condition: MatcherCondition.IS,
       value: path,
     },
-    query: flattenForMatch(req?.query).map((entry) => ({
-      key: `query:${entry.path}`,
-      name: entry.path,
-      checked: false,
-      condition: MatcherCondition.IS,
-      value: entry.value,
-    })),
-    param: flattenForMatch(req?.body).map((entry) => ({
-      key: `param:${entry.path}`,
-      name: entry.path,
-      checked: false,
-      condition: MatcherCondition.IS,
-      value: entry.value,
-    })),
+    query: buildFlatRows("query", req?.query),
+    param: buildFlatRows("param", req?.body),
     status: res?.status ?? 200,
     content: buildResponseContent(res),
     header: buildHeaderRows(res),
   };
 }
 
-function isCheckedRow(row: DraftRow): boolean {
-  return row.checked;
+function buildNameValueMatchers(
+  create: () => QueryMatcherM | ParamMatcherM,
+  rows: Array<DraftRow>
+): Array<RequestMatcherM> {
+  return rows
+    .filter((row) => row.checked)
+    .map((row) => {
+      const matcher = create();
+      matcher.name = row.name ?? "";
+      matcher.value = row.value;
+      matcher.conditions = row.condition;
+      return matcher;
+    });
 }
 
 /**
@@ -282,20 +294,8 @@ export function buildMatchersFromDraft(
     matcher.conditions = draft.path.condition;
     matchers.push(matcher);
   }
-  draft.query.filter(isCheckedRow).forEach((row) => {
-    const matcher = createQueryMatcher();
-    matcher.name = row.name ?? "";
-    matcher.value = row.value;
-    matcher.conditions = row.condition;
-    matchers.push(matcher);
-  });
-  draft.param.filter(isCheckedRow).forEach((row) => {
-    const matcher = createParamMatcher();
-    matcher.name = row.name ?? "";
-    matcher.value = row.value;
-    matcher.conditions = row.condition;
-    matchers.push(matcher);
-  });
+  matchers.push(...buildNameValueMatchers(createQueryMatcher, draft.query));
+  matchers.push(...buildNameValueMatchers(createParamMatcher, draft.param));
   return matchers;
 }
 
@@ -312,7 +312,7 @@ export function buildActionFromDraft(
   action.responseContent.value =
     draft.content.trim() === "" ? "{}" : draft.content;
   action.responseContent.headers = draft.header
-    .filter(isCheckedRow)
+    .filter((row) => row.checked)
     .map((row) => [row.name ?? "", row.value] as [string, string]);
   return action;
 }
