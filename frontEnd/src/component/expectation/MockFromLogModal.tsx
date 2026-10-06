@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   App,
   Button,
@@ -8,7 +8,6 @@ import {
   Modal,
   Select,
   Space,
-  Typography,
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import Editor from "@monaco-editor/react";
@@ -109,7 +108,7 @@ const MockFromLogModalContent: React.FC<{
     const isExpanded = !!expanded[slot];
     const visible = isExpanded ? rows : rows.slice(0, FOLD_LIMIT);
     return (
-      <div className={moduleStyle.list}>
+      <>
         {visible.map((row) => (
           <MatcherRow
             key={row.key}
@@ -124,6 +123,7 @@ const MockFromLogModalContent: React.FC<{
           <Button
             type="link"
             size="small"
+            style={{ paddingLeft: 4 }}
             onClick={() =>
               setExpanded((prev) => ({ ...prev, [slot]: !isExpanded }))
             }
@@ -131,7 +131,7 @@ const MockFromLogModalContent: React.FC<{
             {isExpanded ? "Show less" : `Show all ${rows.length}`}
           </Button>
         )}
-      </div>
+      </>
     );
   };
 
@@ -167,36 +167,34 @@ const MockFromLogModalContent: React.FC<{
     <Modal
       title="Mock this request"
       open={open}
-      width={760}
+      width={780}
       onCancel={onClose}
       footer={null}
       maskClosable={false}
     >
       <div className={moduleStyle.body}>
-        <div className={moduleStyle.section}>
-          <div className={moduleStyle.field}>
-            <span className={moduleStyle.fieldLabel}>Name</span>
-            <Input
-              aria-label="Expectation name"
-              value={draft.name}
-              placeholder="Expectation name"
-              onChange={(event) =>
-                setDraft((current) => {
-                  current.name = event.target.value;
-                })
-              }
-            />
-          </div>
+        <div className={moduleStyle.fieldLine}>
+          <span className={moduleStyle.fieldLabel}>Name</span>
+          <Input
+            aria-label="Expectation name"
+            value={draft.name}
+            placeholder="Expectation name"
+            onChange={(event) =>
+              setDraft((current) => {
+                current.name = event.target.value;
+              })
+            }
+          />
         </div>
 
-        <div className={moduleStyle.section}>
-          <div className={moduleStyle.sectionTitle}>
-            Matchers
-            <span className={moduleStyle.hint}>
-              Only checked fields are matched; path and method are on by default.
+        <div className={moduleStyle.panel}>
+          <div className={moduleStyle.panelHead}>
+            <span>Matchers</span>
+            <span className={moduleStyle.panelHeadHint}>
+              Only checked fields are matched
             </span>
           </div>
-          <div className={moduleStyle.list} style={{ marginBottom: 8 }}>
+          <div className={moduleStyle.panelBody}>
             <MatcherRow
               slot="method"
               row={draft.method}
@@ -211,75 +209,82 @@ const MockFromLogModalContent: React.FC<{
               showCondition
               onChange={onChange}
             />
-          </div>
-          <div className={moduleStyle.field}>
-            <span className={moduleStyle.fieldLabel}>Query</span>
-            <span className={moduleStyle.hint}>unchecked by default</span>
-          </div>
-          {renderRows("query", draft.query, true)}
-          <div className={moduleStyle.field} style={{ marginTop: 8 }}>
-            <span className={moduleStyle.fieldLabel}>Request params</span>
-            <span className={moduleStyle.hint}>from the request body, flattened</span>
-          </div>
-          {renderRows("param", draft.param, true)}
-        </div>
 
-        <div className={moduleStyle.section}>
-          <div className={moduleStyle.sectionTitle}>
-            Response
-            <span className={moduleStyle.hint}>always returns JSON</span>
-          </div>
-          <div className={moduleStyle.field}>
-            <span className={moduleStyle.fieldLabel}>Status</span>
-            <InputNumber
-              aria-label="Response status"
-              value={draft.status}
-              onChange={(value) => {
-                if (value !== null) {
-                  setDraft((current) => {
-                    current.status = value;
-                  });
-                }
-              }}
-            />
-          </div>
-          <div className={moduleStyle.field}>
-            <span className={moduleStyle.fieldLabel}>Headers</span>
-          </div>
-          {renderRows("header", draft.header, false)}
-          <div className={moduleStyle.field} style={{ marginTop: 8 }}>
-            <span className={moduleStyle.fieldLabel}>Body</span>
-          </div>
-          <div
-            className={[
-              moduleStyle.editorWrap,
-              jsonInvalid ? moduleStyle.editorError : "",
-            ].join(" ")}
-          >
-            <Editor
-              height="220px"
-              language="json"
-              theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
-              value={draft.content}
-              options={{ lineNumbers: "off", minimap: { enabled: false } }}
-              onChange={(value) =>
-                setDraft((current) => {
-                  current.content = value ?? "";
-                })
-              }
-            />
-          </div>
-          {jsonInvalid && (
-            <div className={moduleStyle.errorText} role="alert">
-              Response content is not valid JSON
+            <div className={moduleStyle.subHead}>
+              <span>Query</span>
+              <span className={moduleStyle.subCount}>{draft.query.length}</span>
             </div>
-          )}
+            {renderRows("query", draft.query, true)}
+
+            <div className={moduleStyle.subHead}>
+              <span>Request params</span>
+              <span className={moduleStyle.subCount}>{draft.param.length}</span>
+            </div>
+            {renderRows("param", draft.param, true)}
+          </div>
         </div>
 
-        <Typography.Text type="secondary">
-          A new expectation is created with the selected matchers and this JSON
-          response.
-        </Typography.Text>
+        <div className={moduleStyle.panel}>
+          <div className={moduleStyle.panelHead}>
+            <span>Response</span>
+            <span className={moduleStyle.panelHeadHint}>
+              always returns JSON
+            </span>
+          </div>
+          <div className={moduleStyle.panelBody}>
+            <div className={moduleStyle.fieldLine}>
+              <span className={moduleStyle.fieldLabel}>Status</span>
+              <div>
+                <InputNumber
+                  aria-label="Response status"
+                  style={{ width: 160 }}
+                  value={draft.status}
+                  onChange={(value) => {
+                    if (value !== null) {
+                      setDraft((current) => {
+                        current.status = value;
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={moduleStyle.subHead}>
+              <span>Headers</span>
+              <span className={moduleStyle.subCount}>{draft.header.length}</span>
+            </div>
+            {renderRows("header", draft.header, false)}
+
+            <div className={moduleStyle.subHead}>
+              <span>Body</span>
+            </div>
+            <div
+              className={[
+                moduleStyle.editorWrap,
+                jsonInvalid ? moduleStyle.editorError : "",
+              ].join(" ")}
+            >
+              <Editor
+                height="220px"
+                language="json"
+                theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
+                value={draft.content}
+                options={{ lineNumbers: "off", minimap: { enabled: false } }}
+                onChange={(value) =>
+                  setDraft((current) => {
+                    current.content = value ?? "";
+                  })
+                }
+              />
+            </div>
+            {jsonInvalid && (
+              <div className={moduleStyle.errorText} role="alert">
+                Response content is not valid JSON
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className={moduleStyle.footer}>
@@ -313,8 +318,9 @@ const MatcherRow = React.memo(function MatcherRow({
   return (
     <div className={moduleStyle.row}>
       <Checkbox
-        className={moduleStyle.rowCheck}
+        className={moduleStyle.rowField}
         checked={row.checked}
+        aria-label={`match ${label}`}
         onChange={(event) =>
           onChange(slot, row.key, { checked: event.target.checked })
         }
@@ -323,7 +329,7 @@ const MatcherRow = React.memo(function MatcherRow({
           {label}
         </span>
       </Checkbox>
-      {showCondition && (
+      {showCondition ? (
         <Select
           size="small"
           className={moduleStyle.rowCondition}
@@ -332,6 +338,8 @@ const MatcherRow = React.memo(function MatcherRow({
           aria-label={`${label} condition`}
           onChange={(value) => onChange(slot, row.key, { condition: value })}
         />
+      ) : (
+        <span className={moduleStyle.rowSpacer} />
       )}
       <Input
         size="small"
