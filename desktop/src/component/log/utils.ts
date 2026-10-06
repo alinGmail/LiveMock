@@ -40,5 +40,21 @@ export function getDefaultColumnTitles() {
       title: "root",
       displayType: ColumnDisplayType.JSON,
     },
+    {
+      title: "query",
+      displayType: ColumnDisplayType.JSON,
+    },
+    {
+      title: "req body",
+      displayType: ColumnDisplayType.JSON,
+    },
+    {
+      title: "request time",
+      displayType: ColumnDisplayType.TEXT,
+    },
+    {
+      title: "response time",
+      displayType: ColumnDisplayType.TEXT,
+    },
   ];
 }
