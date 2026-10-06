@@ -270,7 +270,13 @@ const MockFromLogModalContent: React.FC<{
                 language="json"
                 theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
                 value={draft.content}
-                options={{ lineNumbers: "off", minimap: { enabled: false } }}
+                options={{
+                  lineNumbers: "off",
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: "on",
+                  automaticLayout: true,
+                }}
                 onChange={(value) =>
                   setDraft((current) => {
                     current.content = value ?? "";
@@ -316,7 +322,12 @@ const MatcherRow = React.memo(function MatcherRow({
   onChange: (slot: RowSlot, key: string, patch: Partial<DraftRow>) => void;
 }) {
   return (
-    <div className={moduleStyle.row}>
+    <div
+      className={[
+        moduleStyle.row,
+        showCondition ? "" : moduleStyle.rowNoCondition,
+      ].join(" ")}
+    >
       <Checkbox
         className={moduleStyle.rowField}
         checked={row.checked}
@@ -329,7 +340,7 @@ const MatcherRow = React.memo(function MatcherRow({
           {label}
         </span>
       </Checkbox>
-      {showCondition ? (
+      {showCondition && (
         <Select
           size="small"
           className={moduleStyle.rowCondition}
@@ -338,8 +349,6 @@ const MatcherRow = React.memo(function MatcherRow({
           aria-label={`${label} condition`}
           onChange={(value) => onChange(slot, row.key, { condition: value })}
         />
-      ) : (
-        <span className={moduleStyle.rowSpacer} />
       )}
       <Input
         size="small"

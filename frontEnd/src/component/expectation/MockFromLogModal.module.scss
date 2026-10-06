@@ -56,7 +56,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   opacity: 0.6;
-  margin: 14px 0 4px;
+  margin: 12px 0 3px;
 }
 
 .subCount {
@@ -67,7 +67,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) 150px minmax(200px, 1.25fr);
+  grid-template-columns: minmax(150px, 220px) 136px minmax(200px, 1fr);
   align-items: center;
   gap: 10px;
   padding: 3px 4px;
@@ -77,6 +77,12 @@
   &:hover {
     background: rgba(130, 130, 130, 0.1);
   }
+}
+
+/* Rows without a condition column (response headers) drop the empty middle
+   column so the value sits next to the field name. */
+.rowNoCondition {
+  grid-template-columns: minmax(150px, 220px) minmax(200px, 1fr);
 }
 
 .rowField {
@@ -97,10 +103,6 @@
 
 .rowCondition {
   width: 100%;
-}
-
-.rowSpacer {
-  min-width: 0;
 }
 
 .rowValue {
