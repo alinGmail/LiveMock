@@ -321,7 +321,7 @@ const LogPage: React.FC = () => {
   }, [logColumn, logs, expectationState]);
   const selLogM = logState.selectedLogItem;
   return (
-    <div style={{ padding: "10px", marginTop: "10px" }}>
+    <div style={{ padding: "10px" }}>
       {selLogM && (
         <WebsocketChatPanel
           path={selLogM.req?.path ?? ""}
