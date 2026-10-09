@@ -187,8 +187,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 8px 10px;
+  border: 0;
   border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   color: var(--text-dim);
   transition: background 150ms ease;
@@ -199,6 +204,14 @@
 }
 .menuItemActive {
   background: rgba(59, 130, 246, 0.12);
+}
+.menuItemInfo {
+  cursor: default;
+  color: var(--faint);
+}
+.menuItemInfo:hover {
+  background: transparent;
+  color: var(--faint);
 }
 
 .menuItemMain {

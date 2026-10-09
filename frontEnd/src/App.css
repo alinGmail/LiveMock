@@ -4,7 +4,7 @@
   --normalBlack: rgb(55, 53, 47);
 }
 body {
-  overflow: auto;
+  overflow-y: scroll;
 }
 .dark_mode {
   --hoverBgColor: rgba(255, 243, 247, 0.08);
@@ -215,4 +215,13 @@ pre,
 :focus-visible {
   outline: 2px solid var(--accent-2);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
 }

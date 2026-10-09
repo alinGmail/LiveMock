@@ -165,34 +165,42 @@ const ExpectationPage = () => {
     return map;
   }, [expectationList, groupMap]);
 
-  const blocks = useMemo(() => {
+  const allBlocks = useMemo(() => {
     if (!groupsLoaded) {
       return [];
     }
-    const filtered = q
-      ? expectationList.filter((expectation) =>
-          (haystackMap.get(expectation.id) ?? "").includes(q),
-        )
-      : expectationList;
-    return buildMatchOrderBlocks(filtered, groupList);
-  }, [expectationList, groupList, groupsLoaded, q, haystackMap]);
+    return buildMatchOrderBlocks(expectationList, groupList);
+  }, [expectationList, groupList, groupsLoaded]);
 
-  const ordered = useMemo(
-    () => blocks.flatMap((block) => block.expectations),
-    [blocks],
+  const orderedAll = useMemo(
+    () => allBlocks.flatMap((block) => block.expectations),
+    [allBlocks],
   );
 
+  // The visible list is filtered by the search, but selection is driven by the
+  // full list so that filtering the selected expectation out keeps its detail
+  // shown (the detail empty state is reserved for an actually empty project).
+  const blocks = useMemo(() => {
+    if (!q) {
+      return allBlocks;
+    }
+    const filtered = expectationList.filter((expectation) =>
+      (haystackMap.get(expectation.id) ?? "").includes(q),
+    );
+    return buildMatchOrderBlocks(filtered, groupList);
+  }, [allBlocks, expectationList, groupList, q, haystackMap]);
+
   useEffect(() => {
-    if (ordered.length === 0) {
+    if (orderedAll.length === 0) {
       if (selectedId) {
         setSelectedId(null);
       }
       return;
     }
-    if (!selectedId || !ordered.some((item) => item.id === selectedId)) {
-      setSelectedId(ordered[0].id);
+    if (!selectedId || !orderedAll.some((item) => item.id === selectedId)) {
+      setSelectedId(orderedAll[0].id);
     }
-  }, [ordered, selectedId]);
+  }, [orderedAll, selectedId]);
 
   const selectedExpectation = useMemo(
     () => expectationList.find((item) => item.id === selectedId) ?? null,
@@ -273,7 +281,7 @@ const ExpectationPage = () => {
   };
 
   const masterNodes: Array<ReactNode> = [];
-  let ungroupedLabelShown = false;
+  let previousWasUngrouped = false;
   blocks.forEach((block) => {
     if (block.group) {
       const group = block.group;
@@ -336,6 +344,7 @@ const ExpectationPage = () => {
           )}
         </div>,
       );
+      previousWasUngrouped = false;
       return;
     }
 
@@ -343,14 +352,17 @@ const ExpectationPage = () => {
     if (!expectation) {
       return;
     }
-    if (!ungroupedLabelShown) {
+    if (!previousWasUngrouped) {
       masterNodes.push(
-        <div key="ungrouped-label" className={styles.sectionLabel}>
+        <div
+          key={`ungrouped-label-${expectation.id}`}
+          className={styles.sectionLabel}
+        >
           Ungrouped
         </div>,
       );
-      ungroupedLabelShown = true;
     }
+    previousWasUngrouped = true;
     masterNodes.push(renderRow(expectation, null));
   });
 

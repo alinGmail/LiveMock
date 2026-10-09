@@ -110,8 +110,9 @@ const AppBar = () => {
   const projectMenu = (
     <div className={styles.menu}>
       {projectState.projectList.map((p, index) => (
-        <div
+        <button
           key={p.id}
+          type="button"
           className={[
             styles.menuItem,
             index === projectState.curProjectIndex
@@ -135,10 +136,11 @@ const AppBar = () => {
               {statusLabel(p.status, p.port)}
             </span>
           </div>
-        </div>
+        </button>
       ))}
       <div className={styles.menuSep} />
-      <div
+      <button
+        type="button"
         className={styles.menuItem}
         onClick={() => {
           setProjectModalShow(true);
@@ -147,20 +149,18 @@ const AppBar = () => {
       >
         <PlusOutlined />
         <span>Create New Project</span>
-      </div>
+      </button>
     </div>
   );
 
   const overflowMenu = (
     <div className={styles.menu}>
-      <div
-        className={styles.menuItem}
-        style={{ cursor: "default", color: "var(--faint)" }}
-      >
+      <div className={[styles.menuItem, styles.menuItemInfo].join(" ")}>
         version {APP_VERSION}
       </div>
       <div className={styles.menuSep} />
-      <div
+      <button
+        type="button"
         className={styles.menuItem}
         onClick={() => {
           setOverflowOpen(false);
@@ -169,7 +169,7 @@ const AppBar = () => {
       >
         <LogoutOutlined />
         <span>Logout</span>
-      </div>
+      </button>
     </div>
   );
 
