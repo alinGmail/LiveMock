@@ -1,82 +1,117 @@
-import { Alert, App, Button, Table } from "antd";
-import { PlusOutlined, ImportOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { AppDispatch, useAppSelector } from "../store";
-import {
-  createExpectationReq,
-  listExpectationReq,
-} from "../server/expectationServer";
-import { createGroupReq, listGroupReq } from "../server/groupServer";
-import { createExpectation, ExpectationM } from "livemock-core/struct/expectation";
+import { listExpectationReq } from "../server/expectationServer";
+import { listGroupReq } from "../server/groupServer";
+import { ExpectationM } from "livemock-core/struct/expectation";
 import {
   buildMatchOrderBlocks,
-  createExpectationGroup,
   ExpectationGroupM,
 } from "livemock-core/struct/expectationGroup";
-import {
-  ActionColumn,
-  ActivateColumn,
-  DelayColumn,
-  MatcherColumn,
-  NameColumn,
-  OperationColumn,
-  PriorityColumn,
-} from "../component/expectation/listColumnCompoment";
-import {
-  ExpectationGroupSelectColumn,
-  GroupActivateColumn,
-  GroupNameColumn,
-  GroupOperationColumn,
-  GroupPriorityColumn,
-  renderGroupExpandIcon,
-} from "../component/expectation/groupColumnComponent";
-import { useDispatch } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
-import { toastPromise } from "../component/common";
 import { getExpectationSuccess } from "../slice/thunk";
-import { Key, useEffect, useMemo, useState } from "react";
-import { ExpectationContext } from "../component/context";
-import { ImportExpectationModal } from "../component/expectation/ImportExpectationModal";
+import ExpectationDetail from "../component/expectation/ExpectationDetail";
+import {
+  actionKind,
+  actionLabel,
+  matcherHaystack,
+} from "../component/expectation/display";
+import styles from "./ExpectationPage.module.scss";
 
-type ExpectationRow = ExpectationM & {
-  rowType: "expectation";
-  isChild?: boolean;
+const BADGE_CLASS = {
+  custom: styles.badgeCustom,
+  proxy: styles.badgeProxy,
+  static: styles.badgeStatic,
 };
-interface GroupRow extends ExpectationGroupM {
-  rowType: "group";
-  children?: Array<ExpectationRow>;
-}
-type ExpectationTableRow = GroupRow | ExpectationRow;
 
-function toExpectationRow(
-  expectation: ExpectationM,
-  isChild = false,
-): ExpectationRow {
-  return { ...expectation, rowType: "expectation", isChild };
-}
+const Chevron = () => (
+  <svg
+    className={styles.chevIcon}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
 
-function nextGroupName(groups: Array<ExpectationGroupM>): string {
-  const base = "New Group";
-  const names = new Set(groups.map((group) => group.name));
-  if (!names.has(base)) {
-    return base;
-  }
-  let index = 2;
-  while (names.has(`${base} ${index}`)) {
-    index++;
-  }
-  return `${base} ${index}`;
-}
+const SearchIcon = () => (
+  <svg
+    className={styles.searchIcon}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="7" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
+const EmptyState = ({ query }: { query: string }) => (
+  <div className={styles.empty}>
+    <span className={styles.emptyGlyph}>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+    </span>
+    {query ? (
+      <>
+        <h3>No matches</h3>
+        <p>Nothing matches “{query}”. Try a different name or matcher.</p>
+      </>
+    ) : (
+      <>
+        <h3>No expectations</h3>
+        <p>This project has no expectations yet.</p>
+      </>
+    )}
+  </div>
+);
 
 const ExpectationPage = () => {
-  const { modal } = App.useApp();
   const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
   const dispatch: AppDispatch = useDispatch();
-  const [importOpen, setImportOpen] = useState(false);
-  const [expandedGroupKeys, setExpandedGroupKeys] = useState<
-    readonly Key[] | null
-  >(null);
+  const currentProject = projectState.projectList[projectState.curProjectIndex];
+
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () => new Set(),
+  );
+
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
     () => {
@@ -89,369 +124,272 @@ const ExpectationPage = () => {
   const getGroupListQuery = useQuery(["getGroupList", currentProject.id], () => {
     return listGroupReq(currentProject.id);
   });
+
   const groupList = useMemo(
     () => getGroupListQuery.data ?? [],
     [getGroupListQuery.data],
   );
   const groupsLoaded = getGroupListQuery.data !== undefined;
+  const expectationList = expectationState.expectationList;
 
   useEffect(() => {
-    setExpandedGroupKeys(null);
+    setQuery("");
+    setSelectedId(null);
+    setCollapsedGroups(new Set());
   }, [currentProject.id]);
 
-  const refreshAll = () => {
-    getExpectationListQuery.refetch();
-    getGroupListQuery.refetch();
-  };
-
-  const expectationIndexMap = useMemo(() => {
-    const indexMap = new Map<string, number>();
-    expectationState.expectationList.forEach((expectation, index) => {
-      indexMap.set(expectation.id, index);
-    });
-    return indexMap;
-  }, [expectationState.expectationList]);
-
-  const memberCountMap = useMemo(() => {
-    const countMap = new Map<string, number>();
-    expectationState.expectationList.forEach((expectation) => {
-      if (expectation.groupId) {
-        countMap.set(expectation.groupId, (countMap.get(expectation.groupId) ?? 0) + 1);
-      }
-    });
-    return countMap;
-  }, [expectationState.expectationList]);
-
-  const groupActiveMap = useMemo(() => {
-    const activeMap = new Map<string, boolean>();
-    groupList.forEach((group) => {
-      activeMap.set(group.id, group.activate);
-    });
-    return activeMap;
+  const groupMap = useMemo(() => {
+    const map = new Map<string, ExpectationGroupM>();
+    groupList.forEach((group) => map.set(group.id, group));
+    return map;
   }, [groupList]);
 
-  const tableRows = useMemo<Array<ExpectationTableRow>>(() => {
+  const q = query.trim().toLowerCase();
+
+  const haystackMap = useMemo(() => {
+    const map = new Map<string, string>();
+    expectationList.forEach((expectation) => {
+      const groupName = expectation.groupId
+        ? groupMap.get(expectation.groupId)?.name ?? ""
+        : "ungrouped";
+      const text = [
+        expectation.name,
+        expectation.description ?? "",
+        groupName,
+        ...(expectation.matchers ?? []).map(matcherHaystack),
+      ]
+        .join(" ")
+        .toLowerCase();
+      map.set(expectation.id, text);
+    });
+    return map;
+  }, [expectationList, groupMap]);
+
+  const blocks = useMemo(() => {
     if (!groupsLoaded) {
       return [];
     }
-    return buildMatchOrderBlocks(
-      expectationState.expectationList,
-      groupList,
-    ).map((block) => {
-      if (block.group) {
-        const children = block.expectations.map((expectation) =>
-          toExpectationRow(expectation, true),
-        );
-        const groupRow: GroupRow = {
-          ...block.group,
-          rowType: "group",
-          // no member rows means no expand control ([] would still be truthy)
-          children: children.length > 0 ? children : undefined,
-        };
-        return groupRow;
-      }
-      return toExpectationRow(block.expectations[0]);
-    });
-  }, [expectationState.expectationList, groupList, groupsLoaded]);
+    const filtered = q
+      ? expectationList.filter((expectation) =>
+          (haystackMap.get(expectation.id) ?? "").includes(q),
+        )
+      : expectationList;
+    return buildMatchOrderBlocks(filtered, groupList);
+  }, [expectationList, groupList, groupsLoaded, q, haystackMap]);
 
-  const allGroupRowKeys = useMemo(
-    () => groupList.map((group) => `group-${group.id}`),
-    [groupList],
+  const ordered = useMemo(
+    () => blocks.flatMap((block) => block.expectations),
+    [blocks],
   );
 
-  const rowKey = (record: ExpectationTableRow) => {
-    return record.rowType === "group" ? `group-${record.id}` : record.id;
+  useEffect(() => {
+    if (ordered.length === 0) {
+      if (selectedId) {
+        setSelectedId(null);
+      }
+      return;
+    }
+    if (!selectedId || !ordered.some((item) => item.id === selectedId)) {
+      setSelectedId(ordered[0].id);
+    }
+  }, [ordered, selectedId]);
+
+  const selectedExpectation = useMemo(
+    () => expectationList.find((item) => item.id === selectedId) ?? null,
+    [expectationList, selectedId],
+  );
+  const selectedGroup = selectedExpectation?.groupId
+    ? groupMap.get(selectedExpectation.groupId) ?? null
+    : null;
+
+  const toggleGroup = (id: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
-  const expectationIndex = (record: ExpectationRow) => {
-    return expectationIndexMap.get(record.id) ?? 0;
+  const isLoading =
+    getExpectationListQuery.isFetching || getGroupListQuery.isFetching;
+
+  const renderRow = (
+    expectation: ExpectationM,
+    group: ExpectationGroupM | null,
+  ) => {
+    const active = expectation.activate && (!group || group.activate);
+    const selected = expectation.id === selectedId;
+    const firstAction = expectation.actions?.[0];
+    return (
+      <button
+        key={expectation.id}
+        type="button"
+        className={[
+          styles.expRow,
+          active ? styles.expRowActive : "",
+          selected ? styles.expRowSelected : "",
+          active ? "" : styles.expRowInactive,
+        ].join(" ")}
+        onClick={() => setSelectedId(expectation.id)}
+        aria-pressed={selected}
+      >
+        <span className={styles.rowDot} aria-hidden="true" />
+        <span className={styles.rowMain}>
+          <span className={styles.rowName}>{expectation.name || "empty"}</span>
+          <span className={styles.rowSub}>
+            {expectation.description ? (
+              <span className={styles.rowDesc}>
+                {expectation.description}
+              </span>
+            ) : (
+              <span className={styles.mutedText}>no description</span>
+            )}
+          </span>
+        </span>
+        <span className={styles.rowMeta}>
+          {expectation.delay > 0 ? (
+            <span className={styles.delayTag} title="delay">
+              <ClockIcon />
+              {expectation.delay}ms
+            </span>
+          ) : null}
+          {firstAction ? (
+            <span
+              className={[
+                styles.actionBadge,
+                BADGE_CLASS[actionKind(firstAction.type)],
+              ].join(" ")}
+            >
+              {actionLabel(firstAction.type)}
+            </span>
+          ) : null}
+        </span>
+      </button>
+    );
   };
 
-  const expectationColumn = [
-    {
-      title: "name",
-      dataIndex: "name",
-      key: "name",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return (
-            <GroupNameColumn
-              projectId={currentProject.id}
-              group={record}
-              memberCount={memberCountMap.get(record.id) ?? 0}
-              onChanged={refreshAll}
-            />
-          );
-        }
-        return (
-          <NameColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-            indent={record.isChild}
-          />
-        );
-      },
-    },
-    {
-      title: "group",
-      dataIndex: "groupId",
-      key: "groupId",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return null;
-        }
-        return (
-          <ExpectationGroupSelectColumn
-            projectId={currentProject.id}
-            expectation={record}
-            groups={groupList}
-            dispatch={dispatch}
-            onChanged={refreshAll}
-          />
-        );
-      },
-    },
-    {
-      title: "delay",
-      dataIndex: "delay",
-      key: "delay",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return null;
-        }
-        return (
-          <DelayColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-          />
-        );
-      },
-    },
-    {
-      title: "priority",
-      dataIndex: "priority",
-      key: "priority",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return (
-            <GroupPriorityColumn
-              projectId={currentProject.id}
-              group={record}
-              onChanged={refreshAll}
-            />
-          );
-        }
-        return (
-          <PriorityColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-          />
-        );
-      },
-    },
-    {
-      title: "activate",
-      dataIndex: "activate",
-      key: "activate",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return (
-            <GroupActivateColumn
-              projectId={currentProject.id}
-              group={record}
-              onChanged={refreshAll}
-            />
-          );
-        }
-        return (
-          <ActivateColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-          />
-        );
-      },
-    },
-    {
-      title: "matchers",
-      dataIndex: "matcher",
-      key: "matchers",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return null;
-        }
-        return (
-          <MatcherColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-          />
-        );
-      },
-    },
-    {
-      title: "actions",
-      dataIndex: "actions",
-      key: "actions",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return null;
-        }
-        return (
-          <ActionColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-          />
-        );
-      },
-    },
-    {
-      title: "operation",
-      dataIndex: "operation",
-      key: "operation",
-      render: (text: string, record: ExpectationTableRow) => {
-        if (record.rowType === "group") {
-          return (
-            <GroupOperationColumn
-              projectId={currentProject.id}
-              group={record}
-              memberCount={memberCountMap.get(record.id) ?? 0}
-              modal={modal}
-              onChanged={refreshAll}
-            />
-          );
-        }
-        return (
-          <OperationColumn
-            projectId={currentProject.id}
-            text={text}
-            expectation={record}
-            index={expectationIndex(record)}
-            dispatch={dispatch}
-            modal={modal}
-          />
-        );
-      },
-    },
-  ];
-  return (
-    <ExpectationContext.Provider
-      value={{
-        refreshExpectationList: () => {
-          refreshAll();
-        },
-      }}
-    >
-      <div style={{ padding: "10px" }}>
-        <div style={{ margin: "10px 0px" }}>
-          <Button
-            type={"text"}
-            icon={<PlusOutlined />}
-            onClick={async () => {
-              // send request to add new expectation
-              const createPromise = createExpectationReq(
-                projectState.projectList[projectState.curProjectIndex].id,
-                createExpectation(),
-              );
-              toastPromise(createPromise);
-              createPromise.then(() => {
-                getExpectationListQuery.refetch();
-              });
-            }}
+  const masterNodes: Array<ReactNode> = [];
+  let ungroupedLabelShown = false;
+  blocks.forEach((block) => {
+    if (block.group) {
+      const group = block.group;
+      if (q && block.expectations.length === 0) {
+        return;
+      }
+      const collapsed = collapsedGroups.has(group.id);
+      masterNodes.push(
+        <div
+          key={`group-${group.id}`}
+          className={[
+            styles.groupHead,
+            collapsed ? styles.groupHeadCollapsed : "",
+          ].join(" ")}
+        >
+          <button
+            type="button"
+            className={styles.chev}
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Expand group" : "Collapse group"}
+            onClick={() => toggleGroup(group.id)}
           >
-            Add Expectation
-          </Button>
-          <Button
-            type={"text"}
-            icon={<PlusOutlined />}
-            onClick={() => {
-              // send request to add new empty group
-              const createPromise = createGroupReq(
-                currentProject.id,
-                createExpectationGroup(nextGroupName(groupList)),
-              );
-              toastPromise(createPromise);
-              createPromise.then(() => {
-                getGroupListQuery.refetch();
-              });
-            }}
+            <Chevron />
+          </button>
+          <span className={styles.groupName}>
+            {group.name || "unnamed group"}
+          </span>
+          <span className={styles.count}>{block.expectations.length}</span>
+          <span className={styles.grow} />
+          {!group.activate ? (
+            <span className={styles.inactiveTag}>inactive</span>
+          ) : null}
+          <span className={styles.prioPill} title="group priority">
+            P{group.priority}
+          </span>
+          <span
+            className={[
+              styles.switch,
+              group.activate ? styles.switchOn : "",
+            ].join(" ")}
+            role="switch"
+            aria-checked={group.activate}
+            aria-disabled="true"
+            title="Group activation (read-only in this step)"
           >
-            Add Group
-          </Button>
-          <Button
-            type={"text"}
-            icon={<ImportOutlined />}
-            onClick={() => {
-              setImportOpen(true);
-            }}
-          >
-            Import
-          </Button>
-        </div>
-        <div>
-          {getGroupListQuery.isError && (
-            <Alert
-              type={"error"}
-              showIcon
-              message={"failed to load groups, please refresh"}
-              style={{ marginBottom: "8px" }}
-            />
+            <span className={styles.switchKnob} />
+          </span>
+        </div>,
+      );
+      masterNodes.push(
+        <div
+          key={`group-body-${group.id}`}
+          className={[
+            styles.groupBody,
+            collapsed ? styles.groupBodyCollapsed : "",
+          ].join(" ")}
+        >
+          {block.expectations.map((expectation) =>
+            renderRow(expectation, group),
           )}
-          <Table
-            columns={expectationColumn}
-            size={"small"}
-            rowKey={rowKey}
-            dataSource={tableRows}
-            loading={
-              getExpectationListQuery.isFetching ||
-              getGroupListQuery.isFetching
-            }
-            expandable={{
-              expandedRowKeys: expandedGroupKeys ?? allGroupRowKeys,
-              onExpandedRowsChange: (keys) => {
-                setExpandedGroupKeys(keys);
-              },
-              expandIcon: renderGroupExpandIcon,
-            }}
-            onRow={(record: ExpectationTableRow) => {
-              const inactive =
-                record.rowType === "group"
-                  ? !record.activate
-                  : record.groupId
-                    ? groupActiveMap.get(record.groupId) === false
-                    : false;
-              return inactive ? { style: { opacity: 0.55 } } : {};
-            }}
-          />
-        </div>
-        <ImportExpectationModal
-          projectId={currentProject.id}
-          open={importOpen}
-          onClose={() => {
-            setImportOpen(false);
-          }}
-          onImported={() => {
-            getExpectationListQuery.refetch();
-          }}
+        </div>,
+      );
+      return;
+    }
+
+    const expectation = block.expectations[0];
+    if (!expectation) {
+      return;
+    }
+    if (!ungroupedLabelShown) {
+      masterNodes.push(
+        <div key="ungrouped-label" className={styles.sectionLabel}>
+          Ungrouped
+        </div>,
+      );
+      ungroupedLabelShown = true;
+    }
+    masterNodes.push(renderRow(expectation, null));
+  });
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.workspace}>
+        <section className={styles.master} aria-label="Expectations">
+          <label className={styles.searchWrap}>
+            <SearchIcon />
+            <input
+              className={styles.searchInput}
+              type="search"
+              placeholder="Filter by name, description, matcher or group…"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              autoComplete="off"
+              aria-label="Filter expectations"
+            />
+          </label>
+          {getGroupListQuery.isError ? (
+            <div className={styles.error}>
+              Failed to load groups. Please refresh.
+            </div>
+          ) : null}
+          <div className={styles.list} role="list">
+            {masterNodes.length ? (
+              masterNodes
+            ) : isLoading ? null : (
+              <EmptyState query={q} />
+            )}
+          </div>
+        </section>
+        <ExpectationDetail
+          expectation={selectedExpectation}
+          group={selectedGroup}
         />
       </div>
-    </ExpectationContext.Provider>
+    </div>
   );
 };
+
 export default ExpectationPage;
