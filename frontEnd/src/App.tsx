@@ -6,6 +6,7 @@ import { getProjectListReq } from "./server/projectServer";
 import WelcomePage from "./page/WelcomePage";
 import { useDispatch } from "react-redux";
 import { setProjectList } from "./slice/projectSlice";
+import { setMode } from "./slice/systemConfigSlice";
 import { useAppSelector } from "./store";
 import toast, { Toaster } from "react-hot-toast";
 import { ConfigProvider, Spin, theme, App as AntApp } from "antd";
@@ -28,7 +29,6 @@ type AuthState = "loading" | "login" | "register" | "authenticated";
 function App() {
   const dispatch = useDispatch();
   const projectList = useAppSelector((state) => state.project.projectList);
-  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const [authState, setAuthState] = useState<AuthState>("loading");
   const authStateRef = useRef<AuthState>(authState);
   authStateRef.current = authState;
@@ -91,28 +91,18 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (systemConfigState.mode === "dark") {
-      document.body.className = "dark_mode";
-      document.documentElement.style.colorScheme = "dark";
-      document.getElementsByTagName("html")[0].style.background =
-        "linear-gradient(to bottom, #262626 0, #262626 73px, #595959 73px) repeat-x";
-    } else {
-      document.documentElement.style.colorScheme = "light";
-      document.getElementsByTagName("html")[0].style.background =
-        "linear-gradient(to bottom, rgb(36, 41, 47) 0, rgb(36, 41, 47) 73px, white 73px) repeat-x";
-      document.body.className = "";
-    }
-  }, [systemConfigState.mode]);
+    // The redesign's first step is dark-only: force the dark theme regardless
+    // of any previously stored preference. The theme state and its setter are
+    // kept in code but the toggle is no longer rendered.
+    dispatch(setMode("dark"));
+    document.body.className = "dark_mode";
+    document.documentElement.style.colorScheme = "dark";
+    document.getElementsByTagName("html")[0].style.background = "";
+  }, [dispatch]);
 
   return (
     <>
-      <ConfigProvider
-        theme={
-          systemConfigState.mode === "dark"
-            ? { algorithm: theme.darkAlgorithm }
-            : {}
-        }
-      >
+      <ConfigProvider theme={{ algorithm: theme.darkAlgorithm }}>
         <AntApp>
           {authState === "loading" && (
             <div

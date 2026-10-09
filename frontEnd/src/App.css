@@ -4,7 +4,7 @@
   --normalBlack: rgb(55, 53, 47);
 }
 body {
-  overflow-y: scroll;
+  overflow: auto;
 }
 .dark_mode {
   --hoverBgColor: rgba(255, 243, 247, 0.08);
@@ -133,13 +133,7 @@ body {
   background: rgba(55, 53, 47, 0.08);
 }
 html {
-  background: linear-gradient(
-      to bottom,
-      rgb(36, 41, 47) 0,
-      rgb(36, 41, 47) 74px,
-      white 74px
-    )
-    repeat-x;
+  background: var(--bg);
 }
 
 .blank10,
@@ -208,6 +202,8 @@ html {
 
 body {
   font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
 }
 
 code,

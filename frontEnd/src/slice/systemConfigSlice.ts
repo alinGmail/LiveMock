@@ -4,7 +4,7 @@ export interface SystemConfigState{
     mode:"dark"|"light"
 }
 const initialState: SystemConfigState = {
-    mode:"light"
+    mode:"dark"
 }
 
 
