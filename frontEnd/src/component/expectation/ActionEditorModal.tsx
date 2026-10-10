@@ -12,6 +12,7 @@ import {
   StaticDirectoryActionM,
 } from "livemock-core/struct/action";
 import Modal from "../Modal";
+import Select from "../Select";
 import btn from "../buttonStyles.module.scss";
 import styles from "./ActionEditorModal.module.scss";
 
@@ -220,31 +221,29 @@ const ActionEditorModal = ({
           </label>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Response type</span>
-            <select
-              className={[styles.input, styles.select].join(" ")}
+            <Select
               value={content.type}
-              onChange={(event) =>
-                updateContent({ type: event.target.value as ResponseType })
+              onChange={(value) =>
+                updateContent({ type: value as ResponseType })
               }
-            >
-              <option value={ResponseType.JSON}>JSON</option>
-              <option value={ResponseType.TEXT}>TEXT</option>
-            </select>
+              options={[
+                { value: ResponseType.JSON, label: "JSON" },
+                { value: ResponseType.TEXT, label: "TEXT" },
+              ]}
+            />
           </label>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Content handler</span>
-            <select
-              className={[styles.input, styles.select].join(" ")}
+            <Select
               value={content.contentHandler ?? ContentHandler.NONE}
-              onChange={(event) =>
-                updateContent({
-                  contentHandler: event.target.value as ContentHandler,
-                })
+              onChange={(value) =>
+                updateContent({ contentHandler: value as ContentHandler })
               }
-            >
-              <option value={ContentHandler.NONE}>NONE</option>
-              <option value={ContentHandler.MOCK_JS}>MOCK_JS</option>
-            </select>
+              options={[
+                { value: ContentHandler.NONE, label: "NONE" },
+                { value: ContentHandler.MOCK_JS, label: "MOCK_JS" },
+              ]}
+            />
           </label>
         </div>
         <HeaderRows
@@ -313,16 +312,16 @@ const ActionEditorModal = ({
         <div className={styles.fields}>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Protocol</span>
-            <select
-              className={[styles.input, styles.select].join(" ")}
+            <Select
               value={proxy.protocol}
-              onChange={(event) =>
-                updateProxy({ protocol: event.target.value as ProxyProtocol })
+              onChange={(value) =>
+                updateProxy({ protocol: value as ProxyProtocol })
               }
-            >
-              <option value={ProxyProtocol.HTTP}>http://</option>
-              <option value={ProxyProtocol.HTTPS}>https://</option>
-            </select>
+              options={[
+                { value: ProxyProtocol.HTTP, label: "http://" },
+                { value: ProxyProtocol.HTTPS, label: "https://" },
+              ]}
+            />
           </label>
           <label className={styles.field}>
             <span className={styles.fieldLabel}>Host</span>

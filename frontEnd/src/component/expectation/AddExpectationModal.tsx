@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
 import Modal from "../Modal";
+import Select from "../Select";
 import btn from "../buttonStyles.module.scss";
 import styles from "./AddExpectationModal.module.scss";
 
@@ -89,18 +90,18 @@ const AddExpectationModal = ({
         </label>
         <label className={styles.field}>
           <span className={styles.fieldLabel}>Group</span>
-          <select
-            className={[styles.input, styles.select].join(" ")}
+          <Select
             value={groupId}
-            onChange={(event) => setGroupId(event.target.value)}
-          >
-            <option value="">ungrouped</option>
-            {groups.map((group) => (
-              <option key={group.id} value={group.id}>
-                {group.name || "unnamed group"}
-              </option>
-            ))}
-          </select>
+            placeholder="ungrouped"
+            onChange={(value) => setGroupId(value ?? "")}
+            options={[
+              { value: "", label: "ungrouped" },
+              ...groups.map((group) => ({
+                value: group.id,
+                label: group.name || "unnamed group",
+              })),
+            ]}
+          />
         </label>
       </div>
     </Modal>
