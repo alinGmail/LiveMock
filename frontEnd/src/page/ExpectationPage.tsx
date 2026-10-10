@@ -266,20 +266,23 @@ const ExpectationPage = () => {
     expectation.groupId = values.groupId;
     expectation.actions = [createCustomResponseAction()];
     setCreating(true);
+    let created: ExpectationM;
     try {
-      const created = await createExpectationReq(
-        currentProject.id,
-        expectation,
-      );
-      setQuery("");
-      await getExpectationListQuery.refetch();
-      setAddOpen(false);
-      setSelectedId(created.id);
+      created = await createExpectationReq(currentProject.id, expectation);
     } catch (error) {
       toast.error(getErrorMessage(error));
-    } finally {
       setCreating(false);
+      return;
     }
+    // The expectation exists from here on: close the dialog and select it even
+    // if refreshing the list fails, so pressing Create again cannot duplicate it.
+    setQuery("");
+    setAddOpen(false);
+    setSelectedId(created.id);
+    setCreating(false);
+    getExpectationListQuery.refetch().catch(() => {
+      toast.error("Expectation created, but the list failed to refresh.");
+    });
   };
 
   const isLoading =
