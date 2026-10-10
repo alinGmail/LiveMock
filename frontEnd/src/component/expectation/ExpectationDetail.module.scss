@@ -345,6 +345,35 @@
 .fieldRow:first-child {
   border-top: 0;
 }
+.fieldRowTop {
+  align-items: flex-start;
+}
+.vFlex {
+  flex: 1;
+  min-width: 0;
+}
+.kvGrid {
+  display: grid;
+  grid-template-columns: minmax(120px, 34%) 1fr;
+  gap: 1px;
+  width: 100%;
+}
+.kvK {
+  padding: 6px 10px;
+  background: var(--bg-deep);
+  color: var(--muted);
+  font-size: 12px;
+  border-radius: 3px 0 0 3px;
+  word-break: break-all;
+}
+.kvV {
+  padding: 6px 10px;
+  background: var(--bg-deep);
+  color: var(--text-dim);
+  font-size: 12.5px;
+  word-break: break-all;
+  border-radius: 0 3px 3px 0;
+}
 .k {
   width: 120px;
   flex: none;

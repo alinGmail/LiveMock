@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import styles from "./ExpectationDetail.module.scss";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
@@ -146,6 +147,22 @@ const ActionBtns = ({
   </span>
 );
 
+const HeaderGrid = ({ rows }: { rows?: Array<[string, string]> | null }) => {
+  if (!rows || rows.length === 0) {
+    return <span className={styles.mutedText}>none</span>;
+  }
+  return (
+    <div className={styles.kvGrid}>
+      {rows.map((row, index) => (
+        <Fragment key={index}>
+          <div className={[styles.kvK, styles.mono].join(" ")}>{row[0]}</div>
+          <div className={[styles.kvV, styles.mono].join(" ")}>{row[1]}</div>
+        </Fragment>
+      ))}
+    </div>
+  );
+};
+
 const ActionView = ({
   action,
   onEdit,
@@ -187,9 +204,21 @@ const ActionView = ({
           </span>
         </div>
         <div className={styles.fieldRow}>
-          <span className={styles.k}>Content type</span>
+          <span className={styles.k}>Response type</span>
           <span className={[styles.v, styles.mono].join(" ")}>
             {response.type}
+          </span>
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.k}>Content handler</span>
+          <span className={[styles.v, styles.mono].join(" ")}>
+            {response.contentHandler ?? "NONE"}
+          </span>
+        </div>
+        <div className={[styles.fieldRow, styles.fieldRowTop].join(" ")}>
+          <span className={styles.k}>Headers</span>
+          <span className={[styles.v, styles.vFlex].join(" ")}>
+            <HeaderGrid rows={response.headers} />
           </span>
         </div>
         {response.value ? (
@@ -221,14 +250,37 @@ const ActionView = ({
             {target || "—"}
           </span>
         </div>
-        {proxy.prefixRemove ? (
-          <div className={styles.fieldRow}>
-            <span className={styles.k}>Remove prefix</span>
-            <span className={[styles.v, styles.mono].join(" ")}>
-              {proxy.prefixRemove}
-            </span>
-          </div>
-        ) : null}
+        <div className={styles.fieldRow}>
+          <span className={styles.k}>Prefix remove</span>
+          <span className={[styles.v, styles.mono].join(" ")}>
+            {proxy.prefixRemove || "—"}
+          </span>
+        </div>
+        <div className={[styles.fieldRow, styles.fieldRowTop].join(" ")}>
+          <span className={styles.k}>Request headers</span>
+          <span className={[styles.v, styles.vFlex].join(" ")}>
+            <HeaderGrid rows={proxy.requestHeaders} />
+          </span>
+        </div>
+        <div className={[styles.fieldRow, styles.fieldRowTop].join(" ")}>
+          <span className={styles.k}>Response headers</span>
+          <span className={[styles.v, styles.vFlex].join(" ")}>
+            <HeaderGrid rows={proxy.headers} />
+          </span>
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.k}>Cross config</span>
+          <span className={[styles.v, styles.mono].join(" ")}>
+            {proxy.handleCross ? "handle cross" : "off"}
+            {proxy.crossAllowCredentials ? " · allow credentials" : ""}
+          </span>
+        </div>
+        <div className={styles.fieldRow}>
+          <span className={styles.k}>Websocket</span>
+          <span className={[styles.v, styles.mono].join(" ")}>
+            {proxy.supportWebsocket ? "supported" : "off"}
+          </span>
+        </div>
         {proxy.pathRewrite && proxy.pathRewrite.length ? (
           <div className={styles.fieldRow}>
             <span className={styles.k}>Path rewrite</span>
