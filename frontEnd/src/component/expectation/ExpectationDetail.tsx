@@ -324,6 +324,7 @@ interface ExpectationDetailProps {
   onEditAction?: () => void;
   onDeleteAction?: () => void;
   onAddAction?: () => void;
+  onEditDescription?: () => void;
 }
 
 const ExpectationDetail = ({
@@ -332,6 +333,7 @@ const ExpectationDetail = ({
   onEditAction,
   onDeleteAction,
   onAddAction,
+  onEditDescription,
 }: ExpectationDetailProps) => {
   if (!expectation) {
     return (
@@ -420,6 +422,19 @@ const ExpectationDetail = ({
             <div className={styles.cardHead}>
               <h3>Description</h3>
               <span className={styles.hint}>optional</span>
+              {onEditDescription ? (
+                <span className={styles.actionBtns}>
+                  <button
+                    type="button"
+                    className={styles.actionBtn}
+                    aria-label="Edit description"
+                    title="Edit description"
+                    onClick={onEditDescription}
+                  >
+                    <PencilIcon />
+                  </button>
+                </span>
+              ) : null}
             </div>
             <div className={styles.cardBody}>
               {expectation.description ? (

@@ -7,6 +7,7 @@ import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
   listExpectationReq,
+  updateExpectationReq,
 } from "../server/expectationServer";
 import { listGroupReq } from "../server/groupServer";
 import {
@@ -30,6 +31,7 @@ import {
   addAction,
   modifyAction,
   removeAction,
+  updateExpectationItem,
 } from "../slice/expectationSlice";
 import { getExpectationSuccess } from "../slice/thunk";
 import ExpectationDetail from "../component/expectation/ExpectationDetail";
@@ -37,6 +39,7 @@ import AddExpectationModal, {
   AddExpectationValues,
 } from "../component/expectation/AddExpectationModal";
 import ActionEditorModal from "../component/expectation/ActionEditorModal";
+import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
 import { getErrorMessage } from "../component/common";
 import {
   actionKind,
@@ -157,6 +160,8 @@ const ExpectationPage = () => {
   const [creating, setCreating] = useState(false);
   const [editingAction, setEditingAction] = useState<ActionM | null>(null);
   const [actionSaving, setActionSaving] = useState(false);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const wasAddOpenRef = useRef(false);
 
@@ -394,6 +399,29 @@ const ExpectationPage = () => {
     }
   };
 
+  const handleSaveDescription = async (description: string) => {
+    if (!selectedId) {
+      return;
+    }
+    setDescriptionSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, {
+        description,
+      });
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: { description },
+        }),
+      );
+      setDescriptionOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setDescriptionSaving(false);
+    }
+  };
+
   const isLoading =
     getExpectationListQuery.isFetching || getGroupListQuery.isFetching;
 
@@ -584,6 +612,7 @@ const ExpectationPage = () => {
           onEditAction={handleEditAction}
           onDeleteAction={handleDeleteAction}
           onAddAction={handleAddAction}
+          onEditDescription={() => setDescriptionOpen(true)}
         />
       </div>
       {addOpen ? (
@@ -600,6 +629,14 @@ const ExpectationPage = () => {
           saving={actionSaving}
           onSave={handleSaveAction}
           onClose={() => setEditingAction(null)}
+        />
+      ) : null}
+      {descriptionOpen && selectedExpectation ? (
+        <DescriptionEditorModal
+          description={selectedExpectation.description ?? ""}
+          saving={descriptionSaving}
+          onSave={handleSaveDescription}
+          onClose={() => setDescriptionOpen(false)}
         />
       ) : null}
     </div>
