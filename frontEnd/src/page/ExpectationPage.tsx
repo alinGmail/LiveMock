@@ -274,15 +274,21 @@ const ExpectationPage = () => {
       setCreating(false);
       return;
     }
-    // The expectation exists from here on: close the dialog and select it even
-    // if refreshing the list fails, so pressing Create again cannot duplicate it.
+    // The expectation exists from here on: close the dialog even if refreshing
+    // the list fails, so pressing Create again cannot duplicate it. Select the
+    // new row only after the refreshed list includes it, otherwise the
+    // selection effect would fall back to the first row.
     setQuery("");
     setAddOpen(false);
-    setSelectedId(created.id);
     setCreating(false);
-    getExpectationListQuery.refetch().catch(() => {
-      toast.error("Expectation created, but the list failed to refresh.");
-    });
+    getExpectationListQuery
+      .refetch()
+      .then(() => {
+        setSelectedId(created.id);
+      })
+      .catch(() => {
+        toast.error("Expectation created, but the list failed to refresh.");
+      });
   };
 
   const isLoading =
