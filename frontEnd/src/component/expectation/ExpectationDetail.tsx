@@ -113,6 +113,39 @@ const PlusIcon = () => (
   </svg>
 );
 
+const ActionBtns = ({
+  onEdit,
+  onDelete,
+}: {
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) => (
+  <span className={styles.actionBtns}>
+    {onEdit ? (
+      <button
+        type="button"
+        className={styles.actionBtn}
+        aria-label="Edit action"
+        title="Edit action"
+        onClick={onEdit}
+      >
+        <PencilIcon />
+      </button>
+    ) : null}
+    {onDelete ? (
+      <button
+        type="button"
+        className={[styles.actionBtn, styles.actionBtnDanger].join(" ")}
+        aria-label="Delete action"
+        title="Delete action"
+        onClick={onDelete}
+      >
+        <TrashIcon />
+      </button>
+    ) : null}
+  </span>
+);
+
 const ActionView = ({
   action,
   onEdit,
@@ -139,30 +172,7 @@ const ActionView = ({
       <div>
         <div className={styles.actionTop}>
           {badge}
-          <span className={styles.actionBtns}>
-            {onEdit ? (
-              <button
-                type="button"
-                className={styles.actionBtn}
-                aria-label="Edit action"
-                title="Edit action"
-                onClick={onEdit}
-              >
-                <PencilIcon />
-              </button>
-            ) : null}
-            {onDelete ? (
-              <button
-                type="button"
-                className={[styles.actionBtn, styles.actionBtnDanger].join(" ")}
-                aria-label="Delete action"
-                title="Delete action"
-                onClick={onDelete}
-              >
-                <TrashIcon />
-              </button>
-            ) : null}
-          </span>
+          <ActionBtns onEdit={onEdit} onDelete={onDelete} />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.k}>Status</span>
@@ -203,30 +213,7 @@ const ActionView = ({
       <div>
         <div className={styles.actionTop}>
           {badge}
-          <span className={styles.actionBtns}>
-            {onEdit ? (
-              <button
-                type="button"
-                className={styles.actionBtn}
-                aria-label="Edit action"
-                title="Edit action"
-                onClick={onEdit}
-              >
-                <PencilIcon />
-              </button>
-            ) : null}
-            {onDelete ? (
-              <button
-                type="button"
-                className={[styles.actionBtn, styles.actionBtnDanger].join(" ")}
-                aria-label="Delete action"
-                title="Delete action"
-                onClick={onDelete}
-              >
-                <TrashIcon />
-              </button>
-            ) : null}
-          </span>
+          <ActionBtns onEdit={onEdit} onDelete={onDelete} />
         </div>
         <div className={styles.fieldRow}>
           <span className={styles.k}>Target host</span>
@@ -259,7 +246,10 @@ const ActionView = ({
   const staticAction = action as StaticDirectoryActionM;
   return (
     <div>
-      <div className={styles.actionTop}>{badge}</div>
+      <div className={styles.actionTop}>
+        {badge}
+        <ActionBtns onEdit={onEdit} onDelete={onDelete} />
+      </div>
       <div className={styles.fieldRow}>
         <span className={styles.k}>URL prefix</span>
         <span className={[styles.v, styles.mono].join(" ")}>
