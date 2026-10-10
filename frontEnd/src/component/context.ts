@@ -1,17 +1,5 @@
 import { createContext, useContext } from "react";
 import { RequestMatcherM } from "livemock-core/struct/matcher";
-import { ActionM } from "livemock-core/struct/action";
-
-export interface ExpectationContextData {
-  refreshExpectationList: () => void;
-}
-const ExpectationContext = createContext<ExpectationContextData>({
-  refreshExpectationList:() => undefined,
-});
-
-export function useExpectationContext():ExpectationContextData{
-  return useContext(ExpectationContext);
-}
 
 interface MatcherContextData {
   matcherIndex: number | null;
@@ -34,24 +22,4 @@ function useMatcherContext(): MatcherContextData {
   return context;
 }
 
-interface ActionContextData {
-  onActionModify: (action: ActionM) => void;
-  onActionRemove: (actionId: string) => void;
-}
-
-const ActionContext = createContext<ActionContextData>({
-  onActionModify: () => {},
-  onActionRemove: () => {},
-});
-
-function useActionContext(): ActionContextData {
-  return useContext(ActionContext);
-}
-
-export {
-  ExpectationContext,
-  MatcherContext,
-  useMatcherContext,
-  useActionContext,
-  ActionContext,
-};
+export { MatcherContext, useMatcherContext };

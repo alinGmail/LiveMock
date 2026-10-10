@@ -2,12 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { App } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
   listExpectationReq,
 } from "../server/expectationServer";
 import { listGroupReq } from "../server/groupServer";
+import {
+  createActionReq,
+  deleteActionReq,
+  updateActionReq,
+} from "../server/actionServer";
 import {
   createExpectation,
   ExpectationM,
@@ -16,12 +22,21 @@ import {
   buildMatchOrderBlocks,
   ExpectationGroupM,
 } from "livemock-core/struct/expectationGroup";
-import { createCustomResponseAction } from "livemock-core/struct/action";
+import {
+  ActionM,
+  createCustomResponseAction,
+} from "livemock-core/struct/action";
+import {
+  addAction,
+  modifyAction,
+  removeAction,
+} from "../slice/expectationSlice";
 import { getExpectationSuccess } from "../slice/thunk";
 import ExpectationDetail from "../component/expectation/ExpectationDetail";
 import AddExpectationModal, {
   AddExpectationValues,
 } from "../component/expectation/AddExpectationModal";
+import ActionEditorModal from "../component/expectation/ActionEditorModal";
 import { getErrorMessage } from "../component/common";
 import {
   actionKind,
@@ -130,6 +145,7 @@ const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
   const dispatch: AppDispatch = useDispatch();
+  const { modal } = App.useApp();
   const currentProject = projectState.projectList[projectState.curProjectIndex];
 
   const [query, setQuery] = useState("");
@@ -139,6 +155,8 @@ const ExpectationPage = () => {
   );
   const [addOpen, setAddOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [editingAction, setEditingAction] = useState<ActionM | null>(null);
+  const [actionSaving, setActionSaving] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const wasAddOpenRef = useRef(false);
 
@@ -289,6 +307,91 @@ const ExpectationPage = () => {
       .catch(() => {
         toast.error("Expectation created, but the list failed to refresh.");
       });
+  };
+
+  const handleEditAction = () => {
+    const first = selectedExpectation?.actions?.[0];
+    if (first) {
+      setEditingAction(first);
+    }
+  };
+
+  const handleSaveAction = async (action: ActionM) => {
+    if (!selectedId) {
+      return;
+    }
+    const index = expectationList.findIndex((item) => item.id === selectedId);
+    if (index < 0) {
+      return;
+    }
+    setActionSaving(true);
+    try {
+      await updateActionReq(action.id, {
+        projectId: currentProject.id,
+        expectationId: selectedId,
+        actionUpdate: action,
+      });
+      dispatch(modifyAction({ expectationIndex: index, actionUpdate: action }));
+      setEditingAction(null);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setActionSaving(false);
+    }
+  };
+
+  const handleDeleteAction = () => {
+    const first = selectedExpectation?.actions?.[0];
+    if (!first || !selectedId) {
+      return;
+    }
+    modal.confirm({
+      title: "Delete action?",
+      content: "This removes the action from this expectation.",
+      okText: "Delete",
+      okType: "danger",
+      onOk: async () => {
+        const index = expectationList.findIndex(
+          (item) => item.id === selectedId,
+        );
+        if (index < 0) {
+          return;
+        }
+        try {
+          await deleteActionReq(first.id, {
+            projectId: currentProject.id,
+            expectationId: selectedId,
+          });
+          dispatch(
+            removeAction({ expectationIndex: index, actionId: first.id }),
+          );
+        } catch (error) {
+          toast.error(getErrorMessage(error));
+        }
+      },
+    });
+  };
+
+  const handleAddAction = async () => {
+    if (!selectedId) {
+      return;
+    }
+    const index = expectationList.findIndex((item) => item.id === selectedId);
+    if (index < 0) {
+      return;
+    }
+    const action = createCustomResponseAction();
+    try {
+      await createActionReq({
+        projectId: currentProject.id,
+        expectationId: selectedId,
+        action,
+      });
+      dispatch(addAction({ expectationIndex: index, action }));
+      setEditingAction(action);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
   };
 
   const isLoading =
@@ -478,6 +581,9 @@ const ExpectationPage = () => {
         <ExpectationDetail
           expectation={selectedExpectation}
           group={selectedGroup}
+          onEditAction={handleEditAction}
+          onDeleteAction={handleDeleteAction}
+          onAddAction={handleAddAction}
         />
       </div>
       {addOpen ? (
@@ -486,6 +592,14 @@ const ExpectationPage = () => {
           creating={creating}
           onCreate={handleCreate}
           onClose={() => setAddOpen(false)}
+        />
+      ) : null}
+      {editingAction ? (
+        <ActionEditorModal
+          action={editingAction}
+          saving={actionSaving}
+          onSave={handleSaveAction}
+          onClose={() => setEditingAction(null)}
         />
       ) : null}
     </div>

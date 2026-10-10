@@ -70,10 +70,58 @@ const MatcherChip = ({ matcher }: { matcher: RequestMatcherM }) => {
   );
 };
 
-const ActionView = ({ action }: { action: ActionM | undefined }) => {
-  if (!action) {
-    return <span className={styles.mutedText}>no action</span>;
-  }
+const PencilIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const ActionView = ({
+  action,
+  onEdit,
+  onDelete,
+}: {
+  action: ActionM;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) => {
   const badge = (
     <span
       className={[styles.typeBadge, BADGE_CLASS[actionKind(action.type)]].join(
@@ -89,7 +137,33 @@ const ActionView = ({ action }: { action: ActionM | undefined }) => {
     const response = custom.responseContent;
     return (
       <div>
-        <div className={styles.actionTop}>{badge}</div>
+        <div className={styles.actionTop}>
+          {badge}
+          <span className={styles.actionBtns}>
+            {onEdit ? (
+              <button
+                type="button"
+                className={styles.actionBtn}
+                aria-label="Edit action"
+                title="Edit action"
+                onClick={onEdit}
+              >
+                <PencilIcon />
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                className={[styles.actionBtn, styles.actionBtnDanger].join(" ")}
+                aria-label="Delete action"
+                title="Delete action"
+                onClick={onDelete}
+              >
+                <TrashIcon />
+              </button>
+            ) : null}
+          </span>
+        </div>
         <div className={styles.fieldRow}>
           <span className={styles.k}>Status</span>
           <span
@@ -127,7 +201,33 @@ const ActionView = ({ action }: { action: ActionM | undefined }) => {
     const target = proxy.host ? `${proxy.protocol}://${proxy.host}` : "";
     return (
       <div>
-        <div className={styles.actionTop}>{badge}</div>
+        <div className={styles.actionTop}>
+          {badge}
+          <span className={styles.actionBtns}>
+            {onEdit ? (
+              <button
+                type="button"
+                className={styles.actionBtn}
+                aria-label="Edit action"
+                title="Edit action"
+                onClick={onEdit}
+              >
+                <PencilIcon />
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                className={[styles.actionBtn, styles.actionBtnDanger].join(" ")}
+                aria-label="Delete action"
+                title="Delete action"
+                onClick={onDelete}
+              >
+                <TrashIcon />
+              </button>
+            ) : null}
+          </span>
+        </div>
         <div className={styles.fieldRow}>
           <span className={styles.k}>Target host</span>
           <span className={[styles.v, styles.mono].join(" ")}>
@@ -179,9 +279,18 @@ const ActionView = ({ action }: { action: ActionM | undefined }) => {
 interface ExpectationDetailProps {
   expectation: ExpectationM | null;
   group: ExpectationGroupM | null;
+  onEditAction?: () => void;
+  onDeleteAction?: () => void;
+  onAddAction?: () => void;
 }
 
-const ExpectationDetail = ({ expectation, group }: ExpectationDetailProps) => {
+const ExpectationDetail = ({
+  expectation,
+  group,
+  onEditAction,
+  onDeleteAction,
+  onAddAction,
+}: ExpectationDetailProps) => {
   if (!expectation) {
     return (
       <div className={styles.detail}>
@@ -305,7 +414,27 @@ const ExpectationDetail = ({ expectation, group }: ExpectationDetailProps) => {
               <span className={styles.hint}>what happens on a match</span>
             </div>
             <div className={styles.cardBody}>
-              <ActionView action={firstAction} />
+              {firstAction ? (
+                <ActionView
+                  action={firstAction}
+                  onEdit={onEditAction}
+                  onDelete={onDeleteAction}
+                />
+              ) : (
+                <div className={styles.noAction}>
+                  <span className={styles.mutedText}>no action</span>
+                  {onAddAction ? (
+                    <button
+                      type="button"
+                      className={styles.addActionBtn}
+                      onClick={onAddAction}
+                    >
+                      <PlusIcon />
+                      Add action
+                    </button>
+                  ) : null}
+                </div>
+              )}
             </div>
           </section>
 

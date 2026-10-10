@@ -244,6 +244,71 @@
   gap: 10px;
   margin-bottom: 12px;
 }
+.actionBtns {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+.actionBtn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.actionBtnDanger:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+}
+.actionBtn svg {
+  width: 15px;
+  height: 15px;
+}
+.noAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.addActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+.addActionBtn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.08);
+}
+.addActionBtn svg {
+  width: 14px;
+  height: 14px;
+}
 .typeBadge {
   display: inline-flex;
   align-items: center;
