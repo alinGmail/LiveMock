@@ -225,3 +225,23 @@ pre,
     animation-duration: 0.001ms !important;
   }
 }
+
+/* Thin, dark scrollbars matching the design demo. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3b52 transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3b52;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4f6b;
+  background-clip: content-box;
+}

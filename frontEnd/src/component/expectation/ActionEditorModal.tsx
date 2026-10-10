@@ -264,7 +264,29 @@ const ActionEditorModal = ({
           <div className={styles.editorWrap}>
             <Editor
               height="220px"
-              theme="vs-dark"
+              theme="livemock-dark"
+              beforeMount={(monaco) => {
+                monaco.editor.defineTheme("livemock-dark", {
+                  base: "vs-dark",
+                  inherit: true,
+                  rules: [],
+                  colors: {
+                    "editor.background": "#0b1220",
+                    "editorGutter.background": "#0b1220",
+                    "editorLineNumber.foreground": "#64748b",
+                    "editorLineNumber.activeForeground": "#94a3b8",
+                    "editor.lineHighlightBackground": "#16223a",
+                    "editorCursor.foreground": "#60a5fa",
+                    "editor.selectionBackground": "#3b82f655",
+                    "editorWidget.background": "#1e293b",
+                    "editorWidget.border": "#26364d",
+                    "minimap.background": "#0b1220",
+                    "scrollbarSlider.background": "#2a3b5280",
+                    "scrollbarSlider.hoverBackground": "#3b4f6b99",
+                    "scrollbarSlider.activeBackground": "#3b4f6bcc",
+                  },
+                });
+              }}
               language={
                 content.type === ResponseType.JSON ? "json" : "plaintext"
               }
