@@ -1,16 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { AppDispatch, useAppSelector } from "../store";
-import { listExpectationReq } from "../server/expectationServer";
+import {
+  createExpectationReq,
+  listExpectationReq,
+} from "../server/expectationServer";
 import { listGroupReq } from "../server/groupServer";
-import { ExpectationM } from "livemock-core/struct/expectation";
+import {
+  createExpectation,
+  ExpectationM,
+} from "livemock-core/struct/expectation";
 import {
   buildMatchOrderBlocks,
   ExpectationGroupM,
 } from "livemock-core/struct/expectationGroup";
+import { createCustomResponseAction } from "livemock-core/struct/action";
 import { getExpectationSuccess } from "../slice/thunk";
 import ExpectationDetail from "../component/expectation/ExpectationDetail";
+import AddExpectationModal, {
+  AddExpectationValues,
+} from "../component/expectation/AddExpectationModal";
+import { getErrorMessage } from "../component/common";
 import {
   actionKind,
   actionLabel,
@@ -52,6 +64,20 @@ const SearchIcon = () => (
   >
     <circle cx="11" cy="11" r="7" />
     <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 5v14M5 12h14" />
   </svg>
 );
 
@@ -111,6 +137,17 @@ const ExpectationPage = () => {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const [addOpen, setAddOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const wasAddOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (wasAddOpenRef.current && !addOpen) {
+      addButtonRef.current?.focus();
+    }
+    wasAddOpenRef.current = addOpen;
+  }, [addOpen]);
 
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
@@ -220,6 +257,29 @@ const ExpectationPage = () => {
       }
       return next;
     });
+  };
+
+  const handleCreate = async (values: AddExpectationValues) => {
+    const expectation = createExpectation();
+    expectation.name = values.name.trim() || "New expectation";
+    expectation.description = values.description.trim();
+    expectation.groupId = values.groupId;
+    expectation.actions = [createCustomResponseAction()];
+    setCreating(true);
+    try {
+      const created = await createExpectationReq(
+        currentProject.id,
+        expectation,
+      );
+      setQuery("");
+      await getExpectationListQuery.refetch();
+      setAddOpen(false);
+      setSelectedId(created.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setCreating(false);
+    }
   };
 
   const isLoading =
@@ -370,6 +430,17 @@ const ExpectationPage = () => {
     <div className={styles.page}>
       <div className={styles.workspace}>
         <section className={styles.master} aria-label="Expectations">
+          <div className={styles.toolbar}>
+            <button
+              ref={addButtonRef}
+              type="button"
+              className={styles.addButton}
+              onClick={() => setAddOpen(true)}
+            >
+              <PlusIcon />
+              Add Expectation
+            </button>
+          </div>
           <label className={styles.searchWrap}>
             <SearchIcon />
             <input
@@ -400,6 +471,14 @@ const ExpectationPage = () => {
           group={selectedGroup}
         />
       </div>
+      {addOpen ? (
+        <AddExpectationModal
+          groups={groupList}
+          creating={creating}
+          onCreate={handleCreate}
+          onClose={() => setAddOpen(false)}
+        />
+      ) : null}
     </div>
   );
 };
