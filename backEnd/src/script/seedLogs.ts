@@ -40,7 +40,7 @@ interface LogSpec {
   wsMessages?: Array<{ fromClient: boolean; content: string }>;
 }
 
-const LOG_SPECS: Array<LogSpec> = [
+const BASE_SPECS: Array<LogSpec> = [
   {
     method: "POST",
     path: "/api/login",
@@ -206,6 +206,59 @@ const LOG_SPECS: Array<LogSpec> = [
     resHeaders: [["content-type", "application/json"]],
   },
 ];
+
+const TOTAL_LOGS = 130;
+const GENERATED_STATUSES = [200, 200, 201, 204, 400, 404, 500];
+const GENERATED_METHODS = ["GET", "POST", "PUT", "DELETE"];
+
+function statusMessageFor(status: number): string {
+  switch (status) {
+    case 200:
+      return "OK";
+    case 201:
+      return "Created";
+    case 204:
+      return "No Content";
+    case 400:
+      return "Bad Request";
+    case 404:
+      return "Not Found";
+    case 500:
+      return "Internal Server Error";
+    default:
+      return "";
+  }
+}
+
+/** The rich hand-written specs plus generated filler up to TOTAL_LOGS. */
+function buildLogSpecs(): Array<LogSpec> {
+  const specs = [...BASE_SPECS];
+  let index = 1;
+  while (specs.length < TOTAL_LOGS) {
+    const status = GENERATED_STATUSES[index % GENERATED_STATUSES.length];
+    const method = GENERATED_METHODS[index % GENERATED_METHODS.length];
+    specs.push({
+      method,
+      path: `/api/items/${index}`,
+      status,
+      statusMessage: statusMessageFor(status),
+      duration: (index * 37) % 500,
+      query: index % 4 === 0 ? { page: String(index % 9) } : {},
+      reqBody: method === "GET" ? undefined : { id: index, name: `item ${index}` },
+      reqHeaders: [
+        ["accept", "application/json"],
+        ["host", "localhost:8088"],
+      ],
+      resBody: { id: index, name: `item ${index}`, ok: status < 400 },
+      resHeaders: [["content-type", "application/json"]],
+      expectationName: status >= 500 ? "fallback response" : undefined,
+    });
+    index++;
+  }
+  return specs;
+}
+
+const LOG_SPECS = buildLogSpecs();
 
 export interface SeedLogsResult {
   projectId: string;

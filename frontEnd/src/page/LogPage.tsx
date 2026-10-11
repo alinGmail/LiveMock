@@ -52,7 +52,7 @@ const METHOD_COLOR: { [key: string]: string } = {
 };
 
 const METHOD_OPTIONS = ["GET", "POST", "PUT", "DELETE"];
-const STATUS_FAMILIES = [
+const PAGE_SIZE = 50;const STATUS_FAMILIES = [
   { value: "2xx", label: "2xx" },
   { value: "3xx", label: "3xx" },
   { value: "4xx", label: "4xx" },
@@ -201,6 +201,8 @@ const LogPage: React.FC = () => {
     duration: true,
     marker: true,
   });
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
@@ -256,14 +258,48 @@ const LogPage: React.FC = () => {
     () => {
       return listLogViewLogs(logViewId as string, {
         maxLogId: null,
+        limit: PAGE_SIZE,
         projectId: currentProject.id,
       }).then((res) => {
         setLogs(res);
+        setHasMore(res.length === PAGE_SIZE);
         return res;
       });
     },
     { enabled: !!logViewId },
   );
+
+  const loadMore = () => {
+    if (!logViewId || !hasMore || loadingMore || logs.length === 0) {
+      return;
+    }
+    setLoadingMore(true);
+    const maxLogId = logs[logs.length - 1].id;
+    listLogViewLogs(logViewId, {
+      maxLogId,
+      limit: PAGE_SIZE,
+      projectId: currentProject.id,
+    })
+      .then((res) => {
+        setLogs((prev) => {
+          const existing = new Set(prev.map((log) => log.id));
+          res.forEach((log) => {
+            if (!existing.has(log.id)) {
+              prev.push(log);
+            }
+          });
+        });
+        setHasMore(res.length === PAGE_SIZE);
+      })
+      .finally(() => setLoadingMore(false));
+  };
+
+  const onListScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const el = event.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 240) {
+      loadMore();
+    }
+  };
 
   const applyPresetFilter = (filter: PresetFilterM) => {
     if (!logViewId) {
@@ -650,8 +686,11 @@ const LogPage: React.FC = () => {
 
       <div className={styles.workspace}>
         <section className={styles.master} aria-label="Request log">
-          <div className={styles.list} role="list">
+          <div className={styles.list} role="list" onScroll={onListScroll}>
             {listContent}
+            {loadingMore ? (
+              <div className={styles.listFooter}>Loading more…</div>
+            ) : null}
           </div>
         </section>
         <LogDetailPane
