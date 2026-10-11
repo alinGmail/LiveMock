@@ -76,6 +76,54 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 
+/* Host = protocol select (addonBefore) + input, merged into one control. */
+.hostGroup {
+  width: 100%;
+}
+.hostGroup :global(.ant-input-group-wrapper) {
+  width: 100%;
+}
+.hostGroup :global(.ant-input-group-addon) {
+  padding: 0;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-right: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.hostGroup :global(.ant-input) {
+  height: 34px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text);
+  font: inherit;
+  box-shadow: none;
+}
+.hostGroup :global(.ant-input::placeholder) {
+  color: var(--faint);
+}
+.hostGroup:focus-within :global(.ant-input),
+.hostGroup:focus-within :global(.ant-input-group-addon) {
+  border-color: var(--accent);
+}
+.hostGroup :global(.ant-select) {
+  width: 100%;
+}
+.hostGroup :global(.ant-select-selector) {
+  height: 32px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.hostGroup :global(.ant-select-selection-item) {
+  line-height: 30px !important;
+  color: var(--text) !important;
+  font-size: 13px;
+}
+.hostGroup :global(.ant-select-arrow) {
+  color: var(--faint);
+}
+
 /* ===== header rows ===== */
 .headerRows {
   display: flex;

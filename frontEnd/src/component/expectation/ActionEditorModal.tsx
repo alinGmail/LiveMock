@@ -1,3 +1,4 @@
+import { Input, Select as AntSelect } from "antd";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import {
@@ -310,27 +311,39 @@ const ActionEditorModal = ({
     body = (
       <div className={styles.form}>
         <div className={styles.fields}>
-          <label className={styles.field}>
-            <span className={styles.fieldLabel}>Protocol</span>
-            <Select
-              value={proxy.protocol}
-              onChange={(value) =>
-                updateProxy({ protocol: value as ProxyProtocol })
-              }
-              options={[
-                { value: ProxyProtocol.HTTP, label: "http://" },
-                { value: ProxyProtocol.HTTPS, label: "https://" },
-              ]}
-            />
-          </label>
-          <label className={styles.field}>
+          <label className={[styles.field, styles.fieldFull].join(" ")}>
             <span className={styles.fieldLabel}>Host</span>
-            <input
-              className={styles.input}
-              value={proxy.host}
-              placeholder="api.example.com"
-              onChange={(event) => updateProxy({ host: event.target.value })}
-            />
+            <div className={styles.hostGroup}>
+              <Input
+                addonBefore={
+                  <AntSelect
+                    variant="borderless"
+                    value={proxy.protocol}
+                    onChange={(value) =>
+                      updateProxy({ protocol: value as ProxyProtocol })
+                    }
+                    options={[
+                      { value: ProxyProtocol.HTTP, label: "http://" },
+                      { value: ProxyProtocol.HTTPS, label: "https://" },
+                    ]}
+                  />
+                }
+                value={proxy.host}
+                placeholder="api.example.com"
+                onChange={(event) => {
+                  let value = event.target.value;
+                  let protocol = proxy.protocol;
+                  if (value.startsWith("http://")) {
+                    protocol = ProxyProtocol.HTTP;
+                    value = value.substring(7);
+                  } else if (value.startsWith("https://")) {
+                    protocol = ProxyProtocol.HTTPS;
+                    value = value.substring(8);
+                  }
+                  updateProxy({ host: value, protocol });
+                }}
+              />
+            </div>
           </label>
           <label className={[styles.field, styles.fieldFull].join(" ")}>
             <span className={styles.fieldLabel}>
