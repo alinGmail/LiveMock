@@ -27,6 +27,7 @@ import {
   ActionM,
   createCustomResponseAction,
 } from "livemock-core/struct/action";
+import { RequestMatcherM } from "livemock-core/struct/matcher";
 import {
   addAction,
   modifyAction,
@@ -40,6 +41,10 @@ import AddExpectationModal, {
 } from "../component/expectation/AddExpectationModal";
 import ActionEditorModal from "../component/expectation/ActionEditorModal";
 import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
+import MatchersEditorModal from "../component/expectation/MatchersEditorModal";
+import TimingEditorModal, {
+  TimingValues,
+} from "../component/expectation/TimingEditorModal";
 import { getErrorMessage } from "../component/common";
 import {
   actionKind,
@@ -162,6 +167,10 @@ const ExpectationPage = () => {
   const [actionSaving, setActionSaving] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [descriptionSaving, setDescriptionSaving] = useState(false);
+  const [matchersOpen, setMatchersOpen] = useState(false);
+  const [matchersSaving, setMatchersSaving] = useState(false);
+  const [timingOpen, setTimingOpen] = useState(false);
+  const [timingSaving, setTimingSaving] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const wasAddOpenRef = useRef(false);
 
@@ -422,6 +431,72 @@ const ExpectationPage = () => {
     }
   };
 
+  const handleSaveMatchers = async (matchers: Array<RequestMatcherM>) => {
+    if (!selectedId) {
+      return;
+    }
+    setMatchersSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, { matchers });
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: { matchers },
+        }),
+      );
+      setMatchersOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setMatchersSaving(false);
+    }
+  };
+
+  const handleSaveTiming = async (values: TimingValues) => {
+    if (!selectedId) {
+      return;
+    }
+    setTimingSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, values);
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: values,
+        }),
+      );
+      setTimingOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setTimingSaving(false);
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (!selectedId || !selectedExpectation) {
+      return;
+    }
+    const activate = !selectedExpectation.activate;
+    dispatch(
+      updateExpectationItem({
+        expectationId: selectedId,
+        modifyValues: { activate },
+      }),
+    );
+    updateExpectationReq(currentProject.id, selectedId, { activate }).catch(
+      (error) => {
+        dispatch(
+          updateExpectationItem({
+            expectationId: selectedId,
+            modifyValues: { activate: !activate },
+          }),
+        );
+        toast.error(getErrorMessage(error));
+      },
+    );
+  };
+
   const isLoading =
     getExpectationListQuery.isFetching || getGroupListQuery.isFetching;
 
@@ -613,6 +688,9 @@ const ExpectationPage = () => {
           onDeleteAction={handleDeleteAction}
           onAddAction={handleAddAction}
           onEditDescription={() => setDescriptionOpen(true)}
+          onEditMatchers={() => setMatchersOpen(true)}
+          onEditTiming={() => setTimingOpen(true)}
+          onToggleActive={handleToggleActive}
         />
       </div>
       {addOpen ? (
@@ -637,6 +715,23 @@ const ExpectationPage = () => {
           saving={descriptionSaving}
           onSave={handleSaveDescription}
           onClose={() => setDescriptionOpen(false)}
+        />
+      ) : null}
+      {matchersOpen && selectedExpectation ? (
+        <MatchersEditorModal
+          matchers={selectedExpectation.matchers ?? []}
+          saving={matchersSaving}
+          onSave={handleSaveMatchers}
+          onClose={() => setMatchersOpen(false)}
+        />
+      ) : null}
+      {timingOpen && selectedExpectation ? (
+        <TimingEditorModal
+          expectation={selectedExpectation}
+          groups={groupList}
+          saving={timingSaving}
+          onSave={handleSaveTiming}
+          onClose={() => setTimingOpen(false)}
         />
       ) : null}
     </div>

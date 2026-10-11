@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import Toggle from "../Toggle";
 import styles from "./ExpectationDetail.module.scss";
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { ExpectationGroupM } from "livemock-core/struct/expectationGroup";
@@ -325,6 +326,9 @@ interface ExpectationDetailProps {
   onDeleteAction?: () => void;
   onAddAction?: () => void;
   onEditDescription?: () => void;
+  onEditMatchers?: () => void;
+  onEditTiming?: () => void;
+  onToggleActive?: () => void;
 }
 
 const ExpectationDetail = ({
@@ -334,6 +338,9 @@ const ExpectationDetail = ({
   onDeleteAction,
   onAddAction,
   onEditDescription,
+  onEditMatchers,
+  onEditTiming,
+  onToggleActive,
 }: ExpectationDetailProps) => {
   if (!expectation) {
     return (
@@ -377,18 +384,12 @@ const ExpectationDetail = ({
         <div className={styles.headRow}>
           <h2 className={styles.title}>{expectation.name || "empty"}</h2>
           <div className={styles.headActions}>
-            <span
-              className={[
-                styles.headSwitch,
-                expectation.activate ? styles.headSwitchOn : "",
-              ].join(" ")}
-              role="switch"
-              aria-checked={expectation.activate}
-              aria-disabled="true"
-              title="Activation (read-only in this step)"
-            >
-              <span className={styles.headSwitchKnob} />
-            </span>
+            <Toggle
+              checked={expectation.activate}
+              onChange={() => onToggleActive?.()}
+              label="Toggle active"
+              disabled={!onToggleActive}
+            />
           </div>
         </div>
         <div className={styles.chips}>
@@ -451,6 +452,19 @@ const ExpectationDetail = ({
             <div className={styles.cardHead}>
               <h3>Matchers</h3>
               <span className={styles.hint}>every matcher must match</span>
+              {onEditMatchers ? (
+                <span className={styles.actionBtns}>
+                  <button
+                    type="button"
+                    className={styles.actionBtn}
+                    aria-label="Edit matchers"
+                    title="Edit matchers"
+                    onClick={onEditMatchers}
+                  >
+                    <PencilIcon />
+                  </button>
+                </span>
+              ) : null}
             </div>
             <div className={styles.cardBody}>
               {expectation.matchers && expectation.matchers.length ? (
@@ -498,6 +512,19 @@ const ExpectationDetail = ({
           <section className={styles.card}>
             <div className={styles.cardHead}>
               <h3>Timing &amp; state</h3>
+              {onEditTiming ? (
+                <span className={styles.actionBtns}>
+                  <button
+                    type="button"
+                    className={styles.actionBtn}
+                    aria-label="Edit timing and state"
+                    title="Edit timing and state"
+                    onClick={onEditTiming}
+                  >
+                    <PencilIcon />
+                  </button>
+                </span>
+              ) : null}
             </div>
             <div className={styles.cardBody}>
               <div className={styles.fields}>

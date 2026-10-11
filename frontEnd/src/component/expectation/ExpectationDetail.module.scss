@@ -54,38 +54,6 @@
   gap: 6px;
 }
 
-.headSwitch {
-  position: relative;
-  display: inline-block;
-  width: 34px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-3);
-  flex: none;
-  opacity: 0.9;
-}
-.headSwitchOn {
-  background: rgba(34, 197, 94, 0.22);
-  border-color: rgba(34, 197, 94, 0.55);
-}
-.headSwitchKnob {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--muted);
-  transition:
-    transform 180ms ease,
-    background 180ms ease;
-}
-.headSwitchOn .headSwitchKnob {
-  transform: translateX(14px);
-  background: var(--success);
-}
-
 .chips {
   display: flex;
   flex-wrap: wrap;

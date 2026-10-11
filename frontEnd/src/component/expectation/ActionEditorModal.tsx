@@ -14,6 +14,7 @@ import {
 } from "livemock-core/struct/action";
 import Modal from "../Modal";
 import Select from "../Select";
+import Toggle from "../Toggle";
 import btn from "../buttonStyles.module.scss";
 import styles from "./ActionEditorModal.module.scss";
 
@@ -51,33 +52,6 @@ const XIcon = () => (
   >
     <path d="M18 6 6 18M6 6l12 12" />
   </svg>
-);
-
-const Toggle = ({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (value: boolean) => void;
-  label: string;
-}) => (
-  <span
-    className={[styles.switch, checked ? styles.switchOn : ""].join(" ")}
-    role="switch"
-    aria-checked={checked}
-    aria-label={label}
-    tabIndex={0}
-    onClick={() => onChange(!checked)}
-    onKeyDown={(event) => {
-      if (event.key === " " || event.key === "Enter") {
-        event.preventDefault();
-        onChange(!checked);
-      }
-    }}
-  >
-    <span className={styles.switchKnob} />
-  </span>
 );
 
 const HeaderRows = ({
