@@ -193,9 +193,9 @@ const LogPage: React.FC = () => {
   const logViewIdRef = useRef<string>();
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
-  const [justInId, setJustInId] = useState<number | null>(null);
   const [paused, setPaused] = useState(false);
   const pausedRef = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const [cols, setCols] = useState({
     expectation: true,
     duration: true,
@@ -359,6 +359,28 @@ const LogPage: React.FC = () => {
     logViewLogsQuery.refetch();
   };
 
+  // Flash a row green on insert / update / websocket update. Uses the Web
+  // Animations API so multiple rows can flash at once and a repeated change
+  // restarts the animation (a CSS class would only play once).
+  const highlightRow = (id: number) => {
+    window.requestAnimationFrame(() => {
+      const el = listRef.current?.querySelector<HTMLElement>(
+        `[data-log-id="${id}"]`,
+      );
+      if (!el || typeof el.animate !== "function") {
+        return;
+      }
+      el.getAnimations().forEach((animation) => animation.cancel());
+      el.animate(
+        [
+          { backgroundColor: "rgba(34, 197, 94, 0.24)" },
+          { backgroundColor: "transparent" },
+        ],
+        { duration: 1500, easing: "ease" },
+      );
+    });
+  };
+
   useEffect(() => {
     const socket = io({
       path: `${ServerUrl}/socket.io`,
@@ -372,7 +394,7 @@ const LogPage: React.FC = () => {
           return;
         }
         onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-        setJustInId(log.id);
+        highlightRow(log.id);
       },
     );
     socket.on(
@@ -382,6 +404,7 @@ const LogPage: React.FC = () => {
           return;
         }
         onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs);
+        highlightRow(log.id);
       },
     );
     socket.on(
@@ -411,11 +434,11 @@ const LogPage: React.FC = () => {
     socket.on(
       "updateLog",
       ({ projectId, log }: { projectId: string; log: LogM }) => {
-        if (
-          projectId === currentProject.id &&
-          log.id === store.getState().log.selectedLogId
-        ) {
-          dispatch(setSelectedLogItem(log));
+        if (projectId === currentProject.id) {
+          highlightRow(log.id);
+          if (log.id === store.getState().log.selectedLogId) {
+            dispatch(setSelectedLogItem(log));
+          }
         }
       },
     );
@@ -445,15 +468,6 @@ const LogPage: React.FC = () => {
       dispatch(setSelectedLogItem(logs[0]));
     }
   }, [logs, logState.selectedLogId]);
-
-  useEffect(() => {
-    if (justInId == null) {
-      return;
-    }
-    // clear the highlight after the animation (matches the design's 1.4s)
-    const timer = window.setTimeout(() => setJustInId(null), 1500);
-    return () => window.clearTimeout(timer);
-  }, [justInId]);
 
   const selectedLog =
     logs.find((log) => log.id === logState.selectedLogId) ??
@@ -503,10 +517,10 @@ const LogPage: React.FC = () => {
         key={log.id}
         type="button"
         role="listitem"
+        data-log-id={log.id}
         className={[
           styles.reqRow,
           log.id === logState.selectedLogId ? styles.reqRowSelected : "",
-          log.id === justInId ? styles.reqRowJustIn : "",
         ].join(" ")}
         onClick={() => {
           dispatch(setSelectedLogId(log.id));
@@ -686,7 +700,12 @@ const LogPage: React.FC = () => {
 
       <div className={styles.workspace}>
         <section className={styles.master} aria-label="Request log">
-          <div className={styles.list} role="list" onScroll={onListScroll}>
+          <div
+            className={styles.list}
+            role="list"
+            ref={listRef}
+            onScroll={onListScroll}
+          >
             {listContent}
             {loadingMore ? (
               <div className={styles.listFooter}>Loading more…</div>

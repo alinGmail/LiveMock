@@ -220,17 +220,6 @@
   );
   border-color: rgba(59, 130, 246, 0.45);
 }
-.reqRowJustIn {
-  animation: justin 1.4s ease;
-}
-@keyframes justin {
-  0% {
-    background: rgba(34, 197, 94, 0.24);
-  }
-  100% {
-    background: transparent;
-  }
-}
 .rail {
   width: 4px;
   height: 30px;
