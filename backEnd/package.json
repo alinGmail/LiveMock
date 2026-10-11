@@ -14,6 +14,7 @@
     "prepack": "yarn workspace livemock-core build && yarn workspace front-end build && node scripts/build.mjs",
     "reset-admin": "ts-node ./src/script/resetAdmin.ts",
     "seed-demo": "ts-node ./src/script/seedDemo.ts",
+    "seed-logs": "ts-node ./src/script/seedLogs.ts",
     "testAll": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=test/"
   },
   "keywords": [
