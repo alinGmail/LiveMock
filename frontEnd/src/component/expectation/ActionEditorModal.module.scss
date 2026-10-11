@@ -85,6 +85,7 @@
 }
 .hostGroup :global(.ant-input-group-addon) {
   padding: 0;
+  min-width: 96px;
   background: var(--bg-deep);
   border: 1px solid var(--border);
   border-right: 0;
@@ -108,9 +109,11 @@
 }
 .hostGroup :global(.ant-select) {
   width: 100%;
+  min-width: 82px;
 }
 .hostGroup :global(.ant-select-selector) {
   height: 32px !important;
+  padding: 0 11px !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
