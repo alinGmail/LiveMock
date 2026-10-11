@@ -240,6 +240,18 @@ export function changeToLokijsFilter(filter: LogFilterM) {
       case LogFilterCondition.LESS:
         return { [filter.property]: { $lt: filter.value } };
       case LogFilterCondition.IN: {
+        const inArray: Array<string | number> = [];
+        (Array.isArray(filter.value) ? filter.value : [filter.value]).forEach(
+          (element) => {
+            inArray.push(element);
+            if (isNumberString(element as string)) {
+              inArray.push(Number(element));
+            }
+          },
+        );
+        return { [filter.property]: { $in: inArray } };
+      }
+      case LogFilterCondition.FAMILY: {
         const rawValues: Array<string | number> = Array.isArray(filter.value)
           ? filter.value
           : [filter.value];

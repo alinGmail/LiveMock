@@ -7,14 +7,17 @@ import {
 } from "livemock-core/struct/log";
 import { changeToLokijsFilter } from "../../src/log/logUtils";
 
-function statusFilter(value: Array<string>): PresetFilterM {
+function statusFilter(
+  condition: LogFilterCondition,
+  value: Array<string>,
+): PresetFilterM {
   return {
     type: FilterType.PRESET_FILTER,
     name: PresetFilterName.STATUS_CODE,
     id: "status-filter",
     property: "res.status",
     value,
-    condition: LogFilterCondition.IN,
+    condition,
     activate: true,
   };
 }
@@ -30,25 +33,31 @@ describe("log filter translation (status families)", () => {
     { id: 5, res: { status: null } },
   ]);
 
-  const matchingIds = (value: Array<string>) =>
+  const matchingIds = (condition: LogFilterCondition, value: Array<string>) =>
     collection
-      .find(changeToLokijsFilter(statusFilter(value)))
+      .find(changeToLokijsFilter(statusFilter(condition, value)))
       .map((log: { id: number }) => log.id)
       .sort((a, b) => a - b);
 
-  test("exact codes keep working", () => {
-    expect(matchingIds(["404"])).toEqual([3]);
+  test("IN matches exact codes only", () => {
+    expect(matchingIds(LogFilterCondition.IN, ["404"])).toEqual([3]);
   });
 
-  test("a family matches its whole range", () => {
-    expect(matchingIds(["2xx"])).toEqual([1, 2]);
+  test("IN does not treat a family token as a range", () => {
+    expect(matchingIds(LogFilterCondition.IN, ["2xx"])).toEqual([]);
   });
 
-  test("exact values and a family combine", () => {
-    expect(matchingIds(["2xx", "500"])).toEqual([1, 2, 4]);
+  test("FAMILY matches a whole range", () => {
+    expect(matchingIds(LogFilterCondition.FAMILY, ["2xx"])).toEqual([1, 2]);
   });
 
-  test("a family with no matches returns nothing", () => {
-    expect(matchingIds(["3xx"])).toEqual([]);
+  test("FAMILY combines exact values and a family", () => {
+    expect(
+      matchingIds(LogFilterCondition.FAMILY, ["2xx", "500"]),
+    ).toEqual([1, 2, 4]);
+  });
+
+  test("FAMILY with no matches returns nothing", () => {
+    expect(matchingIds(LogFilterCondition.FAMILY, ["3xx"])).toEqual([]);
   });
 });

@@ -162,6 +162,11 @@ export enum LogFilterCondition {
   GREATER = "GREATER",
   LESS = "LESS",
   IN = "IN",
+  /**
+   * Membership by status family token (e.g. "2xx"): each token expands to an
+   * inclusive range. Distinct from IN, which is a set of exact values.
+   */
+  FAMILY = "FAMILY",
 }
 
 export const LogFilterConditionMap: {
@@ -173,6 +178,7 @@ export const LogFilterConditionMap: {
   GREATER: "$gt",
   LESS: "$less",
   IN: "$in",
+  FAMILY: "$family",
 };
 
 function getKeyByValue<T extends Record<string, string>>(
@@ -223,7 +229,7 @@ export function createStatusCodePresetFilterM(): PresetFilterM {
   return {
     activate: true,
     name: PresetFilterName.STATUS_CODE,
-    condition: LogFilterCondition.IN,
+    condition: LogFilterCondition.FAMILY,
     id: uuId(),
     property: "res.status",
     type: FilterType.PRESET_FILTER,
