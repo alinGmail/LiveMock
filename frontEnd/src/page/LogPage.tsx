@@ -52,7 +52,8 @@ const METHOD_COLOR: { [key: string]: string } = {
 };
 
 const METHOD_OPTIONS = ["GET", "POST", "PUT", "DELETE"];
-const PAGE_SIZE = 50;const STATUS_FAMILIES = [
+const PAGE_SIZE = 50;
+const STATUS_FAMILIES = [
   { value: "2xx", label: "2xx" },
   { value: "3xx", label: "3xx" },
   { value: "4xx", label: "4xx" },
@@ -474,23 +475,13 @@ const LogPage: React.FC = () => {
     logState.selectedLogItem ??
     null;
 
-  const filteredLogs = useMemo(() => {
-    const methods = presetFilter.methods;
-    const families = presetFilter.statusCode;
-    const expectationId = presetFilter.expectationId;
-    return logs.filter((log) => {
-      if (methods.length && !methods.includes((log.req?.method ?? "").toUpperCase())) {
-        return false;
-      }
-      if (families.length && !families.includes(statusFamily(log.res?.status))) {
-        return false;
-      }
-      if (expectationId && log.expectationId !== expectationId) {
-        return false;
-      }
-      return true;
-    });
-  }, [logs, presetFilter]);
+  // Filtering happens on the server (persisted in the log view); the list only
+  // renders what the server returns. This flag just picks the empty-state copy.
+  const hasActiveFilters =
+    presetFilter.methods.length > 0 ||
+    presetFilter.statusCode.length > 0 ||
+    !!presetFilter.expectationId ||
+    logState.logFilter.some((filter) => filter.activate);
 
   const expectationOptions = useMemo(
     () => [
@@ -573,7 +564,15 @@ const LogPage: React.FC = () => {
 
   let listContent: React.ReactNode;
   if (logs.length === 0) {
-    listContent = (
+    listContent = hasActiveFilters ? (
+      <div className={styles.empty}>
+        <span className={styles.emptyGlyph}>
+          <SearchIcon />
+        </span>
+        <h3>No matching requests</h3>
+        <p>Adjust or clear the filters to see more.</p>
+      </div>
+    ) : (
       <div className={styles.empty}>
         <span className={styles.emptyGlyph}>
           <ListIcon />
@@ -582,18 +581,8 @@ const LogPage: React.FC = () => {
         <p>Start the project and send a request to the mock port to see it here.</p>
       </div>
     );
-  } else if (filteredLogs.length === 0) {
-    listContent = (
-      <div className={styles.empty}>
-        <span className={styles.emptyGlyph}>
-          <SearchIcon />
-        </span>
-        <h3>No matching requests</h3>
-        <p>Adjust or clear the filters to see more.</p>
-      </div>
-    );
   } else {
-    listContent = filteredLogs.map(renderRow);
+    listContent = logs.map(renderRow);
   }
 
   return (
