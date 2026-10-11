@@ -329,6 +329,7 @@ interface ExpectationDetailProps {
   onEditMatchers?: () => void;
   onEditTiming?: () => void;
   onToggleActive?: () => void;
+  activeSaving?: boolean;
 }
 
 const ExpectationDetail = ({
@@ -341,6 +342,7 @@ const ExpectationDetail = ({
   onEditMatchers,
   onEditTiming,
   onToggleActive,
+  activeSaving,
 }: ExpectationDetailProps) => {
   if (!expectation) {
     return (
@@ -388,7 +390,7 @@ const ExpectationDetail = ({
               checked={expectation.activate}
               onChange={() => onToggleActive?.()}
               label="Toggle active"
-              disabled={!onToggleActive}
+              disabled={!onToggleActive || activeSaving}
             />
           </div>
         </div>

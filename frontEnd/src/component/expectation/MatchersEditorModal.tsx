@@ -108,6 +108,19 @@ const MatchersEditorModal = ({
     );
   };
 
+  const changeCondition = (index: number, condition: MatcherCondition) => {
+    // Presence checks hide the value field; clear any leftover value so it
+    // cannot silently affect matching (the array path still reads it).
+    if (
+      condition === MatcherCondition.SHOWED ||
+      condition === MatcherCondition.NOT_SHOWED
+    ) {
+      patch(index, { conditions: condition, value: "" });
+    } else {
+      patch(index, { conditions: condition });
+    }
+  };
+
   return (
     <Modal
       title="Edit matchers"
@@ -164,9 +177,7 @@ const MatchersEditorModal = ({
                   <Select
                     value={matcher.conditions}
                     onChange={(value) =>
-                      patch(index, {
-                        conditions: value as MatcherCondition,
-                      })
+                      changeCondition(index, value as MatcherCondition)
                     }
                     options={CONDITION_OPTIONS}
                   />

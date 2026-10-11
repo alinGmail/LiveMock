@@ -171,6 +171,7 @@ const ExpectationPage = () => {
   const [matchersSaving, setMatchersSaving] = useState(false);
   const [timingOpen, setTimingOpen] = useState(false);
   const [timingSaving, setTimingSaving] = useState(false);
+  const [activeSaving, setActiveSaving] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const wasAddOpenRef = useRef(false);
 
@@ -474,18 +475,19 @@ const ExpectationPage = () => {
   };
 
   const handleToggleActive = () => {
-    if (!selectedId || !selectedExpectation) {
+    if (!selectedId || !selectedExpectation || activeSaving) {
       return;
     }
     const activate = !selectedExpectation.activate;
+    setActiveSaving(true);
     dispatch(
       updateExpectationItem({
         expectationId: selectedId,
         modifyValues: { activate },
       }),
     );
-    updateExpectationReq(currentProject.id, selectedId, { activate }).catch(
-      (error) => {
+    updateExpectationReq(currentProject.id, selectedId, { activate })
+      .catch((error) => {
         dispatch(
           updateExpectationItem({
             expectationId: selectedId,
@@ -493,8 +495,8 @@ const ExpectationPage = () => {
           }),
         );
         toast.error(getErrorMessage(error));
-      },
-    );
+      })
+      .finally(() => setActiveSaving(false));
   };
 
   const isLoading =
@@ -691,6 +693,7 @@ const ExpectationPage = () => {
           onEditMatchers={() => setMatchersOpen(true)}
           onEditTiming={() => setTimingOpen(true)}
           onToggleActive={handleToggleActive}
+          activeSaving={activeSaving}
         />
       </div>
       {addOpen ? (
