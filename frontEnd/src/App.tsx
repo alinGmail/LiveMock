@@ -15,7 +15,6 @@ import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
 import ConfigPage from "./page/ConfigPage";
 import { useEffect, useRef, useState } from "react";
-import RequestLogDetailPage from "./page/RequestLogDetail/RequestLogDetailPage";
 import AuthPage from "./page/AuthPage";
 import { getAuthStatusReq, getMeReq } from "./server/authServer";
 import {
@@ -145,10 +144,6 @@ function App() {
                         element={<Navigate to={"expectation"} />}
                       />
                     </Route>
-                    <Route
-                      path={"requestLog/detail/:logId"}
-                      element={<RequestLogDetailPage />}
-                    />
                   </Routes>
                 </HashRouter>
               )
