@@ -40,6 +40,7 @@ import { binarySearch } from "../component/common";
 import Select from "../component/Select";
 import btn from "../component/buttonStyles.module.scss";
 import LogDetailPane from "../component/log/LogDetailPane";
+import { MockFromLogModal } from "../component/expectation/MockFromLogModal";
 import styles from "./LogPage.module.scss";
 
 const METHOD_COLOR: { [key: string]: string } = {
@@ -204,6 +205,7 @@ const LogPage: React.FC = () => {
   });
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [mockLog, setMockLog] = useState<LogM | null>(null);
   useEffect(() => {
     pausedRef.current = paused;
   }, [paused]);
@@ -704,8 +706,16 @@ const LogPage: React.FC = () => {
         <LogDetailPane
           log={selectedLog}
           expectations={expectationState.expectationMap}
+          onMock={() => setMockLog(selectedLog)}
         />
       </div>
+      <MockFromLogModal
+        projectId={currentProject.id}
+        log={mockLog}
+        open={!!mockLog}
+        onClose={() => setMockLog(null)}
+        onSaved={() => getExpectationListQuery.refetch()}
+      />
     </div>
   );
 };

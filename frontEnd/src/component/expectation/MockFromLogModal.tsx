@@ -152,7 +152,11 @@ const MockFromLogModalContent: React.FC<{
     }
     setSaving(true);
     try {
-      await createExpectationReq(projectId, buildExpectationFromDraft(draft));
+      const expectation = buildExpectationFromDraft(draft);
+      expectation.description = `Mocked from request ${log.req?.method ?? ""} ${
+        log.req?.path ?? ""
+      }`.trim();
+      await createExpectationReq(projectId, expectation);
       message.success("Expectation created");
       onSaved();
       onClose();

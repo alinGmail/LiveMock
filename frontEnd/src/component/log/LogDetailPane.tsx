@@ -127,9 +127,10 @@ const SummaryItem = ({ k, v }: { k: string; v: string }) => (
 interface LogDetailPaneProps {
   log: LogM | null;
   expectations: { [id: string]: ExpectationM };
+  onMock?: () => void;
 }
 
-const LogDetailPane = ({ log, expectations }: LogDetailPaneProps) => {
+const LogDetailPane = ({ log, expectations, onMock }: LogDetailPaneProps) => {
   const [tab, setTab] = useState<TabId>("overview");
 
   if (!log) {
@@ -404,8 +405,9 @@ const LogDetailPane = ({ log, expectations }: LogDetailPaneProps) => {
           <button
             type="button"
             className={[btn.btn, btn.primary].join(" ")}
-            disabled
-            title="Not available yet"
+            disabled={!log.req || !onMock}
+            title={log.req ? undefined : "No request to mock"}
+            onClick={onMock}
           >
             Mock this request
           </button>
