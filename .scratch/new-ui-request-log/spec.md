@@ -90,7 +90,7 @@ The web dashboard only. The socket events and `LogM` model are unchanged.
 ## Out of Scope
 
 - Custom filter chips / Add filter and the filter editor popover.
-- Mock this request (button rendered but inert).
+- Mock this request — the button was rendered inert in this step; it is now implemented in `.scratch/new-ui-mock-from-log/spec.md` (step 6).
 - Copy-as-cURL and per-log delete (no endpoint).
 - The full column editor dialog.
 - Light theme and the desktop flavor's UI (its filter translation is mirrored for parity only).
