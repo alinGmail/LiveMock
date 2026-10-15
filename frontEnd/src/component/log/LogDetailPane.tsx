@@ -402,15 +402,19 @@ const LogDetailPane = ({ log, expectations, onMock }: LogDetailPaneProps) => {
           <span className={styles.dhMethod}>{method}</span>
           <span className={styles.dhPath}>{path}</span>
           <span className={styles.grow} />
-          <button
-            type="button"
-            className={[btn.btn, btn.primary].join(" ")}
-            disabled={!log.req || !onMock}
+          <span
+            className={styles.mockWrap}
             title={log.req ? undefined : "No request to mock"}
-            onClick={onMock}
           >
-            Mock this request
-          </button>
+            <button
+              type="button"
+              className={[btn.btn, btn.primary].join(" ")}
+              disabled={!log.req || !onMock}
+              onClick={onMock}
+            >
+              Mock this request
+            </button>
+          </span>
         </div>
         {chips}
       </div>

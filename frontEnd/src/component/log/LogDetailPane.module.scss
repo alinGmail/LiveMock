@@ -39,6 +39,11 @@
 .grow {
   flex: 1;
 }
+/* Keeps the disabled button's "why" tooltip hoverable: a disabled control
+   swallows pointer events, so the title lives on this wrapper instead. */
+.mockWrap {
+  display: inline-flex;
+}
 
 .chips {
   display: flex;
