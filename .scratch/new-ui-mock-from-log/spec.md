@@ -81,19 +81,23 @@ page**. If the selected request has no request to mock, the button is unavailabl
 - The created expectation is a single custom-response (JSON) action; `groupId` is
   null, `activate` true, `priority`/`delay` 0.
 
-### Dialog UI (reuse, thin adaptation)
+### Dialog UI (rebuilt in the redesign)
 
-- The dialog is the existing web `MockFromLogModal` component (an `antd` modal titled
-  "Mock this request", width 780, `maskClosable=false`), which already renders the
-  Name / Matchers / Response panels and the Reset / Cancel / Save footer, uses the
-  app's `App.useApp()` toast, and follows the app's dark theme (including the Monaco
-  editor theme). It is wired for the first time — it is currently orphaned.
-- The design deliberately did **not** restyle this dialog ("the Mock-from-log modal …
-  [is] not redesigned"), so it is reused rather than rebuilt with the redesign's
-  primitives.
-- The one behavioural addition to the component: after building the expectation from
-  the draft, set its **description** to `"Mocked from request <method> <path>"`. This
-  is done in the web layer only; the core helper stays untouched.
+- The dialog is rebuilt in the redesign's idiom — the shared `Modal` primitive with a
+  new `lg` size (820px), the shared `Select`, the shared button styles and a CSS
+  module — so it matches the rest of the new UI. It keeps the Name / Matchers /
+  Response panels and the Reset / Cancel / Save footer, the app's `App.useApp()`
+  toast, and the Monaco JSON editor (dark-themed).
+- The design source is the prototype (`new-ui/index.html`'s "Mock this request"
+  section and `new-ui/.scratch/request-log-redesign/design-mock-request.png`). Note
+  the design notes claim this modal was "not redesigned", which the prototype
+  contradicts; the prototype wins.
+- The two intended deviations from the prototype: the JSON body keeps the **Monaco**
+  editor rather than a plain textarea, and the condition select keeps **every**
+  `MatcherCondition` value rather than the prototype's narrower six.
+- The expectation is still built from the shared core helper, unchanged; after
+  building, set its **description** to `"Mocked from request <method> <path>"` in the
+  web layer only.
 
 ### Entry point and availability
 
@@ -167,4 +171,5 @@ page**. If the selected request has no request to mock, the button is unavailabl
   implementation tickets go to `.scratch/new-ui-mock-from-log/issues/NN-<slug>.md`.
 - Deliberate deviations from the design prototype (name kept; recorded here so a
   reviewer does not flag them): stay-on-page instead of navigate-and-select; keep the
-  core pre-fill defaults; web-only.
+  core pre-fill defaults; keep the Monaco body editor and the full condition list;
+  web-only.

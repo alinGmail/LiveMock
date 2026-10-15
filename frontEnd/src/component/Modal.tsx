@@ -6,7 +6,7 @@ import styles from "./Modal.module.scss";
 interface ModalProps {
   title: string;
   onClose: () => void;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   headerExtra?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
@@ -92,9 +92,10 @@ const Modal = ({
     >
       <div
         ref={dialogRef}
-        className={[styles.modal, size === "md" ? styles.md : styles.sm].join(
-          " ",
-        )}
+        className={[
+          styles.modal,
+          size === "md" ? styles.md : size === "lg" ? styles.lg : styles.sm,
+        ].join(" ")}
         role="dialog"
         aria-modal="true"
         aria-label={title}
