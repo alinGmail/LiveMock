@@ -13,9 +13,9 @@ import { MatcherCondition } from "livemock-core/struct/matcher";
 import { LogM } from "livemock-core/struct/log";
 import { createExpectationReq } from "../../server/expectationServer";
 import { getErrorMessage } from "../common";
-import { useAppSelector } from "../../store";
 import Modal from "../Modal";
 import Select from "../Select";
+import { LIVEMOCK_DARK_THEME, defineLivemockDarkTheme } from "../monacoTheme";
 import btn from "../buttonStyles.module.scss";
 import styles from "./MockFromLogModal.module.scss";
 
@@ -80,7 +80,6 @@ const MockFromLogModalContent: React.FC<{
   onSaved: () => void;
 }> = ({ projectId, log, onClose, onSaved }) => {
   const { message } = App.useApp();
-  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const [draft, setDraft] = useImmer<LogExpectationDraft>(() =>
     buildDraftFromLog(log)
   );
@@ -298,13 +297,16 @@ const MockFromLogModalContent: React.FC<{
               <Editor
                 height="220px"
                 language="json"
-                theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
+                theme={LIVEMOCK_DARK_THEME}
+                beforeMount={defineLivemockDarkTheme}
                 value={draft.content}
                 options={{
-                  lineNumbers: "off",
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
+                  fontSize: 13,
                   wordWrap: "on",
+                  lineNumbers: "off",
+                  lineNumbersMinChars: 3,
                   automaticLayout: true,
                 }}
                 onChange={(value) =>

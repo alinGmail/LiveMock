@@ -1,7 +1,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .field {
@@ -131,6 +131,17 @@
 .rowCondition {
   width: 100%;
 }
+/* Match the row's 30px value input instead of the shared Select's 34px. */
+.row .rowCondition {
+  height: 30px;
+}
+.row .rowCondition :global(.ant-select-selector) {
+  height: 30px !important;
+  padding: 0 9px !important;
+}
+.row .rowCondition :global(.ant-select-selection-item) {
+  line-height: 28px !important;
+}
 
 .rowValue {
   height: 30px;
@@ -150,6 +161,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  background: var(--bg-deep);
 }
 
 .editorError {

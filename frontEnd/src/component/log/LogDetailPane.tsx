@@ -124,6 +124,22 @@ const SummaryItem = ({ k, v }: { k: string; v: string }) => (
   </div>
 );
 
+const ZapIcon = () => (
+  <svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M13 2 3 14h9l-1 8 10-12h-9z" />
+  </svg>
+);
+
 interface LogDetailPaneProps {
   log: LogM | null;
   expectations: { [id: string]: ExpectationM };
@@ -412,6 +428,7 @@ const LogDetailPane = ({ log, expectations, onMock }: LogDetailPaneProps) => {
               disabled={!log.req || !onMock}
               onClick={onMock}
             >
+              <ZapIcon />
               Mock this request
             </button>
           </span>
