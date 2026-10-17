@@ -4,7 +4,7 @@
   "version": "1.4.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev electron dist-electron/main.js\" \"vite\"",
+    "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev VITE_DEV_SERVER_URL=http://localhost:5174 electron dist-electron/main.js\" \"vite\"",
     "tsc": "tsc -project electron",
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",

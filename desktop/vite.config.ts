@@ -7,6 +7,12 @@ import svgr from "vite-plugin-svgr";
 // https://vitejs.dev/config/
 
 export default defineConfig({
+  // Keep the desktop renderer off the web dashboard's default port (5173) so a
+  // running web dev server can never be mistaken for the Electron renderer.
+  server: {
+    port: 5174,
+    strictPort: true,
+  },
   plugins: [
     svgr(),
     react(),

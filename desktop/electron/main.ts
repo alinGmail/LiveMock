@@ -106,10 +106,11 @@ async function createWindow() {
   });
 
   if (env === "dev") {
-    win.loadURL("http://localhost:5173");
+    const devServerUrl = VITE_DEV_SERVER_URL ?? "http://localhost:5174";
+    win.loadURL(devServerUrl);
     win.webContents.on("did-fail-load", () => {
       setTimeout(() => {
-        win?.loadURL("http://localhost:5173");
+        win?.loadURL(devServerUrl);
       }, 3000);
     });
     win.webContents.openDevTools();
@@ -132,8 +133,9 @@ function createAboutWindow() {
     autoHideMenuBar: true,
   });
   if (env === "dev") {
+    const devServerUrl = VITE_DEV_SERVER_URL ?? "http://localhost:5174";
     aboutWin.loadURL(
-      `http://localhost:5173/about.html?version=${process.env.npm_package_version}`
+      `${devServerUrl}/about.html?version=${process.env.npm_package_version}`
     );
   } else {
     aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
