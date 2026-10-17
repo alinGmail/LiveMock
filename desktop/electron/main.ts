@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import fs from "node:fs";
 import path from "node:path";
 import { setProjectHandler } from "./handler/projectHandler";
 import * as process from "process";
@@ -23,6 +24,26 @@ import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 import { addWsEventListeners } from "./common/eventListener";
 import { pruneAllProjects, startLogPruneTask } from "./log/logPruneTask";
 
+const env = process.env["PROJECT_ENV"];
+
+// Keep dev data inside the worktree. Without this every worktree (and every
+// running dev app) shares ~/.config/Electron, so projects, logs and per-project
+// mock ports collide. Production keeps Electron's normal userData location.
+if (env === "dev") {
+  if (process.env.LIVEMOCK_DEV_SHARED_DATA === "1") {
+    console.log(`[desktop-dev] userData: shared (${app.getPath("userData")})`);
+  } else {
+    const devUserData = process.env.LIVEMOCK_DEV_USER_DATA
+      ? path.resolve(process.env.LIVEMOCK_DEV_USER_DATA)
+      : path.resolve(__dirname, "../.dev-data");
+    const devSessionData = path.join(devUserData, "session");
+    fs.mkdirSync(devSessionData, { recursive: true });
+    app.setPath("userData", devUserData);
+    app.setPath("sessionData", devSessionData);
+    console.log(`[desktop-dev] userData: ${devUserData}`);
+  }
+}
+
 log.initialize();
 log.errorHandler.startCatching();
 
@@ -43,8 +64,6 @@ process.env.PUBLIC = app.isPackaged
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-
-const env = process.env["PROJECT_ENV"];
 
 sysEventEmitter.on(SystemEvent.START, async () => {
   const systemCollection = await getSystemCollection(app.getPath("userData"));
