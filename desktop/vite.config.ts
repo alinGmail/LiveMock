@@ -6,12 +6,17 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
 // https://vitejs.dev/config/
 
+const requestedPort = Number(process.env.LIVEMOCK_DESKTOP_PORT ?? 5174);
+const devPort =
+  Number.isFinite(requestedPort) && requestedPort >= 0 ? requestedPort : 5174;
+
 export default defineConfig({
-  // Keep the desktop renderer off the web dashboard's default port (5173) so a
-  // running web dev server can never be mistaken for the Electron renderer.
+  // The dev orchestrator sets LIVEMOCK_DESKTOP_PORT=0 to get an OS-assigned
+  // free port, so concurrent worktrees never fight over a fixed port. Manual
+  // `vite` runs keep the dedicated 5174 default.
   server: {
-    port: 5174,
-    strictPort: true,
+    port: devPort,
+    strictPort: devPort !== 0,
   },
   plugins: [
     svgr(),
