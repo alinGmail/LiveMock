@@ -249,6 +249,54 @@
   background: var(--surface-3);
   color: var(--text);
 }
+.groupEdit:global(.ant-dropdown-open) {
+  opacity: 1;
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.groupMenu {
+  min-width: 184px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.35);
+}
+
+.groupMenuItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+.groupMenuItem:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.groupMenuSep {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--border-soft);
+}
+
+.groupMenuItemDanger {
+  color: #fca5a5;
+}
+.groupMenuItemDanger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
 
 .groupBody {
   display: flex;
