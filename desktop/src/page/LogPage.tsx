@@ -1,58 +1,87 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuId } from "uuid";
 import {
-  createSimpleFilter,
   FilterType,
   LogM,
   PresetFilterM,
   PresetFilterName,
-  WebsocketMessageM,
-  WebsocketStatus,
+  createExpectationPresetFilterM,
+  createMethodsPresetFilterM,
+  createStatusCodePresetFilterM,
 } from "livemock-core/struct/log";
 import { AppDispatch, store, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
-import { Button, Modal, Table } from "antd";
+import { App } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { Updater, useImmer } from "use-immer";
+import _ from "lodash";
 import {
-  getConfigColumn,
-  getCustomColumn,
-  getDefaultColumn,
-} from "./LogPageColumn";
-import { ColumnEditor } from "../component/table/ColumnEditor";
+  deleteAllRequestLogs,
+  listLogViewLogs,
+  listLogViewReq,
+} from "../server/logServer";
+import { updatePresetLogFilterReq } from "../server/logFilterServer";
+import { listExpectationListReq } from "../server/expectationServer";
+import { getExpectationSuccess } from "../slice/thunk";
 import {
-  addLogFilter,
-  ColumnDisplayType,
-  hideColumnEditor,
   PresetFilterState,
   resetLogFilter,
+  setSelectedLogId,
   setSelectedLogItem,
-  setShowWebsocketChatPanel,
-  TableColumnItem,
   updatePresetFilter,
 } from "../slice/logSlice";
-import ColumnConfig from "../component/table/ColumnConfig";
-import { useQuery } from "@tanstack/react-query";
-import { listLogViewReq, listLogViewLogs } from "../server/logServer";
-import { binarySearch, toastPromise } from "../component/common";
-import { Updater, useImmer } from "use-immer";
-import { ColumnsType } from "antd/es/table/interface";
+import { setExpectationMap } from "../slice/expectationSlice";
+import { binarySearch } from "../component/common";
+import Select from "../component/Select";
+import btn from "../component/buttonStyles.module.scss";
+import LogDetailPane from "../component/log/LogDetailPane";
+import { MockFromLogModal } from "../component/expectation/MockFromLogModal";
 import {
   LogEvents,
   LogViewEvents,
 } from "livemock-core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
-import FilterRowComponent from "../component/log/FilterRowComponent";
-import PresetFilterRowComponent from "../component/log/PresetFilterRowComponent";
-import { setExpectationMap } from "../slice/expectationSlice";
-import { listExpectationListReq } from "../server/expectationServer";
-import _ from "lodash";
-import { getExpectationSuccess } from "../slice/thunk";
-import ChatMainComponent, {
-  MessageListContainer,
-} from "../component/chat/ChatMainComponent";
-import { DisconnectOutlined, LinkOutlined } from "@ant-design/icons";
-import { red, green } from "@ant-design/colors";
-import { useNavigate } from "react-router-dom";
-import { MockFromLogModal } from "../component/expectation/MockFromLogModal";
+import styles from "./LogPage.module.scss";
+
+const METHOD_COLOR: { [key: string]: string } = {
+  GET: "#22c55e",
+  POST: "#60a5fa",
+  PUT: "#f59e0b",
+  PATCH: "#a78bfa",
+  DELETE: "#ef4444",
+  OPTIONS: "#94a3b8",
+};
+
+const METHOD_OPTIONS = ["GET", "POST", "PUT", "DELETE"];
+const PAGE_SIZE = 50;
+const STATUS_FAMILIES = [
+  { value: "2xx", label: "2xx" },
+  { value: "3xx", label: "3xx" },
+  { value: "4xx", label: "4xx" },
+  { value: "5xx", label: "5xx" },
+];
+
+function statusFamily(status: number | null | undefined): string {
+  if (status == null) {
+    return "none";
+  }
+  if (status < 300) {
+    return "s2";
+  }
+  if (status < 400) {
+    return "s3";
+  }
+  if (status < 500) {
+    return "s4";
+  }
+  return "s5";
+}
 
 function onLogsInsert(
   insertLog: LogM,
@@ -66,6 +95,7 @@ function onLogsInsert(
   setLogs((logs) => {
     if (logs.length === 0) {
       logs.push(insertLog);
+      return;
     }
     for (let i = 0; i < logs.length; i++) {
       const curLog = logs.at(i);
@@ -74,6 +104,7 @@ function onLogsInsert(
         return;
       }
     }
+    logs.push(insertLog);
   });
 }
 
@@ -87,19 +118,15 @@ function onLogsUpdate(
     return;
   }
   setLogs((logs) => {
-    const updateLogIndex = binarySearch(logs, updateLog, (a, b) => {
+    const index = binarySearch(logs, updateLog, (a, b) => {
       if (a.id === b.id) {
         return 0;
       }
-      if (a.id > b.id) {
-        return -1;
-      }
-      return 1;
+      return a.id > b.id ? -1 : 1;
     });
-    if (updateLogIndex === -1) {
-      return;
+    if (index !== -1) {
+      logs[index] = updateLog;
     }
-    logs[updateLogIndex] = updateLog;
   });
 }
 
@@ -113,45 +140,92 @@ function onLogsDelete(
     return;
   }
   setLogs((logs) => {
-    const deleteLogIndex = logs.findIndex((log) => log.id === logId);
-    if (deleteLogIndex !== -1) {
-      logs.splice(deleteLogIndex, 1);
+    const index = logs.findIndex((log) => log.id === logId);
+    if (index !== -1) {
+      logs.splice(index, 1);
     }
   });
 }
 
-const placeHolderColumn: TableColumnItem = {
-  id: uuId(),
-  name: "",
-  label: "",
-  path: "",
-  displayType: ColumnDisplayType.TEXT,
-  visible: true,
-};
-// const pageId:string = uuId();
+const CheckIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+
+const ListIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="7" />
+    <path d="m21 21-4.3-4.3" />
+  </svg>
+);
 
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
-  const systemConfigState = useAppSelector((state) => state.systemConfig);
-  const logViewIdRef = useRef<string>();
-  const {
-    columnConfigShow,
-    columnEditorShow,
-    currentColumnEditIndex,
-    defaultColumnVisible,
-    logFilter,
-    logList,
-    tableColumns,
-  } = logState;
-  const currentEditColumn = tableColumns[currentColumnEditIndex];
-  const dispatch: AppDispatch = useDispatch();
+  const expectationState = useAppSelector((state) => state.expectation);
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
-  const [logs, setLogs] = useImmer<Array<LogM>>([]);
-  const [mockLog, setMockLog] = useState<LogM | null>(null);
-  const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
+  const { modal } = App.useApp();
 
-  const expectationState = useAppSelector((state) => state.expectation);
+  const logViewIdRef = useRef<string>();
+  const logsProjectIdRef = useRef<string | null>(null);
+  const [logs, setLogs] = useImmer<Array<LogM>>([]);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [cols, setCols] = useState({
+    expectation: true,
+    duration: true,
+    marker: true,
+  });
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [mockLog, setMockLog] = useState<LogM | null>(null);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  const presetFilter = logState.presetFilter;
+
+  useEffect(() => {
+    logsProjectIdRef.current = null;
+    setLogs([]);
+    setHasMore(false);
+    dispatch(setSelectedLogId(null));
+    dispatch(setSelectedLogItem(null));
+  }, [currentProject.id, dispatch, setLogs]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
     return listLogViewReq({ projectId: currentProject.id }).then((res) => {
@@ -163,8 +237,6 @@ const LogPage: React.FC = () => {
           )
         )
       );
-
-      // update preset filter
       const presetFilters: Array<PresetFilterM> = res[0].filters.filter(
         (item) => item.type === FilterType.PRESET_FILTER
       ) as Array<PresetFilterM>;
@@ -183,7 +255,6 @@ const LogPage: React.FC = () => {
         }
       });
       dispatch(updatePresetFilter(presetFilterUpdate));
-      // end update preset filter
       return res;
     });
   });
@@ -192,8 +263,8 @@ const LogPage: React.FC = () => {
     ["getExpectationList", currentProject.id],
     () => {
       return listExpectationListReq(currentProject.id).then((res) => {
-        const _expectationMap = _.keyBy(res, (expectation) => expectation.id);
-        dispatch(setExpectationMap(_expectationMap));
+        const expectationMap = _.keyBy(res, (expectation) => expectation.id);
+        dispatch(setExpectationMap(expectationMap));
         dispatch(getExpectationSuccess(currentProject.id, res));
         return res;
       });
@@ -207,234 +278,461 @@ const LogPage: React.FC = () => {
     () => {
       return listLogViewLogs(logViewId as string, {
         maxLogId: null,
+        limit: PAGE_SIZE,
         projectId: currentProject.id,
       }).then((res) => {
+        logsProjectIdRef.current = currentProject.id;
         setLogs(res);
+        setHasMore(res.length === PAGE_SIZE);
         return res;
       });
     },
-    {
-      enabled: !!logViewId,
-    }
+    { enabled: !!logViewId }
   );
-  const [logColumn, updateLogColumn] = useImmer<ColumnsType<LogM>>([]);
-  useEffect(() => {
-    const customColumns = getCustomColumn(
-      tableColumns.filter((item, index) => item.visible),
-      dispatch,
-      systemConfigState.mode
-    );
-    const newLogColumn = getDefaultColumn(
-      dispatch,
-      systemConfigState.mode,
-      logViewId,
-      currentProject.id,
-      logViewLogsQuery.refetch,
-      expectationState.expectationMap
-    )
-      .filter((item, index) => defaultColumnVisible[index])
-      .concat(customColumns)
-      .concat(
-        getConfigColumn(dispatch, navigate, currentProject.id, setMockLog)
-      );
-    updateLogColumn(newLogColumn);
-  }, [
-    tableColumns,
-    defaultColumnVisible,
-    dispatch,
-    systemConfigState.mode,
-    logViewId,
-    currentProject.id,
-    expectationState,
-  ]);
 
-  useEffect(() => {
-    // clear all event on reload
-    window.api.event.removeAllListener(LogViewEvents.OnLogAdd);
-    window.api.event.removeAllListener(LogViewEvents.OnLogUpdate);
-    window.api.event.removeAllListener(LogViewEvents.OnLogDelete);
+  const loadMore = () => {
+    if (!logViewId || !hasMore || loadingMore || logs.length === 0) {
+      return;
+    }
+    setLoadingMore(true);
+    const maxLogId = logs[logs.length - 1].id;
+    listLogViewLogs(logViewId, {
+      maxLogId,
+      limit: PAGE_SIZE,
+      projectId: currentProject.id,
+    })
+      .then((res) => {
+        setLogs((prev) => {
+          const existing = new Set(prev.map((log) => log.id));
+          res.forEach((log) => {
+            if (!existing.has(log.id)) {
+              prev.push(log);
+            }
+          });
+        });
+        setHasMore(res.length === PAGE_SIZE);
+      })
+      .finally(() => setLoadingMore(false));
+  };
+
+  const onListScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const el = event.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 240) {
+      loadMore();
+    }
+  };
+
+  const applyPresetFilter = (filter: PresetFilterM) => {
+    if (!logViewId) {
+      return;
+    }
+    updatePresetLogFilterReq({
+      projectId: currentProject.id,
+      logViewId,
+      filter,
+    }).then(() => logViewLogsQuery.refetch());
+  };
+
+  const onExpectationChange = (value: string) => {
+    const id = value || null;
+    dispatch(updatePresetFilter({ ...presetFilter, expectationId: id }));
+    const filter = createExpectationPresetFilterM();
+    filter.value = (id ?? []) as unknown as string;
+    applyPresetFilter(filter);
+  };
+
+  const toggleMethod = (method: string) => {
+    const next = presetFilter.methods.includes(method)
+      ? presetFilter.methods.filter((item) => item !== method)
+      : [...presetFilter.methods, method];
+    dispatch(updatePresetFilter({ ...presetFilter, methods: next }));
+    const filter = createMethodsPresetFilterM();
+    filter.value = next;
+    applyPresetFilter(filter);
+  };
+
+  const toggleStatusFamily = (family: string) => {
+    const next = presetFilter.statusCode.includes(family)
+      ? presetFilter.statusCode.filter((item) => item !== family)
+      : [...presetFilter.statusCode, family];
+    dispatch(updatePresetFilter({ ...presetFilter, statusCode: next }));
+    const filter = createStatusCodePresetFilterM();
+    filter.value = next;
+    applyPresetFilter(filter);
+  };
+
+  const clearLogs = () => {
+    modal.confirm({
+      title: "Clear request log?",
+      content:
+        "This deletes every captured request for the current project. It cannot be undone.",
+      okText: "Clear",
+      okType: "danger",
+      onOk: async () => {
+        await deleteAllRequestLogs({ projectId: currentProject.id });
+        logsProjectIdRef.current = null;
+        setLogs([]);
+        setHasMore(false);
+        dispatch(setSelectedLogId(null));
+        dispatch(setSelectedLogItem(null));
+        logViewLogsQuery.refetch();
+      },
+    });
+  };
+
+  const resume = () => {
+    setPaused(false);
+    logViewLogsQuery.refetch();
+  };
+
+  const highlightRow = useCallback((id: number) => {
+    window.requestAnimationFrame(() => {
+      const el = listRef.current?.querySelector<HTMLElement>(
+        `[data-log-id="${id}"]`
+      );
+      if (!el || typeof el.animate !== "function") {
+        return;
+      }
+      el.getAnimations().forEach((animation) => animation.cancel());
+      el.animate(
+        [
+          { backgroundColor: "rgba(34, 197, 94, 0.24)" },
+          { backgroundColor: "transparent" },
+        ],
+        { duration: 1500, easing: "ease" }
+      );
+    });
   }, []);
 
   useEffect(() => {
-    const id = uuId();
-    function onViewLogInsertHandle(
-      event: IpcRendererEvent,
-      { log, logViewId }: { log: LogM; logViewId: string }
-    ) {
-      onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
-    }
-    window.api.event.on(LogViewEvents.OnLogAdd, onViewLogInsertHandle, id);
-    return () => {
-      window.api.event.removeListener(LogViewEvents.OnLogAdd, id);
-    };
-  }, [currentProject.id]);
+    const addId = uuId();
+    const updateId = uuId();
+    const deleteId = uuId();
+    const logUpdateId = uuId();
 
-  useEffect(() => {
-    const id = uuId();
-    const onViewLogUpdateHandle = (
+    const onViewLogInsert = (
       event: IpcRendererEvent,
       { log, logViewId }: { log: LogM; logViewId: string }
     ) => {
+      if (pausedRef.current) {
+        return;
+      }
+      onLogsInsert(log, logViewId, logViewIdRef.current, setLogs);
+      highlightRow(log.id);
+    };
+    const onViewLogUpdate = (
+      event: IpcRendererEvent,
+      { log, logViewId }: { log: LogM; logViewId: string }
+    ) => {
+      if (pausedRef.current) {
+        return;
+      }
       onLogsUpdate(log, logViewId, logViewIdRef.current, setLogs);
+      highlightRow(log.id);
     };
-    window.api.event.on(LogViewEvents.OnLogUpdate, onViewLogUpdateHandle, id);
-    return () => {
-      window.api.event.removeListener(LogViewEvents.OnLogUpdate, id);
-    };
-  }, [currentProject.id]);
-
-  useEffect(() => {
-    const id = uuId();
-    const onViewLogDeleteHandle = (
+    const onViewLogDelete = (
       event: IpcRendererEvent,
       { id, logViewId }: { id: number; logViewId: string }
     ) => {
+      if (pausedRef.current) {
+        return;
+      }
       onLogsDelete(id, logViewId, logViewIdRef.current, setLogs);
     };
-    window.api.event.on(LogViewEvents.OnLogDelete, onViewLogDeleteHandle, id);
-    return () => {
-      window.api.event.removeListener(LogViewEvents.OnLogDelete, id);
-    };
-  }, [currentProject.id]);
-
-  /**
-   * update select log item
-   * use for websocket
-   */
-  useEffect(() => {
-    const id = uuId();
-    const onLogUpdateHandle = (
+    const onLogUpdate = (
       event: IpcRendererEvent,
-      { projectId, log, oldLog }: { projectId: string; log: LogM; oldLog: LogM }
+      { projectId, log }: { projectId: string; log: LogM }
     ) => {
       if (projectId !== currentProject.id) {
         return;
       }
+      highlightRow(log.id);
       if (log.id === store.getState().log.selectedLogId) {
         dispatch(setSelectedLogItem(log));
       }
     };
-    window.api.event.on(LogEvents.OnLogUpdate, onLogUpdateHandle, id);
-    return () => {
-      window.api.event.removeListener(LogEvents.OnLogUpdate, id);
-    };
-  }, [currentProject.id]);
 
-  const listTable = useMemo(() => {
+    window.api.event.on(LogViewEvents.OnLogAdd, onViewLogInsert, addId);
+    window.api.event.on(LogViewEvents.OnLogUpdate, onViewLogUpdate, updateId);
+    window.api.event.on(LogViewEvents.OnLogDelete, onViewLogDelete, deleteId);
+    window.api.event.on(LogEvents.OnLogUpdate, onLogUpdate, logUpdateId);
+
+    return () => {
+      window.api.event.removeListener(LogViewEvents.OnLogAdd, addId);
+      window.api.event.removeListener(LogViewEvents.OnLogUpdate, updateId);
+      window.api.event.removeListener(LogViewEvents.OnLogDelete, deleteId);
+      window.api.event.removeListener(LogEvents.OnLogUpdate, logUpdateId);
+    };
+  }, [currentProject.id, dispatch, highlightRow, setLogs]);
+
+  useEffect(() => {
+    if (
+      logsProjectIdRef.current === currentProject.id &&
+      logs.length &&
+      logState.selectedLogId == null
+    ) {
+      dispatch(setSelectedLogId(logs[0].id));
+      dispatch(setSelectedLogItem(logs[0]));
+    }
+  }, [logs, logState.selectedLogId, currentProject.id, dispatch]);
+
+  const selectedLog =
+    logState.selectedLogId == null ||
+    logsProjectIdRef.current !== currentProject.id
+      ? null
+      : logs.find((log) => log.id === logState.selectedLogId) ??
+        logState.selectedLogItem ??
+        null;
+
+  const hasActiveFilters =
+    presetFilter.methods.length > 0 ||
+    presetFilter.statusCode.length > 0 ||
+    !!presetFilter.expectationId ||
+    logState.logFilter.some((filter) => filter.activate);
+
+  const expectationOptions = useMemo(
+    () => [
+      { value: "", label: "All requests" },
+      ...(getExpectationListQuery.data ?? []).map((expectation) => ({
+        value: expectation.id,
+        label: expectation.name || "unnamed expectation",
+      })),
+    ],
+    [getExpectationListQuery.data]
+  );
+
+  const renderRow = (log: LogM) => {
+    const method = (log.req?.method ?? "").toUpperCase();
+    const path = log.req?.path ?? "";
+    const status = log.res?.status ?? null;
+    const duration = log.res?.duration;
+    const expectation = log.expectationId
+      ? expectationState.expectationMap[log.expectationId]
+      : undefined;
+    const family = statusFamily(status);
     return (
-      <Table
-        loading={logViewLogsQuery.isFetching}
-        columns={logColumn}
-        dataSource={logs}
-        size={"small"}
-        tableLayout={"fixed"}
-        scroll={{ x: "max-content" }}
-        rowKey={"id"}
-        pagination={{
-          pageSize: 200,
+      <button
+        key={log.id}
+        type="button"
+        role="listitem"
+        data-log-id={log.id}
+        className={[
+          styles.reqRow,
+          log.id === logState.selectedLogId ? styles.reqRowSelected : "",
+        ].join(" ")}
+        onClick={() => {
+          dispatch(setSelectedLogId(log.id));
+          dispatch(setSelectedLogItem(log));
         }}
-      />
+      >
+        <span
+          className={[styles.rail, styles[family]].join(" ")}
+          aria-hidden="true"
+        />
+        <span className={styles.reqMain}>
+          <span className={styles.reqLine1}>
+            <span
+              className={styles.method}
+              style={
+                {
+                  "--m": METHOD_COLOR[method] ?? "#94a3b8",
+                } as React.CSSProperties
+              }
+            >
+              {method}
+            </span>
+            <span className={styles.reqPath}>{path}</span>
+          </span>
+          <span className={styles.reqLine2}>
+            {cols.expectation && expectation ? (
+              <span className={styles.expRef}>{expectation.name}</span>
+            ) : null}
+            {cols.marker && log.proxyInfo?.isProxy ? (
+              <span className={[styles.marker, styles.markerProxy].join(" ")}>
+                proxy
+              </span>
+            ) : null}
+            {cols.marker && log.websocketInfo?.isWebsocket ? (
+              <span className={[styles.marker, styles.markerWs].join(" ")}>
+                ws
+              </span>
+            ) : null}
+            <span>{log.req?.requestTimeStr ?? ""}</span>
+          </span>
+        </span>
+        <span className={styles.reqMeta}>
+          {cols.duration && duration != null ? (
+            <span className={styles.dur}>{duration} ms</span>
+          ) : null}
+          {status == null ? (
+            <span className={[styles.sp, styles.spNone].join(" ")}>
+              pending
+            </span>
+          ) : (
+            <span className={[styles.sp, styles[family]].join(" ")}>
+              {status}
+            </span>
+          )}
+        </span>
+      </button>
     );
-  }, [logColumn, logs, expectationState]);
-  const selLogM = logState.selectedLogItem;
+  };
+
+  let listContent: React.ReactNode;
+  if (logs.length === 0) {
+    listContent = hasActiveFilters ? (
+      <div className={styles.empty}>
+        <span className={styles.emptyGlyph}>
+          <SearchIcon />
+        </span>
+        <h3>No matching requests</h3>
+        <p>Adjust or clear the filters to see more.</p>
+      </div>
+    ) : (
+      <div className={styles.empty}>
+        <span className={styles.emptyGlyph}>
+          <ListIcon />
+        </span>
+        <h3>No requests captured</h3>
+        <p>Start the project and send a request to the mock port to see it here.</p>
+      </div>
+    );
+  } else {
+    listContent = logs.map(renderRow);
+  }
+
   return (
-    <div style={{ padding: "10px" }}>
-      {selLogM && (
-        <WebsocketChatPanel
-          path={selLogM.req?.path ?? ""}
-          key={"wsChatPanel" + selLogM.id}
-          show={logState.showWebsocketChatPanel}
-          messageList={selLogM.websocketInfo?.messages ?? []}
-          onClose={() => {
-            dispatch(setShowWebsocketChatPanel(false));
-          }}
-          status={selLogM.websocketInfo?.status ?? null}
-        ></WebsocketChatPanel>
-      )}
-      <PresetFilterRowComponent
-        getExpectationListQuery={getExpectationListQuery}
-        getLogViewQuery={getLogViewQuery}
-        logViewId={logViewId}
-        currentProject={currentProject}
-        refreshLogList={logViewLogsQuery.refetch}
-        logState={logState}
-      />
-      <FilterRowComponent
-        getLogViewQuery={getLogViewQuery}
-        logViewId={logViewId}
-        currentProject={currentProject}
-        refreshLogList={logViewLogsQuery.refetch}
-        logState={logState}
-        getExpectationListQuery={getExpectationListQuery}
-      ></FilterRowComponent>
-      <div>{listTable}</div>
-      <ColumnEditor
-        onClose={() => {
-          dispatch(hideColumnEditor());
-        }}
-        show={columnEditorShow}
-        tableColumnItem={currentEditColumn || placeHolderColumn}
-      />
-      <ColumnConfig show={columnConfigShow} />
+    <div className={styles.page}>
+      <div className={styles.filterbar}>
+        <span className={styles.flabel}>Filters</span>
+        <Select
+          className={styles.expectationSelect}
+          value={presetFilter.expectationId ?? ""}
+          onChange={onExpectationChange}
+          options={expectationOptions}
+        />
+        <div className={styles.fgroup} aria-label="Method filters">
+          {METHOD_OPTIONS.map((method) => (
+            <button
+              key={method}
+              type="button"
+              className={[
+                styles.fchip,
+                presetFilter.methods.includes(method) ? styles.fchipActive : "",
+              ].join(" ")}
+              onClick={() => toggleMethod(method)}
+            >
+              {method}
+            </button>
+          ))}
+        </div>
+        <div className={styles.fgroup} aria-label="Status filters">
+          {STATUS_FAMILIES.map((family) => (
+            <button
+              key={family.value}
+              type="button"
+              className={[
+                styles.fchip,
+                presetFilter.statusCode.includes(family.value)
+                  ? styles.fchipActive
+                  : "",
+              ].join(" ")}
+              onClick={() => toggleStatusFamily(family.value)}
+            >
+              {family.label}
+            </button>
+          ))}
+        </div>
+        <span className={styles.spacer} />
+        <span
+          className={[styles.live, !paused ? styles.liveOn : ""].join(" ")}
+        >
+          <span className={styles.liveDot} />
+          {paused ? "paused" : "live"}
+        </span>
+        {paused ? (
+          <button
+            type="button"
+            className={[btn.btn, btn.ghost].join(" ")}
+            onClick={resume}
+          >
+            Resume
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={[btn.btn, btn.ghost].join(" ")}
+            onClick={() => setPaused(true)}
+          >
+            Pause
+          </button>
+        )}
+        <button
+          type="button"
+          className={[btn.btn, btn.ghost].join(" ")}
+          onClick={clearLogs}
+        >
+          Clear
+        </button>
+        <details className={styles.dropdown}>
+          <summary className={styles.fchip}>Columns</summary>
+          <div className={styles.menu}>
+            <div className={styles.menuLabel}>Row fields</div>
+            {(
+              [
+                ["expectation", "Expectation"],
+                ["duration", "Duration"],
+                ["marker", "Proxy / WS marker"],
+              ] as Array<[keyof typeof cols, string]>
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={[styles.menuItem, cols[key] ? styles.menuOn : ""].join(
+                  " "
+                )}
+                onClick={() =>
+                  setCols((prev) => ({ ...prev, [key]: !prev[key] }))
+                }
+              >
+                <span className={styles.menuCheck}>
+                  <CheckIcon />
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </details>
+      </div>
+
+      <div className={styles.workspace}>
+        <section className={styles.master} aria-label="Request log">
+          <div
+            className={styles.list}
+            role="list"
+            ref={listRef}
+            onScroll={onListScroll}
+          >
+            {listContent}
+            {loadingMore ? (
+              <div className={styles.listFooter}>Loading more…</div>
+            ) : null}
+          </div>
+        </section>
+        <LogDetailPane
+          log={selectedLog}
+          expectations={expectationState.expectationMap}
+          onMock={() => setMockLog(selectedLog)}
+        />
+      </div>
       <MockFromLogModal
         projectId={currentProject.id}
         log={mockLog}
         open={!!mockLog}
-        onClose={() => {
-          setMockLog(null);
-        }}
-        onSaved={() => {
-          getExpectationListQuery.refetch();
-        }}
+        onClose={() => setMockLog(null)}
+        onSaved={() => getExpectationListQuery.refetch()}
       />
     </div>
-  );
-};
-
-const WebsocketChatPanel: React.FunctionComponent<{
-  show: boolean;
-  messageList: Array<WebsocketMessageM> | undefined;
-  path: string;
-  status: WebsocketStatus | null;
-  onClose: () => void;
-}> = ({ show, messageList, onClose, path, status }) => {
-  useEffect(() => {
-    if (!messageList) {
-      return;
-    }
-    messageListContainer.concat(
-      messageList.slice(messageListContainer.messageList.length)
-    );
-  }, [messageList]);
-  const [messageListContainer, setMessageListContainer] =
-    useState<MessageListContainer>(
-      new MessageListContainer(messageList ? [...messageList] : [])
-    );
-  return (
-    <Modal
-      open={show}
-      onCancel={onClose}
-      title={
-        <div>
-          {`${path}`}
-          &nbsp;&nbsp;&nbsp;
-          {status && status === WebsocketStatus.OPEN && (
-            <>
-              <LinkOutlined style={{ color: green[5] }} />
-              &nbsp;<span style={{ color: green[5] }}>{status}</span>
-            </>
-          )}
-          {status && status !== WebsocketStatus.OPEN && (
-            <>
-              <DisconnectOutlined style={{ color: red[5] }} />
-              &nbsp;<span style={{ color: red[5] }}>{status}</span>
-            </>
-          )}
-        </div>
-      }
-    >
-      <ChatMainComponent messageListContainer={messageListContainer} />
-    </Modal>
   );
 };
 
