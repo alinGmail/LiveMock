@@ -3,6 +3,7 @@ import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { reducer as projectReducer } from "./slice/projectSlice";
 import { reducer as expectationReducer } from "./slice/expectationSlice";
 import { reducer as logReducer } from "./slice/logSlice";
+import { reducer as authReducer } from "./slice/authSlice";
 import {
   reducer as systemConfigReducer,
   setMode,
@@ -12,6 +13,7 @@ export const store = configureStore({
     project: projectReducer,
     expectation: expectationReducer,
     log: logReducer,
+    auth: authReducer,
     systemConfig: systemConfigReducer,
   },
 });

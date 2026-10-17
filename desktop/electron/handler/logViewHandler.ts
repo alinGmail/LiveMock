@@ -54,7 +54,7 @@ export async function setLogViewHandler(path: string) {
       reqQuery: ListLogViewLogsReqQuery,
       reqBody: ListLogViewLogsReqBody
     ) => {
-      const { maxLogId, projectId } = reqQuery;
+      const { maxLogId, projectId, limit } = reqQuery;
       const lovViewId = reqParam.logViewId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -66,6 +66,8 @@ export async function setLogViewHandler(path: string) {
       }
       const logCollection = await getLogCollection(projectId, path);
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
+      const pageSize =
+        Number(limit) > 0 ? Math.min(Number(limit), PAGE_SIZE) : PAGE_SIZE;
       let resultset = dynamicView.branchResultset();
       if (maxLogId === undefined || maxLogId === null || maxLogId === "") {
       } else {
@@ -73,7 +75,7 @@ export async function setLogViewHandler(path: string) {
       }
       const logs = resultset
         .simplesort("id", { desc: true })
-        .limit(PAGE_SIZE)
+        .limit(pageSize)
         .data();
       return logs;
     }

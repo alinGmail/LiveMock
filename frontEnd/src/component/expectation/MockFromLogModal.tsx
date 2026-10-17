@@ -1,15 +1,5 @@
 import React, { useCallback, useState } from "react";
-import {
-  App,
-  Button,
-  Checkbox,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Space,
-} from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { App } from "antd";
 import Editor from "@monaco-editor/react";
 import { useImmer } from "use-immer";
 import {
@@ -23,8 +13,11 @@ import { MatcherCondition } from "livemock-core/struct/matcher";
 import { LogM } from "livemock-core/struct/log";
 import { createExpectationReq } from "../../server/expectationServer";
 import { getErrorMessage } from "../common";
-import { useAppSelector } from "../../store";
-import moduleStyle from "./MockFromLogModal.module.scss";
+import Modal from "../Modal";
+import Select from "../Select";
+import { LIVEMOCK_DARK_THEME, defineLivemockDarkTheme } from "../monacoTheme";
+import btn from "../buttonStyles.module.scss";
+import styles from "./MockFromLogModal.module.scss";
 
 const CONDITION_OPTIONS = Object.values(MatcherCondition).map((condition) => ({
   value: condition,
@@ -43,14 +36,30 @@ interface MockFromLogModalProps {
   onSaved: () => void;
 }
 
+const RefreshIcon = () => (
+  <svg
+    width={15}
+    height={15}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+    <path d="M21 4v5h-5" />
+  </svg>
+);
+
 /**
- * Dialog that creates a mock expectation from a captured request log. It is a
- * controlled `antd` modal; all of its editable state lives in a single
- * `LogExpectationDraft` handled with `use-immer` so editing one row does not
- * rebuild the whole list.
+ * New-UI dialog that creates a mock expectation from a captured request log.
+ * The editable state lives in a single `LogExpectationDraft` handled with
+ * `use-immer`, so editing one row does not rebuild the whole list.
  */
 export function MockFromLogModal(props: MockFromLogModalProps) {
-  if (!props.log) {
+  if (!props.log || !props.open) {
     return null;
   }
   return (
@@ -58,7 +67,6 @@ export function MockFromLogModal(props: MockFromLogModalProps) {
       key={props.log.id}
       projectId={props.projectId}
       log={props.log}
-      open={props.open}
       onClose={props.onClose}
       onSaved={props.onSaved}
     />
@@ -68,12 +76,10 @@ export function MockFromLogModal(props: MockFromLogModalProps) {
 const MockFromLogModalContent: React.FC<{
   projectId: string;
   log: LogM;
-  open: boolean;
   onClose: () => void;
   onSaved: () => void;
-}> = ({ projectId, log, open, onClose, onSaved }) => {
+}> = ({ projectId, log, onClose, onSaved }) => {
   const { message } = App.useApp();
-  const systemConfigState = useAppSelector((state) => state.systemConfig);
   const [draft, setDraft] = useImmer<LogExpectationDraft>(() =>
     buildDraftFromLog(log)
   );
@@ -103,7 +109,7 @@ const MockFromLogModalContent: React.FC<{
     showCondition: boolean
   ) => {
     if (rows.length === 0) {
-      return <div className={moduleStyle.empty}>No entries captured</div>;
+      return <div className={styles.empty}>No entries captured</div>;
     }
     const isExpanded = !!expanded[slot];
     const visible = isExpanded ? rows : rows.slice(0, FOLD_LIMIT);
@@ -120,16 +126,15 @@ const MockFromLogModalContent: React.FC<{
           />
         ))}
         {rows.length > FOLD_LIMIT && (
-          <Button
-            type="link"
-            size="small"
-            style={{ paddingLeft: 4 }}
+          <button
+            type="button"
+            className={[btn.btn, btn.ghost].join(" ")}
             onClick={() =>
               setExpanded((prev) => ({ ...prev, [slot]: !isExpanded }))
             }
           >
             {isExpanded ? "Show less" : `Show all ${rows.length}`}
-          </Button>
+          </button>
         )}
       </>
     );
@@ -152,7 +157,11 @@ const MockFromLogModalContent: React.FC<{
     }
     setSaving(true);
     try {
-      await createExpectationReq(projectId, buildExpectationFromDraft(draft));
+      const expectation = buildExpectationFromDraft(draft);
+      expectation.description = `Mocked from request ${log.req?.method ?? ""} ${
+        log.req?.path ?? ""
+      }`.trim();
+      await createExpectationReq(projectId, expectation);
       message.success("Expectation created");
       onSaved();
       onClose();
@@ -166,16 +175,42 @@ const MockFromLogModalContent: React.FC<{
   return (
     <Modal
       title="Mock this request"
-      open={open}
-      width={780}
-      onCancel={onClose}
-      footer={null}
-      maskClosable={false}
+      size="lg"
+      onClose={onClose}
+      footer={
+        <div className={styles.footer}>
+          <button
+            type="button"
+            className={[btn.btn, btn.ghost].join(" ")}
+            onClick={handleReset}
+          >
+            <RefreshIcon />
+            Reset
+          </button>
+          <span className={styles.footerGrow} />
+          <button
+            type="button"
+            className={[btn.btn, btn.ghost].join(" ")}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className={[btn.btn, btn.primary].join(" ")}
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      }
     >
-      <div className={moduleStyle.body}>
-        <div className={moduleStyle.fieldLine}>
-          <span className={moduleStyle.fieldLabel}>Name</span>
-          <Input
+      <div className={styles.form}>
+        <label className={styles.field}>
+          <span className={styles.fieldLabel}>Name</span>
+          <input
+            className={styles.input}
             aria-label="Expectation name"
             value={draft.name}
             placeholder="Expectation name"
@@ -185,16 +220,14 @@ const MockFromLogModalContent: React.FC<{
               })
             }
           />
-        </div>
+        </label>
 
-        <div className={moduleStyle.panel}>
-          <div className={moduleStyle.panelHead}>
+        <section className={styles.panel}>
+          <div className={styles.panelHead}>
             <span>Matchers</span>
-            <span className={moduleStyle.panelHeadHint}>
-              Only checked fields are matched
-            </span>
+            <span className={styles.hint}>Only checked fields are matched</span>
           </div>
-          <div className={moduleStyle.panelBody}>
+          <div className={styles.panelBody}>
             <MatcherRow
               slot="method"
               row={draft.method}
@@ -210,71 +243,70 @@ const MockFromLogModalContent: React.FC<{
               onChange={onChange}
             />
 
-            <div className={moduleStyle.subHead}>
+            <div className={styles.subHead}>
               <span>Query</span>
-              <span className={moduleStyle.subCount}>{draft.query.length}</span>
+              <span className={styles.subCount}>{draft.query.length}</span>
             </div>
             {renderRows("query", draft.query, true)}
 
-            <div className={moduleStyle.subHead}>
+            <div className={styles.subHead}>
               <span>Request params</span>
-              <span className={moduleStyle.subCount}>{draft.param.length}</span>
+              <span className={styles.subCount}>{draft.param.length}</span>
             </div>
             {renderRows("param", draft.param, true)}
           </div>
-        </div>
+        </section>
 
-        <div className={moduleStyle.panel}>
-          <div className={moduleStyle.panelHead}>
+        <section className={styles.panel}>
+          <div className={styles.panelHead}>
             <span>Response</span>
-            <span className={moduleStyle.panelHeadHint}>
-              always returns JSON
-            </span>
+            <span className={styles.hint}>always returns JSON</span>
           </div>
-          <div className={moduleStyle.panelBody}>
-            <div className={moduleStyle.fieldLine}>
-              <span className={moduleStyle.fieldLabel}>Status</span>
-              <div>
-                <InputNumber
-                  aria-label="Response status"
-                  style={{ width: 160 }}
-                  value={draft.status}
-                  onChange={(value) => {
-                    if (value !== null) {
-                      setDraft((current) => {
-                        current.status = value;
-                      });
-                    }
-                  }}
-                />
-              </div>
-            </div>
+          <div className={styles.panelBody}>
+            <label className={styles.field}>
+              <span className={styles.fieldLabel}>Status</span>
+              <input
+                className={[styles.input, styles.statusInput].join(" ")}
+                type="number"
+                aria-label="Response status"
+                value={draft.status}
+                onChange={(event) => {
+                  const value = parseInt(event.target.value, 10);
+                  setDraft((current) => {
+                    current.status = Number.isNaN(value) ? 0 : value;
+                  });
+                }}
+              />
+            </label>
 
-            <div className={moduleStyle.subHead}>
+            <div className={styles.subHead}>
               <span>Headers</span>
-              <span className={moduleStyle.subCount}>{draft.header.length}</span>
+              <span className={styles.subCount}>{draft.header.length}</span>
             </div>
             {renderRows("header", draft.header, false)}
 
-            <div className={moduleStyle.subHead}>
+            <div className={styles.subHead}>
               <span>Body</span>
             </div>
             <div
               className={[
-                moduleStyle.editorWrap,
-                jsonInvalid ? moduleStyle.editorError : "",
+                styles.editorWrap,
+                jsonInvalid ? styles.editorError : "",
               ].join(" ")}
             >
               <Editor
                 height="220px"
                 language="json"
-                theme={systemConfigState.mode === "dark" ? "vs-dark" : "light"}
+                theme={LIVEMOCK_DARK_THEME}
+                beforeMount={defineLivemockDarkTheme}
                 value={draft.content}
                 options={{
-                  lineNumbers: "off",
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
+                  fontSize: 13,
                   wordWrap: "on",
+                  lineNumbers: "off",
+                  lineNumbersMinChars: 3,
                   automaticLayout: true,
                 }}
                 onChange={(value) =>
@@ -285,24 +317,12 @@ const MockFromLogModalContent: React.FC<{
               />
             </div>
             {jsonInvalid && (
-              <div className={moduleStyle.errorText} role="alert">
+              <div className={styles.errorText} role="alert">
                 Response content is not valid JSON
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      <div className={moduleStyle.footer}>
-        <Button icon={<ReloadOutlined />} onClick={handleReset}>
-          Reset
-        </Button>
-        <Space>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button type="primary" loading={saving} onClick={handleSave}>
-            Save
-          </Button>
-        </Space>
+        </section>
       </div>
     </Modal>
   );
@@ -324,35 +344,35 @@ const MatcherRow = React.memo(function MatcherRow({
   return (
     <div
       className={[
-        moduleStyle.row,
-        showCondition ? "" : moduleStyle.rowNoCondition,
+        styles.row,
+        showCondition ? "" : styles.rowNoCondition,
       ].join(" ")}
     >
-      <Checkbox
-        className={moduleStyle.rowField}
-        checked={row.checked}
-        aria-label={`match ${label}`}
-        onChange={(event) =>
-          onChange(slot, row.key, { checked: event.target.checked })
-        }
-      >
-        <span className={moduleStyle.rowLabel} title={label}>
+      <label className={styles.rowCheck}>
+        <input
+          type="checkbox"
+          checked={row.checked}
+          aria-label={`match ${label}`}
+          onChange={(event) =>
+            onChange(slot, row.key, { checked: event.target.checked })
+          }
+        />
+        <span className={styles.rowLabel} title={label}>
           {label}
         </span>
-      </Checkbox>
+      </label>
       {showCondition && (
         <Select
           size="small"
-          className={moduleStyle.rowCondition}
+          className={styles.rowCondition}
           value={row.condition}
           options={CONDITION_OPTIONS}
           aria-label={`${label} condition`}
           onChange={(value) => onChange(slot, row.key, { condition: value })}
         />
       )}
-      <Input
-        size="small"
-        className={moduleStyle.rowValue}
+      <input
+        className={[styles.input, styles.rowValue].join(" ")}
         value={row.value}
         placeholder="value"
         aria-label={`${label} value`}

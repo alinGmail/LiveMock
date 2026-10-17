@@ -1,0 +1,85 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: #3e5372;
+}
+
+.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+}
+.ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: transparent;
+}
+
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.28);
+}
+.primary:hover {
+  background: #2f74e6;
+  border-color: #2f74e6;
+}
+.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.iconBtn {
+  width: 34px;
+  padding: 0;
+}
+.iconBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dangerOutline {
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+}
+.dangerOutline:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fecaca;
+}
+
+.dangerSolid {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.dangerSolid:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+.dangerSolid:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

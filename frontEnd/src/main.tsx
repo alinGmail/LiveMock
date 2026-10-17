@@ -1,6 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+// Self-hosted redesign fonts (Fira Sans / Fira Code) — bundled, no external CDN.
+// Latin subset only: Fira carries no CJK glyphs, so non-Latin text falls back.
+import "@fontsource/fira-sans/latin-300.css";
+import "@fontsource/fira-sans/latin-400.css";
+import "@fontsource/fira-sans/latin-500.css";
+import "@fontsource/fira-sans/latin-600.css";
+import "@fontsource/fira-sans/latin-700.css";
+import "@fontsource/fira-code/latin-400.css";
+import "@fontsource/fira-code/latin-500.css";
+import "@fontsource/fira-code/latin-600.css";
+import "@fontsource/fira-code/latin-700.css";
 import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "./store";

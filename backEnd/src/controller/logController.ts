@@ -147,7 +147,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       >,
       res: Response<ListLogViewLogsResponse>
     ) => {
-      let { maxLogId, projectId } = req.query;
+      let { maxLogId, projectId, limit } = req.query;
       const lovViewId = req.params.logViewId;
       if (!projectId) {
         throw new ServerError(400, "project id not exist!");
@@ -160,6 +160,8 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       const logCollection = await getLogCollection(projectId, path);
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
 
+      const pageSize =
+        Number(limit) > 0 ? Math.min(Number(limit), PAGE_SIZE) : PAGE_SIZE;
       let resultset = dynamicView.branchResultset(); //.limit(PAGE_SIZE).data();
       if (maxLogId === undefined || maxLogId === null || maxLogId === "") {
       } else {
@@ -167,7 +169,7 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       }
       const logs = resultset
         .simplesort("id", { desc: true })
-        .limit(PAGE_SIZE)
+        .limit(pageSize)
         .data();
       res.json(logs);
     }
