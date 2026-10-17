@@ -144,3 +144,97 @@ html {
   height: 20px;
   line-height: 20px;
 }
+
+/* ==========================================================================
+   LiveMock redesign tokens (new UI, dark only)
+   Source of truth: new-ui/design-system/livemock-ui-redesign/MASTER.md and the
+   design demo new-ui/index.html. Exposed globally so the new components share a
+   single palette; existing pages only consume the variables they already use.
+   ========================================================================== */
+:root {
+  --bg: #0f172a;
+  --bg-deep: #0b1220;
+  --surface: #1e293b;
+  --surface-2: #243449;
+  --surface-3: #2b3c53;
+
+  --border: #334155;
+  --border-soft: #26364d;
+
+  --text: #f8fafc;
+  --text-dim: #cbd5e1;
+  --muted: #94a3b8;
+  --faint: #64748b;
+
+  --accent: #3b82f6;
+  --accent-2: #60a5fa;
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --purple: #a78bfa;
+  --pink: #f472b6;
+  --teal: #2dd4bf;
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --radius-xs: 5px;
+
+  --ring: 0 0 0 2px var(--bg), 0 0 0 4px rgba(96, 165, 250, 0.55);
+
+  --sans: "Fira Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Fira Code", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+}
+
+body {
+  font-family: var(--sans);
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--mono);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* Thin, dark scrollbars matching the design demo. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3b52 transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a3b52;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3b4f6b;
+  background-clip: content-box;
+}

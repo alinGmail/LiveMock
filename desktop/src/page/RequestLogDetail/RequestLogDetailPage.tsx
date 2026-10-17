@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRequestLogDetail } from "../../server/logServer";
 import { ClockCircleOutlined } from "@ant-design/icons";
-import RequestQueryCard from "front-end/src/page/RequestLogDetail/RequestQueryCard";
+import RequestQueryCard from "./RequestQueryCard";
 import ResponseBodyCard from "./ResponseBodyCard";
 import ResponseHeadersCard from "./ResponseHeadersCard";
 

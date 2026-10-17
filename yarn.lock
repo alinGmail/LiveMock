@@ -8103,6 +8103,8 @@ __metadata:
   dependencies:
     "@ant-design/icons": "npm:^5.0.1"
     "@eslint/js": "npm:^9.39.5"
+    "@fontsource/fira-code": "npm:^5.3.0"
+    "@fontsource/fira-sans": "npm:^5.3.0"
     "@monaco-editor/react": "npm:^4.6.0"
     "@reduxjs/toolkit": "npm:^1.8.1"
     "@tanstack/react-query": "npm:^4.24.10"
