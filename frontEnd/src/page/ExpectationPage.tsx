@@ -2,15 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { App } from "antd";
+import { App, Dropdown } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
+  deleteExpectationReq,
   listExpectationReq,
   updateExpectationReq,
 } from "../server/expectationServer";
 import {
   createGroupReq,
+  deleteGroupReq,
   listGroupReq,
   updateGroupReq,
 } from "../server/groupServer";
@@ -21,6 +23,7 @@ import {
 } from "../server/actionServer";
 import {
   createExpectation,
+  duplicateExpectation,
   ExpectationM,
 } from "livemock-core/struct/expectation";
 import {
@@ -35,6 +38,7 @@ import {
 import { RequestMatcherM } from "livemock-core/struct/matcher";
 import {
   addAction,
+  deleteExpectation,
   modifyAction,
   removeAction,
   updateExpectationItem,
@@ -54,6 +58,8 @@ import TimingEditorModal, {
 import GroupEditorModal, {
   GroupEditorValues,
 } from "../component/expectation/GroupEditorModal";
+import DeleteExpectationModal from "../component/expectation/DeleteExpectationModal";
+import DeleteGroupModal from "../component/expectation/DeleteGroupModal";
 import Toggle from "../component/Toggle";
 import { getErrorMessage } from "../component/common";
 import {
@@ -211,6 +217,15 @@ const ExpectationPage = () => {
     () => new Set(),
   );
   const [addOpen, setAddOpen] = useState(false);
+  const [addGroupId, setAddGroupId] = useState<string | null>(null);
+  const [groupMenuId, setGroupMenuId] = useState<string | null>(null);
+  const [cloneTarget, setCloneTarget] = useState<ExpectationM | null>(null);
+  const [cloning, setCloning] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ExpectationM | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteGroupTarget, setDeleteGroupTarget] =
+    useState<ExpectationGroupM | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState(false);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -266,6 +281,11 @@ const ExpectationPage = () => {
     setQuery("");
     setSelectedId(null);
     setCollapsedGroups(new Set());
+    setGroupMenuId(null);
+    setAddGroupId(null);
+    setCloneTarget(null);
+    setDeleteTarget(null);
+    setDeleteGroupTarget(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -381,6 +401,127 @@ const ExpectationPage = () => {
       })
       .catch(() => {
         toast.error("Expectation created, but the list failed to refresh.");
+      });
+  };
+
+  const handleClone = async (values: AddExpectationValues) => {
+    if (!cloneTarget) {
+      return;
+    }
+    const expectation = duplicateExpectation(cloneTarget);
+    expectation.name =
+      values.name.trim() || `${cloneTarget.name || "expectation"} (copy)`;
+    expectation.description = values.description.trim();
+    expectation.groupId = values.groupId;
+    expectation.createTime = new Date();
+    setCloning(true);
+    let created: ExpectationM;
+    try {
+      created = await createExpectationReq(currentProject.id, expectation);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setCloning(false);
+      return;
+    }
+    // Clear the filter and expand the target group so the new row is visible.
+    setQuery("");
+    if (created.groupId) {
+      const groupId = created.groupId;
+      setCollapsedGroups((prev) => {
+        const next = new Set(prev);
+        next.delete(groupId);
+        return next;
+      });
+    }
+    setCloneTarget(null);
+    setCloning(false);
+    toast.success("Expectation cloned");
+    getExpectationListQuery
+      .refetch()
+      .then(() => {
+        setSelectedId(created.id);
+      })
+      .catch(() => {
+        toast.error("Expectation cloned, but the list failed to refresh.");
+      });
+  };
+
+  const handleDeleteExpectation = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+    const target = deleteTarget;
+    const index = orderedAll.findIndex((item) => item.id === target.id);
+    const remaining = orderedAll.filter((item) => item.id !== target.id);
+    const nextSelected =
+      remaining[index >= 0 ? index : 0] ??
+      remaining[remaining.length - 1] ??
+      null;
+    setDeleting(true);
+    try {
+      await deleteExpectationReq(currentProject.id, target.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setDeleting(false);
+      return;
+    }
+    // Remove the row and move the selection before refetching, so the
+    // selection effect sees a valid id instead of falling back to the first row.
+    dispatch(deleteExpectation(target.id));
+    setSelectedId(nextSelected ? nextSelected.id : null);
+    setDeleteTarget(null);
+    setDeleting(false);
+    toast.success("Expectation deleted");
+    getExpectationListQuery.refetch().catch(() => {
+      toast.error("Expectation deleted, but the list failed to refresh.");
+    });
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!deleteGroupTarget) {
+      return;
+    }
+    const group = deleteGroupTarget;
+    const memberIds = new Set(
+      expectationList
+        .filter((item) => item.groupId === group.id)
+        .map((item) => item.id),
+    );
+    const selectedWasMember = selectedId ? memberIds.has(selectedId) : false;
+    let nextSelected: ExpectationM | null = null;
+    if (selectedWasMember && selectedId) {
+      const selectedIndex = orderedAll.findIndex(
+        (item) => item.id === selectedId,
+      );
+      const remaining = orderedAll.filter((item) => !memberIds.has(item.id));
+      const remainingIndex = orderedAll
+        .slice(0, selectedIndex < 0 ? 0 : selectedIndex)
+        .filter((item) => !memberIds.has(item.id)).length;
+      nextSelected =
+        remaining[remainingIndex] ?? remaining[remaining.length - 1] ?? null;
+    }
+    setDeletingGroup(true);
+    try {
+      await deleteGroupReq(currentProject.id, group.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setDeletingGroup(false);
+      return;
+    }
+    // Remove the group's expectations and move the selection before refetching,
+    // so the selection effect never falls back to an unrelated row.
+    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
+    if (selectedWasMember) {
+      setSelectedId(nextSelected ? nextSelected.id : null);
+    }
+    setDeleteGroupTarget(null);
+    setDeletingGroup(false);
+    toast.success("Group deleted");
+    getGroupListQuery
+      .refetch()
+      .then(() => getExpectationListQuery.refetch())
+      .catch(() => {
+        toast.error("Group deleted, but the list failed to refresh.");
       });
   };
 
@@ -716,15 +857,65 @@ const ExpectationPage = () => {
             onChange={() => handleToggleGroupActive(group)}
             label={`Toggle group ${group.name || "unnamed group"}`}
           />
-          <button
-            type="button"
-            className={styles.groupEdit}
-            title="Edit group"
-            aria-label={`Edit group ${group.name || "unnamed group"}`}
-            onClick={() => setGroupModal({ mode: "edit", group })}
+          <Dropdown
+            trigger={["click"]}
+            placement="bottomRight"
+            open={groupMenuId === group.id}
+            onOpenChange={(open) => setGroupMenuId(open ? group.id : null)}
+            dropdownRender={() => (
+              <div className={styles.groupMenu}>
+                <button
+                  type="button"
+                  className={styles.groupMenuItem}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setGroupModal({ mode: "edit", group });
+                  }}
+                >
+                  Edit group
+                </button>
+                <button
+                  type="button"
+                  className={styles.groupMenuItem}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setCollapsedGroups((prev) => {
+                      const next = new Set(prev);
+                      next.delete(group.id);
+                      return next;
+                    });
+                    setAddGroupId(group.id);
+                    setAddOpen(true);
+                  }}
+                >
+                  New expectation
+                </button>
+                <div className={styles.groupMenuSep} />
+                <button
+                  type="button"
+                  className={[
+                    styles.groupMenuItem,
+                    styles.groupMenuItemDanger,
+                  ].join(" ")}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setDeleteGroupTarget(group);
+                  }}
+                >
+                  Delete group
+                </button>
+              </div>
+            )}
           >
-            <MoreIcon />
-          </button>
+            <button
+              type="button"
+              className={styles.groupEdit}
+              title="Group actions"
+              aria-label={`Group actions for ${group.name || "unnamed group"}`}
+            >
+              <MoreIcon />
+            </button>
+          </Dropdown>
         </div>,
       );
       masterNodes.push(
@@ -771,7 +962,10 @@ const ExpectationPage = () => {
               ref={addButtonRef}
               type="button"
               className={styles.addButton}
-              onClick={() => setAddOpen(true)}
+              onClick={() => {
+                setAddGroupId(null);
+                setAddOpen(true);
+              }}
             >
               <PlusIcon />
               Add Expectation
@@ -815,6 +1009,16 @@ const ExpectationPage = () => {
         <ExpectationDetail
           expectation={selectedExpectation}
           group={selectedGroup}
+          onClone={() => {
+            if (selectedExpectation) {
+              setCloneTarget(selectedExpectation);
+            }
+          }}
+          onDelete={() => {
+            if (selectedExpectation) {
+              setDeleteTarget(selectedExpectation);
+            }
+          }}
           onEditName={() => setNameOpen(true)}
           onEditAction={handleEditAction}
           onDeleteAction={handleDeleteAction}
@@ -829,9 +1033,62 @@ const ExpectationPage = () => {
       {addOpen ? (
         <AddExpectationModal
           groups={groupList}
+          lockedGroupId={addGroupId}
           creating={creating}
           onCreate={handleCreate}
-          onClose={() => setAddOpen(false)}
+          onClose={() => {
+            setAddOpen(false);
+            setAddGroupId(null);
+          }}
+        />
+      ) : null}
+      {cloneTarget ? (
+        <AddExpectationModal
+          groups={groupList}
+          initialValues={{
+            name: `${cloneTarget.name || "expectation"} (copy)`,
+            description: cloneTarget.description ?? "",
+            groupId: cloneTarget.groupId ?? null,
+          }}
+          title="Clone expectation"
+          submitLabel="Clone"
+          submittingLabel="Cloning…"
+          creating={cloning}
+          onCreate={handleClone}
+          onClose={() => {
+            if (!cloning) {
+              setCloneTarget(null);
+            }
+          }}
+        />
+      ) : null}
+      {deleteTarget ? (
+        <DeleteExpectationModal
+          name={deleteTarget.name}
+          deleting={deleting}
+          onConfirm={handleDeleteExpectation}
+          onClose={() => {
+            if (!deleting) {
+              setDeleteTarget(null);
+            }
+          }}
+        />
+      ) : null}
+      {deleteGroupTarget ? (
+        <DeleteGroupModal
+          name={deleteGroupTarget.name}
+          count={
+            expectationList.filter(
+              (item) => item.groupId === deleteGroupTarget.id,
+            ).length
+          }
+          deleting={deletingGroup}
+          onConfirm={handleDeleteGroup}
+          onClose={() => {
+            if (!deletingGroup) {
+              setDeleteGroupTarget(null);
+            }
+          }}
         />
       ) : null}
       {editingAction ? (
