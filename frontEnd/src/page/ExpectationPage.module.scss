@@ -284,6 +284,20 @@
   color: var(--text);
 }
 
+.groupMenuSep {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--border-soft);
+}
+
+.groupMenuItemDanger {
+  color: #fca5a5;
+}
+.groupMenuItemDanger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
 .groupBody {
   display: flex;
   flex-direction: column;
