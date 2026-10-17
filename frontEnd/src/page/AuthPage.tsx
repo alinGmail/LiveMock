@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { loginReq, registerReq } from "../server/authServer";
 import { getErrorMessage } from "../component/common";
 import logoUrl from "../assets/logo.png";
@@ -24,7 +24,6 @@ interface FormErrors {
  * toggles, and no toasts.
  */
 const AuthPage = ({ mode, onSuccess }: AuthPageProps) => {
-  const [localMode, setLocalMode] = useState<"login" | "register">(mode);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -33,20 +32,7 @@ const AuthPage = ({ mode, onSuccess }: AuthPageProps) => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    setLocalMode(mode);
-  }, [mode]);
-
-  const register = localMode === "register";
-
-  const switchMode = (next: "login" | "register") => {
-    setLocalMode(next);
-    setErrors({});
-    setPassword("");
-    setConfirm("");
-    setShowPassword(false);
-    setShowConfirm(false);
-  };
+  const register = mode === "register";
 
   const validate = (): boolean => {
     const next: FormErrors = {};
@@ -100,13 +86,17 @@ const AuthPage = ({ mode, onSuccess }: AuthPageProps) => {
           <span>LiveMock</span>
         </div>
         <h1>{register ? "Create your account" : "Welcome back"}</h1>
-        <p className={styles.sub}>
-          {register
-            ? "First run — this single account protects the dashboard and API."
-            : "Sign in to continue to your dashboard."}
-        </p>
+        {register ? null : (
+          <p className={styles.sub}>Sign in to continue to your dashboard.</p>
+        )}
 
-        <form className={styles.form} onSubmit={submit} noValidate>
+        <form
+          className={[styles.form, register ? styles.formAfterTitle : ""].join(
+            " "
+          )}
+          onSubmit={submit}
+          noValidate
+        >
           {errors.form ? (
             <div className={styles.formError} role="alert">
               {errors.form}
@@ -205,18 +195,6 @@ const AuthPage = ({ mode, onSuccess }: AuthPageProps) => {
           </button>
         </form>
 
-        {register ? (
-          <p className={styles.switch}>
-            Already have an account?{" "}
-            <button
-              type="button"
-              className={styles.link}
-              onClick={() => switchMode("login")}
-            >
-              Sign in
-            </button>
-          </p>
-        ) : null}
         <p className={styles.foot}>Self-hosted · one account per instance</p>
       </div>
     </div>
