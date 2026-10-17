@@ -72,6 +72,47 @@ describe('test project',()=>{
   });
 
 
+  test('update project while running', async () => {
+    const projectCollection = await getProjectCollection('test_db');
+    const project = projectCollection.findOne({});
+    if (!project) {
+      throw new Error("project is null");
+    }
+
+    await supertest(server).post("/project/start/" + project.id).expect(200);
+
+    // name, description and max logs can change while the server is running
+    const updateRes = await supertest(server)
+      .put("/project/" + project.id)
+      .send({
+        projectUpdate: {
+          name: "renamed while running",
+          description: "updated",
+          maxRequestLogNumber: 2500,
+        },
+      } as UpdateProjectReqBody)
+      .expect(200);
+    expect(updateRes.body.name).toEqual("renamed while running");
+    expect(updateRes.body.description).toEqual("updated");
+    expect(updateRes.body.maxRequestLogNumber).toEqual(2500);
+
+    // sending the same port is not a change
+    await supertest(server)
+      .put("/project/" + project.id)
+      .send({ projectUpdate: { port: project.port } } as UpdateProjectReqBody)
+      .expect(200);
+
+    // changing the port while running is rejected
+    const portErr = await supertest(server)
+      .put("/project/" + project.id)
+      .send({ projectUpdate: { port: "9098" } } as UpdateProjectReqBody)
+      .expect(500);
+    expect(portErr.body.error.message).toContain("can not modify port");
+
+    await supertest(server).post("/project/stop/" + project.id).expect(200);
+  });
+
+
   test('start project',async ()=>{
 
     const projectCollection =await getProjectCollection('test_db');

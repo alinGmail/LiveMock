@@ -1,57 +1,27 @@
-import ProjectEditor from "../component/project/ProjectEditor";
-import { EditorType } from "../struct/common";
-import { useImmer } from "use-immer";
 import { useAppSelector } from "../store";
-import { useDebounceEffect, useDebounceFn } from "ahooks";
-import { debounceWait } from "../config";
 import {
   deleteProjectReq,
   getProjectListReq,
-  updateProjectReq,
 } from "../server/projectServer";
 import { getErrorMessage, toastPromise } from "../component/common";
 import { changePasswordReq } from "../server/authServer";
 import { confirmPasswordRules, passwordRules } from "../component/formRules";
-import {setCurProjectIndex, setProjectList} from "../slice/projectSlice";
+import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button, Card, Form, Input, Modal } from "antd";
 import { message } from "antd/lib";
 import { DeleteOutlined } from "@ant-design/icons";
 import toast from "react-hot-toast";
 
+/**
+ * Account and destructive project actions. Project settings (name, port, max
+ * request logs, description) now live in the app bar's Project settings panel.
+ */
 const ConfigPage = () => {
   const dispatch = useDispatch();
-  const isStartUp = useRef(true);
   const projectState = useAppSelector((state) => state.project);
   const currentProject = projectState.projectList[projectState.curProjectIndex];
-  const [modifyProject, updateModifyProject] = useImmer(currentProject);
-
-  useEffect(() => {
-    updateModifyProject(currentProject);
-    isStartUp.current = true;
-  }, [currentProject]);
-  function onProjectEditorSubmit() {}
-  useDebounceEffect(
-    () => {
-      if (isStartUp.current) {
-        isStartUp.current = false;
-        return;
-      }
-      const updatePromise = updateProjectReq(modifyProject.id, {
-        projectUpdate: modifyProject,
-      });
-      toastPromise(updatePromise);
-      updatePromise.then(async (_res) => {
-        let res = await getProjectListReq();
-        dispatch(setProjectList(res));
-      });
-    },
-    [modifyProject],
-    {
-      wait: debounceWait,
-    },
-  );
 
   const [messageApi, messageContextHolder] = message.useMessage();
   const [projectNameInp, setProjectNameInp] = useState<string>("");
@@ -123,12 +93,6 @@ const ConfigPage = () => {
           />
         </div>
       </Modal>
-      <ProjectEditor
-        editorType={EditorType.MODIFY}
-        projectM={modifyProject}
-        onSubmit={onProjectEditorSubmit}
-        updaterProjectM={updateModifyProject}
-      />
       <div
         style={{
           width: "560px",

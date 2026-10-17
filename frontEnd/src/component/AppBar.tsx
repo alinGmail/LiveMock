@@ -20,12 +20,16 @@ import {
   ProjectStatus,
 } from "livemock-core/struct/project";
 import ProjectEditor from "./project/ProjectEditor";
+import ProjectSettingsModal, {
+  ProjectSettingsValues,
+} from "./ProjectSettingsModal";
 import { EditorType } from "../struct/common";
 import {
   createProjectReq,
   getProjectListReq,
   startProjectReq,
   stopProjectReq,
+  updateProjectReq,
 } from "../server/projectServer";
 import { logoutReq } from "../server/authServer";
 import toast from "react-hot-toast";
@@ -51,6 +55,23 @@ function statusLabel(status: ProjectStatus, port: string): string {
   }
 }
 
+const GearIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="16"
+    height="16"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+
 const AppBar = () => {
   const projectState = useAppSelector((state) => state.project);
   const dispatch = useDispatch();
@@ -59,6 +80,8 @@ const AppBar = () => {
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [projectModalShow, setProjectModalShow] = useState(false);
+  const [projectSettingsOpen, setProjectSettingsOpen] = useState(false);
+  const [projectSettingsSaving, setProjectSettingsSaving] = useState(false);
   const [project, updateProject] = useImmer<ProjectM | null>(null);
 
   useEffect(() => {
@@ -93,6 +116,23 @@ const AppBar = () => {
         : startProjectReq(currentProject.id);
     toastPromise(promise);
     promise.then(refreshProjects);
+  };
+
+  const onSaveProjectSettings = async (values: ProjectSettingsValues) => {
+    if (!currentProject) {
+      return;
+    }
+    setProjectSettingsSaving(true);
+    try {
+      await updateProjectReq(currentProject.id, { projectUpdate: values });
+      toast.success("Project settings saved");
+      refreshProjects();
+      setProjectSettingsOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setProjectSettingsSaving(false);
+    }
   };
 
   const onLogout = () => {
@@ -195,6 +235,15 @@ const AppBar = () => {
         )}
       </Modal>
 
+      {projectSettingsOpen && currentProject ? (
+        <ProjectSettingsModal
+          project={currentProject}
+          saving={projectSettingsSaving}
+          onSubmit={onSaveProjectSettings}
+          onClose={() => setProjectSettingsOpen(false)}
+        />
+      ) : null}
+
       <div className={styles.brand}>
         <img className={styles.brandLogo} src={logoUrl} alt="LiveMock" />
         <span>LiveMock</span>
@@ -247,6 +296,17 @@ const AppBar = () => {
           </NavLink>
         ))}
       </nav>
+
+      <button
+        type="button"
+        className={styles.iconBtn}
+        aria-label="Project settings"
+        title="Project settings"
+        onClick={() => setProjectSettingsOpen(true)}
+        disabled={!currentProject}
+      >
+        <GearIcon />
+      </button>
 
       <span className={styles.spacer} />
 

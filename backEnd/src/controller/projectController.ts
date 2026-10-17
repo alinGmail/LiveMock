@@ -119,9 +119,12 @@ async function getProjectRouter(path: string): Promise<express.Router> {
       if (!project) {
         throw new ServerError(500, "project not exist");
       }
-      const projectUpdate = req.body.projectUpdate;
-      // if the project start , can not modify port
-      const portChange = projectUpdate && project.port !== projectUpdate;
+      const projectUpdate = req.body.projectUpdate ?? {};
+      // Only a real port change is blocked while the project is running; other
+      // fields (name, description, max request logs) may be saved at any time.
+      const portChange =
+        projectUpdate.port !== undefined &&
+        String(projectUpdate.port) !== project.port;
       const projectStatus = getProjectStatus(project.id);
       if (
         [
