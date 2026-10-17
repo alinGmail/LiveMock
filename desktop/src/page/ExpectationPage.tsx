@@ -1,17 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { AppDispatch, useAppSelector } from "../store";
-import { listExpectationListReq } from "../server/expectationServer";
-import { listGroupReq } from "../server/groupServer";
-import { ExpectationM } from "livemock-core/struct/expectation";
+import {
+  createExpectationReq,
+  listExpectationListReq,
+  updateExpectationReq,
+} from "../server/expectationServer";
+import {
+  createGroupReq,
+  listGroupReq,
+  updateGroupReq,
+} from "../server/groupServer";
+import {
+  createExpectation,
+  ExpectationM,
+} from "livemock-core/struct/expectation";
 import {
   buildMatchOrderBlocks,
+  createExpectationGroup,
   ExpectationGroupM,
 } from "livemock-core/struct/expectationGroup";
+import { createCustomResponseAction } from "livemock-core/struct/action";
+import {
+  updateExpectationItem,
+} from "../slice/expectationSlice";
 import { getExpectationSuccess } from "../slice/thunk";
 import ExpectationDetail from "../component/expectation/ExpectationDetail";
+import AddExpectationModal, {
+  AddExpectationValues,
+} from "../component/expectation/AddExpectationModal";
+import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
+import NameEditorModal from "../component/expectation/NameEditorModal";
+import TimingEditorModal, {
+  TimingValues,
+} from "../component/expectation/TimingEditorModal";
+import GroupEditorModal, {
+  GroupEditorValues,
+} from "../component/expectation/GroupEditorModal";
 import Toggle from "../component/Toggle";
+import { getErrorMessage } from "../component/common";
 import {
   actionKind,
   actionLabel,
@@ -53,6 +82,43 @@ const SearchIcon = () => (
   >
     <circle cx="11" cy="11" r="7" />
     <path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const FolderPlusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M4 5h5l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+    <path d="M12 11v5M9.5 13.5h5" />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="5" cy="12" r="1.6" />
+    <circle cx="12" cy="12" r="1.6" />
+    <circle cx="19" cy="12" r="1.6" />
   </svg>
 );
 
@@ -101,6 +167,22 @@ const EmptyState = ({ query }: { query: string }) => (
   </div>
 );
 
+function nextGroupName(names: Array<string>): string {
+  const base = "New group";
+  if (!names.includes(base)) {
+    return base;
+  }
+  let index = 2;
+  while (names.includes(`${base} ${index}`)) {
+    index += 1;
+  }
+  return `${base} ${index}`;
+}
+
+type GroupModalState =
+  | { mode: "create" }
+  | { mode: "edit"; group: ExpectationGroupM };
+
 const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
@@ -112,6 +194,26 @@ const ExpectationPage = () => {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const [addOpen, setAddOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
+  const [groupSaving, setGroupSaving] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameSaving, setNameSaving] = useState(false);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [descriptionSaving, setDescriptionSaving] = useState(false);
+  const [timingOpen, setTimingOpen] = useState(false);
+  const [timingSaving, setTimingSaving] = useState(false);
+  const [activeSaving, setActiveSaving] = useState(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const wasAddOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (wasAddOpenRef.current && !addOpen) {
+      addButtonRef.current?.focus();
+    }
+    wasAddOpenRef.current = addOpen;
+  }, [addOpen]);
 
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
@@ -132,6 +234,13 @@ const ExpectationPage = () => {
   );
   const groupsLoaded = getGroupListQuery.data !== undefined;
   const expectationList = expectationState.expectationList;
+
+  const editingGroupId =
+    groupModal?.mode === "edit" ? groupModal.group.id : null;
+  const groupNamesForValidation = groupList
+    .filter((group) => group.id !== editingGroupId)
+    .map((group) => group.name);
+  const defaultGroupName = nextGroupName(groupList.map((group) => group.name));
 
   useEffect(() => {
     setQuery("");
@@ -218,6 +327,160 @@ const ExpectationPage = () => {
       }
       return next;
     });
+  };
+
+  const handleCreate = async (values: AddExpectationValues) => {
+    const expectation = createExpectation();
+    expectation.name = values.name.trim() || "New expectation";
+    expectation.description = values.description.trim();
+    expectation.groupId = values.groupId;
+    expectation.actions = [createCustomResponseAction()];
+    setCreating(true);
+    let created: ExpectationM;
+    try {
+      created = await createExpectationReq(currentProject.id, expectation);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setCreating(false);
+      return;
+    }
+    setQuery("");
+    setAddOpen(false);
+    setCreating(false);
+    getExpectationListQuery
+      .refetch()
+      .then(() => {
+        setSelectedId(created.id);
+      })
+      .catch(() => {
+        toast.error("Expectation created, but the list failed to refresh.");
+      });
+  };
+
+  const handleSubmitGroup = async (values: GroupEditorValues) => {
+    setGroupSaving(true);
+    try {
+      if (groupModal?.mode === "edit") {
+        await updateGroupReq(currentProject.id, groupModal.group.id, values);
+        toast.success("Group updated");
+      } else {
+        const group = createExpectationGroup();
+        group.name = values.name;
+        group.priority = values.priority;
+        group.activate = values.activate;
+        await createGroupReq(currentProject.id, group);
+        toast.success("Group created");
+      }
+      setGroupModal(null);
+      getGroupListQuery.refetch().catch(() => {
+        toast.error("Group saved, but the list failed to refresh.");
+      });
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setGroupSaving(false);
+    }
+  };
+
+  const handleToggleGroupActive = async (group: ExpectationGroupM) => {
+    try {
+      await updateGroupReq(currentProject.id, group.id, {
+        activate: !group.activate,
+      });
+      await getGroupListQuery.refetch();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  const handleSaveDescription = async (description: string) => {
+    if (!selectedId) {
+      return;
+    }
+    setDescriptionSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, {
+        description,
+      });
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: { description },
+        }),
+      );
+      setDescriptionOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setDescriptionSaving(false);
+    }
+  };
+
+  const handleSaveName = async (name: string) => {
+    if (!selectedId) {
+      return;
+    }
+    setNameSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, { name });
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: { name },
+        }),
+      );
+      setNameOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setNameSaving(false);
+    }
+  };
+
+  const handleSaveTiming = async (values: TimingValues) => {
+    if (!selectedId) {
+      return;
+    }
+    setTimingSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, values);
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: values,
+        }),
+      );
+      setTimingOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setTimingSaving(false);
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (!selectedId || !selectedExpectation || activeSaving) {
+      return;
+    }
+    const activate = !selectedExpectation.activate;
+    setActiveSaving(true);
+    dispatch(
+      updateExpectationItem({
+        expectationId: selectedId,
+        modifyValues: { activate },
+      }),
+    );
+    updateExpectationReq(currentProject.id, selectedId, { activate })
+      .catch((error) => {
+        dispatch(
+          updateExpectationItem({
+            expectationId: selectedId,
+            modifyValues: { activate: !activate },
+          }),
+        );
+        toast.error(getErrorMessage(error));
+      })
+      .finally(() => setActiveSaving(false));
   };
 
   const isLoading =
@@ -317,10 +580,18 @@ const ExpectationPage = () => {
           </span>
           <Toggle
             checked={group.activate}
-            onChange={() => undefined}
+            onChange={() => handleToggleGroupActive(group)}
             label={`Toggle group ${group.name || "unnamed group"}`}
-            disabled
           />
+          <button
+            type="button"
+            className={styles.groupEdit}
+            title="Edit group"
+            aria-label={`Edit group ${group.name || "unnamed group"}`}
+            onClick={() => setGroupModal({ mode: "edit", group })}
+          >
+            <MoreIcon />
+          </button>
         </div>,
       );
       masterNodes.push(
@@ -362,6 +633,27 @@ const ExpectationPage = () => {
     <div className={styles.page}>
       <div className={styles.workspace}>
         <section className={styles.master} aria-label="Expectations">
+          <div className={styles.toolbar}>
+            <button
+              ref={addButtonRef}
+              type="button"
+              className={styles.addButton}
+              onClick={() => setAddOpen(true)}
+            >
+              <PlusIcon />
+              Add Expectation
+            </button>
+            <span className={styles.grow} />
+            <button
+              type="button"
+              className={styles.groupAddButton}
+              title="Add group"
+              aria-label="Add group"
+              onClick={() => setGroupModal({ mode: "create" })}
+            >
+              <FolderPlusIcon />
+            </button>
+          </div>
           <label className={styles.searchWrap}>
             <SearchIcon />
             <input
@@ -390,8 +682,57 @@ const ExpectationPage = () => {
         <ExpectationDetail
           expectation={selectedExpectation}
           group={selectedGroup}
+          onEditName={() => setNameOpen(true)}
+          onEditDescription={() => setDescriptionOpen(true)}
+          onEditTiming={() => setTimingOpen(true)}
+          onToggleActive={handleToggleActive}
+          activeSaving={activeSaving}
         />
       </div>
+      {addOpen ? (
+        <AddExpectationModal
+          groups={groupList}
+          creating={creating}
+          onCreate={handleCreate}
+          onClose={() => setAddOpen(false)}
+        />
+      ) : null}
+      {nameOpen && selectedExpectation ? (
+        <NameEditorModal
+          name={selectedExpectation.name ?? ""}
+          saving={nameSaving}
+          onSave={handleSaveName}
+          onClose={() => setNameOpen(false)}
+        />
+      ) : null}
+      {descriptionOpen && selectedExpectation ? (
+        <DescriptionEditorModal
+          description={selectedExpectation.description ?? ""}
+          saving={descriptionSaving}
+          onSave={handleSaveDescription}
+          onClose={() => setDescriptionOpen(false)}
+        />
+      ) : null}
+      {timingOpen && selectedExpectation ? (
+        <TimingEditorModal
+          expectation={selectedExpectation}
+          groups={groupList}
+          saving={timingSaving}
+          onSave={handleSaveTiming}
+          onClose={() => setTimingOpen(false)}
+        />
+      ) : null}
+      {groupModal ? (
+        <GroupEditorModal
+          mode={groupModal.mode}
+          group={groupModal.mode === "edit" ? groupModal.group : undefined}
+          defaultName={defaultGroupName}
+          existingNames={groupNamesForValidation}
+          saving={groupSaving}
+          onSubmit={handleSubmitGroup}
+          onClose={() => setGroupModal(null)}
+        />
+      ) : null}
     </div>
   );
 };
