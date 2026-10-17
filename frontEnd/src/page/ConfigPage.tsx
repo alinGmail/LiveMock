@@ -1,31 +1,15 @@
-import { useAppSelector } from "../store";
-import {
-  deleteProjectReq,
-  getProjectListReq,
-} from "../server/projectServer";
-import { getErrorMessage, toastPromise } from "../component/common";
 import { changePasswordReq } from "../server/authServer";
 import { confirmPasswordRules, passwordRules } from "../component/formRules";
-import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
-import { useDispatch } from "react-redux";
+import { getErrorMessage } from "../component/common";
 import { useState } from "react";
-import { Button, Card, Form, Input, Modal } from "antd";
-import { message } from "antd/lib";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Button, Card, Form, Input } from "antd";
 import toast from "react-hot-toast";
 
 /**
- * Account and destructive project actions. Project settings (name, port, max
- * request logs, description) now live in the app bar's Project settings panel.
+ * Account settings. Project settings (including delete) live in the app bar's
+ * Project settings panel.
  */
 const ConfigPage = () => {
-  const dispatch = useDispatch();
-  const projectState = useAppSelector((state) => state.project);
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
-
-  const [messageApi, messageContextHolder] = message.useMessage();
-  const [projectNameInp, setProjectNameInp] = useState<string>("");
-  const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [passwordForm] = Form.useForm();
   const [changingPassword, setChangingPassword] = useState(false);
 
@@ -47,52 +31,6 @@ const ConfigPage = () => {
 
   return (
     <div style={{ padding: "20px 10px" }}>
-      {messageContextHolder}
-      <Modal
-        title={"warning"}
-        open={deleteModalShow}
-        onOk={() => {
-          if (projectNameInp !== currentProject.name) {
-            messageApi.error("incorrect project name");
-            return false;
-          }
-          const deletePromise = deleteProjectReq(currentProject.id).then(
-            (res) => {
-              setDeleteModalShow(false);
-              getProjectListReq().then(projectListRes => {
-                dispatch(setProjectList(projectListRes));
-                if (projectListRes.length > 0) {
-                  dispatch(setCurProjectIndex(0));
-                }
-              });
-            },
-          );
-          toastPromise(deletePromise);
-        }}
-        onCancel={() => {
-          setDeleteModalShow(false);
-        }}
-      >
-        <div
-          style={{
-            lineHeight: "2em",
-          }}
-        >
-          Are you sure want to delete the project{" "}
-          <strong>{currentProject.name}</strong> ?
-          <br />
-          input the project name to confirm
-          <Input
-            value={projectNameInp}
-            onChange={(e) => {
-              setProjectNameInp(e.target.value);
-            }}
-            style={{
-              marginTop: "4px",
-            }}
-          />
-        </div>
-      </Modal>
       <div
         style={{
           width: "560px",
@@ -133,22 +71,6 @@ const ConfigPage = () => {
             </Button>
           </Form>
         </Card>
-      </div>
-      <div style={{
-        width:'560px',
-        margin:'20px auto',
-      }}>
-        <Button
-          block={true}
-          size={'large'}
-          danger={true}
-          icon={<DeleteOutlined />}
-          onClick={async () => {
-            setDeleteModalShow(true);
-          }}
-        >
-          Delete Project
-        </Button>
       </div>
     </div>
   );

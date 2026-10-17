@@ -77,3 +77,43 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
+
+.dangerZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.dangerTitle {
+  font-weight: 600;
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+.dangerDesc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  max-width: 340px;
+}
+
+.dangerHint {
+  font-size: 11.5px;
+  color: #fca5a5;
+  margin-top: 6px;
+}
+
+.dangerText {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.dangerText b {
+  color: var(--text);
+}

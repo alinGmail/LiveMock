@@ -26,6 +26,7 @@ import ProjectSettingsModal, {
 import { EditorType } from "../struct/common";
 import {
   createProjectReq,
+  deleteProjectReq,
   getProjectListReq,
   startProjectReq,
   stopProjectReq,
@@ -82,6 +83,7 @@ const AppBar = () => {
   const [projectModalShow, setProjectModalShow] = useState(false);
   const [projectSettingsOpen, setProjectSettingsOpen] = useState(false);
   const [projectSettingsSaving, setProjectSettingsSaving] = useState(false);
+  const [projectDeleting, setProjectDeleting] = useState(false);
   const [project, updateProject] = useImmer<ProjectM | null>(null);
 
   useEffect(() => {
@@ -132,6 +134,30 @@ const AppBar = () => {
       toast.error(getErrorMessage(error));
     } finally {
       setProjectSettingsSaving(false);
+    }
+  };
+
+  const onDeleteProject = async () => {
+    if (!currentProject) {
+      return;
+    }
+    setProjectDeleting(true);
+    try {
+      await deleteProjectReq(currentProject.id);
+      toast.success("Project deleted");
+      setProjectSettingsOpen(false);
+      getProjectListReq()
+        .then((list) => {
+          dispatch(setProjectList(list));
+          dispatch(setCurProjectIndex(0));
+        })
+        .catch(() => {
+          toast.error("Project deleted, but the list failed to refresh.");
+        });
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setProjectDeleting(false);
     }
   };
 
@@ -239,7 +265,9 @@ const AppBar = () => {
         <ProjectSettingsModal
           project={currentProject}
           saving={projectSettingsSaving}
+          deleting={projectDeleting}
           onSubmit={onSaveProjectSettings}
+          onDelete={onDeleteProject}
           onClose={() => setProjectSettingsOpen(false)}
         />
       ) : null}

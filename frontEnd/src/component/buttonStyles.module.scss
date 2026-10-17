@@ -58,3 +58,28 @@
   width: 16px;
   height: 16px;
 }
+
+.dangerOutline {
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+}
+.dangerOutline:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fecaca;
+}
+
+.dangerSolid {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.dangerSolid:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+.dangerSolid:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

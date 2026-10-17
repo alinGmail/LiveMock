@@ -6,7 +6,7 @@ import {createProject, ProjectM, ProjectStatus} from "livemock-core/struct/proje
 import {deleteFolderRecursive} from "../../src/common/utils";
 import {CustomErrorMiddleware} from "../../src/controller/common";
 import {UpdateProjectReqBody} from "livemock-core/struct/params/ProjectParams";
-import {getProjectStatus} from "../../src/server/projectStatusManage";
+import {getProjectStatus, setProjectStatus} from "../../src/server/projectStatusManage";
 import {checkPort} from "../../src/util/commonUtils";
 import * as net from "net";
 import {getLogViewCollection, getProjectCollection} from "../../src/db/dbManager";
@@ -151,6 +151,28 @@ describe('test project',()=>{
     // start project
     const startFail = await supertest(server).post("/project/start/"+ projectM.id).expect(500);
     deleteFolderRecursive("test_db");
+  });
+
+
+  test('delete project', async () => {
+    const projectCollection = await getProjectCollection('test_db');
+    const project = projectCollection.findOne({});
+    if (!project) {
+      throw new Error("project is null");
+    }
+
+    // the previous test leaves a failed start in STARTING, which must be rejected
+    const statusErr = await supertest(server)
+      .delete("/project/" + project.id)
+      .expect(500);
+    expect(statusErr.body.error.message).toContain("project status is");
+
+    setProjectStatus(project.id, ProjectStatus.STOPPED);
+    await supertest(server).delete("/project/" + project.id).expect(200);
+
+    const list = await supertest(server).get("/project").expect(200);
+    expect(list.body.length).toBe(0);
+    expect(projectCollection.findOne({ id: project.id })).toBeNull();
   });
 })
 
