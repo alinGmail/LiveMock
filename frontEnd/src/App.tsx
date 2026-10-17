@@ -13,9 +13,10 @@ import { ConfigProvider, Spin, theme, App as AntApp } from "antd";
 import { Route, Routes, Navigate, HashRouter } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
-import ConfigPage from "./page/ConfigPage";
+import SettingsPage from "./page/SettingsPage";
 import { useEffect, useRef, useState } from "react";
 import AuthPage from "./page/AuthPage";
+import { setUsername } from "./slice/authSlice";
 import { getAuthStatusReq, getMeReq } from "./server/authServer";
 import {
   setLoggedOutHandler,
@@ -48,10 +49,12 @@ function App() {
         // set the ref immediately so parallel 401s raise only one toast
         authStateRef.current = "login";
         setAuthState("login");
+        dispatch(setUsername(""));
         toast.error("Your session has expired, please sign in again");
       }
     });
     setLoggedOutHandler(() => {
+      dispatch(setUsername(""));
       setAuthState("login");
     });
     let cancelled = false;
@@ -66,8 +69,9 @@ function App() {
           return;
         }
         try {
-          await getMeReq();
+          const me = await getMeReq();
           if (!cancelled) {
+            dispatch(setUsername(me.username));
             setAuthState("authenticated");
           }
         } catch (error) {
@@ -120,7 +124,8 @@ function App() {
           {(authState === "login" || authState === "register") && (
             <AuthPage
               mode={authState}
-              onSuccess={() => {
+              onSuccess={(username) => {
+                dispatch(setUsername(username));
                 setAuthState("authenticated");
               }}
             />
@@ -138,7 +143,11 @@ function App() {
                         element={<ExpectationPage />}
                       />
                       <Route path={"requestLog"} element={<LogPage />} />
-                      <Route path={"config"} element={<ConfigPage />} />
+                      <Route path={"settings"} element={<SettingsPage />} />
+                      <Route
+                        path={"config"}
+                        element={<Navigate to={"/settings"} replace />}
+                      />
                       <Route
                         path={"*"}
                         element={<Navigate to={"expectation"} />}

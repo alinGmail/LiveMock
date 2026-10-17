@@ -1,6 +1,6 @@
 import styles from "./AppBar.module.scss";
-import { NavLink } from "react-router-dom";
-import { Dropdown, Modal } from "antd";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Dropdown } from "antd";
 import {
   LoadingOutlined,
   LogoutOutlined,
@@ -8,22 +8,19 @@ import {
   PlusOutlined,
   StopOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { Updater, useImmer } from "use-immer";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import logoUrl from "../assets/logo.png";
 import { useAppSelector } from "../store";
 import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
-import {
-  createProject,
-  ProjectM,
-  ProjectStatus,
-} from "livemock-core/struct/project";
-import ProjectEditor from "./project/ProjectEditor";
+import { createProject, ProjectStatus } from "livemock-core/struct/project";
 import ProjectSettingsModal, {
   ProjectSettingsValues,
 } from "./ProjectSettingsModal";
-import { EditorType } from "../struct/common";
+import ProjectForm, {
+  ProjectFormValues,
+} from "./project/ProjectForm";
+import Modal from "./Modal";
 import {
   createProjectReq,
   deleteProjectReq,
@@ -73,22 +70,35 @@ const GearIcon = () => (
   </svg>
 );
 
+const ChevronIcon = () => (
+  <svg
+    className={styles.chev}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
+
 const AppBar = () => {
   const projectState = useAppSelector((state) => state.project);
+  const username = useAppSelector((state) => state.auth.username);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const currentProject = projectState.projectList[projectState.curProjectIndex];
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [overflowOpen, setOverflowOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [projectModalShow, setProjectModalShow] = useState(false);
+  const [projectCreating, setProjectCreating] = useState(false);
   const [projectSettingsOpen, setProjectSettingsOpen] = useState(false);
   const [projectSettingsSaving, setProjectSettingsSaving] = useState(false);
   const [projectDeleting, setProjectDeleting] = useState(false);
-  const [project, updateProject] = useImmer<ProjectM | null>(null);
-
-  useEffect(() => {
-    updateProject(createProject());
-  }, []);
 
   const refreshProjects = () => {
     getProjectListReq().then((list) => {
@@ -96,16 +106,23 @@ const AppBar = () => {
     });
   };
 
-  const onCreateProject = (projectM: ProjectM) => {
-    const createPromise = createProjectReq({ project: projectM });
-    toast.promise(createPromise, {
-      error: getErrorMessage,
-      loading: "loading",
-      success: "operation successful",
-    });
-    setProjectModalShow(false);
-    createPromise.then(refreshProjects);
-    updateProject(createProject());
+  const onCreateProject = async (values: ProjectFormValues) => {
+    const project = createProject();
+    project.name = values.name;
+    project.port = values.port;
+    project.maxRequestLogNumber = values.maxRequestLogNumber;
+    project.description = values.description;
+    setProjectCreating(true);
+    try {
+      await createProjectReq({ project });
+      toast.success("Project created");
+      setProjectModalShow(false);
+      refreshProjects();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setProjectCreating(false);
+    }
   };
 
   const onToggleServer = () => {
@@ -172,6 +189,7 @@ const AppBar = () => {
     (currentProject.status === ProjectStatus.STARTING ||
       currentProject.status === ProjectStatus.CLOSING);
   const running = currentProject?.status === ProjectStatus.STARTED;
+  const initial = (username || "account").charAt(0).toUpperCase();
 
   const projectMenu = (
     <div className={styles.menu}>
@@ -214,52 +232,62 @@ const AppBar = () => {
         }}
       >
         <PlusOutlined />
-        <span>Create New Project</span>
+        <span>New project</span>
       </button>
     </div>
   );
 
-  const overflowMenu = (
-    <div className={styles.menu}>
-      <div className={[styles.menuItem, styles.menuItemInfo].join(" ")}>
-        version {APP_VERSION}
+  const userMenu = (
+    <div className={[styles.menu, styles.userMenu].join(" ")}>
+      <div className={styles.userMenuHead}>
+        <span className={[styles.avatar, styles.avatarLg].join(" ")}>
+          {initial}
+        </span>
+        <div>
+          <div className={styles.accountName}>{username || "account"}</div>
+          <div className={styles.accountMeta}>Single account · signed in</div>
+        </div>
       </div>
       <div className={styles.menuSep} />
       <button
         type="button"
         className={styles.menuItem}
         onClick={() => {
-          setOverflowOpen(false);
+          setUserMenuOpen(false);
+          navigate("/settings");
+        }}
+      >
+        <GearIcon />
+        <span>Settings</span>
+      </button>
+      <button
+        type="button"
+        className={styles.menuItem}
+        onClick={() => {
+          setUserMenuOpen(false);
           onLogout();
         }}
       >
         <LogoutOutlined />
-        <span>Logout</span>
+        <span>Sign out</span>
       </button>
     </div>
   );
 
   return (
     <header className={styles.appbar}>
-      <Modal
-        centered={true}
-        open={projectModalShow}
-        footer={null}
-        onCancel={() => {
-          setProjectModalShow(false);
-        }}
-        width={640}
-        title={"Add Project"}
-      >
-        {project && (
-          <ProjectEditor
-            editorType={EditorType.ADD}
-            projectM={project}
+      {projectModalShow ? (
+        <Modal
+          title="New project"
+          size="md"
+          onClose={() => setProjectModalShow(false)}
+        >
+          <ProjectForm
+            submitting={projectCreating}
             onSubmit={onCreateProject}
-            updaterProjectM={updateProject as Updater<ProjectM>}
           />
-        )}
-      </Modal>
+        </Modal>
+      ) : null}
 
       {projectSettingsOpen && currentProject ? (
         <ProjectSettingsModal
@@ -296,18 +324,7 @@ const AppBar = () => {
                 : ""}
             </span>
           </span>
-          <svg
-            className={styles.chev}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+          <ChevronIcon />
         </button>
       </Dropdown>
 
@@ -378,28 +395,20 @@ const AppBar = () => {
 
       <Dropdown
         trigger={["click"]}
-        open={overflowOpen}
-        onOpenChange={setOverflowOpen}
+        open={userMenuOpen}
+        onOpenChange={setUserMenuOpen}
         placement="bottomRight"
-        dropdownRender={() => overflowMenu}
+        dropdownRender={() => userMenu}
       >
         <button
           type="button"
-          className={styles.iconBtn}
-          aria-label="More actions"
-          title="More actions"
+          className={styles.userTrigger}
+          aria-label="User menu"
+          title={username || "Account"}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <circle cx="5" cy="12" r="1.6" />
-            <circle cx="12" cy="12" r="1.6" />
-            <circle cx="19" cy="12" r="1.6" />
-          </svg>
+          <span className={styles.avatar}>{initial}</span>
+          <span className={styles.uname}>{username || "account"}</span>
+          <ChevronIcon />
         </button>
       </Dropdown>
     </header>
