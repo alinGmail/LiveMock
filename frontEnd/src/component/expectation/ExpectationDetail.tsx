@@ -325,6 +325,7 @@ interface ExpectationDetailProps {
   onEditAction?: () => void;
   onDeleteAction?: () => void;
   onAddAction?: () => void;
+  onEditName?: () => void;
   onEditDescription?: () => void;
   onEditMatchers?: () => void;
   onEditTiming?: () => void;
@@ -338,6 +339,7 @@ const ExpectationDetail = ({
   onEditAction,
   onDeleteAction,
   onAddAction,
+  onEditName,
   onEditDescription,
   onEditMatchers,
   onEditTiming,
@@ -384,7 +386,20 @@ const ExpectationDetail = ({
           <span>Expectation</span>
         </div>
         <div className={styles.headRow}>
-          <h2 className={styles.title}>{expectation.name || "empty"}</h2>
+          <div className={styles.titleRow}>
+            <h2 className={styles.title}>{expectation.name || "empty"}</h2>
+            {onEditName ? (
+              <button
+                type="button"
+                className={styles.actionBtn}
+                aria-label="Edit name"
+                title="Edit name"
+                onClick={onEditName}
+              >
+                <PencilIcon />
+              </button>
+            ) : null}
+          </div>
           <div className={styles.headActions}>
             <Toggle
               checked={expectation.activate}

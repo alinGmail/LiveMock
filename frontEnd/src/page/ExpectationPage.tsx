@@ -46,6 +46,7 @@ import AddExpectationModal, {
 } from "../component/expectation/AddExpectationModal";
 import ActionEditorModal from "../component/expectation/ActionEditorModal";
 import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
+import NameEditorModal from "../component/expectation/NameEditorModal";
 import MatchersEditorModal from "../component/expectation/MatchersEditorModal";
 import TimingEditorModal, {
   TimingValues,
@@ -215,6 +216,8 @@ const ExpectationPage = () => {
   const [groupSaving, setGroupSaving] = useState(false);
   const [editingAction, setEditingAction] = useState<ActionM | null>(null);
   const [actionSaving, setActionSaving] = useState(false);
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameSaving, setNameSaving] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [descriptionSaving, setDescriptionSaving] = useState(false);
   const [matchersOpen, setMatchersOpen] = useState(false);
@@ -525,6 +528,27 @@ const ExpectationPage = () => {
     }
   };
 
+  const handleSaveName = async (name: string) => {
+    if (!selectedId) {
+      return;
+    }
+    setNameSaving(true);
+    try {
+      await updateExpectationReq(currentProject.id, selectedId, { name });
+      dispatch(
+        updateExpectationItem({
+          expectationId: selectedId,
+          modifyValues: { name },
+        }),
+      );
+      setNameOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setNameSaving(false);
+    }
+  };
+
   const handleSaveMatchers = async (matchers: Array<RequestMatcherM>) => {
     if (!selectedId) {
       return;
@@ -791,6 +815,7 @@ const ExpectationPage = () => {
         <ExpectationDetail
           expectation={selectedExpectation}
           group={selectedGroup}
+          onEditName={() => setNameOpen(true)}
           onEditAction={handleEditAction}
           onDeleteAction={handleDeleteAction}
           onAddAction={handleAddAction}
@@ -815,6 +840,14 @@ const ExpectationPage = () => {
           saving={actionSaving}
           onSave={handleSaveAction}
           onClose={() => setEditingAction(null)}
+        />
+      ) : null}
+      {nameOpen && selectedExpectation ? (
+        <NameEditorModal
+          name={selectedExpectation.name ?? ""}
+          saving={nameSaving}
+          onSave={handleSaveName}
+          onClose={() => setNameOpen(false)}
         />
       ) : null}
       {descriptionOpen && selectedExpectation ? (

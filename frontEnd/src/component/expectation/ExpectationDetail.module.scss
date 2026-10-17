@@ -37,12 +37,20 @@
   margin: 8px 0 12px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
 .title {
   margin: 0;
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   color: var(--text);
   word-break: break-word;
