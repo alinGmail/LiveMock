@@ -6,6 +6,7 @@ import { App, Dropdown } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
+  deleteExpectationReq,
   listExpectationReq,
   updateExpectationReq,
 } from "../server/expectationServer";
@@ -21,6 +22,7 @@ import {
 } from "../server/actionServer";
 import {
   createExpectation,
+  duplicateExpectation,
   ExpectationM,
 } from "livemock-core/struct/expectation";
 import {
@@ -35,6 +37,7 @@ import {
 import { RequestMatcherM } from "livemock-core/struct/matcher";
 import {
   addAction,
+  deleteExpectation,
   modifyAction,
   removeAction,
   updateExpectationItem,
@@ -54,6 +57,7 @@ import TimingEditorModal, {
 import GroupEditorModal, {
   GroupEditorValues,
 } from "../component/expectation/GroupEditorModal";
+import DeleteExpectationModal from "../component/expectation/DeleteExpectationModal";
 import Toggle from "../component/Toggle";
 import { getErrorMessage } from "../component/common";
 import {
@@ -213,6 +217,10 @@ const ExpectationPage = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [addGroupId, setAddGroupId] = useState<string | null>(null);
   const [groupMenuId, setGroupMenuId] = useState<string | null>(null);
+  const [cloneTarget, setCloneTarget] = useState<ExpectationM | null>(null);
+  const [cloning, setCloning] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ExpectationM | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -270,6 +278,8 @@ const ExpectationPage = () => {
     setCollapsedGroups(new Set());
     setGroupMenuId(null);
     setAddGroupId(null);
+    setCloneTarget(null);
+    setDeleteTarget(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -386,6 +396,79 @@ const ExpectationPage = () => {
       .catch(() => {
         toast.error("Expectation created, but the list failed to refresh.");
       });
+  };
+
+  const handleClone = async (values: AddExpectationValues) => {
+    if (!cloneTarget) {
+      return;
+    }
+    const expectation = duplicateExpectation(cloneTarget);
+    expectation.name =
+      values.name.trim() || `${cloneTarget.name || "expectation"} (copy)`;
+    expectation.description = values.description.trim();
+    expectation.groupId = values.groupId;
+    expectation.createTime = new Date();
+    setCloning(true);
+    let created: ExpectationM;
+    try {
+      created = await createExpectationReq(currentProject.id, expectation);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setCloning(false);
+      return;
+    }
+    // Clear the filter and expand the target group so the new row is visible.
+    setQuery("");
+    if (created.groupId) {
+      const groupId = created.groupId;
+      setCollapsedGroups((prev) => {
+        const next = new Set(prev);
+        next.delete(groupId);
+        return next;
+      });
+    }
+    setCloneTarget(null);
+    setCloning(false);
+    toast.success("Expectation cloned");
+    getExpectationListQuery
+      .refetch()
+      .then(() => {
+        setSelectedId(created.id);
+      })
+      .catch(() => {
+        toast.error("Expectation cloned, but the list failed to refresh.");
+      });
+  };
+
+  const handleDeleteExpectation = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+    const target = deleteTarget;
+    const index = orderedAll.findIndex((item) => item.id === target.id);
+    const remaining = orderedAll.filter((item) => item.id !== target.id);
+    const nextSelected =
+      remaining[index >= 0 ? index : 0] ??
+      remaining[remaining.length - 1] ??
+      null;
+    setDeleting(true);
+    try {
+      await deleteExpectationReq(currentProject.id, target.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setDeleting(false);
+      return;
+    }
+    // Remove the row and move the selection before refetching, so the
+    // selection effect sees a valid id instead of falling back to the first row.
+    dispatch(deleteExpectation(target.id));
+    setSelectedId(nextSelected ? nextSelected.id : null);
+    setDeleteTarget(null);
+    setDeleting(false);
+    toast.success("Expectation deleted");
+    getExpectationListQuery.refetch().catch(() => {
+      toast.error("Expectation deleted, but the list failed to refresh.");
+    });
   };
 
   const handleSubmitGroup = async (values: GroupEditorValues) => {
@@ -858,6 +941,16 @@ const ExpectationPage = () => {
         <ExpectationDetail
           expectation={selectedExpectation}
           group={selectedGroup}
+          onClone={() => {
+            if (selectedExpectation) {
+              setCloneTarget(selectedExpectation);
+            }
+          }}
+          onDelete={() => {
+            if (selectedExpectation) {
+              setDeleteTarget(selectedExpectation);
+            }
+          }}
           onEditName={() => setNameOpen(true)}
           onEditAction={handleEditAction}
           onDeleteAction={handleDeleteAction}
@@ -878,6 +971,38 @@ const ExpectationPage = () => {
           onClose={() => {
             setAddOpen(false);
             setAddGroupId(null);
+          }}
+        />
+      ) : null}
+      {cloneTarget ? (
+        <AddExpectationModal
+          groups={groupList}
+          initialValues={{
+            name: `${cloneTarget.name || "expectation"} (copy)`,
+            description: cloneTarget.description ?? "",
+            groupId: cloneTarget.groupId ?? null,
+          }}
+          title="Clone expectation"
+          submitLabel="Clone"
+          submittingLabel="Cloning…"
+          creating={cloning}
+          onCreate={handleClone}
+          onClose={() => {
+            if (!cloning) {
+              setCloneTarget(null);
+            }
+          }}
+        />
+      ) : null}
+      {deleteTarget ? (
+        <DeleteExpectationModal
+          name={deleteTarget.name}
+          deleting={deleting}
+          onConfirm={handleDeleteExpectation}
+          onClose={() => {
+            if (!deleting) {
+              setDeleteTarget(null);
+            }
           }}
         />
       ) : null}
