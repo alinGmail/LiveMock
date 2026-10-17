@@ -43,7 +43,23 @@ const Modal = ({
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    // Consumers usually focus their first field in their own effect. If they
+    // don't, keep keyboard focus inside the dialog so Esc and the Tab trap work.
+    const timer = window.setTimeout(() => {
+      const container = dialogRef.current;
+      if (!container || container.contains(document.activeElement)) {
+        return;
+      }
+      const field = container.querySelector<HTMLElement>(
+        'input:not([disabled]), textarea:not([disabled]), select:not([disabled])',
+      );
+      const firstFocusable = container.querySelector<HTMLElement>(
+        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      );
+      (field ?? firstFocusable)?.focus();
+    }, 0);
     return () => {
+      window.clearTimeout(timer);
       previouslyFocused?.focus?.();
     };
   }, []);

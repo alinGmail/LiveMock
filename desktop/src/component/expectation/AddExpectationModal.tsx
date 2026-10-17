@@ -33,11 +33,13 @@ const AddExpectationModal = ({
     nameRef.current?.focus();
   }, []);
 
+  const trimmedName = name.trim();
+
   const submit = () => {
-    if (creating) {
+    if (creating || !trimmedName) {
       return;
     }
-    onCreate({ name, description, groupId: groupId || null });
+    onCreate({ name: trimmedName, description, groupId: groupId || null });
   };
 
   return (
@@ -58,7 +60,7 @@ const AddExpectationModal = ({
             type="button"
             className={[btn.btn, btn.primary].join(" ")}
             onClick={submit}
-            disabled={creating}
+            disabled={creating || !trimmedName}
           >
             {creating ? "Creating…" : "Create"}
           </button>

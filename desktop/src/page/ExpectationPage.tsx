@@ -274,6 +274,19 @@ const ExpectationPage = () => {
     return map;
   }, [groupList]);
 
+  const memberCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    expectationList.forEach((expectation) => {
+      if (expectation.groupId) {
+        map.set(
+          expectation.groupId,
+          (map.get(expectation.groupId) ?? 0) + 1,
+        );
+      }
+    });
+    return map;
+  }, [expectationList]);
+
   const q = query.trim().toLowerCase();
 
   const haystackMap = useMemo(() => {
@@ -696,7 +709,9 @@ const ExpectationPage = () => {
           <span className={styles.groupName}>
             {group.name || "unnamed group"}
           </span>
-          <span className={styles.count}>{block.expectations.length}</span>
+          <span className={styles.count}>
+            {memberCountMap.get(group.id) ?? 0}
+          </span>
           <span className={styles.grow} />
           {!group.activate ? (
             <span className={styles.inactiveTag}>inactive</span>

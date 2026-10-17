@@ -1,6 +1,6 @@
 import styles from "./AppBar.module.scss";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Dropdown, Modal } from "antd";
+import { Dropdown } from "antd";
 import {
   LoadingOutlined,
   PlayCircleOutlined,
@@ -19,6 +19,7 @@ import {
   ProjectStatus,
 } from "livemock-core/struct/project";
 import ProjectEditor from "./project/ProjectEditor";
+import Modal from "./Modal";
 import { EditorType } from "../struct/common";
 import {
   createProjectReq,
@@ -89,10 +90,14 @@ const AppBar = () => {
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectModalShow, setProjectModalShow] = useState(false);
-  const [projectCreating, setProjectCreating] = useState(false);
   const [projectDraft, updateProjectDraft] = useImmer<ProjectM>(
     createProject()
   );
+
+  const closeProjectModal = () => {
+    setProjectModalShow(false);
+    updateProjectDraft(createProject());
+  };
 
   const refreshProjects = () => {
     getProjectListReq().then((list) => {
@@ -101,17 +106,13 @@ const AppBar = () => {
   };
 
   const onCreateProject = async (project: ProjectM) => {
-    setProjectCreating(true);
     try {
       await createProjectReq({ project });
       toast.success("Project created");
-      setProjectModalShow(false);
-      updateProjectDraft(createProject());
+      closeProjectModal();
       refreshProjects();
     } catch (error) {
       toast.error(getErrorMessage(error));
-    } finally {
-      setProjectCreating(false);
     }
   };
 
@@ -124,7 +125,7 @@ const AppBar = () => {
         ? stopProjectReq(currentProject.id)
         : startProjectReq(currentProject.id);
     toastPromise(promise);
-    promise.then(refreshProjects);
+    promise.then(refreshProjects).catch(() => undefined);
   };
 
   const transitioning =
@@ -181,22 +182,16 @@ const AppBar = () => {
 
   return (
     <header className={styles.appbar}>
-      <Modal
-        centered
-        open={projectModalShow}
-        footer={null}
-        width={640}
-        title={"Add Project"}
-        confirmLoading={projectCreating}
-        onCancel={() => setProjectModalShow(false)}
-      >
-        <ProjectEditor
-          editorType={EditorType.ADD}
-          projectM={projectDraft}
-          onSubmit={onCreateProject}
-          updaterProjectM={updateProjectDraft as Updater<ProjectM>}
-        />
-      </Modal>
+      {projectModalShow ? (
+        <Modal title="New project" size="md" onClose={closeProjectModal}>
+          <ProjectEditor
+            editorType={EditorType.ADD}
+            projectM={projectDraft}
+            onSubmit={onCreateProject}
+            updaterProjectM={updateProjectDraft as Updater<ProjectM>}
+          />
+        </Modal>
+      ) : null}
 
       <div className={styles.brand}>
         <img className={styles.brandLogo} src={logoUrl} alt="LiveMock" />
