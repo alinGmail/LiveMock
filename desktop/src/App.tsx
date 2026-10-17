@@ -15,7 +15,6 @@ import ExpectationPage from "./page/ExpectationPage";
 import ConfigPage from "./page/ConfigPage";
 import LogPage from "./page/LogPage";
 import { useEffect } from "react";
-import RequestLogDetailPage from "./page/RequestLogDetail/RequestLogDetailPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,10 +48,6 @@ function App() {
                     <Route path={"config"} element={<ConfigPage />} />
                     <Route path={"*"} element={<Navigate to={"expectation"} />} />
                   </Route>
-                  <Route
-                    path={"requestLog/detail/:logId"}
-                    element={<RequestLogDetailPage />}
-                  />
                 </Routes>
               </HashRouter>
             )
