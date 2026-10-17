@@ -119,31 +119,6 @@ async function createWindow() {
   }
 }
 
-function openNewWindow(hash: string, width: number, height: number) {
-  if (!win) {
-    return;
-  }
-  const newWin = new BrowserWindow({
-    modal: false,
-    show: true,
-    width: width,
-    height: height,
-    icon: path.join(process.env.PUBLIC, "logo.png"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      nodeIntegration: true,
-    },
-  });
-  if (env === "dev") {
-    newWin.loadURL(`http://localhost:5173/#${hash}`);
-    newWin.webContents.openDevTools();
-  } else {
-    newWin.loadFile(path.join(process.env.DIST, "index.html"), {
-      hash: hash,
-    });
-  }
-}
-
 function createAboutWindow() {
   if (!win) {
     return;
@@ -178,13 +153,6 @@ function createAboutWindow() {
 ipcMain.handle(SystemEvents.OpenAboutWindow, () => {
   createAboutWindow();
 });
-
-ipcMain.handle(
-  SystemEvents.OpenNewWindow,
-  (event,hash: string, width: number, height: number) => {
-    openNewWindow(hash, width, height);
-  }
-);
 
 app.on("window-all-closed", () => {
   win = null;

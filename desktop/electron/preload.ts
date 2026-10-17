@@ -489,16 +489,6 @@ export const api = {
       );
     },
   },
-  system: {
-    openNewWindow: (hash: string, width: number, height: number) => {
-      return ipcRenderer.invoke(
-        SystemEvents.OpenNewWindow,
-        hash,
-        width,
-        height
-      );
-    },
-  },
 };
 
 electron.contextBridge.exposeInMainWorld("api", api);

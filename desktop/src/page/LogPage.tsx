@@ -223,6 +223,13 @@ const LogPage: React.FC = () => {
     logsProjectIdRef.current = null;
     setLogs([]);
     setHasMore(false);
+    dispatch(
+      updatePresetFilter({
+        expectationId: null,
+        methods: [],
+        statusCode: [],
+      })
+    );
     dispatch(setSelectedLogId(null));
     dispatch(setSelectedLogItem(null));
   }, [currentProject.id, dispatch, setLogs]);
@@ -295,13 +302,21 @@ const LogPage: React.FC = () => {
       return;
     }
     setLoadingMore(true);
+    const requestProjectId = currentProject.id;
+    const requestLogViewId = logViewId;
     const maxLogId = logs[logs.length - 1].id;
     listLogViewLogs(logViewId, {
       maxLogId,
       limit: PAGE_SIZE,
-      projectId: currentProject.id,
+      projectId: requestProjectId,
     })
       .then((res) => {
+        if (
+          logsProjectIdRef.current !== requestProjectId ||
+          logViewIdRef.current !== requestLogViewId
+        ) {
+          return;
+        }
         setLogs((prev) => {
           const existing = new Set(prev.map((log) => log.id));
           res.forEach((log) => {
@@ -438,6 +453,10 @@ const LogPage: React.FC = () => {
         return;
       }
       onLogsDelete(id, logViewId, logViewIdRef.current, setLogs);
+      if (id === store.getState().log.selectedLogId) {
+        dispatch(setSelectedLogId(null));
+        dispatch(setSelectedLogItem(null));
+      }
     };
     const onLogUpdate = (
       event: IpcRendererEvent,
