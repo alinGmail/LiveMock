@@ -9,7 +9,11 @@ import {
   listExpectationReq,
   updateExpectationReq,
 } from "../server/expectationServer";
-import { listGroupReq } from "../server/groupServer";
+import {
+  createGroupReq,
+  listGroupReq,
+  updateGroupReq,
+} from "../server/groupServer";
 import {
   createActionReq,
   deleteActionReq,
@@ -21,6 +25,7 @@ import {
 } from "livemock-core/struct/expectation";
 import {
   buildMatchOrderBlocks,
+  createExpectationGroup,
   ExpectationGroupM,
 } from "livemock-core/struct/expectationGroup";
 import {
@@ -45,6 +50,10 @@ import MatchersEditorModal from "../component/expectation/MatchersEditorModal";
 import TimingEditorModal, {
   TimingValues,
 } from "../component/expectation/TimingEditorModal";
+import GroupEditorModal, {
+  GroupEditorValues,
+} from "../component/expectation/GroupEditorModal";
+import Toggle from "../component/Toggle";
 import { getErrorMessage } from "../component/common";
 import {
   actionKind,
@@ -104,6 +113,29 @@ const PlusIcon = () => (
   </svg>
 );
 
+const FolderPlusIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M4 5h5l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+    <path d="M12 11v5M9.5 13.5h5" />
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="5" cy="12" r="1.6" />
+    <circle cx="12" cy="12" r="1.6" />
+    <circle cx="19" cy="12" r="1.6" />
+  </svg>
+);
+
 const ClockIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -149,6 +181,22 @@ const EmptyState = ({ query }: { query: string }) => (
   </div>
 );
 
+function nextGroupName(names: Array<string>): string {
+  const base = "New group";
+  if (!names.includes(base)) {
+    return base;
+  }
+  let index = 2;
+  while (names.includes(`${base} ${index}`)) {
+    index += 1;
+  }
+  return `${base} ${index}`;
+}
+
+type GroupModalState =
+  | { mode: "create" }
+  | { mode: "edit"; group: ExpectationGroupM };
+
 const ExpectationPage = () => {
   const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
@@ -163,6 +211,8 @@ const ExpectationPage = () => {
   );
   const [addOpen, setAddOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
+  const [groupSaving, setGroupSaving] = useState(false);
   const [editingAction, setEditingAction] = useState<ActionM | null>(null);
   const [actionSaving, setActionSaving] = useState(false);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
@@ -201,6 +251,13 @@ const ExpectationPage = () => {
   );
   const groupsLoaded = getGroupListQuery.data !== undefined;
   const expectationList = expectationState.expectationList;
+
+  const editingGroupId =
+    groupModal?.mode === "edit" ? groupModal.group.id : null;
+  const groupNamesForValidation = groupList
+    .filter((group) => group.id !== editingGroupId)
+    .map((group) => group.name);
+  const defaultGroupName = nextGroupName(groupList.map((group) => group.name));
 
   useEffect(() => {
     setQuery("");
@@ -322,6 +379,42 @@ const ExpectationPage = () => {
       .catch(() => {
         toast.error("Expectation created, but the list failed to refresh.");
       });
+  };
+
+  const handleSubmitGroup = async (values: GroupEditorValues) => {
+    setGroupSaving(true);
+    try {
+      if (groupModal?.mode === "edit") {
+        await updateGroupReq(currentProject.id, groupModal.group.id, values);
+        toast.success("Group updated");
+      } else {
+        const group = createExpectationGroup();
+        group.name = values.name;
+        group.priority = values.priority;
+        group.activate = values.activate;
+        await createGroupReq(currentProject.id, group);
+        toast.success("Group created");
+      }
+      setGroupModal(null);
+      getGroupListQuery.refetch().catch(() => {
+        toast.error("Group saved, but the list failed to refresh.");
+      });
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setGroupSaving(false);
+    }
+  };
+
+  const handleToggleGroupActive = async (group: ExpectationGroupM) => {
+    try {
+      await updateGroupReq(currentProject.id, group.id, {
+        activate: !group.activate,
+      });
+      await getGroupListQuery.refetch();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
   };
 
   const handleEditAction = () => {
@@ -594,18 +687,20 @@ const ExpectationPage = () => {
           <span className={styles.prioPill} title="group priority">
             P{group.priority}
           </span>
-          <span
-            className={[
-              styles.switch,
-              group.activate ? styles.switchOn : "",
-            ].join(" ")}
-            role="switch"
-            aria-checked={group.activate}
-            aria-disabled="true"
-            title="Group activation (read-only in this step)"
+          <Toggle
+            checked={group.activate}
+            onChange={() => handleToggleGroupActive(group)}
+            label={`Toggle group ${group.name || "unnamed group"}`}
+          />
+          <button
+            type="button"
+            className={styles.groupEdit}
+            title="Edit group"
+            aria-label={`Edit group ${group.name || "unnamed group"}`}
+            onClick={() => setGroupModal({ mode: "edit", group })}
           >
-            <span className={styles.switchKnob} />
-          </span>
+            <MoreIcon />
+          </button>
         </div>,
       );
       masterNodes.push(
@@ -656,6 +751,16 @@ const ExpectationPage = () => {
             >
               <PlusIcon />
               Add Expectation
+            </button>
+            <span className={styles.grow} />
+            <button
+              type="button"
+              className={styles.groupAddButton}
+              title="Add group"
+              aria-label="Add group"
+              onClick={() => setGroupModal({ mode: "create" })}
+            >
+              <FolderPlusIcon />
             </button>
           </div>
           <label className={styles.searchWrap}>
@@ -735,6 +840,17 @@ const ExpectationPage = () => {
           saving={timingSaving}
           onSave={handleSaveTiming}
           onClose={() => setTimingOpen(false)}
+        />
+      ) : null}
+      {groupModal ? (
+        <GroupEditorModal
+          mode={groupModal.mode}
+          group={groupModal.mode === "edit" ? groupModal.group : undefined}
+          defaultName={defaultGroupName}
+          existingNames={groupNamesForValidation}
+          saving={groupSaving}
+          onSubmit={handleSubmitGroup}
+          onClose={() => setGroupModal(null)}
         />
       ) : null}
     </div>

@@ -58,6 +58,34 @@
   height: 16px;
 }
 
+/* Icon-only "Add group" button, right-aligned in the toolbar. */
+.groupAddButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.groupAddButton:hover {
+  background: var(--surface-3);
+  border-color: #3e5372;
+  color: var(--text);
+}
+.groupAddButton svg {
+  width: 16px;
+  height: 16px;
+}
+
 .searchWrap {
   position: relative;
   margin: 12px 12px 4px;
@@ -191,6 +219,37 @@
   color: var(--faint);
 }
 
+/* Hover/focus-revealed kebab that opens the group editor. */
+.groupEdit {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  cursor: pointer;
+  transition:
+    opacity 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+.groupEdit svg {
+  width: 16px;
+  height: 16px;
+}
+.groupHead:hover .groupEdit,
+.groupEdit:focus-visible {
+  opacity: 1;
+}
+.groupEdit:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
 .groupBody {
   display: flex;
   flex-direction: column;
@@ -319,39 +378,6 @@
   color: var(--warn);
   background: rgba(245, 158, 11, 0.12);
   border-color: rgba(245, 158, 11, 0.3);
-}
-
-/* ===== Disabled switch (group activation, read-only) ===== */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 34px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-3);
-  flex: none;
-  opacity: 0.9;
-}
-.switchOn {
-  background: rgba(34, 197, 94, 0.22);
-  border-color: rgba(34, 197, 94, 0.55);
-}
-.switchKnob {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--muted);
-  transition:
-    transform 180ms ease,
-    background 180ms ease;
-}
-.switchOn .switchKnob {
-  transform: translateX(14px);
-  background: var(--success);
 }
 
 /* ===== Empty ===== */
