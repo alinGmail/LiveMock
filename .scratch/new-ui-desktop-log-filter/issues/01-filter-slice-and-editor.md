@@ -6,12 +6,12 @@ the page compiling, and the ported filter editor component and styles.
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `logFilter` is typed as `SimpleFilterM[]` and `resetLogFilter` accepts that type.
-- [ ] Add, modify and remove filter reducers exist and are exported.
-- [ ] Log-view hydration narrows simple filters with a type predicate.
-- [ ] The desktop has a filter editor component and CSS module matching the web editor's
+- [x] `logFilter` is typed as `SimpleFilterM[]` and `resetLogFilter` accepts that type.
+- [x] Add, modify and remove filter reducers exist and are exported.
+- [x] Log-view hydration narrows simple filters with a type predicate.
+- [x] The desktop has a filter editor component and CSS module matching the web editor's
       fields, IN tag input, active toggle, footer and popover positioning.
-- [ ] No IPC, preload, handler, backend or core file changes are needed.
-- [ ] Desktop lint and renderer typecheck pass.
+- [x] No IPC, preload, handler, backend or core file changes are needed.
+- [x] Desktop lint and renderer typecheck pass.

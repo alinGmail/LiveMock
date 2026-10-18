@@ -6,11 +6,11 @@ project's custom filters and closes any open editor before the new log view load
 
 **Blocked by:** 02 (needs the filter UI and editor state)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `hasActiveFilters` treats `activate !== false` as active.
-- [ ] Inactive filters do not count as active for the empty-state copy.
-- [ ] Switching projects clears custom filters immediately.
-- [ ] Switching projects closes the filter editor.
-- [ ] The new project's persisted filters load from its log view.
-- [ ] Desktop lint and renderer typecheck pass.
+- [x] `hasActiveFilters` treats `activate !== false` as active.
+- [x] Inactive filters do not count as active for the empty-state copy.
+- [x] Switching projects clears custom filters immediately.
+- [x] Switching projects closes the filter editor.
+- [x] The new project's persisted filters load from its log view.
+- [x] Desktop lint and renderer typecheck pass.

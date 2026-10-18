@@ -8,19 +8,19 @@ refetch the log list.
 
 **Blocked by:** 01 (needs the slice actions and editor component)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Active and inactive chips render after the status-family chips, followed by a
+- [x] Active and inactive chips render after the status-family chips, followed by a
       dashed Add filter control.
-- [ ] Add opens the editor with `req.path`, `CONTAINS`, empty value and Active on.
-- [ ] Chips open the editor with the filter cloned, so draft edits cannot mutate Redux.
-- [ ] The editor validates property and value; IN requires at least one tag; the primary
+- [x] Add opens the editor with `req.path`, `CONTAINS`, empty value and Active on.
+- [x] Chips open the editor with the filter cloned, so draft edits cannot mutate Redux.
+- [x] The editor validates property and value; IN requires at least one tag; the primary
       action is disabled while invalid or saving.
-- [ ] Create, update and delete call the existing IPC wrappers, update Redux and refetch
+- [x] Create, update and delete call the existing IPC wrappers, update Redux and refetch
       the log list.
-- [ ] The chip remove control deletes without opening the editor.
-- [ ] Cancel, Escape and outside click close without persisting.
-- [ ] Save and delete failures show a toast and keep the editor open.
-- [ ] Enter/Space opens chips and Add; focus enters the property field; Escape closes;
+- [x] The chip remove control deletes without opening the editor.
+- [x] Cancel, Escape and outside click close without persisting.
+- [x] Save and delete failures show a toast and keep the editor open.
+- [x] Enter/Space opens chips and Add; focus enters the property field; Escape closes;
       focus returns to the origin or Add.
-- [ ] Add and chips are disabled until the log view has loaded.
+- [x] Add and chips are disabled until the log view has loaded.
