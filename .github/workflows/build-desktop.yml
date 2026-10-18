@@ -1,0 +1,96 @@
+name: Build desktop packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  # Build unsigned artifacts. Add signing secrets and remove this to sign.
+  CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+jobs:
+  build:
+    name: Package for ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            build: >-
+              yarn electron-builder --linux AppImage --x64 --publish never
+          - platform: windows
+            os: windows-latest
+            build: >-
+              yarn electron-builder --win nsis --x64 --publish never
+          - platform: macos
+            os: macos-latest
+            build: >-
+              yarn electron-builder --mac dmg --x64 --arm64 --publish never
+              --config.mac.artifactName='${productName}_${version}_mac-${arch}.${ext}'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build core
+        run: yarn workspace livemock-core build
+
+      - name: Compile Electron main process
+        run: yarn workspace livemock-desktop tsc
+
+      - name: Build renderer
+        run: yarn workspace livemock-desktop vite build
+
+      - name: Package
+        working-directory: desktop
+        run: ${{ matrix.build }}
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: livemock-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            desktop/release/**/*.AppImage
+            desktop/release/**/*.snap
+            desktop/release/**/*.deb
+            desktop/release/**/*.exe
+            desktop/release/**/*.dmg
+            desktop/release/**/*.zip
+
+  release:
+    name: Attach packages to release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*
+          generate_release_notes: true
