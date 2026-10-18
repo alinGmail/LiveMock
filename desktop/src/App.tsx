@@ -12,7 +12,6 @@ import { Toaster } from "react-hot-toast";
 import { Spin, ConfigProvider, theme, App as AntApp } from "antd";
 import { Route, Routes, Navigate, HashRouter } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
-import ConfigPage from "./page/ConfigPage";
 import LogPage from "./page/LogPage";
 import { useEffect } from "react";
 
@@ -45,7 +44,6 @@ function App() {
                   <Route element={<Layout />}>
                     <Route path={"expectation"} element={<ExpectationPage />} />
                     <Route path={"requestLog"} element={<LogPage />}></Route>
-                    <Route path={"config"} element={<ConfigPage />} />
                     <Route path={"*"} element={<Navigate to={"expectation"} />} />
                   </Route>
                 </Routes>
