@@ -8,17 +8,21 @@ import React, {
 import { v4 as uuId } from "uuid";
 import {
   FilterType,
+  LogFilterCondition,
+  LogFilterConditionMap,
   LogM,
   PresetFilterM,
   PresetFilterName,
   SimpleFilterM,
   createExpectationPresetFilterM,
   createMethodsPresetFilterM,
+  createSimpleFilter,
   createStatusCodePresetFilterM,
 } from "livemock-core/struct/log";
 import { AppDispatch, store, useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { App } from "antd";
+import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Updater, useImmer } from "use-immer";
 import _ from "lodash";
@@ -27,21 +31,30 @@ import {
   listLogViewLogs,
   listLogViewReq,
 } from "../server/logServer";
-import { updatePresetLogFilterReq } from "../server/logFilterServer";
+import {
+  addLogFilterReq,
+  deleteLogFilterReq,
+  updateLogFilterReq,
+  updatePresetLogFilterReq,
+} from "../server/logFilterServer";
 import { listExpectationListReq } from "../server/expectationServer";
 import { getExpectationSuccess } from "../slice/thunk";
 import {
   PresetFilterState,
+  addLogFilter,
+  modifyLogFilter,
+  removeLogFilter,
   resetLogFilter,
   setSelectedLogId,
   setSelectedLogItem,
   updatePresetFilter,
 } from "../slice/logSlice";
 import { setExpectationMap } from "../slice/expectationSlice";
-import { binarySearch } from "../component/common";
+import { binarySearch, getErrorMessage } from "../component/common";
 import Select from "../component/Select";
 import btn from "../component/buttonStyles.module.scss";
 import LogDetailPane from "../component/log/LogDetailPane";
+import LogFilterEditor from "../component/log/LogFilterEditor";
 import { MockFromLogModal } from "../component/expectation/MockFromLogModal";
 import {
   LogEvents,
@@ -67,6 +80,17 @@ const STATUS_FAMILIES = [
   { value: "4xx", label: "4xx" },
   { value: "5xx", label: "5xx" },
 ];
+
+type FilterEditorState = {
+  mode: "create" | "edit";
+  filter: SimpleFilterM;
+  anchor: HTMLElement;
+};
+
+const cloneFilter = (filter: SimpleFilterM): SimpleFilterM => ({
+  ...filter,
+  value: Array.isArray(filter.value) ? [...filter.value] : filter.value,
+});
 
 function statusFamily(status: number | null | undefined): string {
   if (status == null) {
@@ -191,6 +215,20 @@ const SearchIcon = () => (
   </svg>
 );
 
+const XIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
+
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
   const expectationState = useAppSelector((state) => state.expectation);
@@ -213,6 +251,10 @@ const LogPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [mockLog, setMockLog] = useState<LogM | null>(null);
+  const [filterEditor, setFilterEditor] = useState<FilterEditorState | null>(
+    null
+  );
+  const [filterSaving, setFilterSaving] = useState(false);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -348,6 +390,73 @@ const LogPage: React.FC = () => {
       logViewId,
       filter,
     }).then(() => logViewLogsQuery.refetch());
+  };
+
+  const openAddFilter = (anchor: HTMLElement) => {
+    if (!logViewId) {
+      return;
+    }
+    const filter = createSimpleFilter();
+    filter.property = "req.path";
+    filter.condition = LogFilterCondition.CONTAINS;
+    setFilterEditor({ mode: "create", filter, anchor });
+  };
+
+  const openEditFilter = (filter: SimpleFilterM, anchor: HTMLElement) => {
+    if (!logViewId) {
+      return;
+    }
+    setFilterEditor({ mode: "edit", filter: cloneFilter(filter), anchor });
+  };
+
+  const saveFilter = async (next: SimpleFilterM) => {
+    if (!logViewId || !filterEditor || filterSaving) {
+      return;
+    }
+    setFilterSaving(true);
+    try {
+      if (filterEditor.mode === "create") {
+        await addLogFilterReq({
+          projectId: currentProject.id,
+          logViewId,
+          filter: next,
+        });
+        dispatch(addLogFilter(next));
+      } else {
+        await updateLogFilterReq(next.id, {
+          projectId: currentProject.id,
+          logViewId,
+          filter: next,
+        });
+        dispatch(modifyLogFilter(next));
+      }
+      setFilterEditor(null);
+      logViewLogsQuery.refetch();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setFilterSaving(false);
+    }
+  };
+
+  const removeFilter = async (filter: SimpleFilterM) => {
+    if (!logViewId || filterSaving) {
+      return;
+    }
+    setFilterSaving(true);
+    try {
+      await deleteLogFilterReq(filter.id, {
+        projectId: currentProject.id,
+        logViewId,
+      });
+      dispatch(removeLogFilter(filter.id));
+      setFilterEditor(null);
+      logViewLogsQuery.refetch();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setFilterSaving(false);
+    }
   };
 
   const onExpectationChange = (value: string) => {
@@ -522,6 +631,8 @@ const LogPage: React.FC = () => {
     [getExpectationListQuery.data]
   );
 
+  const simpleFilters = logState.logFilter;
+
   const renderRow = (log: LogM) => {
     const method = (log.req?.method ?? "").toUpperCase();
     const path = log.req?.path ?? "";
@@ -664,6 +775,75 @@ const LogPage: React.FC = () => {
             </button>
           ))}
         </div>
+        <div className={styles.fgroup} aria-label="Custom filters">
+          {simpleFilters.map((filter) => {
+            const active = filter.activate !== false;
+            const valueText = Array.isArray(filter.value)
+              ? filter.value.join(", ")
+              : filter.value;
+            return (
+              <span
+                key={filter.id}
+                className={[
+                  styles.fchip,
+                  styles.fchipCustom,
+                  active ? "" : styles.fchipOff,
+                ].join(" ")}
+                role="button"
+                tabIndex={logViewId ? 0 : -1}
+                aria-disabled={!logViewId}
+                title={
+                  active ? "Edit filter" : "Inactive filter — click to edit"
+                }
+                onClick={(event) =>
+                  openEditFilter(filter, event.currentTarget)
+                }
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) {
+                    return;
+                  }
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openEditFilter(filter, event.currentTarget);
+                  }
+                }}
+              >
+                {active ? null : (
+                  <span className={styles.offRing} aria-hidden="true" />
+                )}
+                <span className={styles.fcProp}>
+                  {filter.property || "empty"}
+                </span>
+                <span className={styles.fcCond}>
+                  {LogFilterConditionMap[filter.condition]}
+                </span>
+                <span className={styles.fcVal}>{valueText || "empty"}</span>
+                <button
+                  type="button"
+                  className={styles.fcRemove}
+                  aria-label={`Remove filter ${filter.property || "empty"}`}
+                  disabled={!logViewId}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void removeFilter(filter);
+                  }}
+                >
+                  <XIcon />
+                </button>
+              </span>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          className={[styles.fchip, styles.fchipAdd].join(" ")}
+          data-add-filter="true"
+          onClick={(event) => openAddFilter(event.currentTarget)}
+          disabled={!logViewId || filterSaving}
+          title={logViewId ? "Add filter" : "Loading filters…"}
+        >
+          + Add filter
+        </button>
         <span className={styles.spacer} />
         <span
           className={[styles.live, !paused ? styles.liveOn : ""].join(" ")}
@@ -746,6 +926,25 @@ const LogPage: React.FC = () => {
           onMock={() => setMockLog(selectedLog)}
         />
       </div>
+      {filterEditor ? (
+        <LogFilterEditor
+          mode={filterEditor.mode}
+          filter={filterEditor.filter}
+          anchor={filterEditor.anchor}
+          saving={filterSaving}
+          onSave={saveFilter}
+          onDelete={
+            filterEditor.mode === "edit"
+              ? () => void removeFilter(filterEditor.filter)
+              : undefined
+          }
+          onClose={() => {
+            if (!filterSaving) {
+              setFilterEditor(null);
+            }
+          }}
+        />
+      ) : null}
       <MockFromLogModal
         projectId={currentProject.id}
         log={mockLog}
