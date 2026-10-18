@@ -15,6 +15,11 @@ interface AddExpectationModalProps {
   groups: Array<ExpectationGroupM>;
   /** When set, the expectation is created in this group and the group is fixed. */
   lockedGroupId?: string | null;
+  /** Prefills the form (used when cloning an existing expectation). */
+  initialValues?: AddExpectationValues;
+  title?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
   creating: boolean;
   onCreate: (values: AddExpectationValues) => void;
   onClose: () => void;
@@ -23,18 +28,29 @@ interface AddExpectationModalProps {
 const AddExpectationModal = ({
   groups,
   lockedGroupId,
+  initialValues,
+  title = "Add expectation",
+  submitLabel = "Create",
+  submittingLabel = "Creating…",
   creating,
   onCreate,
   onClose,
 }: AddExpectationModalProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [groupId, setGroupId] = useState(lockedGroupId ?? "");
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [description, setDescription] = useState(
+    initialValues?.description ?? "",
+  );
+  const [groupId, setGroupId] = useState(
+    lockedGroupId ?? initialValues?.groupId ?? "",
+  );
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     nameRef.current?.focus();
-  }, []);
+    if (initialValues?.name) {
+      nameRef.current?.select();
+    }
+  }, [initialValues?.name]);
 
   const trimmedName = name.trim();
 
@@ -47,7 +63,7 @@ const AddExpectationModal = ({
 
   return (
     <Modal
-      title="Add expectation"
+      title={title}
       onClose={onClose}
       size="sm"
       footer={
@@ -65,7 +81,7 @@ const AddExpectationModal = ({
             onClick={submit}
             disabled={creating || !trimmedName}
           >
-            {creating ? "Creating…" : "Create"}
+            {creating ? submittingLabel : submitLabel}
           </button>
         </>
       }

@@ -21,6 +21,7 @@ import {
 } from "../server/actionServer";
 import {
   createExpectation,
+  duplicateExpectation,
   ExpectationM,
 } from "livemock-core/struct/expectation";
 import {
@@ -213,6 +214,8 @@ const ExpectationPage = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [addGroupId, setAddGroupId] = useState<string | null>(null);
   const [groupMenuId, setGroupMenuId] = useState<string | null>(null);
+  const [cloneTarget, setCloneTarget] = useState<ExpectationM | null>(null);
+  const [cloning, setCloning] = useState(false);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -270,6 +273,7 @@ const ExpectationPage = () => {
     setCollapsedGroups(new Set());
     setAddGroupId(null);
     setGroupMenuId(null);
+    setCloneTarget(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -392,6 +396,46 @@ const ExpectationPage = () => {
       .catch(() => {
         toast.error("Expectation created, but the list failed to refresh.");
       });
+  };
+
+  const handleClone = async (values: AddExpectationValues) => {
+    if (!cloneTarget) {
+      return;
+    }
+    const expectation = duplicateExpectation(cloneTarget);
+    expectation.name =
+      values.name.trim() || `${cloneTarget.name || "expectation"} (copy)`;
+    expectation.description = values.description.trim();
+    expectation.groupId = values.groupId;
+    expectation.createTime = new Date();
+    setCloning(true);
+    let created: ExpectationM;
+    try {
+      created = await createExpectationReq(currentProject.id, expectation);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setCloning(false);
+      return;
+    }
+    // Clear the filter and expand the target group so the new row is visible.
+    setQuery("");
+    if (created.groupId) {
+      const groupId = created.groupId;
+      setCollapsedGroups((prev) => {
+        const next = new Set(prev);
+        next.delete(groupId);
+        return next;
+      });
+    }
+    setCloneTarget(null);
+    setCloning(false);
+    toast.success("Expectation cloned");
+    const result = await getExpectationListQuery.refetch();
+    if (result.isError) {
+      toast.error("Expectation cloned, but the list failed to refresh.");
+      return;
+    }
+    setSelectedId(created.id);
   };
 
   const handleSubmitGroup = async (values: GroupEditorValues) => {
@@ -874,6 +918,7 @@ const ExpectationPage = () => {
           onEditMatchers={() => setMatchersOpen(true)}
           onEditTiming={() => setTimingOpen(true)}
           onToggleActive={handleToggleActive}
+          onClone={() => setCloneTarget(selectedExpectation)}
           activeSaving={activeSaving}
         />
       </div>
@@ -886,6 +931,26 @@ const ExpectationPage = () => {
           onClose={() => {
             setAddOpen(false);
             setAddGroupId(null);
+          }}
+        />
+      ) : null}
+      {cloneTarget ? (
+        <AddExpectationModal
+          groups={groupList}
+          initialValues={{
+            name: `${cloneTarget.name || "expectation"} (copy)`,
+            description: cloneTarget.description ?? "",
+            groupId: cloneTarget.groupId ?? null,
+          }}
+          title="Clone expectation"
+          submitLabel="Clone"
+          submittingLabel="Cloning…"
+          creating={cloning}
+          onCreate={handleClone}
+          onClose={() => {
+            if (!cloning) {
+              setCloneTarget(null);
+            }
           }}
         />
       ) : null}

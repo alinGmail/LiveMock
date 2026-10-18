@@ -87,6 +87,21 @@ const PencilIcon = () => (
   </svg>
 );
 
+const CopyIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="9" y="9" width="12" height="12" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
 const TrashIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -330,6 +345,7 @@ interface ExpectationDetailProps {
   onEditMatchers?: () => void;
   onEditTiming?: () => void;
   onToggleActive?: () => void;
+  onClone?: () => void;
   activeSaving?: boolean;
 }
 
@@ -344,6 +360,7 @@ const ExpectationDetail = ({
   onEditMatchers,
   onEditTiming,
   onToggleActive,
+  onClone,
   activeSaving,
 }: ExpectationDetailProps) => {
   if (!expectation) {
@@ -407,6 +424,17 @@ const ExpectationDetail = ({
               label="Toggle active"
               disabled={!onToggleActive || activeSaving}
             />
+            {onClone ? (
+              <button
+                type="button"
+                className={styles.actionBtn}
+                aria-label="Clone expectation"
+                title="Clone expectation"
+                onClick={onClone}
+              >
+                <CopyIcon />
+              </button>
+            ) : null}
           </div>
         </div>
         <div className={styles.chips}>
