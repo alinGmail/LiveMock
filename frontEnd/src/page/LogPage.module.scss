@@ -55,11 +55,91 @@
   border-color: #3e5372;
   color: var(--text);
 }
+.fchip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .fchipActive {
   background: rgba(59, 130, 246, 0.16);
   border-color: rgba(96, 165, 250, 0.5);
   color: #bfdbfe;
 }
+
+/* ===== custom filters ===== */
+.fchipAdd {
+  border-style: dashed;
+  color: var(--muted);
+}
+.fchipAdd:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.fchipCustom {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding-right: 5px;
+  cursor: pointer;
+}
+.fchipCustom.fchipOff {
+  border-style: dashed;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+.fchipCustom.fchipOff:hover {
+  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.06);
+}
+.fcProp {
+  color: var(--text-dim);
+}
+.fcCond {
+  color: var(--accent-2);
+}
+.fcVal {
+  color: var(--text);
+}
+.fchipOff .fcProp,
+.fchipOff .fcCond {
+  color: var(--faint);
+}
+.fchipOff .fcVal {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(148, 163, 184, 0.55);
+}
+.offRing {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--faint);
+  background: transparent;
+  flex: none;
+}
+.fcRemove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin-left: 1px;
+  border: 0;
+  background: transparent;
+  color: var(--faint);
+  border-radius: 5px;
+  flex: none;
+  cursor: pointer;
+}
+.fcRemove svg {
+  width: 12px;
+  height: 12px;
+}
+.fcRemove:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+}
+
 .expectationSelect {
   width: 190px;
 }
