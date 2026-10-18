@@ -12,6 +12,7 @@ import {
 } from "../server/expectationServer";
 import {
   createGroupReq,
+  deleteGroupReq,
   listGroupReq,
   updateGroupReq,
 } from "../server/groupServer";
@@ -48,6 +49,7 @@ import AddExpectationModal, {
   AddExpectationValues,
 } from "../component/expectation/AddExpectationModal";
 import DeleteExpectationModal from "../component/expectation/DeleteExpectationModal";
+import DeleteGroupModal from "../component/expectation/DeleteGroupModal";
 import ActionEditorModal from "../component/expectation/ActionEditorModal";
 import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
 import NameEditorModal from "../component/expectation/NameEditorModal";
@@ -221,6 +223,9 @@ const ExpectationPage = () => {
   const [cloning, setCloning] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ExpectationM | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteGroupTarget, setDeleteGroupTarget] =
+    useState<ExpectationGroupM | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState(false);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -280,6 +285,7 @@ const ExpectationPage = () => {
     setGroupMenuId(null);
     setCloneTarget(null);
     setDeleteTarget(null);
+    setDeleteGroupTarget(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -473,6 +479,53 @@ const ExpectationPage = () => {
     const result = await getExpectationListQuery.refetch();
     if (result.isError) {
       toast.error("Expectation deleted, but the list failed to refresh.");
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!deleteGroupTarget) {
+      return;
+    }
+    const group = deleteGroupTarget;
+    const memberIds = new Set(
+      expectationList
+        .filter((item) => item.groupId === group.id)
+        .map((item) => item.id),
+    );
+    const selectedWasMember = selectedId ? memberIds.has(selectedId) : false;
+    let nextSelected: ExpectationM | null = null;
+    if (selectedWasMember && selectedId) {
+      const selectedIndex = orderedAll.findIndex(
+        (item) => item.id === selectedId,
+      );
+      const remaining = orderedAll.filter((item) => !memberIds.has(item.id));
+      const remainingIndex = orderedAll
+        .slice(0, selectedIndex < 0 ? 0 : selectedIndex)
+        .filter((item) => !memberIds.has(item.id)).length;
+      nextSelected =
+        remaining[remainingIndex] ?? remaining[remaining.length - 1] ?? null;
+    }
+    setDeletingGroup(true);
+    try {
+      await deleteGroupReq(currentProject.id, group.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setDeletingGroup(false);
+      return;
+    }
+    // Remove the group's expectations and move the selection before refetching,
+    // so the selection effect never falls back to an unrelated row.
+    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
+    if (selectedWasMember) {
+      setSelectedId(nextSelected ? nextSelected.id : null);
+    }
+    setDeleteGroupTarget(null);
+    setDeletingGroup(false);
+    toast.success("Group deleted");
+    const groupResult = await getGroupListQuery.refetch();
+    const expectationResult = await getExpectationListQuery.refetch();
+    if (groupResult.isError || expectationResult.isError) {
+      toast.error("Group deleted, but the list failed to refresh.");
     }
   };
 
@@ -843,6 +896,20 @@ const ExpectationPage = () => {
                 >
                   New expectation
                 </button>
+                <div className={styles.groupMenuSep} />
+                <button
+                  type="button"
+                  className={[
+                    styles.groupMenuItem,
+                    styles.groupMenuItemDanger,
+                  ].join(" ")}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setDeleteGroupTarget(group);
+                  }}
+                >
+                  Delete group
+                </button>
               </div>
             )}
           >
@@ -1001,6 +1068,23 @@ const ExpectationPage = () => {
           onClose={() => {
             if (!deleting) {
               setDeleteTarget(null);
+            }
+          }}
+        />
+      ) : null}
+      {deleteGroupTarget ? (
+        <DeleteGroupModal
+          name={deleteGroupTarget.name ?? ""}
+          count={
+            expectationList.filter(
+              (item) => item.groupId === deleteGroupTarget.id,
+            ).length
+          }
+          deleting={deletingGroup}
+          onConfirm={handleDeleteGroup}
+          onClose={() => {
+            if (!deletingGroup) {
+              setDeleteGroupTarget(null);
             }
           }}
         />
