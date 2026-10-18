@@ -186,8 +186,6 @@ const LogFilterEditor = ({
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    propertyRef.current?.focus();
-    propertyRef.current?.select();
 
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
