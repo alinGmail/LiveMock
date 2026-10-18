@@ -51,10 +51,10 @@ page.
   light/dark toggle, and give the main window a desktop-appropriate default and minimum
   size.
 - **Strict web parity**: the desktop Expectation page matches the current web
-  implementation, including its deliberate omissions. Import, duplicate/delete
-  expectation, delete group, and multi-action editing are not ported; the old controls
-  and dialogs for them are removed rather than left as dead UI. These are accepted
-  regressions for this step.
+  implementation. The initial redesign omitted import, duplicate/delete expectation,
+  delete group and multi-action editing; a follow-up port restores duplicate, delete
+  expectation, delete group, the group actions menu and the shared destructive
+  confirmation, matching web. Import and multi-action editing remain out of scope.
 - **Everything else stays**: Request Log and Config keep their current content under the
   new shell, and the first-run welcome page keeps its current content outside the shell.
   The Request Log’s “Mock this request” dialog is not redesigned. The native Electron
@@ -208,7 +208,7 @@ the remaining pages continue to work and can be migrated in later steps.
 70. As a developer, I want the old expectation UI code removed once the new page is live,
     so that future changes do not accidentally revive dead components.
 71. As a developer, I want the desktop data layer left intact, so that later steps can
-    restore Import, delete/duplicate or multi-action without redesigning IPC.
+    restore Import or multi-action without redesigning IPC.
 72. As a developer, I want the web and desktop renderers to stay near-copies, so that
     future design changes can be ported predictably.
 73. As a maintainer, I want the desktop build, type-check and lint to pass, so that the
@@ -276,14 +276,17 @@ the remaining pages continue to work and can be migrated in later steps.
   description, group name and matcher text. Selection is driven by the unfiltered list,
   so filtering the selected row out does not clear the detail pane.
 - Group headers show a collapse control, name, member count, priority pill, inactive
-  marker, activation toggle and an edit action. The group header’s edit action opens the
-  group dialog. Groups are expanded by default.
+  marker, activation toggle and an actions menu. The menu offers Edit group, New
+  expectation in that group, and Delete group. The member count follows the active
+  search, matching the rows currently visible. Groups are expanded by default.
 - Expectation rows show an active-state dot, name, description or “no description”
   placeholder, delay tag, and the first action’s type badge. Inactive expectations and
   members of inactive groups are de-emphasised. The selected row is highlighted.
-- The detail pane shows a breadcrumb, name, active toggle, delay/priority chips,
-  description, matcher chips, an action summary for the first action, and a timing &
-  state grid. It shows a dedicated empty state when the project has no expectations.
+- The detail pane shows a breadcrumb, name, active toggle, clone and delete actions,
+  delay/priority chips, description, matcher chips, an action summary for the first
+  action, and a timing & state grid. It shows a dedicated empty state when the project
+  has no expectations. Clone copies the expectation through the existing create path;
+  delete uses a shared destructive confirmation and preserves request logs.
 - When an expectation has no action, the action card shows a muted empty state and an
   add action control. When it has an action, the card shows edit and delete controls.
 - The page reads expectations and groups through the existing desktop IPC wrappers and
@@ -324,12 +327,12 @@ the remaining pages continue to work and can be migrated in later steps.
 
 ### Strict web parity and deliberate removals
 
-- The desktop page matches the current web page, not the old desktop table. The following
-  existing desktop capabilities are **not** ported in this step:
+- The desktop page matches the current web page, not the old desktop table.
+- Ported in the follow-up: the group actions menu (Edit group / New expectation /
+  Delete group), clone expectation, delete expectation, the shared destructive
+  confirmation dialog, blank-name fallback and search-aware group counts.
+- The following existing desktop capabilities are **not** ported:
   - Import of expectations (and the Import dialog).
-  - Duplicate expectation.
-  - Delete expectation.
-  - Delete group (including cascade from the old group column).
   - Inline editing in table columns.
   - Dedicated matcher create/update/delete UI; matcher editing now saves the whole array.
   - Editing or displaying more than the first action.
@@ -398,9 +401,10 @@ the remaining pages continue to work and can be migrated in later steps.
 - The Request Log “Mock this request” dialog redesign.
 - The detached request-log detail window redesign.
 - Import of expectations, including the Import dialog and batch-import UX.
-- Duplicate expectation, delete expectation and delete group.
 - Multi-action display or editing; only the first action is shown and edited.
 - Dedicated matcher create/update/delete UI; matchers are saved as a whole array.
+- ARIA menu semantics and arrow-key navigation for the group actions menu; the port
+  matches web’s plain-button menu, and this remains a follow-up.
 - A light theme, or any theme toggle.
 - Changes to the native Electron application menu, About window or window chrome.
 - Changes to the shared core model, backend, IPC channel names or database schema.
@@ -412,10 +416,11 @@ the remaining pages continue to work and can be migrated in later steps.
 
 - The web redesign steps deliberately deferred the desktop flavour. This spec is that
   deferred port, scoped to the shell and the Expectation page.
-- Strict web parity is a conscious product decision. Desktop users lose Import,
-  duplicate/delete, group delete and multi-action editing in this step; those capabilities
-  are not silently dropped in code, they are removed from the UI and documented here so a
-  later step can restore them intentionally.
+- Strict web parity is a conscious product decision. Desktop users lose Import and
+  multi-action editing in this step; those capabilities are not silently dropped in code,
+  they are removed from the UI and documented here so a later step can restore them
+  intentionally. Duplicate, delete expectation and delete group were restored by the
+  follow-up port in tickets 08–15.
 - The old pages will look visually inconsistent inside the new dark shell. That is
   accepted for this step; they must remain functional, not redesigned.
 - The desktop renderer must keep using `window.api` IPC. Web HTTP modules, superagent,

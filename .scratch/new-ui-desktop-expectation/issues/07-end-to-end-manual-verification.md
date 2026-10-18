@@ -24,5 +24,6 @@ behaviour. Record the checks and any accepted visual mismatch on the old pages.
 - [ ] Verify the default/minimum window size and the stacked layout below the responsive
       breakpoint, with no horizontal overflow.
 - [ ] Confirm there are no console errors during the smoke test and that the removed
-      Import / duplicate / delete / group-delete / multi-action controls are absent by
-      design.
+      Import and multi-action controls remain absent by design.
+- [ ] Verify the follow-up expectation actions — group actions menu, clone, delete
+      expectation and delete group — using ticket 15.
