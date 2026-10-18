@@ -4,11 +4,11 @@
 
 **Blocked by:** 10 (uses the shared destructive confirmation dialog)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Delete group appears after a separator in danger styling.
-- [ ] The confirmation count matches the full member set; singular and plural wording are correct.
-- [ ] Deleting an empty group says only that the group will be removed.
-- [ ] Deleting removes the group and all of its expectations; request logs remain.
-- [ ] Selection moves correctly when the selected expectation was a member and stays put when it was not.
-- [ ] A failed request keeps the dialog open; a failed refresh is reported.
+- [x] Delete group appears after a separator in danger styling.
+- [x] The confirmation count matches the full member set; singular and plural wording are correct.
+- [x] Deleting an empty group says only that the group will be removed.
+- [x] Deleting removes the group and all of its expectations; request logs remain.
+- [x] Selection moves correctly when the selected expectation was a member and stays put when it was not.
+- [x] A failed request keeps the dialog open; a failed refresh is reported.

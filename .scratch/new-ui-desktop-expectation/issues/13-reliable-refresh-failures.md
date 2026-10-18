@@ -4,10 +4,17 @@
 
 **Blocked by:** 09, 10, 11 (audits the flows added by those tickets)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Web and desktop inspect the refetch result for the listed flows instead of using a rejected-promise catch.
-- [ ] Successful refresh behavior is unchanged, including selecting a newly created or cloned row.
-- [ ] A failed refresh shows the appropriate toast and does not select a row missing from the list.
-- [ ] Group deletion attempts both refreshes and reports once if either fails.
-- [ ] Group save and group toggle refresh failures are surfaced.
+- [x] Web and desktop inspect the refetch result for the listed flows instead of using a rejected-promise catch.
+- [x] Successful refresh behavior is unchanged, including selecting a newly created or cloned row.
+- [x] A failed refresh shows the appropriate toast; create/clone do not select a row absent from the list, while deletes keep the locally valid neighbor.
+- [x] Group deletion attempts both refreshes and reports once if either fails.
+- [x] Group save and group toggle refresh failures are surfaced.
+
+## Note
+
+Verification found a separate race between the Redux removal and the selection
+effect: the effect could fall back to the first row after a delete. The fix is
+included in commit `b95703d` for both flavours; the delete handlers now re-apply
+the neighbor after the refresh settles.

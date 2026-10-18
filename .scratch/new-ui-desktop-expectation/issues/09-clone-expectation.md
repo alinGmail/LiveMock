@@ -4,12 +4,12 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The copy control appears only when an expectation is selected.
-- [ ] The dialog title is "Clone expectation" and the submit labels are "Clone" / "Cloning…".
-- [ ] The name is prefilled with "<source> (copy)", focused and selected.
-- [ ] The clone has new ids for the expectation, every matcher and every action; all other behavior is preserved; create time is reset.
-- [ ] The search is cleared, the target group is expanded, and the clone is selected after the refreshed list includes it.
-- [ ] Closing is blocked while cloning; a failed request keeps the dialog open and shows an error toast.
-- [ ] No new IPC or API channel is added; the existing create path is reused.
+- [x] The copy control appears only when an expectation is selected.
+- [x] The dialog title is "Clone expectation" and the submit labels are "Clone" / "Cloning…".
+- [x] The name is prefilled with "<source> (copy)", focused and selected.
+- [x] The clone has new ids for the expectation, every matcher and every action; all other behavior is preserved; create time is reset.
+- [x] The search is cleared, the target group is expanded, and the clone is selected after the refreshed list includes it.
+- [x] Closing is blocked while cloning; a failed request keeps the dialog open and shows an error toast.
+- [x] No new IPC or API channel is added; the existing create path is reused.

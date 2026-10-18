@@ -1,10 +1,10 @@
 # 14: Update the desktop expectation spec and tickets
 
-**What to build:** The desktop expectation spec and its tickets must reflect that duplicate, delete expectation and delete group are now ported. Add a ticket that records the ported actions, the decision to align empty-name handling and group counts with web, the reliable refresh-failure decision, the accessibility follow-up and the manual verification scope. Leave the historical web specs untouched and note that the new ticket supersedes their earlier out-of-scope claims.
+**What to build:** The desktop expectation spec and its tickets must reflect that clone, delete expectation and delete group are now ported. Add a ticket that records the ported actions, the decision to align empty-name handling and group counts with web, the reliable refresh-failure decision, the accessibility follow-up and the manual verification scope. Leave the historical web specs untouched and note that the new ticket supersedes their earlier out-of-scope claims.
 
 **Blocked by:** 08, 09, 10, 11, 12, 13 (records the final behavior)
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Decisions recorded
 
@@ -18,8 +18,8 @@
 - Verification is desktop lint, renderer typecheck, web lint/build and a manual Electron
   smoke test with screenshots (ticket 15).
 
-- [ ] The spec no longer claims duplicate, delete expectation or delete group are out of scope.
-- [ ] Tickets 04, 05 and 07 no longer claim those controls are absent.
-- [ ] A new ticket documents scope, decisions and the verification checklist.
-- [ ] Historical web specs are untouched and the supersession is noted.
-- [ ] No stale "not ported" claim remains in the desktop docs.
+- [x] The spec no longer claims clone, delete expectation or delete group are out of scope.
+- [x] Tickets 04, 05 and 07 no longer claim those controls are absent.
+- [x] A new ticket documents scope, decisions and the verification checklist.
+- [x] Historical web specs are untouched and the supersession is noted.
+- [x] No stale "not ported" claim remains in the desktop docs.

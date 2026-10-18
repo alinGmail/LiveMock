@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The confirmation shows the correct title, name and consequence note; Cancel closes without deleting.
-- [ ] Confirming deletes the expectation, shows a success toast and removes the row.
-- [ ] Selection moves correctly after deleting a middle row, the last row and the only row.
-- [ ] While deleting, both buttons are disabled and the confirm label reads "Deleting…"; a failure keeps the dialog open and shows an error.
-- [ ] Request logs remain after deletion.
-- [ ] The confirmation is a reusable primitive, with header-icon support in the desktop modal shell.
+- [x] The confirmation shows the correct title, name and consequence note; Cancel closes without deleting.
+- [x] Confirming deletes the expectation, shows a success toast and removes the row.
+- [x] Selection moves correctly after deleting a middle row, the last row and the only row.
+- [x] While deleting, both buttons are disabled and the confirm label reads "Deleting…"; a failure keeps the dialog open and shows an error.
+- [x] Request logs remain after deletion.
+- [x] The confirmation is a reusable primitive, with header-icon support in the desktop modal shell.

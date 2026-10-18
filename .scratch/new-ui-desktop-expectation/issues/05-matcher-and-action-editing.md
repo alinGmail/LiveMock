@@ -21,4 +21,4 @@ matches and what its first action returns or forwards, using the same dialogs as
 - [ ] Saving the action uses the existing action update wrapper and updates Redux.
 - [ ] The action card can delete the first action after confirmation, and can add a default
       custom-response action only when the expectation currently has none.
-- [ ] Import and multi-action editing remain absent; duplicate, delete expectation and delete group are delivered by tickets 09–11.
+- [ ] Import and multi-action editing remain absent; clone, delete expectation and delete group are delivered by tickets 09–11.

@@ -23,4 +23,4 @@ activation from the detail header, and create or edit groups.
 - [ ] The group header’s activation toggle updates the group and refreshes the list.
 - [ ] Create/save buttons prevent duplicate submissions while a request is in flight, and
       failures surface a toast instead of silently closing the dialog.
-- [ ] Import remains absent; duplicate, delete expectation and delete group are delivered by tickets 09–11.
+- [ ] Import remains absent; clone, delete expectation and delete group are delivered by tickets 09–11.

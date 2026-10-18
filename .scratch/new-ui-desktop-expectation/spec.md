@@ -51,8 +51,8 @@ page.
   light/dark toggle, and give the main window a desktop-appropriate default and minimum
   size.
 - **Strict web parity**: the desktop Expectation page matches the current web
-  implementation. The initial redesign omitted import, duplicate/delete expectation,
-  delete group and multi-action editing; a follow-up port restores duplicate, delete
+  implementation. The initial redesign omitted import, clone/delete expectation,
+  delete group and multi-action editing; a follow-up port restores clone, delete
   expectation, delete group, the group actions menu and the shared destructive
   confirmation, matching web. Import and multi-action editing remain out of scope.
 - **Everything else stays**: Request Log and Config keep their current content under the
@@ -419,7 +419,7 @@ the remaining pages continue to work and can be migrated in later steps.
 - Strict web parity is a conscious product decision. Desktop users lose Import and
   multi-action editing in this step; those capabilities are not silently dropped in code,
   they are removed from the UI and documented here so a later step can restore them
-  intentionally. Duplicate, delete expectation and delete group were restored by the
+  intentionally. Clone, delete expectation and delete group were restored by the
   follow-up port in tickets 08–15.
 - The old pages will look visually inconsistent inside the new dark shell. That is
   accepted for this step; they must remain functional, not redesigned.

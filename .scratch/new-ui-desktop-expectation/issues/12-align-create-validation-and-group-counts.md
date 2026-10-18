@@ -4,10 +4,10 @@
 
 **Blocked by:** 08, 09 (both change the add dialog that this ticket aligns)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Creating with a blank name creates an expectation named "New expectation".
-- [ ] Cloning with a blank name creates "<source> (copy)".
-- [ ] The name field is still focused and selected appropriately when the dialog opens.
-- [ ] With a search active, each group header count equals its matching member count; empty groups stay hidden.
-- [ ] With no search, each group header count equals its full membership.
+- [x] Creating with a blank name creates an expectation named "New expectation".
+- [x] Cloning with a blank name creates "<source> (copy)".
+- [x] The name field is still focused and selected appropriately when the dialog opens.
+- [x] With a search active, each group header count equals its matching member count; empty groups stay hidden.
+- [x] With no search, each group header count equals its full membership.
