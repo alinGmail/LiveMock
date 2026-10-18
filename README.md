@@ -14,10 +14,8 @@ LiveMock is a comprehensive tool for API development and testing, offering mock 
 
 
 ## 🎆 Preview
-![image](https://github.com/alinGmail/LiveMock/blob/main/img/light1.png)
-![image](https://github.com/alinGmail/LiveMock/blob/main/img/light2.png)
-![image](https://github.com/alinGmail/LiveMock/blob/main/img/dark1.png)
-![image](https://github.com/alinGmail/LiveMock/blob/main/img/dark2.png)
+![Expectations](https://github.com/alinGmail/LiveMock/blob/main/img/screenshots/01-expectations.png)
+![Request Log](https://github.com/alinGmail/LiveMock/blob/main/img/screenshots/02-request-log.png)
 
 ## 📦 features
 
