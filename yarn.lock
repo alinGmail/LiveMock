@@ -1003,6 +1003,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/fira-code@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/fira-code@npm:5.3.0"
+  checksum: 10c0/402416a8a645b4f7e5be72f223626a68c0a60fd836d5f7e8b840a07ed83637663abe70e8d05f88602225248df90bbd733807dab1e819aab65557e9fbdafed8d4
+  languageName: node
+  linkType: hard
+
+"@fontsource/fira-sans@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/fira-sans@npm:5.3.0"
+  checksum: 10c0/b15532c5d43a04f5e841c929c4266fa3ff346fb323241b3adf6d1c5e3716f2b3a6314224557faf9c17f5453523f4e93c31dba18a40c71c395fd5cfda07963f81
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/merge@npm:^9.2.6":
   version: 9.2.6
   resolution: "@graphql-tools/merge@npm:9.2.6"
@@ -6270,6 +6284,8 @@ __metadata:
   dependencies:
     "@ant-design/icons": "npm:^5.0.1"
     "@eslint/js": "npm:^9.39.5"
+    "@fontsource/fira-code": "npm:^5.3.0"
+    "@fontsource/fira-sans": "npm:^5.3.0"
     "@monaco-editor/react": "npm:^4.6.0"
     "@reduxjs/toolkit": "npm:^1.8.1"
     "@tanstack/react-query": "npm:^4.24.10"
@@ -8087,6 +8103,8 @@ __metadata:
   dependencies:
     "@ant-design/icons": "npm:^5.0.1"
     "@eslint/js": "npm:^9.39.5"
+    "@fontsource/fira-code": "npm:^5.3.0"
+    "@fontsource/fira-sans": "npm:^5.3.0"
     "@monaco-editor/react": "npm:^4.6.0"
     "@reduxjs/toolkit": "npm:^1.8.1"
     "@tanstack/react-query": "npm:^4.24.10"

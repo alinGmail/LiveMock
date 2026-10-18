@@ -5,3 +5,5 @@ node_modules
 
 .yarn
 
+desktop/.dev-data/
+

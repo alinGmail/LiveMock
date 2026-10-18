@@ -1,6 +1,5 @@
 import { ExpectationM } from "livemock-core/struct/expectation";
 import { createSlice, Draft, PayloadAction } from "@reduxjs/toolkit";
-import { matcherReducers } from "./matcherSlice";
 import { actionReducers } from "./actionSlice";
 
 export interface ExpectationState {
@@ -53,7 +52,6 @@ const expectationSlice = createSlice({
         (item) => item.id !== action.payload
       );
     },
-    ...matcherReducers,
     ...actionReducers,
   },
 });
@@ -62,9 +60,6 @@ let { actions, caseReducers, getInitialState, name, reducer } =
   expectationSlice;
 
 let {
-  addMatcher,
-  modifyMatcher,
-  removeMatcher,
   setExpectationList,
   updateExpectationItem,
   addAction,
@@ -76,9 +71,6 @@ let {
   deleteExpectationMap,
 } = actions;
 export {
-  addMatcher,
-  modifyMatcher,
-  removeMatcher,
   setExpectationList,
   updateExpectationItem,
   deleteExpectation,

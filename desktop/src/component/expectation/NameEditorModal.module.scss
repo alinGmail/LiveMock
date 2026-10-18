@@ -1,0 +1,35 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.input {
+  height: 34px;
+  width: 100%;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font: inherit;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}

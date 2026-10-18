@@ -180,6 +180,21 @@ function isNumberString(value: string) {
   const numVal = Number(value);
   return !isNaN(numVal);
 }
+
+/**
+ * A status-family token such as "2xx" maps to the inclusive range [200, 299].
+ * Returns null for exact codes or any other value.
+ */
+function statusFamilyRange(
+  token: string
+): { low: number; high: number } | null {
+  const match = /^([1-5])xx$/i.exec(token.trim());
+  if (!match) {
+    return null;
+  }
+  const low = Number(match[1]) * 100;
+  return { low, high: low + 99 };
+}
 // change filter to mongo-style query
 export function changeToLokijsFilter(filter: LogFilterM) {
   if (
@@ -224,15 +239,54 @@ export function changeToLokijsFilter(filter: LogFilterM) {
         return { [filter.property]: { $gt: filter.value } };
       case LogFilterCondition.LESS:
         return { [filter.property]: { $lt: filter.value } };
-      case LogFilterCondition.IN:
-        let inArray: Array<string | number> = [];
-        (filter.value as Array<string>).forEach((element) => {
-          inArray.push(element);
-          if (isNumberString(element)) {
-            inArray.push(Number(element));
+      case LogFilterCondition.IN: {
+        const inArray: Array<string | number> = [];
+        (Array.isArray(filter.value) ? filter.value : [filter.value]).forEach(
+          (element) => {
+            inArray.push(element);
+            if (isNumberString(element as string)) {
+              inArray.push(Number(element));
+            }
+          },
+        );
+        return { [filter.property]: { $in: inArray } };
+      }
+      case LogFilterCondition.FAMILY: {
+        const rawValues: Array<string | number> = Array.isArray(filter.value)
+          ? filter.value
+          : [filter.value];
+        const exactValues: Array<string | number> = [];
+        const rangeClauses: Array<object> = [];
+        rawValues.forEach((element) => {
+          const range = statusFamilyRange(String(element));
+          if (range) {
+            rangeClauses.push({
+              $and: [
+                { [filter.property]: { $gte: range.low } },
+                { [filter.property]: { $lte: range.high } },
+              ],
+            });
+            return;
+          }
+          exactValues.push(element);
+          if (isNumberString(element as string)) {
+            exactValues.push(Number(element));
           }
         });
-        return { [filter.property]: { $in: inArray } };
+        const clauses: Array<object> = [];
+        if (exactValues.length) {
+          clauses.push({ [filter.property]: { $in: exactValues } });
+        }
+        clauses.push(...rangeClauses);
+        if (clauses.length === 0) {
+          // no values: match nothing
+          return { [filter.property]: { $in: [] } };
+        }
+        if (clauses.length === 1) {
+          return clauses[0];
+        }
+        return { $or: clauses };
+      }
     }
   } else {
     // todo
@@ -250,7 +304,28 @@ export function removeDynamicViewFilter(
   dynamicView: DynamicView<LogM>,
   filterId: string
 ) {
-  dynamicView.removeFilter(filterId);
+  // A filter can be persisted but absent from the in-memory pipeline (for
+  // example an inactive filter, or a stale id after a reload). Loki throws when
+  // removing an unknown uid, so only remove when it is actually present.
+  const pipeline = dynamicView.filterPipeline.find(
+    (item) => String(item.uid) === filterId,
+  );
+  if (!pipeline || pipeline.uid === undefined) {
+    return;
+  }
+  dynamicView.removeFilter(pipeline.uid);
+}
+
+/** Apply an active filter, or remove it when it is inactive. */
+export function syncDynamicViewFilter(
+  dynamicView: DynamicView<LogM>,
+  filter: LogFilterM
+) {
+  if (filter.activate === false) {
+    removeDynamicViewFilter(dynamicView, filter.id);
+    return;
+  }
+  applyDynamicViewFilter(dynamicView, filter);
 }
 
 export async function getLogDynamicView(
@@ -276,21 +351,29 @@ export async function getLogDynamicView(
     if (!dynamicView) {
       return;
     }
-    logView.filters.forEach((filter) => {
+    const activeFilters = logView.filters.filter(
+      (filter) => filter.activate !== false,
+    );
+    activeFilters.forEach((filter) => {
       const find = dynamicView!.filterPipeline.find((pipeLine) => {
-        return pipeLine.uid === filter.id;
+        return String(pipeLine.uid) === filter.id;
       });
       if (!find) {
         applyDynamicViewFilter(dynamicView!, filter);
       }
     });
-    dynamicView.filterPipeline.forEach((pipeLine) => {
-      const find = logView.filters.find((filter) => {
-        return filter.id === pipeLine.uid;
-      });
-      if (!find && pipeLine.uid) {
-        dynamicView?.removeFilter(pipeLine.uid);
-      }
+    const staleFilterIds = dynamicView.filterPipeline
+      .filter((pipeLine) => {
+        return (
+          !!pipeLine.uid &&
+          !activeFilters.some(
+            (filter) => filter.id === String(pipeLine.uid),
+          )
+        );
+      })
+      .map((pipeLine) => String(pipeLine.uid));
+    staleFilterIds.forEach((filterId) => {
+      removeDynamicViewFilter(dynamicView!, filterId);
     });
     dynamicView.on("insert", (log: LogM) => {
       logViewEventEmitter.emit("insert", { log, logViewId: logView.id });

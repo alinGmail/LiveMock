@@ -6,6 +6,7 @@ import _ from "lodash";
 export interface ExpectationM {
   id: string;
   name: string;
+  description: string;
   delay: number;
   priority: number;
   activate: boolean;
@@ -21,6 +22,7 @@ export function createExpectation(): ExpectationM {
     actions: [],
     activate: true,
     createTime: new Date(),
+    description: "",
     delay: 0,
     groupId: null,
     id: uuId(),

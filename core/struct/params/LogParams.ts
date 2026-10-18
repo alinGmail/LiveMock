@@ -54,7 +54,9 @@ export interface ListLogViewLogsReqBody {}
 
 export interface ListLogViewLogsReqQuery {
   projectId: string;
-  maxLogId: string | null;
+  maxLogId: string | number | null;
+  /** Page size; defaults to and is capped by the server's page size. */
+  limit?: number;
 }
 
 /**

@@ -4,7 +4,7 @@
   "version": "1.4.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "concurrently \"tsc -project electron && cross-env PROJECT_ENV=dev electron dist-electron/main.js\" \"vite\"",
+    "dev": "node scripts/dev.mjs",
     "tsc": "tsc -project electron",
     "electron": "cross-env PROJECT_ENV=dev electron dist-electron/main.js",
     "start": "electron dist-electron/main.js",
@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
+    "@fontsource/fira-code": "^5.3.0",
+    "@fontsource/fira-sans": "^5.3.0",
     "@monaco-editor/react": "^4.6.0",
     "@reduxjs/toolkit": "^1.8.1",
     "@tanstack/react-query": "^4.24.10",
