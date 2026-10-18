@@ -58,8 +58,9 @@ Port the web Request Log redesign to the Electron desktop renderer.
 This is strict web parity. The following existing desktop capabilities are deliberately
 removed in this step: custom filter editing, the full column editor and custom JSON-path
 columns, the detached detail window, the websocket chat modal, OPTIONS filtering, exact
-status-code filtering, and raw-log/root columns. Copy-as-cURL and per-log delete remain
-absent because neither flavour has an endpoint for them.
+status-code filtering, and raw-log/root columns. Custom filter editing was later restored
+by `new-ui-desktop-log-filter`. Copy-as-cURL and per-log delete remain absent because
+neither flavour has an endpoint for them.
 
 ## User Stories
 
@@ -302,7 +303,8 @@ absent because neither flavour has an endpoint for them.
 
 ## Out of Scope
 
-- Custom filter chips / Add filter / the filter editor popover.
+- Custom filter chips / Add filter / the filter editor popover in this step; they were
+  later restored by `new-ui-desktop-log-filter`.
 - The full column editor, custom JSON-path columns, TEXT/JSON column display and
   raw-log/root columns.
 - The detached request-log detail BrowserWindow and its route.
@@ -319,9 +321,10 @@ absent because neither flavour has an endpoint for them.
 
 ## Further Notes
 
-- Strict web parity is a conscious product decision. The desktop loses custom filters,
-  column configuration and the detached detail window in this step; they are recorded here
-  so a later step can restore them intentionally if needed.
+- Strict web parity is a conscious product decision. The desktop lost custom filters,
+  column configuration and the detached detail window in this step; custom filters were
+  restored by `new-ui-desktop-log-filter`, and the others remain recorded here so a later
+  step can restore them intentionally if needed.
 - The detached detail window was already limited: it had no live updates, no inline tabs,
   and a project-unscoped query key. Removing it does not lose data that the inline pane
   cannot show.

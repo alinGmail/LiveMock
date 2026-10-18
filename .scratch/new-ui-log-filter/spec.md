@@ -121,8 +121,9 @@ condition stay out of the custom-filter editor.
 
 ### Scope
 
-- This step changes the **web** Request Log UI only. The desktop Request Log UI is not
-  touched; the desktop main-process `logUtils`/`logFilterHandler` copies are updated only
+- This step changes the **web** Request Log UI and the desktop main process. The desktop
+  renderer is not touched here; `new-ui-desktop-log-filter` later ports the custom-filter
+  UI and wiring to it. The desktop `logUtils`/`logFilterHandler` copies are updated now
   to keep the backend semantics in sync with the web backend.
 - Custom filters are `SimpleFilterM` records attached to the first log view of the current
   project. Group filters, nested groups and `FAMILY` are not exposed in the editor.
@@ -208,7 +209,8 @@ condition stay out of the custom-filter editor.
 
 ## Out of Scope
 
-- Redesigning the desktop Request Log UI or adding custom filters to it.
+- Redesigning the desktop Request Log page. Desktop custom filters were ported later in
+  `new-ui-desktop-log-filter`.
 - Group filters, nested filter groups, conjunctions and the `FAMILY` condition in the
   editor.
 - Client-side filtering of the paginated request list.
