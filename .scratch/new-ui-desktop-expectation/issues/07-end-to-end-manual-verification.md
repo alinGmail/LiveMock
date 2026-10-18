@@ -10,7 +10,7 @@ behaviour. Record the checks and any accepted visual mismatch on the old pages.
 
 - [ ] Launch the desktop app and confirm it opens in the dark redesign with the new app
       bar, Fira fonts and no left navigation.
-- [ ] Verify project switch, New project, Expectation / Request Log tabs, gear → Config,
+- [ ] Verify project switch, New project, Expectation / Request Log tabs, gear → Project settings,
       status pill, start/stop, native menu and About.
 - [ ] Verify the Expectation read view: match-order grouping, ungrouped section, collapse,
       selection, search, empty states, inactive de-emphasis, description, matcher chips,

@@ -18,4 +18,5 @@ offers a Danger zone whose delete action requires typing the project name.
       delete.
 - [x] Deleting closes the modal, shows a toast and switches to the first remaining
       project; deleting the last project returns to Welcome.
+- [x] A failed refresh after deletion does not leave the deleted project selected.
 - [x] Closing the modal leaves the current project unchanged.

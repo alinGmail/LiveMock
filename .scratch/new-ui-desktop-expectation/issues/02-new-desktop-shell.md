@@ -16,10 +16,11 @@ outside it.
       start/stop control; the old project strip and left navigation are gone.
 - [ ] The project dropdown lists projects with their status and port, switches the
       current project, and offers “New project” using the existing project editor dialog.
-- [ ] The settings gear opens the existing Config page; Config remains reachable but is
-      not a visible page tab, and the page tabs return to Expectation / Request Log.
+- [ ] The settings gear opens project settings without adding a visible page tab; the
+      page tabs return to Expectation / Request Log. (Originally this was the Config page;
+      the follow-up below replaced it with the Project settings modal.)
 - [ ] The shell is forced to dark mode, the old light/dark toggle is no longer visible,
-      and the Request Log and Config pages still render and work in the dark shell.
+      and the Request Log and project settings still render and work in the dark shell.
 - [ ] The main window opens at 1280×800 with a 960×640 minimum and the page still stacks
       its panes below the existing responsive breakpoint.
 - [ ] The native Electron application menu, About window, detached request-log detail

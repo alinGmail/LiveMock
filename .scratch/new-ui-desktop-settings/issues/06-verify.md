@@ -42,8 +42,10 @@ Electron smoke (fresh empty dev profile):
 - While running, Port and Delete project are disabled with the stop-first hints.
 - Delete opens the type-the-name confirmation; a mismatch shows `incorrect project name`.
 - Deleting switches to the first remaining project; deleting the last project returns to
-  Welcome.
+  Welcome. The deleted project is removed from Redux before the refresh, so a failed
+  refresh cannot leave it selected.
 - `#/config` falls through the catch-all route to `#/expectation`.
+- The unused debounce config helper was removed with the old Config page.
 
 Screenshots (local evidence, not committed):
 

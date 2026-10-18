@@ -87,16 +87,17 @@ the remaining pages continue to work and can be migrated in later steps.
    that I know which mock listener is active before switching.
 8. As a desktop user, I want a “New project” entry in the project dropdown, so that I can
    create another project without restarting the app.
-9. As a desktop user, I want the new-project dialog to keep the existing project fields,
-   so that creating a project behaves as it does today.
+9. As a desktop user, I want the new-project dialog to use the redesigned project form,
+   so that creating a project matches the web flow.
 10. As a desktop user, I want Expectation and Request Log tabs in the app bar, so that I
     can move between the two main pages.
 11. As a desktop user, I want the active page tab highlighted, so that I always know
     where I am.
-12. As a desktop user, I want a project settings gear in the app bar, so that I can reach
-    the existing Config page.
-13. As a desktop user, I want Config to remain reachable but not occupy a page tab, so
-    that the navigation matches the two-tab design without losing configuration.
+12. As a desktop user, I want a project settings gear in the app bar, so that I can open
+    the Project settings modal.
+13. As a desktop user, I want Project settings to remain reachable without occupying a
+    page tab, so that the navigation matches the two-tab design without losing
+    configuration.
 14. As a desktop user, I want a status pill for the current project, so that I can see
     whether the mock listener is running, stopped, starting or stopping.
 15. As a desktop user, I want a start/stop control in the app bar, so that I can control
@@ -197,8 +198,8 @@ the remaining pages continue to work and can be migrated in later steps.
     expectations, so that the main creation path from captured traffic still works.
 62. As a desktop user, I want the detached request-log detail window to keep opening, so
     that multi-window inspection is not lost.
-63. As a desktop user, I want the Config page to keep working under the new shell, so that
-    I can still edit project settings and delete a project.
+63. As a desktop user, I want Project settings to remain available under the new shell,
+    so that I can still edit project settings and delete a project.
 64. As a desktop user, I want the first-run welcome page to keep working when there are no
     projects, so that a fresh install can create its first project.
 65. As a desktop user with existing data, I want expectations without a stored description
@@ -383,8 +384,8 @@ the remaining pages continue to work and can be migrated in later steps.
   most likely port failures: broken imports, missing CSS modules, mismatched server
   wrapper signatures and unresolved shared-core exports.
 - Manual verification covers:
-  - shell: brand, project switch, new project dialog, tabs, gear → Config, status pill,
-    start/stop, no account menu, native menu and About;
+  - shell: brand, project switch, new project dialog, tabs, gear → Project settings,
+    status pill, start/stop, no account menu, native menu and About;
   - Expectation page read view: match-order grouping, ungrouped section, collapse,
     selection, search, empty states, inactive de-emphasis, description, matcher chips,
     first-action summary and timing/state;
