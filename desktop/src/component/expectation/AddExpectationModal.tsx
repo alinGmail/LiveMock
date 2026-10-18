@@ -13,6 +13,8 @@ export interface AddExpectationValues {
 
 interface AddExpectationModalProps {
   groups: Array<ExpectationGroupM>;
+  /** When set, the expectation is created in this group and the group is fixed. */
+  lockedGroupId?: string | null;
   creating: boolean;
   onCreate: (values: AddExpectationValues) => void;
   onClose: () => void;
@@ -20,13 +22,14 @@ interface AddExpectationModalProps {
 
 const AddExpectationModal = ({
   groups,
+  lockedGroupId,
   creating,
   onCreate,
   onClose,
 }: AddExpectationModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [groupId, setGroupId] = useState("");
+  const [groupId, setGroupId] = useState(lockedGroupId ?? "");
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -95,6 +98,7 @@ const AddExpectationModal = ({
           <Select
             value={groupId}
             placeholder="ungrouped"
+            disabled={Boolean(lockedGroupId)}
             onChange={(value) => setGroupId(value ?? "")}
             options={[
               { value: "", label: "ungrouped" },

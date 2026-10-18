@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { App } from "antd";
+import { App, Dropdown } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
@@ -211,6 +211,8 @@ const ExpectationPage = () => {
     () => new Set(),
   );
   const [addOpen, setAddOpen] = useState(false);
+  const [addGroupId, setAddGroupId] = useState<string | null>(null);
+  const [groupMenuId, setGroupMenuId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -266,6 +268,8 @@ const ExpectationPage = () => {
     setQuery("");
     setSelectedId(null);
     setCollapsedGroups(new Set());
+    setAddGroupId(null);
+    setGroupMenuId(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -724,15 +728,51 @@ const ExpectationPage = () => {
             onChange={() => handleToggleGroupActive(group)}
             label={`Toggle group ${group.name || "unnamed group"}`}
           />
-          <button
-            type="button"
-            className={styles.groupEdit}
-            title="Edit group"
-            aria-label={`Edit group ${group.name || "unnamed group"}`}
-            onClick={() => setGroupModal({ mode: "edit", group })}
+          <Dropdown
+            trigger={["click"]}
+            placement="bottomRight"
+            open={groupMenuId === group.id}
+            onOpenChange={(open) => setGroupMenuId(open ? group.id : null)}
+            dropdownRender={() => (
+              <div className={styles.groupMenu}>
+                <button
+                  type="button"
+                  className={styles.groupMenuItem}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setGroupModal({ mode: "edit", group });
+                  }}
+                >
+                  Edit group
+                </button>
+                <button
+                  type="button"
+                  className={styles.groupMenuItem}
+                  onClick={() => {
+                    setGroupMenuId(null);
+                    setCollapsedGroups((prev) => {
+                      const next = new Set(prev);
+                      next.delete(group.id);
+                      return next;
+                    });
+                    setAddGroupId(group.id);
+                    setAddOpen(true);
+                  }}
+                >
+                  New expectation
+                </button>
+              </div>
+            )}
           >
-            <MoreIcon />
-          </button>
+            <button
+              type="button"
+              className={styles.groupEdit}
+              title="Group actions"
+              aria-label={`Group actions for ${group.name || "unnamed group"}`}
+            >
+              <MoreIcon />
+            </button>
+          </Dropdown>
         </div>,
       );
       masterNodes.push(
@@ -779,7 +819,10 @@ const ExpectationPage = () => {
               ref={addButtonRef}
               type="button"
               className={styles.addButton}
-              onClick={() => setAddOpen(true)}
+              onClick={() => {
+                setAddGroupId(null);
+                setAddOpen(true);
+              }}
             >
               <PlusIcon />
               Add Expectation
@@ -837,9 +880,13 @@ const ExpectationPage = () => {
       {addOpen ? (
         <AddExpectationModal
           groups={groupList}
+          lockedGroupId={addGroupId}
           creating={creating}
           onCreate={handleCreate}
-          onClose={() => setAddOpen(false)}
+          onClose={() => {
+            setAddOpen(false);
+            setAddGroupId(null);
+          }}
         />
       ) : null}
       {editingAction ? (
