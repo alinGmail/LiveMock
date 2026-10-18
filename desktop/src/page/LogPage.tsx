@@ -412,31 +412,45 @@ const LogPage: React.FC = () => {
     setFilterEditor({ mode: "edit", filter: cloneFilter(filter), anchor });
   };
 
+  const isCurrentProject = (projectId: string) => {
+    const project = store.getState().project;
+    return project.projectList[project.curProjectIndex]?.id === projectId;
+  };
+
   const saveFilter = async (next: SimpleFilterM) => {
     if (!logViewId || !filterEditor || filterSaving) {
       return;
     }
+    const projectId = currentProject.id;
     setFilterSaving(true);
     try {
       if (filterEditor.mode === "create") {
         await addLogFilterReq({
-          projectId: currentProject.id,
+          projectId,
           logViewId,
           filter: next,
         });
+        if (!isCurrentProject(projectId)) {
+          return;
+        }
         dispatch(addLogFilter(next));
       } else {
         await updateLogFilterReq(next.id, {
-          projectId: currentProject.id,
+          projectId,
           logViewId,
           filter: next,
         });
+        if (!isCurrentProject(projectId)) {
+          return;
+        }
         dispatch(modifyLogFilter(next));
       }
       setFilterEditor(null);
       logViewLogsQuery.refetch();
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      if (isCurrentProject(projectId)) {
+        toast.error(getErrorMessage(error));
+      }
     } finally {
       setFilterSaving(false);
     }
@@ -446,17 +460,23 @@ const LogPage: React.FC = () => {
     if (!logViewId || filterSaving) {
       return;
     }
+    const projectId = currentProject.id;
     setFilterSaving(true);
     try {
       await deleteLogFilterReq(filter.id, {
-        projectId: currentProject.id,
+        projectId,
         logViewId,
       });
+      if (!isCurrentProject(projectId)) {
+        return;
+      }
       dispatch(removeLogFilter(filter.id));
       setFilterEditor(null);
       logViewLogsQuery.refetch();
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      if (isCurrentProject(projectId)) {
+        toast.error(getErrorMessage(error));
+      }
     } finally {
       setFilterSaving(false);
     }
