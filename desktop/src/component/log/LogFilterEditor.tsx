@@ -178,6 +178,13 @@ const LogFilterEditor = ({
   }, [anchor]);
 
   useEffect(() => {
+    if (position.ready) {
+      propertyRef.current?.focus();
+      propertyRef.current?.select();
+    }
+  }, [position.ready]);
+
+  useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     propertyRef.current?.focus();
     propertyRef.current?.select();
