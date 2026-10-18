@@ -1,10 +1,4 @@
-import {
-  KeyboardEvent,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   LogFilterCondition,
@@ -51,31 +45,25 @@ const XIcon = () => (
 
 const TagInput = ({
   values,
+  text,
+  onTextChange,
   onChange,
   placeholder,
 }: {
   values: Array<string>;
+  text: string;
+  onTextChange: (text: string) => void;
   onChange: (values: Array<string>) => void;
   placeholder: string;
 }) => {
-  const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const addText = () => {
-    const parts = text
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-    if (parts.length) {
-      const next = [...values];
-      parts.forEach((part) => {
-        if (!next.includes(part)) {
-          next.push(part);
-        }
-      });
-      onChange(next);
+    const pending = text.trim();
+    if (pending && !values.includes(pending)) {
+      onChange([...values, pending]);
     }
-    setText("");
+    onTextChange("");
   };
 
   return (
@@ -101,9 +89,9 @@ const TagInput = ({
         className={styles.tagField}
         value={text}
         placeholder={values.length ? "" : placeholder}
-        onChange={(event) => setText(event.target.value)}
+        onChange={(event) => onTextChange(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === ",") {
+          if (event.key === "Enter") {
             event.preventDefault();
             addText();
           } else if (event.key === "Backspace" && !text && values.length) {
@@ -154,6 +142,7 @@ const LogFilterEditor = ({
   const [condition, setCondition] = useState(filter.condition);
   const [value, setValue] = useState(() => initialValue(filter));
   const [values, setValues] = useState<Array<string>>(() => initialValues(filter));
+  const [tagText, setTagText] = useState("");
   const [activate, setActivate] = useState(filter.activate !== false);
   const [position, setPosition] = useState({ top: 0, left: 0, ready: false });
   const panelRef = useRef<HTMLDivElement>(null);
@@ -221,7 +210,11 @@ const LogFilterEditor = ({
       document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", onViewportChange);
       window.removeEventListener("scroll", onViewportChange, true);
-      previous?.focus?.();
+      if (previous?.isConnected) {
+        previous.focus();
+      } else {
+        document.querySelector<HTMLElement>("[data-add-filter]")?.focus();
+      }
     };
   }, [anchor]);
 
@@ -237,36 +230,39 @@ const LogFilterEditor = ({
           .filter(Boolean),
       );
       setValue("");
+      setTagText("");
     } else if (condition === LogFilterCondition.IN) {
       setValue(values.join(", "));
+      setTagText("");
     }
     setCondition(next);
   };
 
   const trimmedProperty = property.trim();
   const validValue =
-    condition === LogFilterCondition.IN ? values.length > 0 : !!value.trim();
+    condition === LogFilterCondition.IN
+      ? values.length > 0 || !!tagText.trim()
+      : !!value.trim();
   const valid = !!trimmedProperty && validValue;
 
   const submit = () => {
     if (!valid || saving) {
       return;
     }
+    const nextValues = [...values];
+    if (condition === LogFilterCondition.IN) {
+      const pending = tagText.trim();
+      if (pending && !nextValues.includes(pending)) {
+        nextValues.push(pending);
+      }
+    }
     onSave({
       ...filter,
       property: trimmedProperty,
       condition,
-      value:
-        condition === LogFilterCondition.IN ? [...values] : value.trim(),
+      value: condition === LogFilterCondition.IN ? nextValues : value.trim(),
       activate,
     });
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      onClose();
-    }
   };
 
   const title = mode === "create" ? "Add filter" : "Edit filter";
@@ -286,7 +282,6 @@ const LogFilterEditor = ({
       }}
       role="dialog"
       aria-label={title}
-      onKeyDown={handleKeyDown}
     >
       <div className={styles.head}>
         <span>{title}</span>
@@ -338,6 +333,8 @@ const LogFilterEditor = ({
             </span>
             <TagInput
               values={values}
+              text={tagText}
+              onTextChange={setTagText}
               onChange={setValues}
               placeholder="type a value and press Enter"
             />
@@ -372,7 +369,7 @@ const LogFilterEditor = ({
             onClick={onDelete}
             disabled={saving}
           >
-            Delete
+            {saving ? "Deleting…" : "Delete"}
           </button>
         ) : null}
         <span className={styles.grow} />

@@ -307,12 +307,13 @@ export function removeDynamicViewFilter(
   // A filter can be persisted but absent from the in-memory pipeline (for
   // example an inactive filter, or a stale id after a reload). Loki throws when
   // removing an unknown uid, so only remove when it is actually present.
-  if (
-    !dynamicView.filterPipeline.some((pipeline) => String(pipeline.uid) === filterId)
-  ) {
+  const pipeline = dynamicView.filterPipeline.find(
+    (item) => String(item.uid) === filterId,
+  );
+  if (!pipeline || pipeline.uid === undefined) {
     return;
   }
-  dynamicView.removeFilter(filterId);
+  dynamicView.removeFilter(pipeline.uid);
 }
 
 /** Apply an active filter, or remove it when it is inactive. */
@@ -361,13 +362,18 @@ export async function getLogDynamicView(
         applyDynamicViewFilter(dynamicView!, filter);
       }
     });
-    dynamicView.filterPipeline.forEach((pipeLine) => {
-      const find = activeFilters.find((filter) => {
-        return filter.id === String(pipeLine.uid);
-      });
-      if (!find && pipeLine.uid) {
-        removeDynamicViewFilter(dynamicView!, String(pipeLine.uid));
-      }
+    const staleFilterIds = dynamicView.filterPipeline
+      .filter((pipeLine) => {
+        return (
+          !!pipeLine.uid &&
+          !activeFilters.some(
+            (filter) => filter.id === String(pipeLine.uid),
+          )
+        );
+      })
+      .map((pipeLine) => String(pipeLine.uid));
+    staleFilterIds.forEach((filterId) => {
+      removeDynamicViewFilter(dynamicView!, filterId);
     });
     dynamicView.on("insert", (log: LogM) => {
       logViewEventEmitter.emit("insert", { log, logViewId: logView.id });

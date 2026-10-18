@@ -260,7 +260,10 @@ const LogPage: React.FC = () => {
       logViewIdRef.current = res.at(0)?.id;
       dispatch(
         resetLogFilter(
-          res[0].filters.filter((item) => item.type === FilterType.SIMPLE_FILTER),
+          res[0].filters.filter(
+            (item): item is SimpleFilterM =>
+              item.type === FilterType.SIMPLE_FILTER,
+          ),
         ),
       );
       const presetFilters = res[0].filters.filter(
@@ -284,6 +287,10 @@ const LogPage: React.FC = () => {
       return res;
     });
   });
+
+  useEffect(() => {
+    dispatch(resetLogFilter([]));
+  }, [currentProject.id, dispatch]);
 
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
@@ -359,6 +366,9 @@ const LogPage: React.FC = () => {
   };
 
   const openAddFilter = (anchor: HTMLElement) => {
+    if (!logViewId) {
+      return;
+    }
     const filter = createSimpleFilter();
     filter.property = "req.path";
     filter.condition = LogFilterCondition.CONTAINS;
@@ -366,6 +376,9 @@ const LogPage: React.FC = () => {
   };
 
   const openEditFilter = (filter: SimpleFilterM, anchor: HTMLElement) => {
+    if (!logViewId) {
+      return;
+    }
     setFilterEditor({ mode: "edit", filter: cloneFilter(filter), anchor });
   };
 
@@ -587,7 +600,7 @@ const LogPage: React.FC = () => {
     presetFilter.methods.length > 0 ||
     presetFilter.statusCode.length > 0 ||
     !!presetFilter.expectationId ||
-    logState.logFilter.some((filter) => filter.activate);
+    logState.logFilter.some((filter) => filter.activate !== false);
 
   const expectationOptions = useMemo(
     () => [
@@ -600,10 +613,7 @@ const LogPage: React.FC = () => {
     [getExpectationListQuery.data],
   );
 
-  const simpleFilters = logState.logFilter.filter(
-    (filter): filter is SimpleFilterM =>
-      filter.type === FilterType.SIMPLE_FILTER,
-  );
+  const simpleFilters = logState.logFilter;
 
   const renderRow = (log: LogM) => {
     const method = (log.req?.method ?? "").toUpperCase();
@@ -753,7 +763,8 @@ const LogPage: React.FC = () => {
                   active ? "" : styles.fchipOff,
                 ].join(" ")}
                 role="button"
-                tabIndex={0}
+                tabIndex={logViewId ? 0 : -1}
+                aria-disabled={!logViewId}
                 title={
                   active
                     ? "Edit filter"
@@ -763,6 +774,9 @@ const LogPage: React.FC = () => {
                   openEditFilter(filter, event.currentTarget)
                 }
                 onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) {
+                    return;
+                  }
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
                     openEditFilter(filter, event.currentTarget);
@@ -783,6 +797,7 @@ const LogPage: React.FC = () => {
                   type="button"
                   className={styles.fcRemove}
                   aria-label={`Remove filter ${filter.property || "empty"}`}
+                  disabled={!logViewId}
                   onClick={(event) => {
                     event.stopPropagation();
                     void removeFilter(filter);
@@ -797,6 +812,7 @@ const LogPage: React.FC = () => {
         <button
           type="button"
           className={[styles.fchip, styles.fchipAdd].join(" ")}
+          data-add-filter="true"
           onClick={(event) => openAddFilter(event.currentTarget)}
           disabled={!logViewId || filterSaving}
           title={logViewId ? "Add filter" : "Loading filters…"}

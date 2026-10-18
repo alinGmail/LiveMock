@@ -147,8 +147,18 @@ describe("test log controller", () => {
     const inactiveAgainRes = await getLogViewLogs(server, logView, projectM);
     expect(inactiveAgainRes.body.length).toBe(4);
 
-    // Deleting an inactive filter (absent from the pipeline) must not throw.
+    // Deleting an inactive filter (absent from the pipeline) must not throw and
+    // must remove it from the persisted log view.
     await logFilterDeletion(server, inactiveFilter.id, logView.id, projectM.id);
+    const logViewAfterInactiveDelete = await supertest(server)
+      .get("/log/logView")
+      .query({ projectId: projectM.id })
+      .expect(200);
+    expect(
+      logViewAfterInactiveDelete.body
+        .at(0)
+        .filters.find((item: { id: string }) => item.id === inactiveFilter.id),
+    ).toBeUndefined();
     const afterInactiveDeleteRes = await getLogViewLogs(server, logView, projectM);
     expect(afterInactiveDeleteRes.body.length).toBe(4);
   });

@@ -81,6 +81,10 @@
   padding-right: 5px;
   cursor: pointer;
 }
+.fchipCustom[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .fchipCustom.fchipOff {
   border-style: dashed;
   border-color: var(--border);
@@ -138,6 +142,10 @@
 .fcRemove:hover {
   color: #fca5a5;
   background: rgba(239, 68, 68, 0.12);
+}
+.fcRemove:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .expectationSelect {
