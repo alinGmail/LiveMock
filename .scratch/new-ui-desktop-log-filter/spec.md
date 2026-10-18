@@ -35,6 +35,9 @@ the database, core types and the web front-end are already in place and stay unc
 
 - The web implementation is the source of truth; the editor component and styles are
   copied to desktop with no transport changes.
+- Desktop additionally focuses the property input once the popover has been measured.
+  The web component keeps its original timing; this desktop-only fix is deliberate and
+  documented in ticket 05.
 - `logSlice.logFilter` is narrowed to `SimpleFilterM[]`, matching web.
 - The desktop keeps its own IPC live-update and pagination code; web socket code is not
   copied.
@@ -45,7 +48,8 @@ the database, core types and the web front-end are already in place and stay unc
 
 ## Out of scope
 
-- Any web front-end, backend, core, preload or desktop main-process change.
+- Any web front-end, backend, core, preload or desktop main-process change. The web
+  editor is intentionally left unchanged even where the desktop adds a small local fix.
 - Group filters, nested filters, conjunctions or the FAMILY condition in the editor.
 - Client-side filtering of the paginated list.
 - Search or time-range controls; the page has neither.

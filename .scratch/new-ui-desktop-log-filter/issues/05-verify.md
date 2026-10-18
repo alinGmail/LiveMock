@@ -43,6 +43,7 @@ Electron smoke (copied dev profile, not the real one):
 - Removing via the chip `x` and via the editor Delete both restore the list.
 - Reloading the page keeps the filter and the filtered list.
 - Switching to another project clears the chips; switching back reloads the filter.
+- A save or delete that finishes after a project switch is ignored by the new project.
 - A filter with no matches shows "No matching requests".
 - Opening Add focuses and selects the property input; Escape restores focus to Add.
 - Pause/Resume still works and the Columns menu still opens.

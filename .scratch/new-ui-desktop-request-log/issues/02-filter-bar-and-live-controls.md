@@ -22,3 +22,8 @@ log-view presets and refetch the stream.
 - [ ] The Columns popover toggles expectation, duration and marker fields locally.
 - [ ] Filter changes survive a reload through the existing log-view persistence.
 - [ ] No OPTIONS chip, exact status-code input or custom-filter editor is introduced.
+
+## Follow-up
+
+`new-ui-desktop-log-filter` later restored the custom-filter chips and editor. The
+"no custom-filter editor" statement above applies only to this step.
