@@ -6,7 +6,18 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
 // https://vitejs.dev/config/
 
+const requestedPort = Number(process.env.LIVEMOCK_DESKTOP_PORT ?? 5174);
+const devPort =
+  Number.isFinite(requestedPort) && requestedPort >= 0 ? requestedPort : 5174;
+
 export default defineConfig({
+  // The dev orchestrator sets LIVEMOCK_DESKTOP_PORT=0 to get an OS-assigned
+  // free port, so concurrent worktrees never fight over a fixed port. Manual
+  // `vite` runs keep the dedicated 5174 default.
+  server: {
+    port: devPort,
+    strictPort: devPort !== 0,
+  },
   plugins: [
     svgr(),
     react(),

@@ -15,7 +15,7 @@ Mock-server tool shipped as two flavors: **web** (backEnd + frontEnd) and **desk
 
 - `yarn web-dev` — dev backend on `LIVEMOCK_PORT` (default 9002) + Vite front-end on :5173. The front-end builds every REST and Socket.IO path from the `ServerUrl` constant (`/api`); Vite proxies `/api` (websocket upgrade included) to the backend (`frontEnd/vite.config.ts`).
 - `yarn web-build` then `yarn web-start` — prod web; backend serves the built UI at `/dashboard` (`frontEnd/dist`).
-- `yarn desktop-dev` — Electron + Vite dev.
+- `yarn desktop-dev` — Electron + Vite dev. The desktop renderer gets a free OS-assigned port so concurrent worktrees do not collide with the web dev server on :5173; set `LIVEMOCK_DESKTOP_PORT=5175` to pin it. Dev data lives in `desktop/.dev-data` per worktree; `LIVEMOCK_DEV_USER_DATA=/path` overrides it and `LIVEMOCK_DEV_SHARED_DATA=1` reuses Electron's default `userData`.
 - Lint: `yarn workspace front-end lint`, `yarn workspace livemock-desktop lint` (only these two workspaces have `lint` scripts).
 - Tests: `yarn workspace livemock test` (Jest, tests under `backEnd/test/`). Single suite/file: `yarn workspace livemock test test/matcher` etc. This is the only workspace with tests.
 

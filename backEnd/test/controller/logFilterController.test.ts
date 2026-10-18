@@ -59,8 +59,12 @@ describe(`log filter controller`, () => {
         expect((dbFilter as SimpleFilterM).property).toBe("filterProperty1");
 
         const simpleFilterM2 = createSimpleFilter();
+        (logViewMCollection as any).dirty = false;
         let param2: CreateLogFilterReqBody = {filter: simpleFilterM2, logViewId: logView!.id, projectId: projectM.id}
         const addRes2 = await supertest(server).post("/logFilter/").send(param2).expect(200);
+        // Adding a filter must mark the log-view collection dirty so Loki's
+        // autosave actually persists it.
+        expect((logViewMCollection as any).dirty).toBe(true);
 
         //test update
         simpleFilterM.value = "filterValue2";

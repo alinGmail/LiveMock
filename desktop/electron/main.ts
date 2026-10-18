@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from "electron";
+import fs from "node:fs";
 import path from "node:path";
 import { setProjectHandler } from "./handler/projectHandler";
 import * as process from "process";
@@ -23,6 +24,26 @@ import { SystemEvent } from "livemock-core/struct/events/systemEvent";
 import { addWsEventListeners } from "./common/eventListener";
 import { pruneAllProjects, startLogPruneTask } from "./log/logPruneTask";
 
+const env = process.env["PROJECT_ENV"];
+
+// Keep dev data inside the worktree. Without this every worktree (and every
+// running dev app) shares ~/.config/Electron, so projects, logs and per-project
+// mock ports collide. Production keeps Electron's normal userData location.
+if (env === "dev") {
+  if (process.env.LIVEMOCK_DEV_SHARED_DATA === "1") {
+    console.log(`[desktop-dev] userData: shared (${app.getPath("userData")})`);
+  } else {
+    const devUserData = process.env.LIVEMOCK_DEV_USER_DATA
+      ? path.resolve(process.env.LIVEMOCK_DEV_USER_DATA)
+      : path.resolve(__dirname, "../.dev-data");
+    const devSessionData = path.join(devUserData, "session");
+    fs.mkdirSync(devSessionData, { recursive: true });
+    app.setPath("userData", devUserData);
+    app.setPath("sessionData", devSessionData);
+    console.log(`[desktop-dev] userData: ${devUserData}`);
+  }
+}
+
 log.initialize();
 log.errorHandler.startCatching();
 
@@ -43,8 +64,6 @@ process.env.PUBLIC = app.isPackaged
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-
-const env = process.env["PROJECT_ENV"];
 
 sysEventEmitter.on(SystemEvent.START, async () => {
   const systemCollection = await getSystemCollection(app.getPath("userData"));
@@ -89,6 +108,10 @@ async function createWindow() {
 
   win = new BrowserWindow({
     icon: path.join(process.env.PUBLIC, "logo.png"),
+    width: 1280,
+    height: 800,
+    minWidth: 960,
+    minHeight: 640,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
@@ -102,41 +125,17 @@ async function createWindow() {
   });
 
   if (env === "dev") {
-    win.loadURL("http://localhost:5173");
+    const devServerUrl = VITE_DEV_SERVER_URL ?? "http://localhost:5174";
+    win.loadURL(devServerUrl);
     win.webContents.on("did-fail-load", () => {
       setTimeout(() => {
-        win?.loadURL("http://localhost:5173");
+        win?.loadURL(devServerUrl);
       }, 3000);
     });
     win.webContents.openDevTools();
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, "index.html"));
-  }
-}
-
-function openNewWindow(hash: string, width: number, height: number) {
-  if (!win) {
-    return;
-  }
-  const newWin = new BrowserWindow({
-    modal: false,
-    show: true,
-    width: width,
-    height: height,
-    icon: path.join(process.env.PUBLIC, "logo.png"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      nodeIntegration: true,
-    },
-  });
-  if (env === "dev") {
-    newWin.loadURL(`http://localhost:5173/#${hash}`);
-    newWin.webContents.openDevTools();
-  } else {
-    newWin.loadFile(path.join(process.env.DIST, "index.html"), {
-      hash: hash,
-    });
   }
 }
 
@@ -153,8 +152,9 @@ function createAboutWindow() {
     autoHideMenuBar: true,
   });
   if (env === "dev") {
+    const devServerUrl = VITE_DEV_SERVER_URL ?? "http://localhost:5174";
     aboutWin.loadURL(
-      `http://localhost:5173/about.html?version=${process.env.npm_package_version}`
+      `${devServerUrl}/about.html?version=${process.env.npm_package_version}`
     );
   } else {
     aboutWin.loadFile(path.join(process.env.DIST, `about.html`));
@@ -174,13 +174,6 @@ function createAboutWindow() {
 ipcMain.handle(SystemEvents.OpenAboutWindow, () => {
   createAboutWindow();
 });
-
-ipcMain.handle(
-  SystemEvents.OpenNewWindow,
-  (event,hash: string, width: number, height: number) => {
-    openNewWindow(hash, width, height);
-  }
-);
 
 app.on("window-all-closed", () => {
   win = null;

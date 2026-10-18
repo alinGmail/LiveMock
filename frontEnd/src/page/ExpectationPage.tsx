@@ -394,14 +394,12 @@ const ExpectationPage = () => {
     setQuery("");
     setAddOpen(false);
     setCreating(false);
-    getExpectationListQuery
-      .refetch()
-      .then(() => {
-        setSelectedId(created.id);
-      })
-      .catch(() => {
-        toast.error("Expectation created, but the list failed to refresh.");
-      });
+    const result = await getExpectationListQuery.refetch();
+    if (result.isError) {
+      toast.error("Expectation created, but the list failed to refresh.");
+      return;
+    }
+    setSelectedId(created.id);
   };
 
   const handleClone = async (values: AddExpectationValues) => {
@@ -436,14 +434,12 @@ const ExpectationPage = () => {
     setCloneTarget(null);
     setCloning(false);
     toast.success("Expectation cloned");
-    getExpectationListQuery
-      .refetch()
-      .then(() => {
-        setSelectedId(created.id);
-      })
-      .catch(() => {
-        toast.error("Expectation cloned, but the list failed to refresh.");
-      });
+    const result = await getExpectationListQuery.refetch();
+    if (result.isError) {
+      toast.error("Expectation cloned, but the list failed to refresh.");
+      return;
+    }
+    setSelectedId(created.id);
   };
 
   const handleDeleteExpectation = async () => {
@@ -465,16 +461,21 @@ const ExpectationPage = () => {
       setDeleting(false);
       return;
     }
-    // Remove the row and move the selection before refetching, so the
-    // selection effect sees a valid id instead of falling back to the first row.
-    dispatch(deleteExpectation(target.id));
+    // Move the selection before removing the row, so the selection effect sees
+    // a valid id instead of falling back to the first row during the Redux
+    // update.
     setSelectedId(nextSelected ? nextSelected.id : null);
+    dispatch(deleteExpectation(target.id));
     setDeleteTarget(null);
     setDeleting(false);
     toast.success("Expectation deleted");
-    getExpectationListQuery.refetch().catch(() => {
+    const result = await getExpectationListQuery.refetch();
+    // Re-apply the neighbor selection once the refreshed list is in place; the
+    // selection effect can otherwise race the Redux update and pick the first row.
+    setSelectedId(nextSelected ? nextSelected.id : null);
+    if (result.isError) {
       toast.error("Expectation deleted, but the list failed to refresh.");
-    });
+    }
   };
 
   const handleDeleteGroup = async () => {
@@ -508,21 +509,25 @@ const ExpectationPage = () => {
       setDeletingGroup(false);
       return;
     }
-    // Remove the group's expectations and move the selection before refetching,
-    // so the selection effect never falls back to an unrelated row.
-    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
+    // Move the selection before removing the members, so the selection effect
+    // never falls back to an unrelated row during the Redux update.
     if (selectedWasMember) {
       setSelectedId(nextSelected ? nextSelected.id : null);
     }
+    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
     setDeleteGroupTarget(null);
     setDeletingGroup(false);
     toast.success("Group deleted");
-    getGroupListQuery
-      .refetch()
-      .then(() => getExpectationListQuery.refetch())
-      .catch(() => {
-        toast.error("Group deleted, but the list failed to refresh.");
-      });
+    const groupResult = await getGroupListQuery.refetch();
+    const expectationResult = await getExpectationListQuery.refetch();
+    // Re-apply the neighbor selection once the refreshed lists are in place;
+    // the selection effect can otherwise race the Redux update.
+    if (selectedWasMember) {
+      setSelectedId(nextSelected ? nextSelected.id : null);
+    }
+    if (groupResult.isError || expectationResult.isError) {
+      toast.error("Group deleted, but the list failed to refresh.");
+    }
   };
 
   const handleSubmitGroup = async (values: GroupEditorValues) => {
@@ -540,9 +545,10 @@ const ExpectationPage = () => {
         toast.success("Group created");
       }
       setGroupModal(null);
-      getGroupListQuery.refetch().catch(() => {
+      const result = await getGroupListQuery.refetch();
+      if (result.isError) {
         toast.error("Group saved, but the list failed to refresh.");
-      });
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -555,7 +561,10 @@ const ExpectationPage = () => {
       await updateGroupReq(currentProject.id, group.id, {
         activate: !group.activate,
       });
-      await getGroupListQuery.refetch();
+      const result = await getGroupListQuery.refetch();
+      if (result.isError) {
+        toast.error("Group updated, but the list failed to refresh.");
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     }

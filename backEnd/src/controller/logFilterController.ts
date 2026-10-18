@@ -23,9 +23,9 @@ import {
 } from "livemock-core/struct/response/LogFilterResponse";
 import bodyParser from "body-parser";
 import {
-  applyDynamicViewFilter,
   getLogDynamicView,
   removeDynamicViewFilter,
+  syncDynamicViewFilter,
 } from "../log/logUtils";
 import { FilterType, PresetFilterM } from "livemock-core/struct/log";
 import { isEmptyArray } from "../util/arrayUtils";
@@ -53,8 +53,9 @@ export async function getLogFilterRouter(
       throw new ServerError(400, "logView not exist!");
     }
     logView.filters.push(filter);
+    collection.update(logView);
     const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-    applyDynamicViewFilter(dynamicView, filter);
+    syncDynamicViewFilter(dynamicView, filter);
     res.json({ message: "success" });
   }
 
@@ -88,7 +89,7 @@ export async function getLogFilterRouter(
     logView.filters[findIndex] = filter;
     collection.update(logView);
     const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-    applyDynamicViewFilter(dynamicView, filter);
+    syncDynamicViewFilter(dynamicView, filter);
     res.json({ message: "success" });
   }
 
@@ -140,13 +141,14 @@ export async function getLogFilterRouter(
       if (findIndex === -1) {
         // append to de logView
         logView.filters.push(filter);
+        collection.update(logView);
       } else {
         presetFilter = logView.filters[findIndex] as PresetFilterM;
         presetFilter.value = filter.value;
         collection.update(logView);
       }
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-      applyDynamicViewFilter(dynamicView, presetFilter);
+      syncDynamicViewFilter(dynamicView, presetFilter);
     }
 
     res.json({ message: "success" });
