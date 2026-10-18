@@ -25,3 +25,9 @@ outside it.
 - [ ] The native Electron application menu, About window, detached request-log detail
       window and first-run welcome page continue to work.
 - [ ] No account, sign-in or sign-out controls are shown in the app bar.
+
+## Follow-up
+
+`new-ui-desktop-settings` later replaced the project editor with the shared project form,
+changed the gear to open the Project settings modal, and removed the Config page and
+`/config` route.

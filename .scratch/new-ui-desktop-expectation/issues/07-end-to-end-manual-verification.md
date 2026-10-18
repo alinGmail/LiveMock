@@ -19,8 +19,9 @@ behaviour. Record the checks and any accepted visual mismatch on the old pages.
       timing/state, active toggle, group create/edit/toggle, matcher add/edit/remove,
       action edit/delete/add.
 - [ ] Verify compatibility: existing records without a description, Request Log live
-      behaviour, “Mock this request”, Config edit/delete, first-run welcome and the
-      detached request-log detail window.
+      behaviour, “Mock this request”, project settings edit/delete, first-run welcome and
+      the detached request-log detail window. (The Config page was later replaced by the
+      Project settings modal in `new-ui-desktop-settings`.)
 - [ ] Verify the default/minimum window size and the stacked layout below the responsive
       breakpoint, with no horizontal overflow.
 - [ ] Confirm there are no console errors during the smoke test and that the removed

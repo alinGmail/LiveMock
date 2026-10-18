@@ -5,6 +5,10 @@
 > Source of truth: the already-shipped web redesign (`frontEnd/src`) and the static design
 > reference under `new-ui/` (`DESIGN.md`, `design-notes.md`, `index.html`).
 > Branch / worktree: `desktop-new-ui` in `feature-new-ui-desktop`.
+>
+> Follow-up: the `new-ui-desktop-settings` spec supersedes the Welcome and project
+> settings statements below. The Welcome page and project settings are now redesigned;
+> the gear opens a modal, and the Config page and `/config` route are gone.
 
 ## Problem Statement
 
@@ -39,9 +43,10 @@ page.
 - **Shell**: replace the project strip and left navigation with the redesign’s single top
   app bar and a full-height content region. Adapt the app bar to desktop: no account or
   auth menu, project switcher with status and port, Expectation / Request Log tabs,
-  project settings gear, mock-listener status and start/stop. “New project” keeps the
-  existing project editor dialog. The gear opens the existing Config page. Config is no
-  longer a visible tab.
+  project settings gear, mock-listener status and start/stop. At the time, “New project”
+  kept the existing project editor dialog and the gear opened the existing Config page.
+  Both were later replaced by the shared project form and the Project settings modal in
+  `new-ui-desktop-settings`.
 - **Expectation page**: replace the editable table with the redesign’s master–detail
   page — a searchable, grouped list ordered like the match engine on the left, and a
   detail pane with description, matchers, action and timing & state on the right. Add,
@@ -55,10 +60,11 @@ page.
   delete group and multi-action editing; a follow-up port restores clone, delete
   expectation, delete group, the group actions menu and the shared destructive
   confirmation, matching web. Import and multi-action editing remain out of scope.
-- **Everything else stays**: Request Log and Config keep their current content under the
-  new shell, and the first-run welcome page keeps its current content outside the shell.
-  The Request Log’s “Mock this request” dialog is not redesigned. The native Electron
-  menu, About window and detached request-log detail window are untouched.
+- **Everything else stays**: Request Log keeps its current content under the new shell.
+  The Config page and first-run welcome page kept their old content in this step and were
+  later redesigned in `new-ui-desktop-settings`. The Request Log’s “Mock this request”
+  dialog is not redesigned. The native Electron menu, About window and detached
+  request-log detail window are untouched.
 
 The result is a desktop app whose shell and Expectation page match the web product, while
 the remaining pages continue to work and can be migrated in later steps.
@@ -254,14 +260,15 @@ the remaining pages continue to work and can be migrated in later steps.
   dropdown, Expectation / Request Log tabs, project settings gear, spacer, status pill,
   start/stop control. The web user/account menu is removed.
 - The project dropdown reuses the existing project list, selection, status/port display
-  and start/stop behaviour. It also offers “New project”, which opens the existing
-  project editor dialog in a modal; the desktop has no redesign of project creation in
-  this step.
-- The project settings gear navigates to the existing Config page. Config keeps its
-  current content and behaviour, remains a route, and is removed from the visible tab
-  set. The app bar shows no tab as active while Config is open.
+  and start/stop behaviour. It also offers “New project”, which opened the existing
+  project editor dialog in a modal at the time; `new-ui-desktop-settings` later replaced
+  it with the shared project form.
+- The project settings gear navigated to the existing Config page at the time.
+  `new-ui-desktop-settings` later replaced that page with the Project settings modal and
+  removed the `/config` route.
 - The first-run welcome page remains outside the new shell and is shown whenever the
-  project list is empty, preserving the current onboarding behaviour.
+  project list is empty. `new-ui-desktop-settings` later restyled it and replaced its
+  form.
 - The Electron main window gets a default size of 1280×800 and minimum size of
   960×640. The renderer keeps the web design’s responsive stacking below 900px.
 - The native application menu, About window and detached request-log detail window are
@@ -385,8 +392,9 @@ the remaining pages continue to work and can be migrated in later steps.
     active toggle, group create/edit/toggle, matcher add/edit/remove, action
     edit/delete/add;
   - compatibility: existing records without a description, Request Log still working,
-    “Mock this request” still creating expectations, Config still editing/deleting,
-    first-run welcome still creating the first project, detached detail window;
+    “Mock this request” still creating expectations, project settings editing/deleting
+    and first-run welcome creating the first project (later restyled in
+    `new-ui-desktop-settings`), detached detail window;
   - window behaviour: default and minimum size, stacking below the responsive
     breakpoint, no horizontal overflow.
 - Prior art: the web redesign steps were verified the same way — lint/type/build plus
@@ -396,7 +404,8 @@ the remaining pages continue to work and can be migrated in later steps.
 
 ## Out of Scope
 
-- Redesigning the Request Log page, Config page, first-run welcome page or settings page.
+- Redesigning the Request Log page or account settings page. The Config page and
+  first-run welcome page were later redesigned in `new-ui-desktop-settings`.
 - Any authentication or account surface; the desktop app has no account system.
 - The Request Log “Mock this request” dialog redesign.
 - The detached request-log detail window redesign.
