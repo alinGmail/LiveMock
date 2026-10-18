@@ -461,14 +461,18 @@ const ExpectationPage = () => {
       setDeleting(false);
       return;
     }
-    // Remove the row and move the selection before refetching, so the
-    // selection effect sees a valid id instead of falling back to the first row.
-    dispatch(deleteExpectation(target.id));
+    // Move the selection before removing the row, so the selection effect sees
+    // a valid id instead of falling back to the first row during the Redux
+    // update.
     setSelectedId(nextSelected ? nextSelected.id : null);
+    dispatch(deleteExpectation(target.id));
     setDeleteTarget(null);
     setDeleting(false);
     toast.success("Expectation deleted");
     const result = await getExpectationListQuery.refetch();
+    // Re-apply the neighbor selection once the refreshed list is in place; the
+    // selection effect can otherwise race the Redux update and pick the first row.
+    setSelectedId(nextSelected ? nextSelected.id : null);
     if (result.isError) {
       toast.error("Expectation deleted, but the list failed to refresh.");
     }
@@ -505,17 +509,22 @@ const ExpectationPage = () => {
       setDeletingGroup(false);
       return;
     }
-    // Remove the group's expectations and move the selection before refetching,
-    // so the selection effect never falls back to an unrelated row.
-    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
+    // Move the selection before removing the members, so the selection effect
+    // never falls back to an unrelated row during the Redux update.
     if (selectedWasMember) {
       setSelectedId(nextSelected ? nextSelected.id : null);
     }
+    memberIds.forEach((id) => dispatch(deleteExpectation(id)));
     setDeleteGroupTarget(null);
     setDeletingGroup(false);
     toast.success("Group deleted");
     const groupResult = await getGroupListQuery.refetch();
     const expectationResult = await getExpectationListQuery.refetch();
+    // Re-apply the neighbor selection once the refreshed lists are in place;
+    // the selection effect can otherwise race the Redux update.
+    if (selectedWasMember) {
+      setSelectedId(nextSelected ? nextSelected.id : null);
+    }
     if (groupResult.isError || expectationResult.isError) {
       toast.error("Group deleted, but the list failed to refresh.");
     }
