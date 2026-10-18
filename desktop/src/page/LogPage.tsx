@@ -11,6 +11,7 @@ import {
   LogM,
   PresetFilterM,
   PresetFilterName,
+  SimpleFilterM,
   createExpectationPresetFilterM,
   createMethodsPresetFilterM,
   createStatusCodePresetFilterM,
@@ -240,7 +241,8 @@ const LogPage: React.FC = () => {
       dispatch(
         resetLogFilter(
           res[0].filters.filter(
-            (item) => item.type === FilterType.SIMPLE_FILTER
+            (item): item is SimpleFilterM =>
+              item.type === FilterType.SIMPLE_FILTER
           )
         )
       );
