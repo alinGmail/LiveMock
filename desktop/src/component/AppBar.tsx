@@ -144,6 +144,16 @@ const AppBar = () => {
       await deleteProjectReq(currentProject.id);
       toast.success("Project deleted");
       setProjectSettingsOpen(false);
+      // Remove the project locally first, so a failed refresh cannot leave the
+      // deleted project selected.
+      dispatch(
+        setProjectList(
+          projectState.projectList.filter(
+            (project) => project.id !== currentProject.id
+          )
+        )
+      );
+      dispatch(setCurProjectIndex(0));
       getProjectListReq()
         .then((list) => {
           dispatch(setProjectList(list));
