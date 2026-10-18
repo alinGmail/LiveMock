@@ -8,19 +8,13 @@ import {
   StopOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
-import { Updater, useImmer } from "use-immer";
 import { useDispatch } from "react-redux";
 import logoUrl from "../assets/logo.png";
 import { useAppSelector } from "../store";
 import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
-import {
-  createProject,
-  ProjectM,
-  ProjectStatus,
-} from "livemock-core/struct/project";
-import ProjectEditor from "./project/ProjectEditor";
+import { createProject, ProjectStatus } from "livemock-core/struct/project";
+import ProjectForm, { ProjectFormValues } from "./project/ProjectForm";
 import Modal from "./Modal";
-import { EditorType } from "../struct/common";
 import {
   createProjectReq,
   getProjectListReq,
@@ -90,14 +84,7 @@ const AppBar = () => {
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectModalShow, setProjectModalShow] = useState(false);
-  const [projectDraft, updateProjectDraft] = useImmer<ProjectM>(
-    createProject()
-  );
-
-  const closeProjectModal = () => {
-    setProjectModalShow(false);
-    updateProjectDraft(createProject());
-  };
+  const [projectCreating, setProjectCreating] = useState(false);
 
   const refreshProjects = () => {
     getProjectListReq().then((list) => {
@@ -105,14 +92,22 @@ const AppBar = () => {
     });
   };
 
-  const onCreateProject = async (project: ProjectM) => {
+  const onCreateProject = async (values: ProjectFormValues) => {
+    const project = createProject();
+    project.name = values.name;
+    project.port = values.port;
+    project.maxRequestLogNumber = values.maxRequestLogNumber;
+    project.description = values.description;
+    setProjectCreating(true);
     try {
       await createProjectReq({ project });
       toast.success("Project created");
-      closeProjectModal();
+      setProjectModalShow(false);
       refreshProjects();
     } catch (error) {
       toast.error(getErrorMessage(error));
+    } finally {
+      setProjectCreating(false);
     }
   };
 
@@ -183,12 +178,14 @@ const AppBar = () => {
   return (
     <header className={styles.appbar}>
       {projectModalShow ? (
-        <Modal title="New project" size="md" onClose={closeProjectModal}>
-          <ProjectEditor
-            editorType={EditorType.ADD}
-            projectM={projectDraft}
+        <Modal
+          title="New project"
+          size="md"
+          onClose={() => setProjectModalShow(false)}
+        >
+          <ProjectForm
+            submitting={projectCreating}
             onSubmit={onCreateProject}
-            updaterProjectM={updateProjectDraft as Updater<ProjectM>}
           />
         </Modal>
       ) : null}
