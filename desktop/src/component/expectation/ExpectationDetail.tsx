@@ -346,6 +346,7 @@ interface ExpectationDetailProps {
   onEditTiming?: () => void;
   onToggleActive?: () => void;
   onClone?: () => void;
+  onDelete?: () => void;
   activeSaving?: boolean;
 }
 
@@ -361,6 +362,7 @@ const ExpectationDetail = ({
   onEditTiming,
   onToggleActive,
   onClone,
+  onDelete,
   activeSaving,
 }: ExpectationDetailProps) => {
   if (!expectation) {
@@ -433,6 +435,19 @@ const ExpectationDetail = ({
                 onClick={onClone}
               >
                 <CopyIcon />
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                className={[styles.actionBtn, styles.actionBtnDanger].join(
+                  " ",
+                )}
+                aria-label="Delete expectation"
+                title="Delete expectation"
+                onClick={onDelete}
+              >
+                <TrashIcon />
               </button>
             ) : null}
           </div>

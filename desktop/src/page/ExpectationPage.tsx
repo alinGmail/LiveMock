@@ -6,6 +6,7 @@ import { App, Dropdown } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
 import {
   createExpectationReq,
+  deleteExpectationReq,
   listExpectationListReq,
   updateExpectationReq,
 } from "../server/expectationServer";
@@ -36,6 +37,7 @@ import {
 import { RequestMatcherM } from "livemock-core/struct/matcher";
 import {
   addAction,
+  deleteExpectation,
   modifyAction,
   removeAction,
   updateExpectationItem,
@@ -45,6 +47,7 @@ import ExpectationDetail from "../component/expectation/ExpectationDetail";
 import AddExpectationModal, {
   AddExpectationValues,
 } from "../component/expectation/AddExpectationModal";
+import DeleteExpectationModal from "../component/expectation/DeleteExpectationModal";
 import ActionEditorModal from "../component/expectation/ActionEditorModal";
 import DescriptionEditorModal from "../component/expectation/DescriptionEditorModal";
 import NameEditorModal from "../component/expectation/NameEditorModal";
@@ -216,6 +219,8 @@ const ExpectationPage = () => {
   const [groupMenuId, setGroupMenuId] = useState<string | null>(null);
   const [cloneTarget, setCloneTarget] = useState<ExpectationM | null>(null);
   const [cloning, setCloning] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ExpectationM | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [groupModal, setGroupModal] = useState<GroupModalState | null>(null);
   const [groupSaving, setGroupSaving] = useState(false);
@@ -274,6 +279,7 @@ const ExpectationPage = () => {
     setAddGroupId(null);
     setGroupMenuId(null);
     setCloneTarget(null);
+    setDeleteTarget(null);
   }, [currentProject.id]);
 
   const groupMap = useMemo(() => {
@@ -436,6 +442,38 @@ const ExpectationPage = () => {
       return;
     }
     setSelectedId(created.id);
+  };
+
+  const handleDeleteExpectation = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+    const target = deleteTarget;
+    const index = orderedAll.findIndex((item) => item.id === target.id);
+    const remaining = orderedAll.filter((item) => item.id !== target.id);
+    const nextSelected =
+      remaining[index >= 0 ? index : 0] ??
+      remaining[remaining.length - 1] ??
+      null;
+    setDeleting(true);
+    try {
+      await deleteExpectationReq(currentProject.id, target.id);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      setDeleting(false);
+      return;
+    }
+    // Remove the row and move the selection before refetching, so the
+    // selection effect sees a valid id instead of falling back to the first row.
+    dispatch(deleteExpectation(target.id));
+    setSelectedId(nextSelected ? nextSelected.id : null);
+    setDeleteTarget(null);
+    setDeleting(false);
+    toast.success("Expectation deleted");
+    const result = await getExpectationListQuery.refetch();
+    if (result.isError) {
+      toast.error("Expectation deleted, but the list failed to refresh.");
+    }
   };
 
   const handleSubmitGroup = async (values: GroupEditorValues) => {
@@ -919,6 +957,7 @@ const ExpectationPage = () => {
           onEditTiming={() => setTimingOpen(true)}
           onToggleActive={handleToggleActive}
           onClone={() => setCloneTarget(selectedExpectation)}
+          onDelete={() => setDeleteTarget(selectedExpectation)}
           activeSaving={activeSaving}
         />
       </div>
@@ -950,6 +989,18 @@ const ExpectationPage = () => {
           onClose={() => {
             if (!cloning) {
               setCloneTarget(null);
+            }
+          }}
+        />
+      ) : null}
+      {deleteTarget ? (
+        <DeleteExpectationModal
+          name={deleteTarget.name ?? ""}
+          deleting={deleting}
+          onConfirm={handleDeleteExpectation}
+          onClose={() => {
+            if (!deleting) {
+              setDeleteTarget(null);
             }
           }}
         />

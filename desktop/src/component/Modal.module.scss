@@ -58,6 +58,11 @@
   border-bottom: 1px solid var(--border-soft);
 }
 
+.titleIcon {
+  display: inline-flex;
+  flex: none;
+}
+
 .title {
   margin: 0;
   font-size: 16px;

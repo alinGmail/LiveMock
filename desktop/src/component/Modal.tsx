@@ -5,6 +5,8 @@ import styles from "./Modal.module.scss";
 
 interface ModalProps {
   title: string;
+  /** Rendered before the title, e.g. a danger icon badge. */
+  titleIcon?: ReactNode;
   onClose: () => void;
   size?: "sm" | "md" | "lg";
   headerExtra?: ReactNode;
@@ -33,6 +35,7 @@ const CloseIcon = () => (
  */
 const Modal = ({
   title,
+  titleIcon,
   onClose,
   size = "sm",
   headerExtra,
@@ -117,6 +120,9 @@ const Modal = ({
         aria-label={title}
       >
         <div className={styles.head}>
+          {titleIcon ? (
+            <span className={styles.titleIcon}>{titleIcon}</span>
+          ) : null}
           <h2 className={styles.title}>{title}</h2>
           {headerExtra}
           <span className={styles.grow} />
