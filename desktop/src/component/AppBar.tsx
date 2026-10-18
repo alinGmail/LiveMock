@@ -1,5 +1,5 @@
 import styles from "./AppBar.module.scss";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Dropdown } from "antd";
 import {
   LoadingOutlined,
@@ -14,12 +14,17 @@ import { useAppSelector } from "../store";
 import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
 import { createProject, ProjectStatus } from "livemock-core/struct/project";
 import ProjectForm, { ProjectFormValues } from "./project/ProjectForm";
+import ProjectSettingsModal, {
+  ProjectSettingsValues,
+} from "./ProjectSettingsModal";
 import Modal from "./Modal";
 import {
   createProjectReq,
+  deleteProjectReq,
   getProjectListReq,
   startProjectReq,
   stopProjectReq,
+  updateProjectReq,
 } from "../server/projectServer";
 import toast from "react-hot-toast";
 import { getErrorMessage, toastPromise } from "./common";
@@ -79,12 +84,14 @@ const ChevronIcon = () => (
 const AppBar = () => {
   const projectState = useAppSelector((state) => state.project);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const currentProject = projectState.projectList[projectState.curProjectIndex];
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectModalShow, setProjectModalShow] = useState(false);
   const [projectCreating, setProjectCreating] = useState(false);
+  const [projectSettingsOpen, setProjectSettingsOpen] = useState(false);
+  const [projectSettingsSaving, setProjectSettingsSaving] = useState(false);
+  const [projectDeleting, setProjectDeleting] = useState(false);
 
   const refreshProjects = () => {
     getProjectListReq().then((list) => {
@@ -108,6 +115,47 @@ const AppBar = () => {
       toast.error(getErrorMessage(error));
     } finally {
       setProjectCreating(false);
+    }
+  };
+
+  const onSaveProjectSettings = async (values: ProjectSettingsValues) => {
+    if (!currentProject) {
+      return;
+    }
+    setProjectSettingsSaving(true);
+    try {
+      await updateProjectReq(currentProject.id, { projectUpdate: values });
+      toast.success("Project settings saved");
+      refreshProjects();
+      setProjectSettingsOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setProjectSettingsSaving(false);
+    }
+  };
+
+  const onDeleteProject = async () => {
+    if (!currentProject) {
+      return;
+    }
+    setProjectDeleting(true);
+    try {
+      await deleteProjectReq(currentProject.id);
+      toast.success("Project deleted");
+      setProjectSettingsOpen(false);
+      getProjectListReq()
+        .then((list) => {
+          dispatch(setProjectList(list));
+          dispatch(setCurProjectIndex(0));
+        })
+        .catch(() => {
+          toast.error("Project deleted, but the list failed to refresh.");
+        });
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setProjectDeleting(false);
     }
   };
 
@@ -190,6 +238,17 @@ const AppBar = () => {
         </Modal>
       ) : null}
 
+      {projectSettingsOpen && currentProject ? (
+        <ProjectSettingsModal
+          project={currentProject}
+          saving={projectSettingsSaving}
+          deleting={projectDeleting}
+          onSubmit={onSaveProjectSettings}
+          onDelete={onDeleteProject}
+          onClose={() => setProjectSettingsOpen(false)}
+        />
+      ) : null}
+
       <div className={styles.brand}>
         <img className={styles.brandLogo} src={logoUrl} alt="LiveMock" />
         <span>LiveMock</span>
@@ -237,7 +296,7 @@ const AppBar = () => {
         className={styles.iconBtn}
         aria-label="Project settings"
         title="Project settings"
-        onClick={() => navigate("/config")}
+        onClick={() => setProjectSettingsOpen(true)}
         disabled={!currentProject}
       >
         <GearIcon />
