@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LogM, LogFilterM } from "livemock-core/struct/log";
+import { LogM, SimpleFilterM } from "livemock-core/struct/log";
 
 export interface PresetFilterState {
   expectationId: string | null;
@@ -8,7 +8,7 @@ export interface PresetFilterState {
 }
 
 export interface LogState {
-  logFilter: Array<LogFilterM>;
+  logFilter: Array<SimpleFilterM>;
   presetFilter: PresetFilterState;
   selectedLogId: number | null;
   selectedLogItem: LogM | null;
@@ -27,8 +27,24 @@ export const logSlice = createSlice({
     selectedLogItem: null,
   } as LogState,
   reducers: {
-    resetLogFilter(state, action: PayloadAction<Array<LogFilterM>>) {
+    resetLogFilter(state, action: PayloadAction<Array<SimpleFilterM>>) {
       state.logFilter = action.payload;
+    },
+    addLogFilter(state, action: PayloadAction<SimpleFilterM>) {
+      state.logFilter.push(action.payload);
+    },
+    modifyLogFilter(state, action: PayloadAction<SimpleFilterM>) {
+      const index = state.logFilter.findIndex(
+        (filter) => filter.id === action.payload.id,
+      );
+      if (index !== -1) {
+        state.logFilter[index] = action.payload;
+      }
+    },
+    removeLogFilter(state, action: PayloadAction<string>) {
+      state.logFilter = state.logFilter.filter(
+        (filter) => filter.id !== action.payload,
+      );
     },
     updatePresetFilter(
       state,
@@ -51,6 +67,9 @@ export const logSlice = createSlice({
 const { actions, reducer } = logSlice;
 const {
   resetLogFilter,
+  addLogFilter,
+  modifyLogFilter,
+  removeLogFilter,
   updatePresetFilter,
   setSelectedLogId,
   setSelectedLogItem,
@@ -58,6 +77,9 @@ const {
 
 export {
   resetLogFilter,
+  addLogFilter,
+  modifyLogFilter,
+  removeLogFilter,
   updatePresetFilter,
   setSelectedLogId,
   setSelectedLogItem,

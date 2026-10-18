@@ -304,7 +304,28 @@ export function removeDynamicViewFilter(
   dynamicView: DynamicView<LogM>,
   filterId: string
 ) {
-  dynamicView.removeFilter(filterId);
+  // A filter can be persisted but absent from the in-memory pipeline (for
+  // example an inactive filter, or a stale id after a reload). Loki throws when
+  // removing an unknown uid, so only remove when it is actually present.
+  const pipeline = dynamicView.filterPipeline.find(
+    (item) => String(item.uid) === filterId,
+  );
+  if (!pipeline || pipeline.uid === undefined) {
+    return;
+  }
+  dynamicView.removeFilter(pipeline.uid);
+}
+
+/** Apply an active filter, or remove it when it is inactive. */
+export function syncDynamicViewFilter(
+  dynamicView: DynamicView<LogM>,
+  filter: LogFilterM
+) {
+  if (filter.activate === false) {
+    removeDynamicViewFilter(dynamicView, filter.id);
+    return;
+  }
+  applyDynamicViewFilter(dynamicView, filter);
 }
 
 export async function getLogDynamicView(
@@ -331,21 +352,29 @@ export async function getLogDynamicView(
       return;
     }
     // sync the logView filter and dynamicView filterPipeline
-    logView.filters.forEach((filter) => {
+    const activeFilters = logView.filters.filter(
+      (filter) => filter.activate !== false,
+    );
+    activeFilters.forEach((filter) => {
       const find = dynamicView!.filterPipeline.find((pipeLine) => {
-        return pipeLine.uid === filter.id;
+        return String(pipeLine.uid) === filter.id;
       });
       if (!find) {
         applyDynamicViewFilter(dynamicView!, filter);
       }
     });
-    dynamicView.filterPipeline.forEach((pipeLine) => {
-      const find = logView.filters.find((filter) => {
-        return filter.id === pipeLine.uid;
-      });
-      if (!find && pipeLine.uid) {
-        dynamicView?.removeFilter(pipeLine.uid);
-      }
+    const staleFilterIds = dynamicView.filterPipeline
+      .filter((pipeLine) => {
+        return (
+          !!pipeLine.uid &&
+          !activeFilters.some(
+            (filter) => filter.id === String(pipeLine.uid),
+          )
+        );
+      })
+      .map((pipeLine) => String(pipeLine.uid));
+    staleFilterIds.forEach((filterId) => {
+      removeDynamicViewFilter(dynamicView!, filterId);
     });
 
     dynamicView.on("insert", (log: LogM) => {
