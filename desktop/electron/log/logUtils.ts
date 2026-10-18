@@ -304,7 +304,24 @@ export function removeDynamicViewFilter(
   dynamicView: DynamicView<LogM>,
   filterId: string
 ) {
+  if (
+    !dynamicView.filterPipeline.some((pipeline) => String(pipeline.uid) === filterId)
+  ) {
+    return;
+  }
   dynamicView.removeFilter(filterId);
+}
+
+/** Apply an active filter, or remove it when it is inactive. */
+export function syncDynamicViewFilter(
+  dynamicView: DynamicView<LogM>,
+  filter: LogFilterM
+) {
+  if (filter.activate === false) {
+    removeDynamicViewFilter(dynamicView, filter.id);
+    return;
+  }
+  applyDynamicViewFilter(dynamicView, filter);
 }
 
 export async function getLogDynamicView(
@@ -331,20 +348,23 @@ export async function getLogDynamicView(
       return;
     }
     // sync the logView filter and dynamicView filterPipeline
-    logView.filters.forEach((filter) => {
+    const activeFilters = logView.filters.filter(
+      (filter) => filter.activate !== false,
+    );
+    activeFilters.forEach((filter) => {
       const find = dynamicView!.filterPipeline.find((pipeLine) => {
-        return pipeLine.uid === filter.id;
+        return String(pipeLine.uid) === filter.id;
       });
       if (!find) {
         applyDynamicViewFilter(dynamicView!, filter);
       }
     });
     dynamicView.filterPipeline.forEach((pipeLine) => {
-      const find = logView.filters.find((filter) => {
-        return filter.id === pipeLine.uid;
+      const find = activeFilters.find((filter) => {
+        return filter.id === String(pipeLine.uid);
       });
       if (!find && pipeLine.uid) {
-        dynamicView?.removeFilter(pipeLine.uid);
+        removeDynamicViewFilter(dynamicView!, String(pipeLine.uid));
       }
     });
 

@@ -126,6 +126,31 @@ describe("test log controller", () => {
     const logViewLogsRes4 = await getLogViewLogs(server, logView, projectM);
     expect(logViewLogsRes4.body.length).toBe(4);
 
+    // An inactive filter is persisted but must not narrow the dynamic view.
+    const inactiveFilter = createSimpleFilter();
+    inactiveFilter.condition = LogFilterCondition.CONTAINS;
+    inactiveFilter.property = "req.headers.token";
+    inactiveFilter.value = "abc";
+    inactiveFilter.activate = false;
+    await logFilterCreation(server, inactiveFilter, logView.id, projectM.id);
+    const inactiveRes = await getLogViewLogs(server, logView, projectM);
+    expect(inactiveRes.body.length).toBe(4);
+
+    // Activating it applies the filter; deactivating removes it again.
+    inactiveFilter.activate = true;
+    await logFilterUpdateAction(server, inactiveFilter, logView.id, projectM.id);
+    const activeRes = await getLogViewLogs(server, logView, projectM);
+    expect(activeRes.body.length).toBe(2);
+
+    inactiveFilter.activate = false;
+    await logFilterUpdateAction(server, inactiveFilter, logView.id, projectM.id);
+    const inactiveAgainRes = await getLogViewLogs(server, logView, projectM);
+    expect(inactiveAgainRes.body.length).toBe(4);
+
+    // Deleting an inactive filter (absent from the pipeline) must not throw.
+    await logFilterDeletion(server, inactiveFilter.id, logView.id, projectM.id);
+    const afterInactiveDeleteRes = await getLogViewLogs(server, logView, projectM);
+    expect(afterInactiveDeleteRes.body.length).toBe(4);
   });
 });
 

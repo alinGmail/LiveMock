@@ -17,9 +17,9 @@ import {
 import { ServerError } from "./common";
 import { getLogViewCollection } from "../db/dbManager";
 import {
-  applyDynamicViewFilter,
   getLogDynamicView,
   removeDynamicViewFilter,
+  syncDynamicViewFilter,
 } from "../log/logUtils";
 import { FilterType, PresetFilterM } from "livemock-core/struct/log";
 import ipcMain = electron.ipcMain;
@@ -44,8 +44,9 @@ export async function setLogFilterHandler(path: string): Promise<void> {
         throw new ServerError(400, "logView not exist!");
       }
       logView.filters.push(filter);
+      collection.update(logView);
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-      applyDynamicViewFilter(dynamicView, filter);
+      syncDynamicViewFilter(dynamicView, filter);
       return { message: "success" };
     }
   );
@@ -78,7 +79,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
       logView.filters[findIndex] = filter;
       collection.update(logView);
       const dynamicView = await getLogDynamicView(projectId, logView.id, path);
-      applyDynamicViewFilter(dynamicView, filter);
+      syncDynamicViewFilter(dynamicView, filter);
       return { message: "success" };
     }
   );
@@ -154,6 +155,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
         let presetFilter: PresetFilterM = reqFilter;
         if (findIndex === -1) {
           logView.filters.push(filter);
+          collection.update(logView);
         } else {
           presetFilter = logView.filters[findIndex] as PresetFilterM;
           presetFilter.value = reqFilter.value;
@@ -164,7 +166,7 @@ export async function setLogFilterHandler(path: string): Promise<void> {
           logView.id,
           path
         );
-        applyDynamicViewFilter(dynamicView, presetFilter);
+        syncDynamicViewFilter(dynamicView, presetFilter);
       }
       return { message: "success" };
     }
