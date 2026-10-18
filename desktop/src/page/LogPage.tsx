@@ -275,6 +275,9 @@ const LogPage: React.FC = () => {
     );
     dispatch(setSelectedLogId(null));
     dispatch(setSelectedLogItem(null));
+    dispatch(resetLogFilter([]));
+    setFilterEditor(null);
+    setFilterSaving(false);
   }, [currentProject.id, dispatch, setLogs]);
 
   const getLogViewQuery = useQuery([currentProject.id], () => {
@@ -618,7 +621,7 @@ const LogPage: React.FC = () => {
     presetFilter.methods.length > 0 ||
     presetFilter.statusCode.length > 0 ||
     !!presetFilter.expectationId ||
-    logState.logFilter.some((filter) => filter.activate);
+    logState.logFilter.some((filter) => filter.activate !== false);
 
   const expectationOptions = useMemo(
     () => [
