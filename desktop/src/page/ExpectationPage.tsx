@@ -387,14 +387,12 @@ const ExpectationPage = () => {
     setQuery("");
     setAddOpen(false);
     setCreating(false);
-    getExpectationListQuery
-      .refetch()
-      .then(() => {
-        setSelectedId(created.id);
-      })
-      .catch(() => {
-        toast.error("Expectation created, but the list failed to refresh.");
-      });
+    const result = await getExpectationListQuery.refetch();
+    if (result.isError) {
+      toast.error("Expectation created, but the list failed to refresh.");
+      return;
+    }
+    setSelectedId(created.id);
   };
 
   const handleClone = async (values: AddExpectationValues) => {
@@ -531,9 +529,10 @@ const ExpectationPage = () => {
         toast.success("Group created");
       }
       setGroupModal(null);
-      getGroupListQuery.refetch().catch(() => {
+      const result = await getGroupListQuery.refetch();
+      if (result.isError) {
         toast.error("Group saved, but the list failed to refresh.");
-      });
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -546,7 +545,10 @@ const ExpectationPage = () => {
       await updateGroupReq(currentProject.id, group.id, {
         activate: !group.activate,
       });
-      await getGroupListQuery.refetch();
+      const result = await getGroupListQuery.refetch();
+      if (result.isError) {
+        toast.error("Group updated, but the list failed to refresh.");
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
