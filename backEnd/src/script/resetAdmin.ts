@@ -3,6 +3,9 @@ import { getConfig } from "../config/config";
 import { saveAndCloseProjectDb } from "../db/dbManager";
 import { resetAccount, validateCredentials } from "../auth/authStore";
 
+/** The argument that switches the CLI from serving to resetting the account. */
+export const RESET_ADMIN_COMMAND = "reset-admin";
+
 /**
  * Replace the single account's username and password and invalidate every
  * session. The caller must make sure the backend is stopped first: LokiJS is
@@ -66,12 +69,18 @@ function createHiddenQuestioner() {
   };
 }
 
-async function main() {
-  const username = process.argv[2];
+/**
+ * Interactive reset: ask for the new password twice, write it and exit.
+ * `usage` is the hint printed when no username is given, so each entry point
+ * can show the command the user can actually type.
+ */
+export async function runResetAdminCli(
+  args: string[],
+  usage = "livemock reset-admin <new-username>"
+): Promise<void> {
+  const username = args[0];
   if (!username) {
-    console.error(
-      "usage: yarn workspace livemock reset-admin <new-username>"
-    );
+    console.error(`usage: ${usage}`);
     process.exit(1);
   }
   const prompt = createHiddenQuestioner();
@@ -92,10 +101,4 @@ async function main() {
     `account reset for "${username.trim()}"\nstart the backend again and log in with the new credentials\n`,
     () => process.exit(0)
   );
-}
-
-if (require.main === module) {
-  main().catch((error) => {
-    process.stderr.write(`${error.message}\n`, () => process.exit(1));
-  });
 }
