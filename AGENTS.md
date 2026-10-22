@@ -10,6 +10,7 @@ Mock-server tool shipped as two flavors: **web** (backEnd + frontEnd) and **desk
 | `backEnd/` | `back-end` | web REST (mounted at `/api`) + Socket.IO server (ts-node, port from `LIVEMOCK_PORT`, default 9002) |
 | `frontEnd/` | `front-end` | web UI (React + Vite, superagent + socket.io-client) |
 | `desktop/` | `livemock` | Electron app: main process in `desktop/electron/`, renderer in `desktop/src/` |
+| `mcp/` | `livemock-mcp` | standalone stdio MCP server for the web flavor; talks to `/api` with an API token, never reads the DB |
 
 ## Key commands (run from repo root)
 
@@ -17,7 +18,7 @@ Mock-server tool shipped as two flavors: **web** (backEnd + frontEnd) and **desk
 - `yarn web-build` then `yarn web-start` — prod web; backend serves the built UI at `/dashboard` (`frontEnd/dist`).
 - `yarn desktop-dev` — Electron + Vite dev. The desktop renderer gets a free OS-assigned port so concurrent worktrees do not collide with the web dev server on :5173; set `LIVEMOCK_DESKTOP_PORT=5175` to pin it. Dev data lives in `desktop/.dev-data` per worktree; `LIVEMOCK_DEV_USER_DATA=/path` overrides it and `LIVEMOCK_DEV_SHARED_DATA=1` reuses Electron's default `userData`.
 - Lint: `yarn workspace front-end lint`, `yarn workspace livemock-desktop lint` (only these two workspaces have `lint` scripts).
-- Tests: `yarn workspace livemock test` (Jest, tests under `backEnd/test/`). Single suite/file: `yarn workspace livemock test test/matcher` etc. This is the only workspace with tests.
+- Tests: `yarn workspace livemock test` (Jest, tests under `backEnd/test/`). Single suite/file: `yarn workspace livemock test test/matcher` etc. `mcp/` has its own `node:test` suite: `yarn workspace livemock-mcp test`, plus an opt-in real-backend walkthrough at `yarn workspace livemock-mcp e2e`.
 
 ## Things an agent would get wrong
 
@@ -26,6 +27,7 @@ Mock-server tool shipped as two flavors: **web** (backEnd + frontEnd) and **desk
 - **Code is duplicated across flavors.** Web server logic (`backEnd/src/`) and Electron main logic (`desktop/electron/`) are near-copies; the UI (`frontEnd/src/` vs `desktop/src/`) likewise. Web talks to the server via superagent + socket.io (`frontEnd/src/server/`), desktop via `window.api` IPC (preload/handlers). Fix logic changes in the matching places in all four trees.
 - `desktop/` is only a UI shell; `desktop/electron/` compiles separately with `tsc -project electron` into `dist-electron/`, while the renderer is plain Vite. Don't put web-only code that talks HTTP in `desktop/src/`.
 - Each project runs its own mock listener on a per-project port (default `"8088"`, `core/struct/project.ts`), started/stopped via project routes.
+- The MCP server is a **separate npm package** and a separate process. It must not import the web server source or read the DB; it drives a running web instance over `/api` with an API token created on the Settings page. Token management and password changes are browser-session-only, so a Bearer token gets `403` on those routes. `mcp/` is ESM (`NodeNext`), so relative imports need a `.js` suffix.
 - `noImplicitAny` is disabled everywhere and all workspace tsconfigs are permissive; don't tighten types when adding code.
 
 ## Style/version quirks

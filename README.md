@@ -135,6 +135,23 @@ With Docker Compose the optional settings can be passed through the environment:
 LIVEMOCK_COOKIE_SECURE=true LIVEMOCK_TRUST_PROXY=127.0.0.1 docker compose up
 ```
 
+### MCP server (web version only)
+
+LiveMock ships a separate MCP server, [`livemock-mcp`](mcp/README.md), so AI clients such as Claude Code, Claude Desktop and Cursor can manage projects, expectations, groups and request logs from the editor.
+
+1. Open **Settings → API tokens** and create a named token. Copy it once; LiveMock stores only a hash.
+2. Point the MCP server at the running web instance:
+
+```bash
+LIVEMOCK_URL=http://localhost:9002 \
+LIVEMOCK_API_TOKEN=lmk_replace_me \
+npx -y livemock-mcp
+```
+
+Tokens have full access to the data plane but cannot create or revoke other tokens or change the account password. Changing the password or running `livemock reset-admin` revokes every token. See [`mcp/README.md`](mcp/README.md) for client configurations, the tool list and raw expectation examples.
+
+The desktop version does not support MCP.
+
 
 
 ## 📌Quick Start

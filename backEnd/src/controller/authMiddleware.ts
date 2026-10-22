@@ -1,5 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { getSession, renewSession } from "../auth/authStore";
+import {
+  getAccount,
+  getApiToken,
+  getSession,
+  renewSession,
+  touchApiToken,
+} from "../auth/authStore";
 import {
   getSessionTokenFromCookie,
   setSessionCookie,
@@ -7,15 +13,25 @@ import {
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
-/** Request augmented by requireAuth with the authenticated account. */
+/** Request augmented by requireAuth with the authenticated principal. */
 export interface AuthRequest extends Request {
   username?: string;
   sessionToken?: string;
   sessionTokenHash?: string;
+  authType?: "session" | "token";
+  apiTokenId?: string;
 }
 
 function unauthorized(res: Response) {
   res.status(401).json({ error: { message: "unauthorized" } });
+}
+
+export function getBearerToken(header: string | undefined): string | null {
+  if (!header) {
+    return null;
+  }
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  return match ? match[1].trim() : null;
 }
 
 /**
@@ -29,6 +45,21 @@ export function requireAuth(dbPath: string) {
       return next();
     }
     try {
+      const bearer = getBearerToken(req.headers.authorization);
+      if (bearer) {
+        const apiToken = await getApiToken(dbPath, bearer);
+        if (!apiToken) {
+          return unauthorized(res);
+        }
+        await touchApiToken(dbPath, apiToken);
+        const account = await getAccount(dbPath);
+        const authRequest = req as AuthRequest;
+        authRequest.username = account?.username;
+        authRequest.authType = "token";
+        authRequest.apiTokenId = apiToken.id;
+        return next();
+      }
+
       const token = getSessionTokenFromCookie(req.headers.cookie);
       if (!token) {
         return unauthorized(res);
@@ -44,10 +75,32 @@ export function requireAuth(dbPath: string) {
       authRequest.username = session.username;
       authRequest.sessionToken = token;
       authRequest.sessionTokenHash = session.tokenHash;
+      authRequest.authType = "session";
       next();
     } catch (err) {
       next(err);
     }
+  };
+}
+
+/**
+ * Require a browser session. API tokens are deliberately rejected here so a
+ * leaked token cannot manage other tokens or change the account password.
+ */
+export function requireSessionAuth(dbPath: string) {
+  const auth = requireAuth(dbPath);
+  return (req: Request, res: Response, next: NextFunction) => {
+    auth(req, res, (err?: any) => {
+      if (err) {
+        return next(err);
+      }
+      if ((req as AuthRequest).authType !== "session") {
+        return res.status(403).json({
+          error: { message: "this endpoint requires a browser session" },
+        });
+      }
+      next();
+    });
   };
 }
 

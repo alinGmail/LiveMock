@@ -1,0 +1,48 @@
+{
+  "name": "livemock-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for LiveMock (web): manage projects, mocks, groups and request logs from an AI client.",
+  "type": "module",
+  "bin": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/index.js",
+    "test": "yarn build && node --test test/*.test.mjs",
+    "e2e": "yarn build && node test/e2e.mjs",
+    "prepack": "yarn build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "livemock",
+    "mock",
+    "api"
+  ],
+  "author": "jason zhai",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alinGmail/LiveMock.git",
+    "directory": "mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/alinGmail/LiveMock/issues"
+  },
+  "homepage": "https://github.com/alinGmail/LiveMock/tree/main/mcp",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -32,7 +32,8 @@
     "core",
     "frontEnd",
     "backEnd",
-    "desktop"
+    "desktop",
+    "mcp"
   ],
   "author": "jason zhai",
   "license": "Apache-2.0",

@@ -11,7 +11,10 @@ import { getConfig } from "./config/config";
 import { RESET_ADMIN_COMMAND, runResetAdminCli } from "./script/resetAdmin";
 import { applyTrustProxy } from "./auth/trustProxy";
 import { createSocketAuthMiddleware } from "./auth/socketAuth";
-import { sweepExpiredSessions } from "./auth/authStore";
+import {
+  sweepExpiredApiTokens,
+  sweepExpiredSessions,
+} from "./auth/authStore";
 import { pruneAllProjects, startLogPruneTask } from "./log/logPruneTask";
 
 export const systemVersion = 801;
@@ -46,6 +49,7 @@ function startServer() {
   // housekeeping: drop sessions that expired without being used again
   const sessionSweep = setInterval(() => {
     sweepExpiredSessions(dbPath).catch(() => undefined);
+    sweepExpiredApiTokens(dbPath).catch(() => undefined);
   }, 60 * 60 * 1000);
   sessionSweep.unref();
 

@@ -18,11 +18,28 @@ export interface SessionM {
   expiresAt: number;
 }
 
+export interface ApiTokenM {
+  id: string;
+  name: string;
+  tokenHash: string;
+  prefix: string;
+  createTime: number;
+  expiresAt: number | null;
+  lastUsedAt: number | null;
+}
+
+/** Public view of an API token: never exposes the plaintext or the hash. */
+export type ApiTokenPublicM = Omit<ApiTokenM, "tokenHash">;
+
 export const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 export const SESSION_RENEW_THROTTLE_MS = 60 * 1000;
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 64;
 export const USERNAME_MAX_LENGTH = 64;
+export const TOKEN_PREFIX = "lmk_";
+export const TOKEN_NAME_MAX_LENGTH = 64;
+export const TOKEN_LAST_USED_THROTTLE_MS = 60 * 1000;
+export const TOKEN_MAX_EXPIRY_DAYS = 3650;
 const BCRYPT_ROUNDS = 10;
 
 async function getOrCreateCollection<T extends object>(
@@ -43,6 +60,10 @@ function getUserCollection(path: string) {
 
 function getSessionCollection(path: string) {
   return getOrCreateCollection<SessionM>(path, "session");
+}
+
+function getApiTokenCollection(path: string) {
+  return getOrCreateCollection<ApiTokenM>(path, "apiToken");
 }
 
 export function validatePassword(password: unknown): string | null {
@@ -137,6 +158,7 @@ export async function updatePassword(
   const collection = await getUserCollection(path);
   user.passwordHash = hashSync(password, BCRYPT_ROUNDS);
   collection.update(user);
+  await revokeAllApiTokens(path);
 }
 
 /** Replace the single account's username and password hash, then drop all sessions. */
@@ -157,11 +179,136 @@ export async function resetAccount(
     user = await createAccount(path, username, password);
   }
   await deleteSessions(path);
+  await revokeAllApiTokens(path);
   return user;
 }
 
 export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
+}
+
+export function validateTokenName(name: unknown): string | null {
+  if (typeof name !== "string" || name.trim().length === 0) {
+    return "token name can not be empty!";
+  }
+  if (name.trim().length > TOKEN_NAME_MAX_LENGTH) {
+    return `token name can not be longer than ${TOKEN_NAME_MAX_LENGTH} characters!`;
+  }
+  return null;
+}
+
+export async function findApiTokenByName(
+  path: string,
+  name: string
+): Promise<ApiTokenM | null> {
+  const collection = await getApiTokenCollection(path);
+  return collection.findOne({ name });
+}
+
+/**
+ * Create a token. The plaintext is returned once; only its hash and a short
+ * display prefix are kept. `expiresInDays` is validated by the caller.
+ */
+export async function createApiToken(
+  path: string,
+  name: string,
+  expiresInDays: number | null = null
+): Promise<{ token: string; record: ApiTokenPublicM }> {
+  const collection = await getApiTokenCollection(path);
+  const token = `${TOKEN_PREFIX}${randomBytes(32).toString("hex")}`;
+  const now = Date.now();
+  const record: ApiTokenM = {
+    id: randomUUID(),
+    name: name.trim(),
+    tokenHash: hashToken(token),
+    prefix: token.slice(0, TOKEN_PREFIX.length + 8),
+    createTime: now,
+    expiresAt:
+      expiresInDays === null
+        ? null
+        : now + expiresInDays * 24 * 60 * 60 * 1000,
+    lastUsedAt: null,
+  };
+  collection.insert(record);
+  return { token, record: toPublicApiToken(record) };
+}
+
+export function toPublicApiToken(record: ApiTokenM): ApiTokenPublicM {
+  const { tokenHash, ...publicRecord } = record;
+  return publicRecord;
+}
+
+/** Find a usable token by its plaintext. Expired records are dropped. */
+export async function getApiToken(
+  path: string,
+  token: string
+): Promise<ApiTokenM | null> {
+  const collection = await getApiTokenCollection(path);
+  const record = collection.findOne({ tokenHash: hashToken(token) });
+  if (!record) {
+    return null;
+  }
+  if (record.expiresAt !== null && record.expiresAt <= Date.now()) {
+    collection.remove(record);
+    return null;
+  }
+  return record;
+}
+
+/** Record usage, throttled so a busy client does not write on every request. */
+export async function touchApiToken(
+  path: string,
+  record: ApiTokenM
+): Promise<void> {
+  const now = Date.now();
+  if (
+    record.lastUsedAt !== null &&
+    now - record.lastUsedAt < TOKEN_LAST_USED_THROTTLE_MS
+  ) {
+    return;
+  }
+  const collection = await getApiTokenCollection(path);
+  record.lastUsedAt = now;
+  collection.update(record);
+}
+
+export async function listApiTokens(path: string): Promise<ApiTokenPublicM[]> {
+  const collection = await getApiTokenCollection(path);
+  return collection
+    .find({})
+    .sort((a, b) => b.createTime - a.createTime)
+    .map(toPublicApiToken);
+}
+
+/** Revoke one token. Returns false when no token had that id. */
+export async function revokeApiToken(
+  path: string,
+  tokenId: string
+): Promise<boolean> {
+  const collection = await getApiTokenCollection(path);
+  const record = collection.findOne({ id: tokenId });
+  if (!record) {
+    return false;
+  }
+  collection.remove(record);
+  return true;
+}
+
+export async function revokeAllApiTokens(path: string): Promise<void> {
+  const collection = await getApiTokenCollection(path);
+  collection.findAndRemove({});
+}
+
+export async function sweepExpiredApiTokens(path: string): Promise<number> {
+  const collection = await getApiTokenCollection(path);
+  const now = Date.now();
+  const expired = collection
+    .find({})
+    .filter((record) => record.expiresAt !== null && record.expiresAt <= now);
+  for (const record of expired) {
+    collection.remove(record);
+  }
+  return expired.length;
 }
 
 export async function createSession(

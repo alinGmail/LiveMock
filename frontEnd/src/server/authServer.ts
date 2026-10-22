@@ -9,6 +9,20 @@ export interface AuthStatusResponse {
 
 export interface AuthUserResponse {
   username: string;
+  authType?: "session" | "token";
+}
+
+export interface ApiTokenRecord {
+  id: string;
+  name: string;
+  prefix: string;
+  createTime: number;
+  expiresAt: number | null;
+  lastUsedAt: number | null;
+}
+
+export interface CreateApiTokenResponse extends ApiTokenRecord {
+  token: string;
 }
 
 export const getAuthStatusReq = async (): Promise<AuthStatusResponse> => {
@@ -61,4 +75,23 @@ export const changePasswordReq = async (
   await http
     .post(`${ServerUrl}/auth/changePassword`)
     .send({ currentPassword, newPassword });
+};
+
+export const listApiTokensReq = async (): Promise<ApiTokenRecord[]> => {
+  const res = await http.get(`${ServerUrl}/auth/tokens`);
+  return res.body;
+};
+
+export const createApiTokenReq = async (
+  name: string,
+  expiresInDays?: number
+): Promise<CreateApiTokenResponse> => {
+  const res = await http
+    .post(`${ServerUrl}/auth/tokens`)
+    .send(expiresInDays === undefined ? { name } : { name, expiresInDays });
+  return res.body;
+};
+
+export const revokeApiTokenReq = async (tokenId: string): Promise<void> => {
+  await http.delete(`${ServerUrl}/auth/tokens/${tokenId}`);
 };
