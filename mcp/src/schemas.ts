@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const projectRefSchema = z
+  .string()
+  .describe("Project id or exact project name");
+
 export const matcherConditionSchema = z.enum([
   "IS",
   "IS_NOT",

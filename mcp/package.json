@@ -17,7 +17,7 @@
     "start": "node dist/index.js",
     "test": "yarn build && node --test test/*.test.mjs",
     "e2e": "yarn build && node test/e2e.mjs",
-    "prepack": "yarn build"
+    "prepack": "tsc -p tsconfig.json"
   },
   "keywords": [
     "mcp",

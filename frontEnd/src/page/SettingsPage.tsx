@@ -243,6 +243,8 @@ const SettingsPage = () => {
     setSaved(false);
     try {
       await changePasswordReq(current, next);
+      // A password change revokes every API token.
+      await loadTokens();
       setCurrent("");
       setNext("");
       setConfirm("");
@@ -477,9 +479,7 @@ const SettingsPage = () => {
                             : undefined
                         }
                       >
-                        {token.expiresAt === null
-                          ? "Never"
-                          : formatTime(token.expiresAt)}
+                        {formatTime(token.expiresAt)}
                       </span>
                       <button
                         type="button"
@@ -536,10 +536,7 @@ const SettingsPage = () => {
             </button>
           </div>
           <p className={styles.tokenDialogMeta}>
-            {createdToken.name} · expires{" "}
-            {createdToken.expiresAt === null
-              ? "never"
-              : formatTime(createdToken.expiresAt)}
+            {createdToken.name} · expires {formatTime(createdToken.expiresAt)}
           </p>
         </Modal>
       ) : null}

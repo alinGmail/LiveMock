@@ -6,6 +6,7 @@ import {
   normalizeGroupUpdate,
   stripInternal,
 } from "../domain.js";
+import { projectRefSchema } from "../schemas.js";
 import { resolveProject, run } from "./helpers.js";
 
 export function registerGroupTools(
@@ -20,7 +21,7 @@ export function registerGroupTools(
       description:
         "List a project's expectation groups with name, activation, priority and creation time.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
       },
       annotations: { readOnlyHint: true },
     },
@@ -43,7 +44,7 @@ export function registerGroupTools(
       description:
         "Create a group. Names are unique per project; higher priority groups are matched first.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         name: z.string().optional(),
         activate: z.boolean().optional(),
         priority: z.number().int().optional(),
@@ -67,7 +68,7 @@ export function registerGroupTools(
       title: "Update a LiveMock expectation group",
       description: "Update a group's name, activation or priority.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         groupId: z.string().describe("Group id"),
         name: z.string().optional(),
         activate: z.boolean().optional(),
@@ -94,7 +95,7 @@ export function registerGroupTools(
       description:
         "Delete a group and every expectation in it. Request logs are kept. This cannot be undone.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         groupId: z.string().describe("Group id"),
       },
       annotations: { destructiveHint: true },

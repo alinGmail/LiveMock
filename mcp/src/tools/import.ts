@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LiveMockClient } from "../client.js";
+import { projectRefSchema } from "../schemas.js";
 import { resolveProject, run } from "./helpers.js";
 
 export function registerImportTool(
@@ -19,7 +20,7 @@ export function registerImportTool(
       description:
         "Import an OpenAPI, Swagger or Postman document as expectations. Returns created, overwritten, skipped and failed counts.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         content: z
           .string()
           .describe("Raw document content (JSON or YAML) as a string"),

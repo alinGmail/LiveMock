@@ -136,11 +136,14 @@ export function normalizeExpectationUpdate(input: any): Partial<ExpectationM> {
   if (input.groupId !== undefined) {
     update.groupId = input.groupId;
   }
+  // Updates are raw: replacing matchers or actions means sending complete
+  // objects. Filling create-time defaults here would silently reset fields
+  // the caller did not mention.
   if (input.matchers !== undefined) {
-    update.matchers = input.matchers.map(normalizeMatcher);
+    update.matchers = input.matchers;
   }
   if (input.actions !== undefined) {
-    update.actions = input.actions.map(normalizeAction);
+    update.actions = input.actions;
   }
   return update;
 }

@@ -1,12 +1,9 @@
 import express from "express";
 import request from "supertest";
+import { createProject } from "livemock-core/struct/project";
 import { getApiRouter } from "../../src/apiRouter";
 import { deleteFolderRecursive } from "../../src/common/utils";
-import { getProjectDb } from "../../src/db/dbManager";
-import {
-  ApiTokenM,
-  resetAccount,
-} from "../../src/auth/authStore";
+import { resetAccount } from "../../src/auth/authStore";
 
 const TEST_DB = "test_db_api_token";
 
@@ -55,6 +52,8 @@ describe("api tokens", () => {
     expect(record.prefix).toEqual(created.prefix);
     expect(record.token).toBeUndefined();
     expect(record.tokenHash).toBeUndefined();
+    expect(record.$loki).toBeUndefined();
+    expect(record.meta).toBeUndefined();
   });
 
   test("a bearer token reaches the data plane without a cookie", async () => {
@@ -69,6 +68,41 @@ describe("api tokens", () => {
       .set("Authorization", `Bearer ${created.token}`)
       .expect(200);
     expect(me.body).toEqual({ username: "admin", authType: "token" });
+  });
+
+  test("a token reaches expectations, groups, logs and import", async () => {
+    const created = await createToken("data-plane");
+    const project = createProject();
+    project.name = "token project";
+    const projectRes = await request(app)
+      .post("/api/project/")
+      .set("Authorization", `Bearer ${created.token}`)
+      .send({ project })
+      .expect(200);
+    const projectId = projectRes.body.id;
+
+    await request(app)
+      .get("/api/expectation/")
+      .query({ projectId })
+      .set("Authorization", `Bearer ${created.token}`)
+      .expect(200);
+    await request(app)
+      .get("/api/group/")
+      .query({ projectId })
+      .set("Authorization", `Bearer ${created.token}`)
+      .expect(200);
+    await request(app)
+      .get("/api/log/")
+      .query({ projectId })
+      .set("Authorization", `Bearer ${created.token}`)
+      .expect(200);
+    // invalid content still proves the token passed authentication and reached
+    // the import handler: the failure is a parse error, not a 401.
+    await request(app)
+      .post("/api/expectation/batchImport")
+      .set("Authorization", `Bearer ${created.token}`)
+      .send({ projectId, content: "not a spec" })
+      .expect(400);
   });
 
   test("a token cannot manage tokens or change the password", async () => {
@@ -107,17 +141,19 @@ describe("api tokens", () => {
   });
 
   test("an expired token is rejected", async () => {
-    const created = await createToken("expired");
-    const db = await getProjectDb(TEST_DB);
-    const collection = db.getCollection<ApiTokenM>("apiToken");
-    const record = collection.findOne({ id: created.id }) as ApiTokenM;
-    record.expiresAt = Date.now() - 1;
-    collection.update(record);
-
-    await request(app)
-      .get("/api/project/")
-      .set("Authorization", `Bearer ${created.token}`)
-      .expect(401);
+    const created = await createToken("expired", 1);
+    const now = Date.now();
+    const spy = jest
+      .spyOn(Date, "now")
+      .mockReturnValue(now + 2 * 24 * 60 * 60 * 1000);
+    try {
+      await request(app)
+        .get("/api/project/")
+        .set("Authorization", `Bearer ${created.token}`)
+        .expect(401);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   test("changing the password revokes every token", async () => {

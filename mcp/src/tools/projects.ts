@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LiveMockClient } from "../client.js";
 import { mockBaseUrl, presentProject } from "../domain.js";
+import { projectRefSchema } from "../schemas.js";
 import { ProjectM } from "../types.js";
 import { resolveProject, run } from "./helpers.js";
 
@@ -37,7 +38,7 @@ export function registerProjectTools(
       description:
         "Get one project by id or exact name, including its mock base URL.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
       },
       annotations: { readOnlyHint: true },
     },
@@ -92,7 +93,7 @@ export function registerProjectTools(
       description:
         "Update a project's name, description, port or maximum request log count. A running project rejects a port change.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         name: z.string().optional(),
         description: z.string().optional(),
         port: z.union([z.string(), z.number()]).optional(),
@@ -118,6 +119,15 @@ export function registerProjectTools(
         if (Object.keys(update).length === 0) {
           throw new Error("No project fields were provided to update.");
         }
+        if (
+          update.port !== undefined &&
+          resolved.status !== "STOPPED" &&
+          update.port !== resolved.port
+        ) {
+          throw new Error(
+            `Project "${resolved.name}" is ${resolved.status}; call stop_project before changing its port.`
+          );
+        }
         return presentProject(
           await client.updateProject(resolved.id, update),
           baseUrl
@@ -132,13 +142,18 @@ export function registerProjectTools(
       description:
         "Delete a project and its expectations, groups and logs. The project must be stopped first. This cannot be undone.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
       },
       annotations: { destructiveHint: true },
     },
     async ({ project }) =>
       run(async () => {
         const resolved = await resolveProject(client, project);
+        if (resolved.status !== "STOPPED") {
+          throw new Error(
+            `Project "${resolved.name}" is ${resolved.status}; call stop_project before deleting it.`
+          );
+        }
         await client.deleteProject(resolved.id);
         return {
           message: "project deleted",
@@ -155,7 +170,7 @@ export function registerProjectTools(
       description:
         "Start a project's mock listener and return the URL it listens on.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
       },
     },
     async ({ project }) =>
@@ -178,7 +193,7 @@ export function registerProjectTools(
       title: "Stop a LiveMock project",
       description: "Stop a project's mock listener and release its port.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
       },
     },
     async ({ project }) =>

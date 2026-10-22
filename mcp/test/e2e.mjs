@@ -110,12 +110,21 @@ async function call(client, name, args = {}) {
 }
 
 async function main() {
+  try {
+    await fs.access(path.join(ROOT, "core", "build"));
+  } catch {
+    throw new Error(
+      "livemock-core is not built. Run `yarn workspace livemock-core build` first."
+    );
+  }
+
   const dbPath = await fs.mkdtemp(path.join(os.tmpdir(), "livemock-mcp-e2e-"));
   const webPort = await freePort();
   const mockPort = await freePort();
   const baseUrl = `http://127.0.0.1:${webPort}`;
   let backend;
   let client;
+  let passed = false;
 
   try {
     backend = await startBackend(webPort, dbPath);
@@ -234,13 +243,14 @@ async function main() {
     assert.match(revoked.text, /401/);
 
     console.log("end-to-end MCP verification passed");
+    passed = true;
   } finally {
     if (client) {
       await client.close().catch(() => undefined);
     }
     await stopProcess(backend?.child);
     await fs.rm(dbPath, { recursive: true, force: true });
-    if (backend && !backend.output().includes("server start")) {
+    if (!passed && backend) {
       console.error(backend.output());
     }
   }

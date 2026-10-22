@@ -7,7 +7,7 @@ import {
   stripInternal,
   summarizeExpectation,
 } from "../domain.js";
-import { expectationSchema } from "../schemas.js";
+import { expectationSchema, projectRefSchema } from "../schemas.js";
 import { resolveProject, run } from "./helpers.js";
 
 const CREATE_EXAMPLE = `Typical custom JSON response:
@@ -28,7 +28,7 @@ export function registerExpectationTools(
       description:
         "List a project's expectations as compact summaries. Use full=true to return the raw matchers and actions.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         full: z
           .boolean()
           .optional()
@@ -55,7 +55,7 @@ export function registerExpectationTools(
       description:
         "Get one expectation by id, including its full matchers and actions.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),
       },
       annotations: { readOnlyHint: true },
@@ -82,7 +82,7 @@ export function registerExpectationTools(
         "Matchers and actions use LiveMock's native shapes; missing ids, matcher conditions and response-object fields are filled with defaults. " +
         CREATE_EXAMPLE,
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         expectation: expectationSchema,
       },
     },
@@ -106,9 +106,9 @@ export function registerExpectationTools(
     {
       title: "Update a LiveMock expectation",
       description:
-        "Update an expectation with a raw partial payload. Only the fields you provide are changed.",
+        "Update an expectation with a raw partial payload. Only the fields you provide are changed. When replacing matchers or actions, send complete objects; defaults are only applied on create.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),
         expectationUpdate: expectationSchema,
       },
@@ -132,7 +132,7 @@ export function registerExpectationTools(
       title: "Delete a LiveMock expectation",
       description: "Delete an expectation by id. This cannot be undone.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),
       },
       annotations: { destructiveHint: true },

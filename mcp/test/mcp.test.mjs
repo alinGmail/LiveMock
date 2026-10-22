@@ -125,6 +125,9 @@ async function startFakeLiveMock() {
       authorization: req.headers.authorization,
     });
 
+    if (req.headers.authorization === `Bearer forbidden-token`) {
+      return json(res, 403, { error: { message: "forbidden" } });
+    }
     if (req.headers.authorization !== `Bearer ${TOKEN}`) {
       return json(res, 401, { error: { message: "unauthorized" } });
     }
@@ -145,9 +148,21 @@ async function startFakeLiveMock() {
       return json(res, 200, project);
     }
     if (req.method === "POST" && path.startsWith("/api/project/start/")) {
+      const project = state.projects.find(
+        (item) => item.id === path.split("/").pop()
+      );
+      if (project) {
+        project.status = "STARTED";
+      }
       return json(res, 200, { message: "success" });
     }
     if (req.method === "POST" && path.startsWith("/api/project/stop/")) {
+      const project = state.projects.find(
+        (item) => item.id === path.split("/").pop()
+      );
+      if (project) {
+        project.status = "STOPPED";
+      }
       return json(res, 200, { message: "success" });
     }
     if (req.method === "DELETE" && path.startsWith("/api/project/")) {
@@ -161,6 +176,9 @@ async function startFakeLiveMock() {
       return json(res, 200, body.expectation);
     }
     if (req.method === "POST" && path === "/api/expectation/batchImport") {
+      if (body?.content === "invalid") {
+        return json(res, 400, { error: { message: "cannot parse spec" } });
+      }
       return json(res, 200, {
         format: "openapi",
         created: 2,
@@ -208,6 +226,9 @@ async function startFakeLiveMock() {
       return json(res, 200, state.logs);
     }
     if (req.method === "GET" && path.startsWith("/api/log/detail/")) {
+      if (path.endsWith("/999")) {
+        return json(res, 404, { error: { message: "log not found" } });
+      }
       return json(res, 200, { logItem: state.logs[0] });
     }
     return json(res, 404, { error: { message: "not found" } });
@@ -269,6 +290,156 @@ test("MCP server exposes the expected tools and can resolve a project", async ()
   } finally {
     await client.close();
     await fake.close();
+  }
+});
+
+test("project tools cover create, update, start, stop and running-state refusals", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const created = await call(client, "create_project", {
+      name: "managed",
+      port: 9091,
+    });
+    assert.equal(created.isError, false, created.text);
+    assert.equal(created.data.port, "9091");
+    const projectId = created.data.id;
+
+    const updated = await call(client, "update_project", {
+      project: projectId,
+      name: "managed-2",
+      maxRequestLogNumber: 2000,
+    });
+    assert.equal(updated.data.name, "managed-2");
+    assert.equal(updated.data.maxRequestLogNumber, 2000);
+
+    const started = await call(client, "start_project", { project: projectId });
+    assert.equal(started.data.status, "STARTED");
+
+    const portChange = await call(client, "update_project", {
+      project: projectId,
+      port: 9092,
+    });
+    assert.equal(portChange.isError, true);
+    assert.match(portChange.text, /stop_project/);
+
+    const deletion = await call(client, "delete_project", {
+      project: projectId,
+    });
+    assert.equal(deletion.isError, true);
+    assert.match(deletion.text, /stop_project/);
+
+    const stopped = await call(client, "stop_project", { project: projectId });
+    assert.equal(stopped.data.status, "STOPPED");
+    const deleted = await call(client, "delete_project", {
+      project: projectId,
+    });
+    assert.equal(deleted.isError, false, deleted.text);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("update_expectation passes raw matchers through without create-time defaults", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const updated = await call(client, "update_expectation", {
+      project: "demo",
+      expectationId: "exp-1",
+      expectationUpdate: {
+        matchers: [{ type: "path", value: "/changed" }],
+      },
+    });
+    assert.equal(updated.isError, false, updated.text);
+    const request = fake.state.requests.find(
+      (entry) => entry.method === "PUT" && entry.path === "/api/expectation/exp-1"
+    );
+    assert.deepEqual(request.body.expectationUpdate.matchers[0], {
+      type: "path",
+      value: "/changed",
+    });
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("unknown and ambiguous project names list candidates", async () => {
+  const fake = await startFakeLiveMock();
+  fake.state.projects.push(
+    { ...fake.state.projects[0], id: "project-2", name: "twin" },
+    { ...fake.state.projects[0], id: "project-3", name: "twin" }
+  );
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const ambiguous = await call(client, "get_project", {
+      project: "twin",
+    });
+    assert.equal(ambiguous.isError, true);
+    assert.match(ambiguous.text, /ambiguous/);
+
+    const unknown = await call(client, "get_project", { project: "nope" });
+    assert.equal(unknown.isError, true);
+    assert.match(unknown.text, /Available projects/);
+    assert.match(unknown.text, /demo/);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("API and parse errors are translated", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const missingExpectation = await call(client, "get_expectation", {
+      project: "demo",
+      expectationId: "missing",
+    });
+    assert.match(missingExpectation.text, /500: expectation not exist/);
+
+    const missingLog = await call(client, "get_log", {
+      project: "demo",
+      logId: 999,
+    });
+    assert.match(missingLog.text, /404: log not found/);
+
+    const badImport = await call(client, "import_api_spec", {
+      project: "demo",
+      content: "invalid",
+    });
+    assert.match(badImport.text, /400: cannot parse spec/);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+
+  const forbiddenFake = await startFakeLiveMock();
+  const forbiddenClient = await connect({
+    LIVEMOCK_URL: forbiddenFake.url,
+    LIVEMOCK_API_TOKEN: "forbidden-token",
+  });
+  try {
+    const forbidden = await call(forbiddenClient, "list_projects");
+    assert.equal(forbidden.isError, true);
+    assert.match(forbidden.text, /refused the request \(403\)/);
+  } finally {
+    await forbiddenClient.close();
+    await forbiddenFake.close();
   }
 });
 

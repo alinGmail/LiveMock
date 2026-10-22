@@ -234,8 +234,13 @@ export async function createApiToken(
 }
 
 export function toPublicApiToken(record: ApiTokenM): ApiTokenPublicM {
-  const { tokenHash, ...publicRecord } = record;
-  return publicRecord;
+  const { tokenHash, ...publicRecord } = record as ApiTokenM & {
+    $loki?: number;
+    meta?: unknown;
+  };
+  delete (publicRecord as any).$loki;
+  delete (publicRecord as any).meta;
+  return publicRecord as ApiTokenPublicM;
 }
 
 /** Find a usable token by its plaintext. Expired records are dropped. */

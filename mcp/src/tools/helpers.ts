@@ -47,9 +47,18 @@ export async function resolveProject(
   if (byId) {
     return byId;
   }
-  const byExactName = projects.find((project) => project.name === reference);
-  if (byExactName) {
-    return byExactName;
+  const byExactName = projects.filter(
+    (project) => project.name === reference
+  );
+  if (byExactName.length === 1) {
+    return byExactName[0];
+  }
+  if (byExactName.length > 1) {
+    throw new Error(
+      `Project name "${reference}" is ambiguous. Use an id instead: ${byExactName
+        .map((project) => `${project.name} (${project.id})`)
+        .join(", ")}`
+    );
   }
   const lower = reference.toLowerCase();
   const byName = projects.filter(

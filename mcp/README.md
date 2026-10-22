@@ -187,6 +187,7 @@ This removes write tools from `tools/list`. It does not reduce the token's permi
 From the repository root:
 
 ```bash
+yarn workspace livemock-core build  # the web backend consumes core's compiled output
 yarn workspace livemock-mcp build   # compile to dist/
 yarn workspace livemock-mcp test    # fake LiveMock HTTP server, SDK stdio client
 yarn workspace livemock-mcp e2e     # starts a real backend with a temporary database

@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LiveMockClient } from "../client.js";
 import { stripInternal, summarizeLog } from "../domain.js";
+import { projectRefSchema } from "../schemas.js";
 import { resolveProject, run } from "./helpers.js";
 
 export function registerLogTools(server: McpServer, client: LiveMockClient) {
@@ -12,7 +13,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
       description:
         "List recent request logs for a project as compact summaries. Bodies are omitted unless includeBody=true. Page backwards with maxLogId.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         limit: z
           .number()
           .int()
@@ -49,7 +50,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
       description:
         "Get one request log with its full request and response, including headers, query and body.",
       inputSchema: {
-        project: z.string().describe("Project id or exact project name"),
+        project: projectRefSchema,
         logId: z.number().int().describe("Request log id"),
       },
       annotations: { readOnlyHint: true },
