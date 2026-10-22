@@ -582,6 +582,34 @@ test("group deletion reports removed expectations and import returns counts", as
   }
 });
 
+test("a missing token and a trailing /api base URL are handled", async () => {
+  const fake = await startFakeLiveMock();
+  const noToken = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: "",
+  });
+  try {
+    const missing = await call(noToken, "list_projects");
+    assert.equal(missing.isError, true);
+    assert.match(missing.text, /LIVEMOCK_API_TOKEN is not set/);
+  } finally {
+    await noToken.close();
+  }
+
+  const withApiSuffix = await connect({
+    LIVEMOCK_URL: `${fake.url}/api`,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const listed = await call(withApiSuffix, "list_projects");
+    assert.equal(listed.isError, false, listed.text);
+    assert.equal(listed.data[0].name, "demo");
+  } finally {
+    await withApiSuffix.close();
+    await fake.close();
+  }
+});
+
 test("credential and connection errors are readable MCP errors", async () => {
   const fake = await startFakeLiveMock();
   const badTokenClient = await connect({
