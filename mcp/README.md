@@ -105,6 +105,22 @@ Add this to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):
 
 Project arguments accept either an id or an exact name. Unknown names return the available candidates.
 
+## What the AI client is told
+
+On `initialize` the server sends an `instructions` primer with the domain model (project → expectation → matcher/action → group → log), match order, the standard workflow (discover, inspect, write, start, verify) and common pitfalls. Each tool also carries a description and a generated JSON Schema with field-level notes, so the model has enough context even before its first call. This README covers the same ground for humans; if the two disagree, `src/instructions.ts` and `src/schemas.ts` are authoritative.
+
+## Concept model
+
+- **Project** — one mock listener on its own port (default `8088`) with its own expectations, groups and logs. It is `STOPPED` or `STARTED`; nothing is served until it is started. `mockBaseUrl` is the address for test traffic, while the LiveMock URL is the control plane.
+- **Expectation** — one rule: when all of its matchers pass, its action runs. Fields include `priority` (higher wins), `delay` (milliseconds), `activate`, optional `groupId`, `matchers[]` and `actions[]`. An expectation with no matchers matches every request.
+- **Matcher** — one condition on the request: `method`, `path` (URL path only, no query string), `header`, `query` or `param` (JSON, urlencoded or multipart body field). All matchers must pass.
+- **Action** — `CUSTOM_RESPONSE`, `PROXY` or `STATIC_DIRECTORY`. LiveMock currently executes the **first** action of a matched expectation.
+- **Group** — an optional bucket with its own `activate` and `priority`. An inactive group disables all its members.
+- **Match order** — a group is one block ranked by the group's `(priority, createTime)` descending; an ungrouped expectation is its own block and uses its own `(priority, createTime)` as that block's rank, so it competes directly with groups. Member priorities only order expectations inside their group and cannot lift a member above another block. The first match wins, and a later-created block wins a priority tie.
+- **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies.
+
+Typical flow: `list_projects` → inspect with `list_expectations` / `get_expectation` / `list_groups` → `create_expectation` or `import_api_spec` → `start_project` → send a request to `mockBaseUrl` → verify with `list_logs` / `get_log`.
+
 ## Creating an expectation
 
 Expectations use LiveMock's **raw** matchers and actions. The MCP server fills structural omissions (ids, `conditions`, response headers and status) but does not invent business values.
@@ -161,9 +177,13 @@ A proxy expectation:
 }
 ```
 
-Supported matcher types: `method`, `path`, `header`, `query`, `param`.
-Supported conditions: `IS`, `IS_NOT`, `CONTAINS`, `NOT_CONTAINS`, `START_WITH`, `END_WITH`, `MATCH_REGEX`, `NOT_MATCH_REGEX`, `SHOWED`, `NOT_SHOWED`, `MATCH_GLOB`, `NO_MATCH_GLOB`.
-Supported action types: `CUSTOM_RESPONSE`, `PROXY`, `STATIC_DIRECTORY`.
+Supported matcher types: `method`, `path` (URL path only, query string excluded), `header`, `query`, `param`.
+Supported conditions: `IS`, `IS_NOT`, `CONTAINS`, `NOT_CONTAINS`, `START_WITH`, `END_WITH`, `MATCH_REGEX`, `NOT_MATCH_REGEX`, `SHOWED`, `NOT_SHOWED`, `MATCH_GLOB`, `NO_MATCH_GLOB`. `SHOWED` / `NOT_SHOWED` are presence checks and ignore `value`.
+Supported action types: `CUSTOM_RESPONSE`, `PROXY`, `STATIC_DIRECTORY`. The mock engine currently executes the **first** action only. For `PROXY`, `prefixRemove` strips a path prefix before forwarding; `pathRewrite` is accepted for compatibility but is not applied by the current engine.
+
+`delay` is in milliseconds and is applied before the response. Higher `priority` is matched first; among equal priorities the more recently created rule wins. A group is ranked as one block, and an inactive group disables all its member expectations. An expectation with `activate: false` never fires.
+
+For `CUSTOM_RESPONSE`, `responseContent.type` controls the generated `Content-Type` (`JSON` → `application/json`, `TEXT` → `text/plain`), and explicit `headers` override it. Set `responseContent.contentHandler` to `MOCK_JS` to interpret `value` as a [Mock.js](http://mockjs.com/) JSON template.
 
 Creating an expectation does not start the project; call `start_project` afterwards.
 

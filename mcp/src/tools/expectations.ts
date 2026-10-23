@@ -26,7 +26,7 @@ export function registerExpectationTools(
     {
       title: "List LiveMock expectations",
       description:
-        "List a project's expectations as compact summaries. Use full=true to return the raw matchers and actions.",
+        "List a project's expectations in match order as compact summaries (matcher lines such as method IS GET). Use full=true to return the raw matchers and actions. Call this before creating a rule to avoid duplicates and to get expectation ids.",
       inputSchema: {
         project: projectRefSchema,
         full: z
@@ -53,7 +53,7 @@ export function registerExpectationTools(
     {
       title: "Get a LiveMock expectation",
       description:
-        "Get one expectation by id, including its full matchers and actions.",
+        "Get one expectation by id, including its full raw matchers and actions. Call this before update_expectation, which replaces matcher/action arrays wholesale.",
       inputSchema: {
         project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),
@@ -78,8 +78,9 @@ export function registerExpectationTools(
     {
       title: "Create a LiveMock expectation",
       description:
-        "Create an expectation from raw LiveMock matchers and actions. " +
-        "Matchers and actions use LiveMock's native shapes; missing ids, matcher conditions and response-object fields are filled with defaults. " +
+        "Create a mock rule: when every matcher matches an incoming request, the first action runs. " +
+        "Matchers and actions use LiveMock's native shapes; structural omissions (ids, conditions=IS, status=200, JSON content, empty headers, activate=true, priority=0, delay=0) are filled, but business values are not invented. " +
+        "delay is in milliseconds. The project does not need to be started to create a rule; call start_project to serve it. " +
         CREATE_EXAMPLE,
       inputSchema: {
         project: projectRefSchema,
@@ -106,7 +107,7 @@ export function registerExpectationTools(
     {
       title: "Update a LiveMock expectation",
       description:
-        "Update an expectation with a raw partial payload. Only the fields you provide are changed. When replacing matchers or actions, send complete objects; defaults are only applied on create.",
+        "Raw partial update: only the fields you provide are changed; omitted fields keep their values. Matchers and actions are replaced wholesale, so fetch the expectation first and send complete arrays of complete objects. Create-time defaults are not applied. This tool cannot move an expectation to another project.",
       inputSchema: {
         project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),
@@ -130,7 +131,8 @@ export function registerExpectationTools(
     "delete_expectation",
     {
       title: "Delete a LiveMock expectation",
-      description: "Delete an expectation by id. This cannot be undone.",
+      description:
+        "Delete an expectation by id. Request logs are kept. This cannot be undone.",
       inputSchema: {
         project: projectRefSchema,
         expectationId: z.string().describe("Expectation id"),

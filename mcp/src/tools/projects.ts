@@ -20,7 +20,7 @@ export function registerProjectTools(
     {
       title: "List LiveMock projects",
       description:
-        "List every project in LiveMock with its status, mock port and mock base URL.",
+        "List every project in LiveMock with its id, name, status, mock port and mock base URL. Start here to discover projects and find the URL for test traffic.",
       inputSchema: {},
       annotations: { readOnlyHint: true },
     },
@@ -36,7 +36,7 @@ export function registerProjectTools(
     {
       title: "Get a LiveMock project",
       description:
-        "Get one project by id or exact name, including its mock base URL.",
+        "Get one project by id or exact name, including its status and mock base URL. Use list_projects when you need to browse.",
       inputSchema: {
         project: projectRefSchema,
       },
@@ -58,7 +58,7 @@ export function registerProjectTools(
     {
       title: "Create a LiveMock project",
       description:
-        "Create a mock project. The project starts stopped; call start_project to listen on its port.",
+        "Create a mock project. It starts STOPPED on port 8088 unless you pass another port. Add expectations with create_expectation or import_api_spec, then start_project to serve traffic.",
       inputSchema: {
         name: z.string().describe("Project name"),
         description: z.string().optional(),
@@ -91,7 +91,7 @@ export function registerProjectTools(
     {
       title: "Update a LiveMock project",
       description:
-        "Update a project's name, description, port or maximum request log count. A running project rejects a port change.",
+        "Update a project's name, description, port or maximum request log count. A STARTED project rejects a port change: call stop_project first.",
       inputSchema: {
         project: projectRefSchema,
         name: z.string().optional(),
@@ -140,7 +140,7 @@ export function registerProjectTools(
     {
       title: "Delete a LiveMock project",
       description:
-        "Delete a project and its expectations, groups and logs. The project must be stopped first. This cannot be undone.",
+        "Delete a project and its expectations, groups and request logs. The project must be STOPPED first. This cannot be undone.",
       inputSchema: {
         project: projectRefSchema,
       },
@@ -168,7 +168,7 @@ export function registerProjectTools(
     {
       title: "Start a LiveMock project",
       description:
-        "Start a project's mock listener and return the URL it listens on.",
+        "Start a project's mock listener and return its mock base URL. Send test requests to that URL; expectations do not serve traffic while the project is stopped.",
       inputSchema: {
         project: projectRefSchema,
       },
@@ -191,7 +191,8 @@ export function registerProjectTools(
     "stop_project",
     {
       title: "Stop a LiveMock project",
-      description: "Stop a project's mock listener and release its port.",
+      description:
+        "Stop a project's mock listener and release its port. Expectations, groups and logs are kept.",
       inputSchema: {
         project: projectRefSchema,
       },

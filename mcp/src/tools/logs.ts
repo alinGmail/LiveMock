@@ -11,7 +11,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
     {
       title: "List LiveMock request logs",
       description:
-        "List recent request logs for a project as compact summaries. Bodies are omitted unless includeBody=true. Page backwards with maxLogId.",
+        "List recent request logs for a project, newest first, as compact summaries. Bodies are omitted unless includeBody=true. Page backwards with maxLogId. Logs cover traffic on the project's mock listener, not the LiveMock control API.",
       inputSchema: {
         project: projectRefSchema,
         limit: z
@@ -48,7 +48,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
     {
       title: "Get a LiveMock request log",
       description:
-        "Get one request log with its full request and response, including headers, query and body.",
+        "Get one request log with full request and response headers, query, body and timing. The expectationId shows which rule matched.",
       inputSchema: {
         project: projectRefSchema,
         logId: z.number().int().describe("Request log id"),

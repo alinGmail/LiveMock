@@ -293,6 +293,57 @@ test("MCP server exposes the expected tools and can resolve a project", async ()
   }
 });
 
+test("server instructions explain the LiveMock domain and workflow", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const instructions = client.getInstructions();
+    assert.equal(typeof instructions, "string");
+    for (const term of [
+      "Project",
+      "Expectation",
+      "Matcher",
+      "Action",
+      "Group",
+      "Request log",
+      "start_project",
+      "priority",
+      "milliseconds",
+      "first action",
+      "ungrouped",
+      "block of its own",
+      "member priorities",
+    ]) {
+      assert.match(
+        instructions,
+        new RegExp(term, "i"),
+        `instructions should mention ${term}`
+      );
+    }
+
+    const tools = await client.listTools();
+    const create = tools.tools.find(
+      (tool) => tool.name === "create_expectation"
+    );
+    assert.match(create.description, /first action/);
+    assert.match(create.description, /CUSTOM_RESPONSE/);
+    const fields = create.inputSchema.properties.expectation.properties;
+    assert.match(fields.delay.description, /milliseconds/i);
+    assert.match(fields.priority.description, /higher/i);
+    assert.match(fields.priority.description, /ungrouped/i);
+    assert.match(fields.priority.description, /group's priority/i);
+    assert.match(fields.groupId.description, /own match-order block/i);
+    assert.match(fields.groupId.description, /priority and createTime/i);
+    assert.match(fields.matchers.description, /all matchers must match/i);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
 test("project tools cover create, update, start, stop and running-state refusals", async () => {
   const fake = await startFakeLiveMock();
   const client = await connect({
@@ -457,6 +508,7 @@ test("read-only mode hides write tools", async () => {
     assert.ok(names.includes("list_expectations"));
     assert.ok(!names.includes("create_expectation"));
     assert.ok(!names.includes("start_project"));
+    assert.match(client.getInstructions(), /read-only/i);
   } finally {
     await client.close();
     await fake.close();

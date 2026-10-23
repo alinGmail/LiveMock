@@ -18,7 +18,7 @@ export function registerImportTool(
     {
       title: "Import an API spec into LiveMock",
       description:
-        "Import an OpenAPI, Swagger or Postman document as expectations. Returns created, overwritten, skipped and failed counts.",
+        "Import OpenAPI 3.x, Swagger 2.0 or Postman Collection content as raw expectations. Returns the detected format plus created, overwritten, skipped and failed counts; entries with the same method and path are skipped unless overwrite=true. The project is not started.",
       inputSchema: {
         project: projectRefSchema,
         content: z

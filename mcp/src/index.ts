@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { LiveMockClient } from "./client.js";
 import { loadConfig } from "./config.js";
+import { buildInstructions } from "./instructions.js";
 import { registerExpectationTools } from "./tools/expectations.js";
 import { registerGroupTools } from "./tools/groups.js";
 import { registerImportTool } from "./tools/import.js";
@@ -16,11 +17,7 @@ async function main() {
   const client = new LiveMockClient(config.baseUrl, config.token);
   const server = new McpServer(
     { name: "livemock", version: VERSION },
-    {
-      instructions:
-        "Manage a running LiveMock web instance. Resolve projects by id or exact name. " +
-        "Expectations use LiveMock's raw matchers and actions; call start_project after creating mocks.",
-    }
+    { instructions: buildInstructions(config.readOnly) }
   );
 
   const writable = !config.readOnly;

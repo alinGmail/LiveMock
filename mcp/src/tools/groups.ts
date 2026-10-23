@@ -19,7 +19,7 @@ export function registerGroupTools(
     {
       title: "List LiveMock expectation groups",
       description:
-        "List a project's expectation groups with name, activation, priority and creation time.",
+        "List a project's expectation groups with name, activation, priority and creation time. A group is ranked as one block in match order; an ungrouped expectation is a block of its own, and an inactive group disables all its member expectations.",
       inputSchema: {
         project: projectRefSchema,
       },
@@ -42,12 +42,23 @@ export function registerGroupTools(
     {
       title: "Create a LiveMock expectation group",
       description:
-        "Create a group. Names are unique per project; higher priority groups are matched first.",
+        "Create an empty expectation group. Names are unique per project. The group's priority ranks the whole block against ungrouped expectations and other groups; a member's own priority only orders it inside this group. Assign expectations by setting their groupId.",
       inputSchema: {
         project: projectRefSchema,
-        name: z.string().optional(),
-        activate: z.boolean().optional(),
-        priority: z.number().int().optional(),
+        name: z.string().optional().describe("Group name, unique per project"),
+        activate: z
+          .boolean()
+          .optional()
+          .describe(
+            "false disables the group and all its members; defaults to true"
+          ),
+        priority: z
+          .number()
+          .int()
+          .optional()
+          .describe(
+            "Group block match precedence; higher is tried first; defaults to 0"
+          ),
       },
     },
     async ({ project, name, activate, priority }) =>
@@ -66,13 +77,21 @@ export function registerGroupTools(
     "update_group",
     {
       title: "Update a LiveMock expectation group",
-      description: "Update a group's name, activation or priority.",
+      description:
+        "Update a group's name, activation or priority. Setting activate=false disables every expectation in the group without deleting it. Changing priority moves the whole block in match order; member priorities stay relative to each other.",
       inputSchema: {
         project: projectRefSchema,
         groupId: z.string().describe("Group id"),
-        name: z.string().optional(),
-        activate: z.boolean().optional(),
-        priority: z.number().int().optional(),
+        name: z.string().optional().describe("New group name"),
+        activate: z
+          .boolean()
+          .optional()
+          .describe("false disables the group and all its members"),
+        priority: z
+          .number()
+          .int()
+          .optional()
+          .describe("New group block match precedence; higher is tried first"),
       },
     },
     async ({ project, groupId, name, activate, priority }) =>
