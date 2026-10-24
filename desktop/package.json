@@ -1,7 +1,7 @@
 {
   "name": "livemock-desktop",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.1.1",
   "type": "commonjs",
   "scripts": {
     "dev": "node scripts/dev.mjs",
