@@ -32,6 +32,28 @@ The server reads three environment variables:
 | `LIVEMOCK_API_TOKEN` | *(required)* | Token created on the Settings page. Sent as `Authorization: Bearer`. |
 | `LIVEMOCK_MCP_READ_ONLY` | *(unset)* | Set to `1` to hide write tools. This is a client-side convenience, **not** a security boundary. |
 
+### One-command install with add-mcp
+
+[`add-mcp`](https://github.com/neon-solutions/add-mcp) writes the right configuration for Claude Code, Claude Desktop, Cursor, OpenCode, VS Code and other clients. It infers the server name `livemock` and runs the package through `npx`.
+
+```bash
+npx add-mcp@2 livemock-mcp -g -a claude-code \
+  --env 'LIVEMOCK_URL=http://localhost:9002' \
+  --env 'LIVEMOCK_API_TOKEN=${LIVEMOCK_API_TOKEN}'
+```
+
+Replace `-a claude-code` with `-a cursor`, `-a opencode`, or add several `-a` flags. The single-quoted `${LIVEMOCK_API_TOKEN}` makes `add-mcp` prompt for the value during installation, so the token does not appear in your shell history.
+
+`-g` writes the user-level client configuration. Keep it: project mode writes `.mcp.json` or `.cursor/mcp.json` inside the repository, where a real token could be committed. `add-mcp` stores the resolved value in that config file — it does not create a runtime environment reference — so use a revocable token and never commit the generated file.
+
+To install a read-only MCP server, add `--env 'LIVEMOCK_MCP_READ_ONLY=1'`. Avoid `--auto-approve` unless you deliberately want the client to run LiveMock's write tools without confirmation.
+
+Verify the configuration with:
+
+```bash
+npx add-mcp@2 list -g -a claude-code
+```
+
 ### Claude Code
 
 ```bash
