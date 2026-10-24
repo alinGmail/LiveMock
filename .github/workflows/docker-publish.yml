@@ -1,0 +1,122 @@
+name: Docker image
+
+# Publishes the web flavour as a multi-arch image to GitHub Container Registry.
+# The image is verified end-to-end (scripts/docker-verify.sh) before anything is
+# pushed, so a tag can never publish a container that does not actually serve
+# the dashboard or answer mocked requests.
+#
+#   git tag v2.1.2 && git push origin v2.1.2   ->  2.1.2, 2.1, latest
+#   Actions -> Docker image -> Run workflow     ->  edge
+#
+# Pull requests touching Docker files only run the build + verification steps.
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "scripts/docker-verify.sh"
+      - ".github/workflows/docker-publish.yml"
+  workflow_dispatch:
+
+env:
+  # Never block on Corepack's interactive "download Yarn?" prompt inside build.
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build, verify, push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # GHCR requires a lowercase image path; GITHUB_REPOSITORY keeps the
+      # owner's casing (alinGmail/LiveMock), so normalise it explicitly.
+      - name: Resolve image name
+        run: echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=edge,enable=${{ github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.title=LiveMock
+            org.opencontainers.image.description=Mock server with a web dashboard: expectations, proxying and request logs.
+            org.opencontainers.image.licenses=Apache-2.0
+
+      # Native-arch build, loaded into the local daemon so the verification
+      # script can run it. Multi-platform images cannot be loaded, which is why
+      # the push build below is a separate step.
+      - name: Build for verification
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: livemock:verify
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify image end-to-end
+        env:
+          IMAGE: livemock:verify
+        run: bash scripts/docker-verify.sh
+
+      - name: Push multi-arch image
+        id: push
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+
+      - name: Summary
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          {
+            echo "### Pushed \`$IMAGE_NAME\`"
+            echo
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+            echo
+            echo "Digest: \`$DIGEST\`"
+          } >> "$GITHUB_STEP_SUMMARY"
