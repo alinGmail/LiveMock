@@ -10,6 +10,8 @@ permissions:
   contents: write
 
 env:
+  # Never block on Corepack's interactive "download Yarn?" prompt in CI.
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
   # Build unsigned artifacts. Add signing secrets and remove this to sign.
   CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
@@ -23,46 +25,48 @@ jobs:
         include:
           - platform: linux
             os: ubuntu-latest
-            build: >-
-              yarn electron-builder --linux AppImage --x64 --publish never
+            args: --linux AppImage --x64 --publish never
           - platform: windows
             os: windows-latest
-            build: >-
-              yarn electron-builder --win nsis --x64 --publish never
+            args: --win nsis --x64 --publish never
           - platform: macos
             os: macos-latest
-            build: >-
-              yarn electron-builder --mac dmg --x64 --arm64 --publish never
+            args: >-
+              --mac dmg --x64 --arm64 --publish never
               --config.mac.artifactName='${productName}_${version}_mac-${arch}.${ext}'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable corepack
-        run: corepack enable
-
+      # setup-node must come first: it puts the runner's Node (and the Corepack
+      # shims we enable next) ahead of the preinstalled Yarn 1.22.22.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: yarn
+
+      - name: Enable corepack
+        run: |
+          corepack enable
+          corepack install --global yarn@4.18.1
+          corepack yarn --version
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: corepack yarn install --immutable
 
       - name: Build core
-        run: yarn workspace livemock-core build
+        run: corepack yarn workspace livemock-core build
 
       - name: Compile Electron main process
-        run: yarn workspace livemock-desktop tsc
+        run: corepack yarn workspace livemock-desktop tsc
 
       - name: Build renderer
-        run: yarn workspace livemock-desktop vite build
+        run: corepack yarn workspace livemock-desktop vite build
 
       - name: Package
         working-directory: desktop
-        run: ${{ matrix.build }}
+        run: corepack yarn electron-builder ${{ matrix.args }}
 
       - name: Upload packages
         uses: actions/upload-artifact@v4

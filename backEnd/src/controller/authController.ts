@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
 import { ServerError, toAsyncRouter } from "./common";
-import { requireAuth, AuthRequest } from "./authMiddleware";
+import { requireAuth, requireSessionAuth, AuthRequest } from "./authMiddleware";
 import {
   clearSessionCookie,
   getSessionTokenFromCookie,
@@ -9,14 +9,20 @@ import {
 } from "../auth/cookies";
 import {
   createAccountIfAbsent,
+  createApiToken,
   createSession,
   deleteSession,
   deleteSessions,
+  findApiTokenByName,
   getAccount,
+  listApiTokens,
   recordLogin,
+  revokeApiToken,
+  TOKEN_MAX_EXPIRY_DAYS,
   updatePassword,
   validateCredentials,
   validatePassword,
+  validateTokenName,
   verifyPassword,
 } from "../auth/authStore";
 import { LoginThrottle } from "../auth/loginThrottle";
@@ -27,6 +33,7 @@ export function getAuthRouter(
 ): express.Router {
   const router = toAsyncRouter(express.Router());
   const auth = requireAuth(dbPath);
+  const sessionAuth = requireSessionAuth(dbPath);
 
   router.use(bodyParser.json());
 
@@ -110,14 +117,74 @@ export function getAuthRouter(
   });
 
   router.get("/me", auth, (req: Request, res: Response) => {
-    res.json({ username: (req as AuthRequest).username });
+    const authRequest = req as AuthRequest;
+    res.json({
+      username: authRequest.username,
+      authType: authRequest.authType,
+    });
   });
 
   /**
-   * Rotate the account password. The calling session stays valid, every other
-   * session is revoked.
+   * API tokens for non-browser clients. Management stays behind a browser
+   * session: a token may drive the data plane but may not mint or revoke
+   * credentials.
    */
-  router.post("/changePassword", auth, async (req: Request, res: Response) => {
+  router.get("/tokens", sessionAuth, async (req: Request, res: Response) => {
+    res.json(await listApiTokens(dbPath));
+  });
+
+  router.post("/tokens", sessionAuth, async (req: Request, res: Response) => {
+    const nameError = validateTokenName(req.body?.name);
+    if (nameError) {
+      throw new ServerError(400, nameError);
+    }
+    const name = (req.body.name as string).trim();
+    if (await findApiTokenByName(dbPath, name)) {
+      throw new ServerError(400, "token name already exists!");
+    }
+
+    let expiresInDays: number | null = null;
+    const rawExpiry = req.body?.expiresInDays;
+    if (rawExpiry !== undefined && rawExpiry !== null) {
+      if (
+        typeof rawExpiry !== "number" ||
+        !Number.isInteger(rawExpiry) ||
+        rawExpiry < 1 ||
+        rawExpiry > TOKEN_MAX_EXPIRY_DAYS
+      ) {
+        throw new ServerError(
+          400,
+          `expiresInDays must be an integer between 1 and ${TOKEN_MAX_EXPIRY_DAYS}`
+        );
+      }
+      expiresInDays = rawExpiry;
+    }
+
+    const { token, record } = await createApiToken(
+      dbPath,
+      name,
+      expiresInDays
+    );
+    res.json({ token, ...record });
+  });
+
+  router.delete(
+    "/tokens/:tokenId",
+    sessionAuth,
+    async (req: Request, res: Response) => {
+      const removed = await revokeApiToken(dbPath, req.params.tokenId);
+      if (!removed) {
+        throw new ServerError(404, "token not exist");
+      }
+      res.json({ message: "success" });
+    }
+  );
+
+  /**
+   * Rotate the account password. The calling session stays valid, every other
+   * session and every API token is revoked.
+   */
+  router.post("/changePassword", sessionAuth, async (req: Request, res: Response) => {
     const account = await getAccount(dbPath);
     if (!account) {
       throw new ServerError(401, "unauthorized");

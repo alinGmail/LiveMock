@@ -200,3 +200,117 @@
   color: var(--faint);
   padding-top: 4px;
 }
+
+.tokenForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.tokenForm .field {
+  max-width: 220px;
+}
+
+.select {
+  height: 40px;
+  width: 100%;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text);
+  font: inherit;
+}
+.select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.tokenList {
+  margin-top: 14px;
+}
+
+.tokenRow {
+  display: grid;
+  grid-template-columns:
+    minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(130px, 1fr)
+    minmax(130px, 1fr) minmax(130px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.tokenHead {
+  border-top: 0;
+  padding-top: 0;
+  font-size: 11.5px;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tokenName {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.tokenCode {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.tokenExpired {
+  color: #fca5a5;
+}
+
+.tokenEmpty {
+  padding: 12px 0 2px;
+  color: var(--faint);
+  font-size: 12.5px;
+}
+
+.tokenDialogHint {
+  margin: 0 0 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tokenSecret {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tokenDialogMeta {
+  margin: 12px 0 0;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .tokenRow {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 4px;
+  }
+  .tokenHead {
+    display: none;
+  }
+  .tokenRow > span:nth-child(n + 3),
+  .tokenRow > code {
+    color: var(--faint);
+  }
+}

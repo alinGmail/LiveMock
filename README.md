@@ -35,6 +35,30 @@ To install the desktop version, simply download from the [release page](https://
 
 ### Installation of the web service version
 
+The backend and dashboard are published to npm as the package [`livemock`](https://www.npmjs.com/package/livemock). No clone or build step is needed — run it straight from the registry:
+
+```
+npx livemock
+```
+
+Or install it globally so the `livemock` command stays on your `PATH`:
+```
+npm install -g livemock
+livemock
+```
+
+Either way the server starts at **http://localhost:9002** (the dashboard is at `/dashboard`) using a `db` directory created in the working directory. To keep the data somewhere else, start it from the directory you want to use, or point `LIVEMOCK_DB_PATH` at an absolute path:
+
+```
+LIVEMOCK_DB_PATH=/var/lib/livemock npx livemock
+```
+
+> [!NOTE]
+> Requires Node.js 18 or newer. Next time you run `npx livemock`, npm reuses the cached copy; add `@latest` (that is, `npx livemock@latest`) to pick up a newer release.
+
+<details>
+<summary>Install from source instead (for contributing / development)</summary>
+
 #### 1.This project uses Yarn Workspaces, so you need to enable corepack.
 ```
 corepack enable
@@ -66,6 +90,8 @@ yarn run web-start
 ```
 the server will be running at http://localhost:9002 by default
 
+</details>
+
 #### configuration
 | environment variable | default | description |
 |---|---|---|
@@ -76,8 +102,9 @@ the server will be running at http://localhost:9002 by default
 
 For example, to run on another port:
 ```
-LIVEMOCK_PORT=8100 yarn run web-start
+LIVEMOCK_PORT=8100 npx livemock
 ```
+(When working from a source checkout, use `LIVEMOCK_PORT=8100 yarn run web-start` instead.)
 
 The control-plane API is served under `/api` (for example `http://localhost:9002/api/project/`) and the Socket.IO endpoint is `/api/socket.io`. In development (`yarn web-dev`), the front-end calls relative URLs and the Vite dev server proxies `/api` (websocket upgrade included) to the backend, so no server URL needs to be configured. In production the backend serves the UI at `/dashboard` on the same origin.
 
@@ -99,14 +126,31 @@ The web version is protected by a **single account**. The desktop version has no
 
 If you lose the credentials, stop the backend and run:
 ```
-yarn workspace livemock reset-admin <new-username>
+npx livemock reset-admin <new-username>
 ```
-You are prompted for the new password (hidden, entered twice). The command resets the username and password and invalidates all sessions; start the backend again and log in. The backend must be stopped first because the database is written from memory while the server runs.
+Use `livemock reset-admin <new-username>` for a global install, or `yarn workspace livemock reset-admin <new-username>` from a source checkout. You are prompted for the new password twice (hidden). The command resets the username and password and invalidates all sessions; start the backend again and log in. The backend must be stopped first because the database is written from memory while the server runs.
 
 With Docker Compose the optional settings can be passed through the environment:
 ```
 LIVEMOCK_COOKIE_SECURE=true LIVEMOCK_TRUST_PROXY=127.0.0.1 docker compose up
 ```
+
+### MCP server (web version only)
+
+LiveMock ships a separate MCP server, [`livemock-mcp`](mcp/README.md), so AI clients such as Claude Code, Claude Desktop and Cursor can manage projects, expectations, groups and request logs from the editor.
+
+1. Open **Settings → API tokens** and create a named token. Copy it once; LiveMock stores only a hash.
+2. Point the MCP server at the running web instance:
+
+```bash
+LIVEMOCK_URL=http://localhost:9002 \
+LIVEMOCK_API_TOKEN=lmk_replace_me \
+npx -y livemock-mcp
+```
+
+Tokens have full access to the data plane but cannot create or revoke other tokens or change the account password. Changing the password or running `livemock reset-admin` revokes every token. See [`mcp/README.md`](mcp/README.md) for client configurations, the tool list and raw expectation examples.
+
+The desktop version does not support MCP.
 
 
 

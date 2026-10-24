@@ -1,11 +1,35 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { changePasswordReq } from "../server/authServer";
+import {
+  ApiTokenRecord,
+  changePasswordReq,
+  CreateApiTokenResponse,
+  createApiTokenReq,
+  listApiTokensReq,
+  revokeApiTokenReq,
+} from "../server/authServer";
 import { getErrorMessage } from "../component/common";
 import { useAppSelector } from "../store";
 import EyeIcon from "../component/EyeIcon";
+import Modal from "../component/Modal";
 import btn from "../component/buttonStyles.module.scss";
 import styles from "./SettingsPage.module.scss";
+
+const EXPIRY_OPTIONS = [
+  { value: "never", label: "Never" },
+  { value: "7", label: "7 days" },
+  { value: "30", label: "30 days" },
+  { value: "90", label: "90 days" },
+  { value: "custom", label: "Custom…" },
+];
+
+function formatTime(value: number | null): string {
+  return value === null ? "Never" : new Date(value).toLocaleString();
+}
+
+function maskPrefix(prefix: string): string {
+  return `${prefix}…`;
+}
 
 const BackIcon = () => (
   <svg
@@ -82,6 +106,114 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [tokens, setTokens] = useState<ApiTokenRecord[]>([]);
+  const [tokensLoading, setTokensLoading] = useState(true);
+  const [tokensError, setTokensError] = useState("");
+  const [tokenName, setTokenName] = useState("");
+  const [tokenExpiry, setTokenExpiry] = useState("never");
+  const [customExpiry, setCustomExpiry] = useState("30");
+  const [tokenFormError, setTokenFormError] = useState("");
+  const [creatingToken, setCreatingToken] = useState(false);
+  const [createdToken, setCreatedToken] =
+    useState<CreateApiTokenResponse | null>(null);
+  const [copiedToken, setCopiedToken] = useState(false);
+  const [revokeTarget, setRevokeTarget] = useState<ApiTokenRecord | null>(null);
+  const [revoking, setRevoking] = useState(false);
+
+  const loadTokens = useCallback(async () => {
+    setTokensLoading(true);
+    setTokensError("");
+    try {
+      setTokens(await listApiTokensReq());
+    } catch (error) {
+      setTokensError(getErrorMessage(error));
+    } finally {
+      setTokensLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadTokens();
+  }, [loadTokens]);
+
+  const submitToken = async (event: FormEvent) => {
+    event.preventDefault();
+    if (creatingToken) {
+      return;
+    }
+    const name = tokenName.trim();
+    if (!name) {
+      setTokenFormError("Please input a token name");
+      return;
+    }
+    if (name.length > 64) {
+      setTokenFormError("At most 64 characters");
+      return;
+    }
+    if (tokens.some((token) => token.name === name)) {
+      setTokenFormError("A token with this name already exists.");
+      return;
+    }
+
+    let expiresInDays: number | undefined;
+    if (tokenExpiry !== "never") {
+      const days = parseInt(
+        tokenExpiry === "custom" ? customExpiry : tokenExpiry,
+        10
+      );
+      if (!Number.isInteger(days) || days < 1 || days > 3650) {
+        setTokenFormError("Expiry must be between 1 and 3650 days");
+        return;
+      }
+      expiresInDays = days;
+    }
+
+    setCreatingToken(true);
+    setTokenFormError("");
+    try {
+      const created = await createApiTokenReq(name, expiresInDays);
+      setCreatedToken(created);
+      setCopiedToken(false);
+      setTokenName("");
+      setTokenExpiry("never");
+      setCustomExpiry("30");
+      await loadTokens();
+    } catch (error) {
+      setTokenFormError(getErrorMessage(error));
+    } finally {
+      setCreatingToken(false);
+    }
+  };
+
+  const copyCreatedToken = async () => {
+    if (!createdToken) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(createdToken.token);
+      setCopiedToken(true);
+    } catch {
+      setCopiedToken(false);
+    }
+  };
+
+  const confirmRevoke = async () => {
+    if (!revokeTarget || revoking) {
+      return;
+    }
+    setRevoking(true);
+    setTokensError("");
+    try {
+      await revokeApiTokenReq(revokeTarget.id);
+      setRevokeTarget(null);
+      await loadTokens();
+    } catch (error) {
+      setTokensError(getErrorMessage(error));
+    } finally {
+      setRevoking(false);
+    }
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (saving) {
@@ -111,6 +243,8 @@ const SettingsPage = () => {
     setSaved(false);
     try {
       await changePasswordReq(current, next);
+      // A password change revokes every API token.
+      await loadTokens();
       setCurrent("");
       setNext("");
       setConfirm("");
@@ -233,8 +367,216 @@ const SettingsPage = () => {
           </form>
         </section>
 
+        <section className={styles.card}>
+          <div className={styles.cardHead}>
+            <h3>API tokens</h3>
+            <span className={styles.hint}>
+              For MCP clients and scripts · full data access
+            </span>
+          </div>
+          <div className={styles.cardBody}>
+            {tokensError ? (
+              <div className={styles.formError} role="alert">
+                {tokensError}
+              </div>
+            ) : null}
+
+            <form
+              className={styles.tokenForm}
+              onSubmit={submitToken}
+              noValidate
+            >
+              <label className={styles.field}>
+                <span className={styles.label}>Name</span>
+                <input
+                  className={styles.input}
+                  value={tokenName}
+                  placeholder="e.g. claude-code"
+                  autoComplete="off"
+                  onChange={(event) => {
+                    setTokenName(event.target.value);
+                    setTokenFormError("");
+                  }}
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.label}>Expiry</span>
+                <select
+                  className={styles.select}
+                  value={tokenExpiry}
+                  onChange={(event) => {
+                    setTokenExpiry(event.target.value);
+                    setTokenFormError("");
+                  }}
+                >
+                  {EXPIRY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {tokenExpiry === "custom" ? (
+                <label className={styles.field}>
+                  <span className={styles.label}>Days</span>
+                  <input
+                    className={styles.input}
+                    inputMode="numeric"
+                    value={customExpiry}
+                    onChange={(event) => {
+                      setCustomExpiry(event.target.value);
+                      setTokenFormError("");
+                    }}
+                  />
+                </label>
+              ) : null}
+              <button
+                type="submit"
+                className={[btn.btn, btn.primary].join(" ")}
+                disabled={creatingToken}
+              >
+                {creatingToken ? "Creating…" : "Create token"}
+              </button>
+            </form>
+            {tokenFormError ? (
+              <div className={styles.formError} role="alert">
+                {tokenFormError}
+              </div>
+            ) : null}
+
+            <div className={styles.tokenList}>
+              {tokensLoading ? (
+                <div className={styles.tokenEmpty}>Loading…</div>
+              ) : tokens.length === 0 ? (
+                <div className={styles.tokenEmpty}>
+                  No API tokens yet. Create one to connect an MCP client.
+                </div>
+              ) : (
+                <>
+                  <div
+                    className={[styles.tokenRow, styles.tokenHead].join(" ")}
+                  >
+                    <span>Name</span>
+                    <span>Prefix</span>
+                    <span>Created</span>
+                    <span>Last used</span>
+                    <span>Expires</span>
+                    <span />
+                  </div>
+                  {tokens.map((token) => (
+                    <div className={styles.tokenRow} key={token.id}>
+                      <span className={styles.tokenName}>{token.name}</span>
+                      <code className={styles.tokenCode}>
+                        {maskPrefix(token.prefix)}
+                      </code>
+                      <span>{formatTime(token.createTime)}</span>
+                      <span>{formatTime(token.lastUsedAt)}</span>
+                      <span
+                        className={
+                          token.expiresAt !== null &&
+                          token.expiresAt <= Date.now()
+                            ? styles.tokenExpired
+                            : undefined
+                        }
+                      >
+                        {formatTime(token.expiresAt)}
+                      </span>
+                      <button
+                        type="button"
+                        className={[btn.btn, btn.ghost].join(" ")}
+                        onClick={() => setRevokeTarget(token)}
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+
         <div className={styles.version}>version {APP_VERSION}</div>
       </div>
+
+      {createdToken ? (
+        <Modal
+          title="API token created"
+          size="sm"
+          onClose={() => {
+            setCreatedToken(null);
+            setCopiedToken(false);
+          }}
+          footer={
+            <button
+              type="button"
+              className={[btn.btn, btn.primary].join(" ")}
+              onClick={() => {
+                setCreatedToken(null);
+                setCopiedToken(false);
+              }}
+            >
+              Done
+            </button>
+          }
+        >
+          <p className={styles.tokenDialogHint}>
+            Copy this token now. It will not be shown again.
+          </p>
+          <div className={styles.tokenSecret}>
+            <code>{createdToken.token}</code>
+          </div>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={[btn.btn, btn.ghost].join(" ")}
+              onClick={copyCreatedToken}
+            >
+              {copiedToken ? "Copied" : "Copy token"}
+            </button>
+          </div>
+          <p className={styles.tokenDialogMeta}>
+            {createdToken.name} · expires {formatTime(createdToken.expiresAt)}
+          </p>
+        </Modal>
+      ) : null}
+
+      {revokeTarget ? (
+        <Modal
+          title="Revoke API token"
+          size="sm"
+          onClose={() => {
+            if (!revoking) {
+              setRevokeTarget(null);
+            }
+          }}
+          footer={
+            <>
+              <button
+                type="button"
+                className={[btn.btn, btn.ghost].join(" ")}
+                disabled={revoking}
+                onClick={() => setRevokeTarget(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={[btn.btn, btn.dangerSolid].join(" ")}
+                disabled={revoking}
+                onClick={confirmRevoke}
+              >
+                {revoking ? "Revoking…" : "Revoke"}
+              </button>
+            </>
+          }
+        >
+          <p className={styles.tokenDialogHint}>
+            Any client using <strong>{revokeTarget.name}</strong> will lose
+            access immediately.
+          </p>
+        </Modal>
+      ) : null}
     </div>
   );
 };

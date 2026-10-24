@@ -66,7 +66,7 @@ describe("auth controller", () => {
 
     // session identifies the account and opens protected routes
     res = await agent.get("/api/auth/me").expect(200);
-    expect(res.body).toEqual({ username: "admin" });
+    expect(res.body).toEqual({ username: "admin", authType: "session" });
     await agent.get("/api/project/").expect(200);
 
     // account now exists and registration is closed forever

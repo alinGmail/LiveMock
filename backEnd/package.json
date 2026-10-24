@@ -1,6 +1,6 @@
 {
   "name": "livemock",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.",
   "main": "dist/index.js",
   "bin": "dist/index.js",
@@ -12,7 +12,7 @@
     "start": "ts-node ./src/index.ts",
     "build": "node scripts/build.mjs",
     "prepack": "yarn workspace livemock-core build && yarn workspace front-end build && node scripts/build.mjs",
-    "reset-admin": "ts-node ./src/script/resetAdmin.ts",
+    "reset-admin": "ts-node ./src/script/resetAdminCli.ts",
     "seed-demo": "ts-node ./src/script/seedDemo.ts",
     "seed-logs": "ts-node ./src/script/seedLogs.ts",
     "testAll": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=test/"
