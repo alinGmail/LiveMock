@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img width="128px" src="https://github.com/alinGmail/LiveMock/blob/main/img/icon_128x128@2x.png"  alt="logo"/>
+  <img width="128px" src="./img/icon_128x128@2x.png"  alt="logo"/>
 </p>
 
 <h1 align="center">
@@ -9,13 +9,18 @@
 <h3 align="center">
   <a href="https://alingmail.github.io/LiveMockDoc/docs/intro">📚document</a>
 </h3>
+
+<p align="center">
+  <strong>English</strong> | <a href="./README.zh-CN.md">简体中文</a>
+</p>
+
 LiveMock is a comprehensive tool for API development and testing, offering mock data, request proxying, and logging, to streamline workflows and track traffic.
 
 
 
 ## 🎆 Preview
-![Expectations](https://github.com/alinGmail/LiveMock/blob/main/img/screenshots/01-expectations.png)
-![Request Log](https://github.com/alinGmail/LiveMock/blob/main/img/screenshots/02-request-log.png)
+![Expectations](./img/screenshots/01-expectations.png)
+![Request Log](./img/screenshots/02-request-log.png)
 
 ## 📦 features
 
@@ -176,7 +181,7 @@ To create an expectation, click the "Add Expectation" button. After that, you wi
 To create a matcher, click the "Add Matcher" button. Change the matcher to "path start_with /" to match all requests.
 
 ### Creating an Action
-An action defines what the expectation will do. Currently, two actions are supported: custom response and proxy. 
+An action defines what the expectation will do. Three actions are supported: custom response, proxy and static directory. 
 
 To create an action, click the "Create Action" button. By default, the action type is set to custom response, but you can change it to proxy. Once the action is created, click on it and input the desired JSON string in the content field. It will be automatically saved.
 
@@ -217,9 +222,10 @@ Here are some examples of matchers:
 ```
 
 ### action
-there are two type of action:
+there are three types of action:
 - `custom response`: response some custom text or JSON to the request, you can also set the headers of the response
 - `proxy`: make the request forward to another host.
+- `static`: serve files from a folder on the machine running LiveMock.
 
 You can customize the header of the response, both in custom response and proxy actions.
 
