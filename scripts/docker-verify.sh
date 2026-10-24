@@ -51,6 +51,13 @@ ok() { echo "  $(c '32' PASS) $*"; PASS=$((PASS+1)); }
 no() { echo "  $(c '31' FAIL) $*"; [ -n "${2:-}" ] && echo "       $2"; FAIL=$((FAIL+1)); }
 eq() { if [ "$2" = "$3" ]; then ok "$1 ($3)"; else no "$1" "expected [$2] got [$3]"; fi; }
 have() { if printf '%s' "$2" | grep -q -- "$3"; then ok "$1"; else no "$1" "missing [$3] in: $(printf '%s' "$2" | head -c 300)"; fi; }
+new_id() {
+  if [ -r /proc/sys/kernel/random/uuid ]; then
+    cat /proc/sys/kernel/random/uuid
+  else
+    printf '%s-%s-%s' "$(date +%s)" "$$" "$RANDOM"
+  fi
+}
 
 STARTED=0
 die() {
@@ -126,16 +133,19 @@ have "container is running" "$(docker ps --filter "name=$CT" --format '{{.Status
 sec "3. startup + UI"
 CODE=000
 for _ in $(seq 1 60); do
-  CODE=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/dashboard" || true)
+  # express.static answers /dashboard with 301 -> /dashboard/, so follow redirects
+  # both here and in the assertions below.
+  CODE=$(curl -sL -o /dev/null -w '%{http_code}' "$BASE/dashboard" || true)
   [ "$CODE" = 200 ] && break
   sleep 1
 done
-eq "GET /dashboard" "200" "$CODE"
+eq "GET /dashboard (following redirect)" "200" "$CODE"
 if [ "$CODE" != 200 ]; then
   echo "  --- docker logs (tail) ---"
   docker logs "$CT" 2>&1 | tail -25
   die "dashboard never became ready"
 fi
+eq "GET /dashboard/" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/dashboard/")"
 eq "GET /" "302" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/")"
 eq "GET / -> Location" "/dashboard" "$(curl -s -o /dev/null -w '%{redirect_url}' "$BASE/" | sed 's|.*'"$APP_PORT"'||')"
 eq "GET /api/project unauthenticated" "401" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/project")"
@@ -157,7 +167,7 @@ eq "re-register is closed" "403" "$(curl -s -o /dev/null -w '%{http_code}' -H 'c
 
 sec "6. create + start project on port $MOCK_PORT"
 PID=$(curl -s -b "$JAR" -H 'content-type: application/json' -d "{\"project\":{
-  \"name\":\"docker-verify\",\"description\":\"\",\"port\":\"$MOCK_PORT\",
+  \"id\":\"$(new_id)\",\"name\":\"docker-verify\",\"description\":\"\",\"port\":\"$MOCK_PORT\",
   \"error\":false,\"errorMessage\":null,\"status\":\"STOPPED\",
   \"unclosedWebsocketRequestLogIds\":[],\"maxRequestLogNumber\":5000,
   \"createDate\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"}}" "$BASE/api/project/" | jq -r '.id // empty')
@@ -169,10 +179,10 @@ sleep 2
 # The payload mirrors core/struct/{params/ExpectationParams,expectation,matcher,action}.ts.
 # If those structs change, this is expected to break loudly at the request below.
 sec "7. mock expectation + real request"
-EXP=$(jq -n --arg pid "$PID" '{
+EXP=$(jq -n --arg pid "$PID" --arg eid "$(new_id)" '{
   projectId: $pid,
   expectation: {
-    id: (now|tostring|gsub("\\.";"")) ,
+    id: $eid ,
     name: "docker-verify hello",
     description: "",
     delay: 0,
@@ -188,7 +198,7 @@ EXP=$(jq -n --arg pid "$PID" '{
       {id:"a1", type:"CUSTOM_RESPONSE", status:200,
        responseContent:{type:"JSON", value:"{\"ok\":true,\"from\":\"docker\"}", headers:[["x-source","livemock-docker"]], contentHandler:"NONE"}}
     ]
-  }' )
+  }}' )
 CODE=$(curl -s -b "$JAR" -o "$EXP_OUT" -w '%{http_code}' \
   -H 'content-type: application/json' -d "$EXP" "$BASE/api/expectation/")
 eq "POST /api/expectation/" "200" "$CODE"
@@ -205,10 +215,10 @@ sleep 1
 have "request log captured" "$(curl -s -b "$JAR" "$BASE/api/log/?projectId=$PID")" "/api/hello"
 docker restart "$CT" >/dev/null || no "docker restart"
 for _ in $(seq 1 45); do
-  [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/dashboard" || true)" = 200 ] && break
+  [ "$(curl -sL -o /dev/null -w '%{http_code}' "$BASE/dashboard" || true)" = 200 ] && break
   sleep 1
 done
-eq "dashboard after restart" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/dashboard")"
+eq "dashboard after restart" "200" "$(curl -sL -o /dev/null -w '%{http_code}' "$BASE/dashboard")"
 eq "session survives restart" "200" "$(curl -s -b "$JAR" -o /dev/null -w '%{http_code}' "$BASE/api/project")"
 have "data persisted in volume" "$(docker exec "$CT" ls /app/data 2>&1)" "db"
 eq "/app/data still writable after restart" "ok" "$(docker exec "$CT" sh -c 'touch /app/data/.w2 && echo ok && rm -f /app/data/.w2' 2>&1 | tail -1)"
