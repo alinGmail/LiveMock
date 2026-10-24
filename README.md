@@ -148,6 +148,16 @@ LIVEMOCK_API_TOKEN=lmk_replace_me \
 npx -y livemock-mcp
 ```
 
+Or let [`add-mcp`](https://github.com/neon-solutions/add-mcp) write the user-level client configuration:
+
+```bash
+npx add-mcp@2 livemock-mcp -g -a claude-code \
+  --env 'LIVEMOCK_URL=http://localhost:9002' \
+  --env 'LIVEMOCK_API_TOKEN=${LIVEMOCK_API_TOKEN}'
+```
+
+`add-mcp` prompts for the token, infers the server name `livemock`, and supports Cursor, OpenCode, Claude Desktop and other clients via `-a`. Keep `-g` so the token is not written into a project file, and see [`mcp/README.md`](mcp/README.md) for the full install notes.
+
 Tokens have full access to the data plane but cannot create or revoke other tokens or change the account password. Changing the password or running `livemock reset-admin` revokes every token. See [`mcp/README.md`](mcp/README.md) for client configurations, the tool list and raw expectation examples.
 
 The desktop version does not support MCP.

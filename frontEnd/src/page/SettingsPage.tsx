@@ -12,6 +12,7 @@ import { getErrorMessage } from "../component/common";
 import { useAppSelector } from "../store";
 import EyeIcon from "../component/EyeIcon";
 import Modal from "../component/Modal";
+import Select from "../component/Select";
 import btn from "../component/buttonStyles.module.scss";
 import styles from "./SettingsPage.module.scss";
 
@@ -24,7 +25,18 @@ const EXPIRY_OPTIONS = [
 ];
 
 function formatTime(value: number | null): string {
-  return value === null ? "Never" : new Date(value).toLocaleString();
+  if (value === null) {
+    return "Never";
+  }
+  const date = new Date(value);
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function fullTime(value: number | null): string | undefined {
+  return value === null ? undefined : new Date(value).toLocaleString();
 }
 
 function maskPrefix(prefix: string): string {
@@ -386,7 +398,7 @@ const SettingsPage = () => {
               onSubmit={submitToken}
               noValidate
             >
-              <label className={styles.field}>
+              <label className={[styles.field, styles.tokenFieldName].join(" ")}>
                 <span className={styles.label}>Name</span>
                 <input
                   className={styles.input}
@@ -399,25 +411,23 @@ const SettingsPage = () => {
                   }}
                 />
               </label>
-              <label className={styles.field}>
+              <label
+                className={[styles.field, styles.tokenFieldExpiry].join(" ")}
+              >
                 <span className={styles.label}>Expiry</span>
-                <select
-                  className={styles.select}
+                <Select
                   value={tokenExpiry}
-                  onChange={(event) => {
-                    setTokenExpiry(event.target.value);
+                  onChange={(value) => {
+                    setTokenExpiry(value);
                     setTokenFormError("");
                   }}
-                >
-                  {EXPIRY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  options={EXPIRY_OPTIONS}
+                />
               </label>
               {tokenExpiry === "custom" ? (
-                <label className={styles.field}>
+                <label
+                  className={[styles.field, styles.tokenFieldDays].join(" ")}
+                >
                   <span className={styles.label}>Days</span>
                   <input
                     className={styles.input}
@@ -432,7 +442,7 @@ const SettingsPage = () => {
               ) : null}
               <button
                 type="submit"
-                className={[btn.btn, btn.primary].join(" ")}
+                className={[btn.btn, btn.primary, styles.tokenSubmit].join(" ")}
                 disabled={creatingToken}
               >
                 {creatingToken ? "Creating…" : "Create token"}
@@ -465,25 +475,43 @@ const SettingsPage = () => {
                   </div>
                   {tokens.map((token) => (
                     <div className={styles.tokenRow} key={token.id}>
-                      <span className={styles.tokenName}>{token.name}</span>
-                      <code className={styles.tokenCode}>
+                      <span className={styles.tokenName} title={token.name}>
+                        {token.name}
+                      </span>
+                      <code className={styles.tokenCode} data-label="Prefix">
                         {maskPrefix(token.prefix)}
                       </code>
-                      <span>{formatTime(token.createTime)}</span>
-                      <span>{formatTime(token.lastUsedAt)}</span>
+                      <span
+                        className={styles.tokenCell}
+                        data-label="Created"
+                        title={fullTime(token.createTime)}
+                      >
+                        {formatTime(token.createTime)}
+                      </span>
+                      <span
+                        className={styles.tokenCell}
+                        data-label="Last used"
+                        title={fullTime(token.lastUsedAt)}
+                      >
+                        {formatTime(token.lastUsedAt)}
+                      </span>
                       <span
                         className={
                           token.expiresAt !== null &&
                           token.expiresAt <= Date.now()
-                            ? styles.tokenExpired
-                            : undefined
+                            ? [styles.tokenCell, styles.tokenExpired].join(" ")
+                            : styles.tokenCell
                         }
+                        data-label="Expires"
+                        title={fullTime(token.expiresAt)}
                       >
                         {formatTime(token.expiresAt)}
                       </span>
                       <button
                         type="button"
-                        className={[btn.btn, btn.ghost].join(" ")}
+                        className={[btn.btn, btn.ghost, styles.tokenAction].join(
+                          " "
+                        )}
                         onClick={() => setRevokeTarget(token)}
                       >
                         Revoke
