@@ -34,3 +34,9 @@ Mock-server tool shipped as two flavors: **web** (backEnd + frontEnd) and **desk
 
 - Backend/desktop pin `express 4.18.x` and old toolchains (ts-jest 28, TS 4.6 in `core/`, prettier 2.8 in backend vs 3.x at root). Keep dependency bumps scoped to the workspace that needs them.
 - DB files under `backEnd/db/` are gitignored runtime data.
+
+## Documentation
+
+- **English is the source of truth; keep the Chinese files in sync in the same commit.** `README.zh-CN.md` mirrors `README.md`, and `mcp/README.zh-CN.md` mirrors `mcp/README.md`. If you change a command, default, env var or feature list in one, change it in the other.
+- Terminology in the Chinese docs: `expectation`, `matcher`, `action` and `proxy` stay English. Other concepts are Chinese with the English in parentheses on first use (for example 请求记录(request log)), and UI labels stay English in backticks. The table lives at the end of `README.zh-CN.md`; do not duplicate it in other files.
+- Keep the `English | 简体中文` switcher line at the top of both README pairs.
