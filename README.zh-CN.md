@@ -23,19 +23,14 @@ LiveMock 是一套面向 API 开发与测试的完整工具：它提供 mock 数
 ## 📦 功能
 
 * **动态 mock**：修改 mock 后立即生效，无需重启服务
-* **跨平台**：提供 web、Windows 和 Mac 三种形态
+* **基于浏览器**：dashboard 由服务本身提供，在任何现代浏览器中打开即可使用
 * **支持 API 代理**：需要时将请求转发到真实 API
 * **支持 mockjs**：用 mockjs 库生成 mock 数据
 * **日志与分析**：记录请求与响应，便于分析
 
 ## 🚧 安装
 
-LiveMock 有两个版本：一个是桌面应用，另一个是 web 服务。两者任选其一即可，推荐使用桌面版。
-
-### 安装桌面版
-桌面版只需从 [release 页面](https://github.com/alinGmail/LiveMock/releases) 下载安装包即可。它支持 macOS 和 Windows。
-
-### 安装 web 服务版
+### 从 npm 安装
 
 后端与 dashboard 已经以 npm 包 [`livemock`](https://www.npmjs.com/package/livemock) 的形式发布，无需克隆仓库或构建，直接从 registry 运行即可：
 
@@ -115,9 +110,9 @@ LIVEMOCK_PORT=8100 npx livemock
 LIVEMOCK_PORT=8100 docker compose up
 ```
 
-### 认证（仅 web 版）
+### 认证
 
-web 版由**单一账号**保护。桌面版没有登录，也不受此影响。
+LiveMock 由**单一账号**保护。
 
 - **首次运行：** 第一次访问会显示初始化表单。创建账号（用户名 + 密码）后即自动登录。此后注册端点永久关闭，每次访问都需要登录。
 - **会话：** 登录状态保存在 httpOnly cookie 中，只要 7 天内有活动就一直有效，后端重启也不会失效。登出只结束当前会话，因此可以同时在多台设备上保持登录。
@@ -137,7 +132,7 @@ npx livemock reset-admin <new-username>
 LIVEMOCK_COOKIE_SECURE=true LIVEMOCK_TRUST_PROXY=127.0.0.1 docker compose up
 ```
 
-### MCP server（仅 web 版）
+### MCP server
 
 LiveMock 附带一个独立的 MCP server：[`livemock-mcp`](mcp/README.zh-CN.md)。通过它，Claude Code、Claude Desktop、Cursor 等 AI 客户端可以在编辑器里管理项目(project)、expectation、分组(group)和请求记录(request log)。
 
@@ -161,8 +156,6 @@ npx add-mcp@2 livemock-mcp -g -a claude-code \
 `add-mcp` 会提示输入令牌，并推断服务器名称为 `livemock`；通过 `-a` 还支持 Cursor、OpenCode、Claude Desktop 等客户端。请保留 `-g`，这样令牌不会被写进项目文件；完整的安装说明见 [`mcp/README.zh-CN.md`](mcp/README.zh-CN.md)。
 
 令牌拥有数据面的完整权限，但不能创建或吊销其他令牌，也不能修改账号密码。修改密码或运行 `livemock reset-admin` 会吊销所有令牌。客户端配置、工具清单和原始 expectation 示例见 [`mcp/README.zh-CN.md`](mcp/README.zh-CN.md)。
-
-桌面版不支持 MCP。
 
 ## 📌快速开始
 安装完成后，首次访问会要求你为实例创建账号。之后登录即可进入欢迎页（用于创建项目的页面）。填写项目名并提交表单，就会跳转到 dashboard。
