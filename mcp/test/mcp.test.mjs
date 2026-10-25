@@ -242,6 +242,9 @@ async function startFakeLiveMock() {
     if (req.method === "GET" && path === "/api/log/query") {
       return json(res, 200, { logs: state.logs, hasMore: false });
     }
+    if (req.method === "POST" && path === "/api/log/queryByFilters") {
+      return json(res, 200, { logs: state.logs, hasMore: false });
+    }
     if (req.method === "GET" && path.startsWith("/api/log/detail/")) {
       if (path.endsWith("/999")) {
         return json(res, 404, { error: { message: "log not found" } });
@@ -292,8 +295,9 @@ test("MCP server exposes the expected tools and can resolve a project", async ()
   try {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name);
-    assert.equal(names.length, 19);
+    assert.equal(names.length, 20);
     assert.ok(names.includes("list_projects"));
+    assert.ok(names.includes("filter_logs"));
     assert.ok(names.includes("create_expectation"));
     assert.ok(names.includes("import_api_spec"));
 
@@ -326,6 +330,7 @@ test("server instructions explain the LiveMock domain and workflow", async () =>
       "Action",
       "Group",
       "Request log",
+      "filter_logs",
       "start_project",
       "priority",
       "milliseconds",
@@ -521,8 +526,9 @@ test("read-only mode hides write tools", async () => {
   try {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name);
-    assert.equal(names.length, 7);
+    assert.equal(names.length, 8);
     assert.ok(names.includes("list_expectations"));
+    assert.ok(names.includes("filter_logs"));
     assert.ok(!names.includes("create_expectation"));
     assert.ok(!names.includes("start_project"));
     assert.match(client.getInstructions(), /read-only/i);
@@ -663,6 +669,44 @@ test("list_logs forwards ad-hoc filters and pagination to the query endpoint", a
     assert.equal(request.query.limit, "1");
     assert.equal(request.query.maxLogId, "100010");
     assert.equal(request.query.includeBody, "true");
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("filter_logs forwards view-shaped filters to the filter endpoint", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const filters = [
+      { property: "req.headers.authorization", condition: "CONTAINS", value: "Bearer" },
+      { property: "res.status", condition: "FAMILY", value: ["2xx"] },
+    ];
+    const result = await call(client, "filter_logs", {
+      project: "demo",
+      filters,
+      limit: 1,
+      maxLogId: 100010,
+      includeBody: true,
+    });
+    assert.equal(result.isError, false, result.text);
+    assert.equal(result.data.hasMore, false);
+    assert.equal(result.data.logs[0].method, "GET");
+    assert.deepEqual(result.data.logs[0].responseBody, { id: 1 });
+
+    const request = fake.state.requests.find(
+      (entry) =>
+        entry.method === "POST" && entry.path === "/api/log/queryByFilters"
+    );
+    assert.equal(request.body.projectId, "project-1");
+    assert.deepEqual(request.body.filters, filters);
+    assert.equal(request.body.limit, 1);
+    assert.equal(request.body.maxLogId, 100010);
+    assert.equal(request.body.includeBody, true);
   } finally {
     await client.close();
     await fake.close();

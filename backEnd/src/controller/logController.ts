@@ -7,7 +7,8 @@ import {
   getLogViewCollection,
   getLogViewDb,
 } from "../db/dbManager";
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
+import bodyParser from "body-parser";
 import { ServerError, toAsyncRouter } from "./common";
 import {
   DeleteAllRequestLogsPathParam,
@@ -26,11 +27,15 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
+  QueryLogsByFiltersPathParam,
+  QueryLogsByFiltersReqBody,
+  QueryLogsByFiltersReqQuery,
   QueryLogsReqQuery,
 } from "livemock-core/struct/params/LogParams";
 import {
   FilterType,
   LogFilterCondition,
+  LogFilterM,
   LogM,
   PresetFilterName,
 } from "livemock-core/struct/log";
@@ -209,12 +214,211 @@ function logQueryFilter(
   return clauses.length > 0 ? { $and: clauses } : {};
 }
 
+// Keep the ad-hoc filter helpers in sync with the desktop handler at
+// desktop/electron/handler/logViewHandler.ts.
+const MAX_QUERY_FILTERS = 50;
+const DEFAULT_QUERY_FILTER_ID = "log-query";
+const LOG_FILTER_CONDITIONS = new Set<string>(
+  Object.values(LogFilterCondition)
+);
+
+function filterProperty(value: unknown, index: number): string {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new ServerError(
+      400,
+      `filters[${index}].property must be a non-empty string`
+    );
+  }
+  const property = value.trim();
+  if (property.startsWith("$")) {
+    throw new ServerError(
+      400,
+      `filters[${index}].property must not start with $`
+    );
+  }
+  if (property.length > 200) {
+    throw new ServerError(400, `filters[${index}].property is too long`);
+  }
+  return property;
+}
+
+function filterValue(
+  value: unknown,
+  index: number
+): string | number | Array<string | number> {
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+  if (
+    Array.isArray(value) &&
+    value.every(
+      (item) => typeof item === "string" || typeof item === "number"
+    )
+  ) {
+    return value;
+  }
+  throw new ServerError(
+    400,
+    `filters[${index}].value must be a string, a number or an array of those`
+  );
+}
+
+const TIME_PROPERTIES = new Set(["req.requestTime", "res.responseTime"]);
+
+/** Time fields are numeric in the log; accept ISO-8601 strings as a courtesy. */
+function normalizeFilterValue(
+  property: string,
+  value: string | number | Array<string | number>
+): string | number | Array<string | number> {
+  if (!TIME_PROPERTIES.has(property)) {
+    return value;
+  }
+  const convert = (item: string | number): string | number => {
+    if (typeof item === "string" && !/^-?\d+$/.test(item.trim())) {
+      const parsed = Date.parse(item);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return item;
+  };
+  return Array.isArray(value) ? value.map(convert) : convert(value);
+}
+
+/**
+ * Translate view-shaped filters into a Loki query without touching the saved
+ * log view. Active filters are ANDed, matching the dynamic-view pipeline.
+ */
+function buildFilterQuery(
+  filters: unknown,
+  maxLogId: number | undefined
+): Record<string, unknown> {
+  if (!Array.isArray(filters)) {
+    throw new ServerError(400, "filters must be an array");
+  }
+  if (filters.length > MAX_QUERY_FILTERS) {
+    throw new ServerError(
+      400,
+      `filters must contain at most ${MAX_QUERY_FILTERS} entries`
+    );
+  }
+
+  const clauses: Array<Record<string, unknown>> = [];
+  if (maxLogId !== undefined) {
+    clauses.push({ id: { $lt: maxLogId } });
+  }
+
+  filters.forEach((filter, index) => {
+    if (!filter || typeof filter !== "object" || Array.isArray(filter)) {
+      throw new ServerError(400, `filters[${index}] must be an object`);
+    }
+    const raw = filter as Record<string, unknown>;
+    if (raw.type === FilterType.GROUP_FILTER) {
+      throw new ServerError(
+        400,
+        `filters[${index}]: GROUP_FILTER is not supported by log queries`
+      );
+    }
+    if (
+      raw.type !== undefined &&
+      raw.type !== FilterType.SIMPLE_FILTER &&
+      raw.type !== FilterType.PRESET_FILTER
+    ) {
+      throw new ServerError(
+        400,
+        `filters[${index}].type must be SIMPLE_FILTER or PRESET_FILTER`
+      );
+    }
+    if (raw.activate !== undefined && typeof raw.activate !== "boolean") {
+      throw new ServerError(
+        400,
+        `filters[${index}].activate must be a boolean`
+      );
+    }
+    if (
+      typeof raw.condition !== "string" ||
+      !LOG_FILTER_CONDITIONS.has(raw.condition)
+    ) {
+      throw new ServerError(
+        400,
+        `filters[${index}].condition is not supported`
+      );
+    }
+    const property = filterProperty(raw.property, index);
+    const value = normalizeFilterValue(
+      property,
+      filterValue(raw.value, index)
+    );
+    if (raw.activate === false) {
+      return;
+    }
+
+    const normalized = {
+      ...raw,
+      type: raw.type ?? FilterType.SIMPLE_FILTER,
+      id: typeof raw.id === "string" ? raw.id : DEFAULT_QUERY_FILTER_ID,
+      property,
+      condition: raw.condition,
+      value,
+      activate: true,
+    } as unknown as LogFilterM;
+    const clause = changeToLokijsFilter(normalized);
+    if (!clause) {
+      throw new ServerError(
+        400,
+        `filters[${index}] could not be translated`
+      );
+    }
+    clauses.push(clause as Record<string, unknown>);
+  });
+
+  return clauses.length > 0 ? { $and: clauses } : {};
+}
+
 function withoutBodies(log: LogM): LogM {
   return {
     ...log,
     req: log.req ? { ...log.req, body: null, rawBody: null } : log.req,
     res: log.res ? { ...log.res, body: null, rawBody: null } : log.res,
   };
+}
+
+function queryIncludeBody(value: unknown): boolean {
+  return (
+    value === true || String(value) === "true" || String(value) === "1"
+  );
+}
+
+function jsonBodyParser() {
+  const parse = bodyParser.json();
+  return (req: Request, res: Response, next: NextFunction) => {
+    parse(req, res, (error) => {
+      if (error) {
+        next(new ServerError(400, "invalid JSON body"));
+        return;
+      }
+      next();
+    });
+  };
+}
+
+function runLogQuery(
+  collection: Collection<LogM>,
+  filter: Record<string, unknown>,
+  limit: number,
+  includeBody: boolean
+): QueryLogsResponse {
+  const results = collection
+    .chain()
+    .find(filter)
+    .simplesort("id", { desc: true })
+    .limit(limit + 1)
+    .data();
+  const hasMore = results.length > limit;
+  const logs = results
+    .slice(0, limit)
+    .map((log) => (includeBody ? log : withoutBodies(log)));
+  return { logs, hasMore };
 }
 
 export async function getLogRouter(path: string): Promise<express.Router> {
@@ -274,23 +478,40 @@ export async function getLogRouter(path: string): Promise<express.Router> {
       }
       const maxLogId = queryMaxLogId(req.query.maxLogId);
       const limit = queryLimit(req.query.limit);
-      const includeBody =
-        String(req.query.includeBody) === "true" ||
-        String(req.query.includeBody) === "1";
+      const includeBody = queryIncludeBody(req.query.includeBody);
       const filter = logQueryFilter(req.query, maxLogId);
 
       const collection = await getLogCollection(projectId, path);
-      const results = collection
-        .chain()
-        .find(filter)
-        .simplesort("id", { desc: true })
-        .limit(limit + 1)
-        .data();
-      const hasMore = results.length > limit;
-      const logs = results
-        .slice(0, limit)
-        .map((log) => (includeBody ? log : withoutBodies(log)));
-      res.json({ logs, hasMore });
+      res.json(runLogQuery(collection, filter, limit, includeBody));
+    }
+  );
+
+  /**
+   * query the logs with view-shaped, read-only filters
+   */
+  router.post(
+    "/queryByFilters",
+    jsonBodyParser(),
+    async (
+      req: Request<
+        QueryLogsByFiltersPathParam,
+        QueryLogsResponse,
+        QueryLogsByFiltersReqBody,
+        QueryLogsByFiltersReqQuery
+      >,
+      res: Response<QueryLogsResponse>
+    ) => {
+      const body = req.body ?? ({} as QueryLogsByFiltersReqBody);
+      if (!body.projectId) {
+        throw new ServerError(400, "project id not exist!");
+      }
+      const maxLogId = queryMaxLogId(body.maxLogId);
+      const limit = queryLimit(body.limit);
+      const includeBody = queryIncludeBody(body.includeBody);
+      const filter = buildFilterQuery(body.filters, maxLogId);
+
+      const collection = await getLogCollection(body.projectId, path);
+      res.json(runLogQuery(collection, filter, limit, includeBody));
     }
   );
 

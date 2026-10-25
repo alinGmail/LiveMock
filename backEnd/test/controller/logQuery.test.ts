@@ -22,6 +22,7 @@ describe("log query", () => {
   const projectM = createProject();
   const dbPath = "test_db_log_query";
   const baseTime = Date.parse("2026-01-01T00:00:00.000Z");
+  let savedLogView: ReturnType<typeof createLogView>;
 
   function makeLog(
     id: number,
@@ -81,13 +82,13 @@ describe("log query", () => {
     // A saved view filter that would hide every log. Ad-hoc queries must ignore
     // it (and must not modify it).
     const logViewCollection = await getLogViewCollection(projectM.id, dbPath);
-    const logView = createLogView();
+    savedLogView = createLogView();
     const filter = createSimpleFilter();
     filter.condition = LogFilterCondition.EQUAL;
     filter.property = "req.path";
     filter.value = "/never";
-    logView.filters.push(filter);
-    logViewCollection.insert(logView);
+    savedLogView.filters.push(filter);
+    logViewCollection.insert(savedLogView);
   });
 
   afterAll(() => {
@@ -98,6 +99,12 @@ describe("log query", () => {
     return supertest(server)
       .get("/log/query")
       .query({ projectId: projectM.id, ...params });
+  }
+
+  function queryByFilters(body: Record<string, unknown>) {
+    return supertest(server)
+      .post("/log/queryByFilters")
+      .send({ projectId: projectM.id, ...body });
   }
 
   test("returns newest first, strips bodies and reports hasMore", async () => {
@@ -192,6 +199,248 @@ describe("log query", () => {
     const logView = logViewCollection.findOne({});
     expect(logView!.filters.length).toBe(1);
     expect((logView!.filters[0] as SimpleFilterM).value).toBe("/never");
+  });
+
+  test("queries logs with a view-style filter", async () => {
+    const res = await queryByFilters({
+      filters: [{ property: "req.method", condition: "EQUAL", value: "GET" }],
+    }).expect(200);
+    expect(res.body.logs.map((log: LogM) => log.id)).toEqual([
+      105, 104, 103, 101,
+    ]);
+    expect(res.body.hasMore).toBe(false);
+    expect(res.body.logs[0].req.body).toBeNull();
+  });
+
+  test("ANDs view-style filters and reaches nested request properties", async () => {
+    const res = await queryByFilters({
+      filters: [
+        { property: "req.method", condition: "EQUAL", value: "GET" },
+        { property: "req.path", condition: "CONTAINS", value: "users" },
+      ],
+    }).expect(200);
+    expect(res.body.logs.map((log: LogM) => log.id)).toEqual([104, 101]);
+  });
+
+  test("supports IN, FAMILY and request-time conditions", async () => {
+    const inList = await queryByFilters({
+      filters: [
+        {
+          property: "req.method",
+          condition: "IN",
+          value: ["GET", "POST"],
+        },
+      ],
+    }).expect(200);
+    expect(inList.body.logs.map((log: LogM) => log.id)).toEqual([
+      105, 104, 103, 102, 101,
+    ]);
+
+    const families = await queryByFilters({
+      filters: [
+        {
+          property: "res.status",
+          condition: "FAMILY",
+          value: ["4xx", "500"],
+        },
+      ],
+    }).expect(200);
+    expect(families.body.logs.map((log: LogM) => log.id)).toEqual([104, 103]);
+
+    const byTime = await queryByFilters({
+      filters: [
+        {
+          property: "req.requestTime",
+          condition: "GREATER",
+          value: baseTime + 1500,
+        },
+        {
+          property: "req.requestTime",
+          condition: "LESS",
+          value: baseTime + 3500,
+        },
+      ],
+    }).expect(200);
+    expect(byTime.body.logs.map((log: LogM) => log.id)).toEqual([104, 103]);
+  });
+
+  test("supports NOT_EQUAL, header paths and ISO time bounds", async () => {
+    const notEqual = await queryByFilters({
+      filters: [
+        { property: "res.status", condition: "NOT_EQUAL", value: 200 },
+      ],
+    }).expect(200);
+    expect(notEqual.body.logs.map((log: LogM) => log.id)).toEqual([
+      104, 103, 102,
+    ]);
+
+    const header = await queryByFilters({
+      filters: [
+        {
+          property: "req.headers.token",
+          condition: "CONTAINS",
+          value: "token-104",
+        },
+      ],
+    }).expect(200);
+    expect(header.body.logs.map((log: LogM) => log.id)).toEqual([104]);
+
+    const body = await queryByFilters({
+      filters: [
+        {
+          property: "req.body.request",
+          condition: "EQUAL",
+          value: 105,
+        },
+      ],
+    }).expect(200);
+    expect(body.body.logs.map((log: LogM) => log.id)).toEqual([105]);
+
+    const byTime = await queryByFilters({
+      filters: [
+        {
+          property: "req.requestTime",
+          condition: "GREATER",
+          value: new Date(baseTime + 1500).toISOString(),
+        },
+        {
+          property: "req.requestTime",
+          condition: "LESS",
+          value: new Date(baseTime + 3500).toISOString(),
+        },
+      ],
+    }).expect(200);
+    expect(byTime.body.logs.map((log: LogM) => log.id)).toEqual([104, 103]);
+  });
+
+  test("pages by maxLogId on the filter endpoint", async () => {
+    const res = await queryByFilters({
+      filters: [{ property: "req.method", condition: "EQUAL", value: "GET" }],
+      maxLogId: 105,
+      limit: 2,
+    }).expect(200);
+    expect(res.body.logs.map((log: LogM) => log.id)).toEqual([104, 103]);
+    expect(res.body.hasMore).toBe(true);
+  });
+
+  test("skips inactive filters and accepts preset-shaped filters", async () => {
+    const inactive = await queryByFilters({
+      filters: [
+        {
+          property: "req.method",
+          condition: "EQUAL",
+          value: "POST",
+          activate: false,
+        },
+      ],
+    }).expect(200);
+    expect(inactive.body.logs.length).toBe(5);
+
+    const preset = await queryByFilters({
+      filters: [
+        {
+          type: "PRESET_FILTER",
+          name: "EXPECTATION",
+          property: "expectationId",
+          condition: "EQUAL",
+          value: "exp-2",
+        },
+      ],
+    }).expect(200);
+    expect(preset.body.logs.map((log: LogM) => log.id)).toEqual([103]);
+  });
+
+  test("pages and includes bodies on request", async () => {
+    const first = await queryByFilters({
+      filters: [{ property: "req.method", condition: "EQUAL", value: "GET" }],
+      limit: 2,
+      includeBody: true,
+    }).expect(200);
+    expect(first.body.logs.map((log: LogM) => log.id)).toEqual([105, 104]);
+    expect(first.body.hasMore).toBe(true);
+    expect(first.body.logs[0].req.body).toEqual({ request: 105 });
+  });
+
+  test("rejects GROUP_FILTER and malformed filters", async () => {
+    const group = await queryByFilters({
+      filters: [
+        {
+          type: "GROUP_FILTER",
+          conjunction: "OR",
+          subGroup: [],
+          activate: true,
+        },
+      ],
+    }).expect(400);
+    expect(group.body.error.message).toMatch(/GROUP_FILTER/);
+
+    const notArray = await queryByFilters({ filters: "req.method" }).expect(
+      400
+    );
+    expect(notArray.body.error.message).toMatch(/array/);
+
+    const badProperty = await queryByFilters({
+      filters: [{ property: "$or", condition: "EQUAL", value: "GET" }],
+    }).expect(400);
+    expect(badProperty.body.error.message).toMatch(/property/);
+
+    const badCondition = await queryByFilters({
+      filters: [{ property: "req.method", condition: "LIKE", value: "GET" }],
+    }).expect(400);
+    expect(badCondition.body.error.message).toMatch(/condition/);
+
+    const badValue = await queryByFilters({
+      filters: [
+        { property: "req.method", condition: "EQUAL", value: { a: 1 } },
+      ],
+    }).expect(400);
+    expect(badValue.body.error.message).toMatch(/value/);
+
+    const tooMany = await queryByFilters({
+      filters: Array.from({ length: 51 }, () => ({
+        property: "req.method",
+        condition: "EQUAL",
+        value: "GET",
+      })),
+    }).expect(400);
+    expect(tooMany.body.error.message).toMatch(/at most/);
+
+    const inactiveInvalid = await queryByFilters({
+      filters: [
+        {
+          property: "req.method",
+          condition: "LIKE",
+          value: "GET",
+          activate: false,
+        },
+      ],
+    }).expect(400);
+    expect(inactiveInvalid.body.error.message).toMatch(/condition/);
+
+    const malformedJson = await supertest(server)
+      .post("/log/queryByFilters")
+      .set("Content-Type", "application/json")
+      .send("{not json")
+      .expect(400);
+    expect(malformedJson.body.error.message).toMatch(/JSON body/);
+  });
+
+  test("does not mutate the saved view or the stored logs", async () => {
+    const res = await queryByFilters({
+      filters: [{ property: "req.method", condition: "EQUAL", value: "POST" }],
+    }).expect(200);
+    expect(res.body.logs.map((log: LogM) => log.id)).toEqual([102]);
+
+    const logCollection = await getLogCollection(projectM.id, dbPath);
+    expect(logCollection.findOne({ id: 101 })!.req!.body).toEqual({
+      request: 101,
+    });
+
+    const logViewCollection = await getLogViewCollection(projectM.id, dbPath);
+    const logView = logViewCollection.findOne({});
+    expect(logView!.filters.length).toBe(1);
+    expect((logView!.filters[0] as SimpleFilterM).value).toBe("/never");
+    expect(logCollection.getDynamicView(savedLogView.id)).toBeNull();
   });
 
   test("rejects invalid filters", async () => {

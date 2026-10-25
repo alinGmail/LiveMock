@@ -3,6 +3,7 @@ import {
   GetLogDetailResponse,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
+  QueryLogsByFiltersReqBody,
   QueryLogsReqQuery,
 } from "livemock-core/struct/params/LogParams";
 import {
@@ -29,6 +30,12 @@ export async function queryLogs(
   query: QueryLogsReqQuery
 ): Promise<QueryLogsResponse> {
   return window.api.logView.queryLogs({}, query, {});
+}
+
+export async function queryLogsByFilters(
+  body: QueryLogsByFiltersReqBody
+): Promise<QueryLogsResponse> {
+  return window.api.logView.queryLogsByFilters({}, {}, body);
 }
 
 export async function deleteAllRequestLogs(

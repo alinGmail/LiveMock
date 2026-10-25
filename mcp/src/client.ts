@@ -4,6 +4,7 @@ import {
   ExpectationM,
   LogM,
   ProjectM,
+  QueryLogsByFiltersParams,
 } from "./types.js";
 
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -279,6 +280,22 @@ export class LiveMockClient {
         expectationId: params.expectationId,
         since: params.since,
         until: params.until,
+        includeBody: params.includeBody,
+      },
+    });
+  }
+
+  queryLogsByFilters(
+    projectId: string,
+    params: QueryLogsByFiltersParams
+  ): Promise<QueryLogsResult> {
+    return this.request<QueryLogsResult>("/log/queryByFilters", {
+      method: "POST",
+      body: {
+        projectId,
+        filters: params.filters,
+        maxLogId: params.maxLogId,
+        limit: params.limit,
         includeBody: params.includeBody,
       },
     });

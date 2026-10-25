@@ -124,6 +124,7 @@ Add this to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):
 | `update_group` | write | Change name, activation or priority. |
 | `delete_group` | write | Delete a group and its member expectations. |
 | `list_logs` | read | Filtered request logs; bodies only with `includeBody=true`. |
+| `filter_logs` | read | Advanced ad-hoc query with log-view-shaped filters; saved views are untouched. |
 | `get_log` | read | One full request/response log. |
 | `import_api_spec` | write | Import OpenAPI, Swagger or Postman content. |
 
@@ -144,6 +145,23 @@ On `initialize` the server sends an `instructions` primer with the domain model 
 - **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies. `list_logs` filters by `method`, `path`, `pathContains`, `status` (an exact code or a family such as `2xx`), `expectationId` and request time; conditions are ANDed, repeated values are ORed, and the filters are ad-hoc — they never change the saved log views the web UI uses.
 
 Typical flow: `list_projects` → inspect with `list_expectations` / `get_expectation` / `list_groups` → `create_expectation` or `import_api_spec` → `start_project` → send a request to `mockBaseUrl` → verify with `list_logs` / `get_log`.
+
+### Querying logs
+
+`list_logs` covers method, path, status, `expectationId` and request time. For any other field or condition, `filter_logs` accepts the same filter objects as saved log views:
+
+```json
+{
+  "project": "demo",
+  "filters": [
+    { "property": "req.headers.authorization", "condition": "CONTAINS", "value": "Bearer" },
+    { "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }
+  ],
+  "limit": 20
+}
+```
+
+Filters are ANDed, `activate: false` is skipped, `GROUP_FILTER` is not supported, and the saved log view is never read or written.
 
 ## Creating an expectation
 

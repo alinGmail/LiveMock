@@ -44,6 +44,7 @@ export enum LogViewEvents{
     ListLogView="ListLogView",
     ListLogViewLogs="ListLogViewLogs",
     QueryLogs="QueryLogs",
+    QueryLogsByFilters="QueryLogsByFilters",
     GetLogDetail="GetLogDetail",
     DeleteAllRequestLogs="DeleteAllRequestLogs",
     OnLogAdd="OnLogViewLogAdd",

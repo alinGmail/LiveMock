@@ -98,6 +98,9 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
+  QueryLogsByFiltersPathParam,
+  QueryLogsByFiltersReqBody,
+  QueryLogsByFiltersReqQuery,
   QueryLogsPathParam,
   QueryLogsReqBody,
   QueryLogsReqQuery,
@@ -424,6 +427,18 @@ export const api = {
     ) => {
       return ipcRenderer.invoke(
         LogViewEvents.QueryLogs,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    queryLogsByFilters: (
+      reqParam: QueryLogsByFiltersPathParam,
+      reqQuery: QueryLogsByFiltersReqQuery,
+      reqBody: QueryLogsByFiltersReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogViewEvents.QueryLogsByFilters,
         reqParam,
         reqQuery,
         reqBody

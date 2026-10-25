@@ -86,6 +86,32 @@ export interface ExpectationM {
   groupId?: string | null;
 }
 
+export type LogFilterCondition =
+  | "EQUAL"
+  | "NOT_EQUAL"
+  | "CONTAINS"
+  | "GREATER"
+  | "LESS"
+  | "IN"
+  | "FAMILY";
+
+export interface LogFilterInput {
+  type?: "SIMPLE_FILTER" | "PRESET_FILTER";
+  property: string;
+  condition: LogFilterCondition;
+  value: string | number | Array<string | number>;
+  activate?: boolean;
+  id?: string;
+  name?: string;
+}
+
+export interface QueryLogsByFiltersParams {
+  filters: Array<LogFilterInput>;
+  maxLogId?: number;
+  limit?: number;
+  includeBody?: boolean;
+}
+
 export interface ExpectationGroupM {
   id: string;
   name: string;
