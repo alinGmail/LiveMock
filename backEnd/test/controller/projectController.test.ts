@@ -143,6 +143,28 @@ describe('test project',()=>{
     expect(projectStatus2).toEqual(ProjectStatus.STOPPED);
     await testProjectList(ProjectStatus.STOPPED);
 
+    // stopping must not wait forever for an in-flight request
+    await supertest(server).post("/project/start/"+ projectM.id).expect(200);
+    const hangingRequest = net.connect(Number(projectM.port), "127.0.0.1");
+    hangingRequest.on("error", () => undefined);
+    await new Promise<void>((resolve) =>
+      hangingRequest.once("connect", resolve)
+    );
+    // send the headers but never the body, keeping the request active
+    hangingRequest.write(
+      "POST /hang HTTP/1.1\r\n" +
+        "Host: 127.0.0.1\r\n" +
+        "Content-Type: application/json\r\n" +
+        "Content-Length: 100\r\n\r\n"
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const stopStart = Date.now();
+    await supertest(server).post("/project/stop/"+projectM.id).expect(200);
+    expect(Date.now() - stopStart).toBeLessThan(2000);
+    expect(getProjectStatus(projectM.id)).toEqual(ProjectStatus.STOPPED);
+    expect(await checkPort(projectM.port)).toBe(false);
+    hangingRequest.destroy();
+
     const tmpServer = net.createServer();
     tmpServer.listen(8866);
     // start fail
@@ -150,6 +172,7 @@ describe('test project',()=>{
     projectCollection.update(projectM);
     // start project
     const startFail = await supertest(server).post("/project/start/"+ projectM.id).expect(500);
+    tmpServer.close();
     deleteFolderRecursive("test_db");
   });
 

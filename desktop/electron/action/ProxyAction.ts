@@ -15,9 +15,19 @@ const inflateAsync = util.promisify(zlib.inflate);
 const unzipAsync = util.promisify(zlib.unzip);
 const brotliDecompressAsync = util.promisify(zlib.brotliDecompress);
 
+// The proxy timeout only guards the wait for the upstream response headers.
+// Once they arrive the response is streamed as-is, so SSE and other long-lived
+// streaming responses are never cut off.
+let ProxyTimeoutMs = 30 * 1000;
+
+export function setProxyTimeoutMs(timeoutMs: number) {
+  ProxyTimeoutMs = timeoutMs;
+}
+
 let proxy = httpProxy.createProxyServer({});
 
 proxy.on("proxyReq", function (proxyReq, req, res, options) {
+  (req as any).proxyReq = proxyReq;
   // handle prefix remove
   const proxyAction: ProxyActionM = (options as any).proxyAction;
   if (
@@ -41,6 +51,9 @@ proxy.on("proxyReq", function (proxyReq, req, res, options) {
   fixRequestBody(proxyReq, req as express.Request);
 });
 proxy.on("proxyRes", function (proxyRes: http.IncomingMessage, req, res) {
+  // response headers arrived: the request is no longer waiting on the
+  // upstream, so streaming responses may take as long as they need
+  (res as any).cancelProxyTimeout?.();
   let body: Array<any> = [];
   const recordBody = isRecordBody(req, proxyRes);
   const proxyAction = (req as any).proxyAction as ProxyActionM;
@@ -197,24 +210,58 @@ export default class ProxyActionImpl implements IAction {
     if (this.delay > 0) {
       await delayPromise(this.delay);
     }
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (error?) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        delete (res as any).cancelProxyTimeout;
+        if (error) {
+          if (!res.headersSent && !res.destroyed && !res.writableEnded) {
+            const timedOut = error.code === "ETIMEDOUT";
+            res
+              .status(timedOut ? 504 : 502)
+              .send(
+                timedOut
+                  ? `Proxy request timed out after ${ProxyTimeoutMs}ms`
+                  : `Proxy request failed: ${error.message}`
+              );
+          } else if (!res.destroyed && !res.writableEnded) {
+            res.destroy();
+          }
+        }
+        resolve();
+      };
+      // the timer only covers the wait for the upstream response headers; it is
+      // cleared as soon as proxyRes fires
+      const timer = setTimeout(() => {
+        finish(
+          Object.assign(new Error("proxy request timed out"), {
+            code: "ETIMEDOUT",
+          })
+        );
+        (req as any).proxyReq?.destroy();
+      }, ProxyTimeoutMs);
+      (res as any).cancelProxyTimeout = () => clearTimeout(timer);
       let option = {
         changeOrigin: true,
         target: `${this.action.protocol}://${this.action.host}`,
         selfHandleResponse: false,
-        callback: (error) => {
-          if (error) {
-            reject(error);
-          }
-        },
         proxyAction: this.action,
       };
       (req as any).proxyAction = this.action;
       res.on("end", () => {
-        resolve();
+        finish();
       });
       insetProxyInfo(logM, option.target, req.path, this.action);
-      proxy.web(req, res, option);
+      try {
+        proxy.web(req, res, option, finish);
+      } catch (error) {
+        finish(error);
+      }
     });
   }
 }

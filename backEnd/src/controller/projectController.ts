@@ -30,6 +30,8 @@ import {
   getProjectStatus,
   setProjectServer,
   setProjectStatus,
+  stopServer,
+  trackServerConnections,
 } from "../server/projectStatusManage";
 import getMockRouter from "../server/mockServer";
 import { createLogView } from "livemock-core/struct/logView";
@@ -189,6 +191,7 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     if (server == null) {
       let expServer = express();
       server = http.createServer(expServer);
+      trackServerConnections(server);
       expServer.all("*", await getMockRouter(path, projectId));
       server.on("upgrade", async (req, socket, head) => {
         const res_dummy = new http.ServerResponse(req);
@@ -258,15 +261,20 @@ async function getProjectRouter(path: string): Promise<express.Router> {
     const server = await getProjectServer(projectId, path);
     if (server) {
       setProjectStatus(projectId, ProjectStatus.CLOSING);
-      server.close((err) => {
-        if (err) {
-          console.error(err);
-          throw new ServerError(500, err.message);
-        }
-        setProjectStatus(projectId, ProjectStatus.STOPPED);
-        res.json({
-          message: "success",
-        });
+      try {
+        // force-close in-flight requests and WebSocket connections, otherwise
+        // server.close() waits for them and the project stays in CLOSING
+        await stopServer(server);
+      } catch (err) {
+        setProjectStatus(
+          projectId,
+          server.listening ? ProjectStatus.STARTED : ProjectStatus.STOPPED
+        );
+        throw new ServerError(500, (err as Error).message);
+      }
+      setProjectStatus(projectId, ProjectStatus.STOPPED);
+      res.json({
+        message: "success",
       });
     } else {
       throw new ServerError(500, "server not exist");
