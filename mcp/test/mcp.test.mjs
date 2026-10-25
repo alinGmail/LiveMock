@@ -331,6 +331,7 @@ test("server instructions explain the LiveMock domain and workflow", async () =>
       "Group",
       "Request log",
       "filter_logs",
+      "FAMILY",
       "start_project",
       "priority",
       "milliseconds",
@@ -360,6 +361,43 @@ test("server instructions explain the LiveMock domain and workflow", async () =>
     assert.match(fields.groupId.description, /own match-order block/i);
     assert.match(fields.groupId.description, /priority and createTime/i);
     assert.match(fields.matchers.description, /all matchers must match/i);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("filter_logs documents every comparator with examples", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const tools = await client.listTools();
+    const tool = tools.tools.find((item) => item.name === "filter_logs");
+    assert.ok(tool);
+    assert.match(tool.description, /FAMILY/);
+    assert.match(tool.description, /status famil/i);
+
+    const schema = JSON.stringify(tool.inputSchema);
+    for (const term of [
+      "EQUAL",
+      "NOT_EQUAL",
+      "CONTAINS",
+      "GREATER",
+      "LESS",
+      "IN",
+      "FAMILY",
+      "2xx",
+      "res.status",
+    ]) {
+      assert.match(
+        schema,
+        new RegExp(term),
+        `filter_logs schema should document ${term}`
+      );
+    }
   } finally {
     await client.close();
     await fake.close();

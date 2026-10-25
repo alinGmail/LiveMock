@@ -27,22 +27,36 @@ const logFilterValue = z.union([
   z.array(z.union([z.string(), z.number()])),
 ]);
 
+const logFilterPropertyDescription =
+  "Dot path into the request log. Common fields: req.method, req.path, " +
+  "req.headers.<name>, req.query.<name>, req.body.<field>, res.status, " +
+  "res.duration, expectationId, req.requestTime. Examples: " +
+  "req.headers.authorization, req.body.user.id.";
+
+const logFilterConditionDescription = `Comparison operator.
+- EQUAL: exact match; strings are case-sensitive and numeric strings match their number (for example "200" matches 200). Example: { "property": "req.method", "condition": "EQUAL", "value": "GET" }.
+- NOT_EQUAL: value differs from the filter value.
+- CONTAINS: substring match for strings. Example: { "property": "req.path", "condition": "CONTAINS", "value": "/users" }.
+- GREATER / LESS: numeric or lexicographic comparison. For req.requestTime and res.responseTime use epoch milliseconds or ISO-8601. Example: { "property": "res.duration", "condition": "GREATER", "value": 1000 }.
+- IN: value is one of the items in the array. Example: { "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }.
+- FAMILY: status-code family range, mainly for res.status. "2xx" means 200-299, "5xx" means 500-599; exact codes can be mixed in, e.g. ["4xx", 500] matches 400-499 or exactly 500. Example: { "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }.`;
+
+const logFilterValueDescription =
+  "Filter value. Use a scalar for EQUAL, NOT_EQUAL, CONTAINS, GREATER and " +
+  "LESS, and an array for IN and FAMILY. FAMILY accepts family tokens such " +
+  'as "2xx" plus exact codes, e.g. ["4xx", 500]. Time fields ' +
+  "(req.requestTime, res.responseTime) accept epoch milliseconds or " +
+  'ISO-8601 timestamps. Examples: "GET", 200, ["2xx", "500"], ' +
+  '"2026-01-01T00:00:00Z".';
+
 const logFilterSchema = z.object({
   type: z
     .enum(["SIMPLE_FILTER", "PRESET_FILTER"])
     .optional()
     .describe("Filter type; defaults to SIMPLE_FILTER."),
-  property: z
-    .string()
-    .describe(
-      "Dot path into the log, for example req.headers.authorization, req.query.id, res.status or expectationId."
-    ),
-  condition: logFilterCondition.describe(
-    "Comparison to apply. Use FAMILY for status families and IN for a list of exact values."
-  ),
-  value: logFilterValue.describe(
-    "Compared value, or an array for IN and FAMILY."
-  ),
+  property: z.string().describe(logFilterPropertyDescription),
+  condition: logFilterCondition.describe(logFilterConditionDescription),
+  value: logFilterValue.describe(logFilterValueDescription),
   activate: z
     .boolean()
     .optional()
@@ -96,7 +110,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
         status: multiStatus
           .optional()
           .describe(
-            "Exact HTTP status code(s) or family tokens such as '2xx'. Pass an array to match any of several."
+            "Exact HTTP status code(s) or family tokens such as '2xx'. Pass an array to match any of several. Examples: 404, ['2xx', '500']."
           ),
         expectationId: multiString
           .optional()
@@ -161,7 +175,7 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
     {
       title: "Filter LiveMock request logs",
       description:
-        "Advanced ad-hoc request log query using the same filter objects as saved log views. Filters are ANDed and evaluated without reading or writing saved log views. Use this for header, query or body properties, or conditions such as NOT_EQUAL / GREATER; prefer list_logs for method, path, status, expectationId or time. GROUP_FILTER is not supported. Bodies are omitted unless includeBody=true; page backwards with maxLogId and check hasMore.",
+        "Advanced ad-hoc request log query using saved-log-view-shaped filters. Supports EQUAL, NOT_EQUAL, CONTAINS, GREATER, LESS, IN and FAMILY (status families such as 2xx). Filters are ANDed and evaluated without reading or writing saved log views. Use this for header, query or body properties, or conditions such as NOT_EQUAL / GREATER / FAMILY; prefer list_logs for simple method, path, status, expectationId or time filters. GROUP_FILTER is not supported. Bodies are omitted unless includeBody=true; page backwards with maxLogId and check hasMore.",
       inputSchema: {
         project: projectRefSchema,
         filters: z
@@ -169,7 +183,9 @@ export function registerLogTools(server: McpServer, client: LiveMockClient) {
           .min(1)
           .max(50)
           .describe(
-            "View-shaped filters to AND together. A filter with activate=false is skipped."
+            "View-shaped filters to AND together. A filter with activate=false is skipped. Example: " +
+              '[{ "property": "req.headers.authorization", "condition": "CONTAINS", "value": "Bearer" }, ' +
+              '{ "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }].'
           ),
         limit: z
           .number()

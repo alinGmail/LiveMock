@@ -161,6 +161,19 @@ Typical flow: `list_projects` → inspect with `list_expectations` / `get_expect
 }
 ```
 
+Common `property` paths: `req.method`, `req.path`, `req.headers.<name>`, `req.query.<name>`, `req.body.<field>`, `res.status`, `res.duration`, `expectationId`, `req.requestTime`.
+
+| Condition | Meaning | Example |
+|---|---|---|
+| `EQUAL` | Exact match; strings are case-sensitive and numeric strings match their number. | `{ "property": "req.method", "condition": "EQUAL", "value": "GET" }` |
+| `NOT_EQUAL` | Value differs from the filter value. | `{ "property": "res.status", "condition": "NOT_EQUAL", "value": 200 }` |
+| `CONTAINS` | Substring match for strings. | `{ "property": "req.path", "condition": "CONTAINS", "value": "/users" }` |
+| `GREATER` / `LESS` | Numeric or lexicographic comparison; time fields accept epoch milliseconds or ISO-8601. | `{ "property": "res.duration", "condition": "GREATER", "value": 1000 }` |
+| `IN` | Matches any value in the array. | `{ "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }` |
+| `FAMILY` | Status-code family range; exact codes can be mixed in. Mainly for `res.status`. | `{ "property": "res.status", "condition": "FAMILY", "value": ["4xx", 500] }` |
+
+`FAMILY` treats `2xx` as 200–299 and `5xx` as 500–599. For simple status-family filters, `list_logs.status` is shorter.
+
 Filters are ANDed, `activate: false` is skipped, `GROUP_FILTER` is not supported, and the saved log view is never read or written.
 
 ## Creating an expectation

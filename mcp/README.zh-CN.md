@@ -163,6 +163,19 @@ claude mcp add livemock \
 }
 ```
 
+常见 `property` 路径：`req.method`、`req.path`、`req.headers.<name>`、`req.query.<name>`、`req.body.<field>`、`res.status`、`res.duration`、`expectationId`、`req.requestTime`。
+
+| 比较器(comparator) | 含义 | 示例 |
+|---|---|---|
+| `EQUAL` | 精确匹配；字符串区分大小写，数字字符串也能匹配对应数字。 | `{ "property": "req.method", "condition": "EQUAL", "value": "GET" }` |
+| `NOT_EQUAL` | 与给定值不相等。 | `{ "property": "res.status", "condition": "NOT_EQUAL", "value": 200 }` |
+| `CONTAINS` | 字符串子串匹配。 | `{ "property": "req.path", "condition": "CONTAINS", "value": "/users" }` |
+| `GREATER` / `LESS` | 数值或字典序比较；时间字段接受 epoch 毫秒或 ISO-8601。 | `{ "property": "res.duration", "condition": "GREATER", "value": 1000 }` |
+| `IN` | 匹配数组中的任意一个值。 | `{ "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }` |
+| `FAMILY` | 状态码区间；可以混入精确状态码，主要用于 `res.status`。 | `{ "property": "res.status", "condition": "FAMILY", "value": ["4xx", 500] }` |
+
+`FAMILY` 把 `2xx` 视为 200–299、`5xx` 视为 500–599。只是按状态码分组过滤时，用 `list_logs.status` 更短。
+
 条件之间是 AND，`activate: false` 会被跳过，不支持 `GROUP_FILTER`，不会读取或修改已保存的日志视图。
 
 ## 创建 expectation
