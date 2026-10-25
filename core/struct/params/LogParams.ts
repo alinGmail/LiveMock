@@ -12,6 +12,40 @@ export interface ListLogReqQuery {
   projectId: string;
 }
 
+export interface QueryLogsPathParam {}
+
+export interface QueryLogsReqBody {}
+
+/**
+ * query logs
+ *
+ * Ad-hoc, read-only filtering over a project's request logs. Unlike a log
+ * view, these conditions are not persisted and do not change what the web UI
+ * sees. Values are ANDed across fields; repeated values of one field are ORed.
+ */
+export interface QueryLogsReqQuery {
+  projectId: string;
+  /** Return entries older than this log id. */
+  maxLogId?: string | number | null;
+  /** Page size, capped at 100. Defaults to 100. */
+  limit?: string | number | null;
+  /** HTTP method(s), case-insensitive. */
+  method?: string | Array<string>;
+  /** Exact URL path(s), query string excluded. */
+  path?: string | Array<string>;
+  /** URL path substring(s), case-sensitive. */
+  pathContains?: string | Array<string>;
+  /** Exact status code(s) or family tokens such as "2xx". */
+  status?: string | number | Array<string | number>;
+  expectationId?: string | Array<string>;
+  /** Request time lower bound, inclusive, as epoch milliseconds or ISO-8601. */
+  since?: string | number;
+  /** Request time upper bound, exclusive, as epoch milliseconds or ISO-8601. */
+  until?: string | number;
+  /** Include request and response bodies. Defaults to false. */
+  includeBody?: string | boolean;
+}
+
 /**
  * get log detail
  */

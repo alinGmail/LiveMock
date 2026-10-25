@@ -125,7 +125,7 @@ claude mcp add livemock \
 | `create_group` | 写 | 创建一个分组。 |
 | `update_group` | 写 | 修改名称、启用状态或优先级(priority)。 |
 | `delete_group` | 写 | 删除分组及其成员 expectation。 |
-| `list_logs` | 读 | 最近的请求记录；只有 `includeBody=true` 时才返回请求体。 |
+| `list_logs` | 读 | 按条件查询请求记录(request log)；只有 `includeBody=true` 时才返回请求体。 |
 | `get_log` | 读 | 一条完整的请求/响应记录。 |
 | `import_api_spec` | 写 | 导入 OpenAPI、Swagger 或 Postman 内容。 |
 
@@ -143,7 +143,7 @@ claude mcp add livemock \
 - **action** —— `CUSTOM_RESPONSE`、`PROXY` 或 `STATIC_DIRECTORY`。LiveMock 目前只执行命中 expectation 的**第一个** action。
 - **分组(group)** —— 一个可选的分组容器，有自己的 `activate` 和 `priority`。停用的分组会禁用其全部成员。
 - **匹配顺序** —— 一个分组是一个整体块，按分组的 `(priority, createTime)` 降序排名；未分组的 expectation 自成一个块，并用它自己的 `(priority, createTime)` 作为该块的排名，因此会直接与分组竞争。成员的 priority 只决定它们在分组内部的顺序，无法把成员抬到其他块之前。先匹配到的胜出；priority 相同时，创建更晚的块胜出。
-- **请求记录(request log)** —— mock 监听器处理的一条请求，包含命中的 `expectationId`、状态码、耗时和请求/响应体。
+- **请求记录(request log)** —— mock 监听器处理的一条请求，包含命中的 `expectationId`、状态码、耗时和请求/响应体。`list_logs` 可按 `method`、`path`、`pathContains`、`status`（精确状态码或 `2xx` 这类区间）、`expectationId` 和请求时间过滤；条件之间是 AND，同一字段重复传值是 OR，且这些条件只是临时查询——不会改动 Web UI 使用的已保存日志视图(log view)。
 
 典型流程：`list_projects` → 用 `list_expectations` / `get_expectation` / `list_groups` 查看 → `create_expectation` 或 `import_api_spec` → `start_project` → 向 `mockBaseUrl` 发送请求 → 用 `list_logs` / `get_log` 验证。
 

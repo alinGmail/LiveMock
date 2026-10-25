@@ -114,13 +114,27 @@ async function startFakeLiveMock() {
     ],
   };
 
+  const queryMap = (searchParams) => {
+    const query = {};
+    for (const [key, value] of searchParams) {
+      if (query[key] === undefined) {
+        query[key] = value;
+      } else if (Array.isArray(query[key])) {
+        query[key].push(value);
+      } else {
+        query[key] = [query[key], value];
+      }
+    }
+    return query;
+  };
+
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
     const body = await readBody(req);
     state.requests.push({
       method: req.method,
       path: url.pathname,
-      query: Object.fromEntries(url.searchParams),
+      query: queryMap(url.searchParams),
       body,
       authorization: req.headers.authorization,
     });
@@ -224,6 +238,9 @@ async function startFakeLiveMock() {
     }
     if (req.method === "GET" && path === "/api/log/") {
       return json(res, 200, state.logs);
+    }
+    if (req.method === "GET" && path === "/api/log/query") {
+      return json(res, 200, { logs: state.logs, hasMore: false });
     }
     if (req.method === "GET" && path.startsWith("/api/log/detail/")) {
       if (path.endsWith("/999")) {
@@ -589,20 +606,63 @@ test("logs summarize bodies unless asked", async () => {
   });
   try {
     const summary = await call(client, "list_logs", { project: "demo" });
-    assert.equal(summary.data[0].method, "GET");
-    assert.equal(summary.data[0].requestBody, undefined);
+    assert.equal(summary.data.logs[0].method, "GET");
+    assert.equal(summary.data.logs[0].requestBody, undefined);
+    assert.equal(summary.data.hasMore, false);
 
     const withBody = await call(client, "list_logs", {
       project: "demo",
       includeBody: true,
     });
-    assert.deepEqual(withBody.data[0].responseBody, { id: 1 });
+    assert.deepEqual(withBody.data.logs[0].responseBody, { id: 1 });
 
     const detail = await call(client, "get_log", {
       project: "demo",
       logId: 100001,
     });
     assert.equal(detail.data.id, 100001);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("list_logs forwards ad-hoc filters and pagination to the query endpoint", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const result = await call(client, "list_logs", {
+      project: "demo",
+      method: ["GET", "POST"],
+      path: "/users/1",
+      pathContains: "/users",
+      status: ["2xx", 500],
+      expectationId: "exp-1",
+      since: 1700000000000,
+      until: "2026-01-01T00:00:00.000Z",
+      limit: 1,
+      maxLogId: 100010,
+      includeBody: true,
+    });
+    assert.equal(result.isError, false, result.text);
+    assert.equal(result.data.hasMore, false);
+
+    const request = fake.state.requests.find(
+      (entry) => entry.path === "/api/log/query"
+    );
+    assert.deepEqual(request.query.method, ["GET", "POST"]);
+    assert.deepEqual(request.query.status, ["2xx", "500"]);
+    assert.equal(request.query.path, "/users/1");
+    assert.equal(request.query.pathContains, "/users");
+    assert.equal(request.query.expectationId, "exp-1");
+    assert.equal(request.query.since, "1700000000000");
+    assert.equal(request.query.until, "2026-01-01T00:00:00.000Z");
+    assert.equal(request.query.limit, "1");
+    assert.equal(request.query.maxLogId, "100010");
+    assert.equal(request.query.includeBody, "true");
   } finally {
     await client.close();
     await fake.close();

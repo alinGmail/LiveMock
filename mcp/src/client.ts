@@ -10,8 +10,29 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 interface RequestOptions {
   method?: string;
-  query?: Record<string, string | number | undefined | null>;
+  query?: Record<
+    string,
+    string | number | boolean | undefined | null | Array<string | number>
+  >;
   body?: unknown;
+}
+
+export interface QueryLogsParams {
+  maxLogId?: number;
+  limit?: number;
+  method?: string | Array<string>;
+  path?: string | Array<string>;
+  pathContains?: string | Array<string>;
+  status?: string | number | Array<string | number>;
+  expectationId?: string | Array<string>;
+  since?: string | number;
+  until?: string | number;
+  includeBody?: boolean;
+}
+
+export interface QueryLogsResult {
+  logs: Array<LogM>;
+  hasMore: boolean;
 }
 
 interface ImportResult {
@@ -44,9 +65,15 @@ export class LiveMockClient {
 
     const url = new URL(`${this.baseUrl}/api${path}`);
     Object.entries(options.query ?? {}).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        url.searchParams.set(key, String(value));
+      if (value === undefined || value === null || value === "") {
+        return;
       }
+      const values = Array.isArray(value) ? value : [value];
+      values.forEach((item) => {
+        if (item !== "") {
+          url.searchParams.append(key, String(item));
+        }
+      });
     });
 
     const controller = new AbortController();
@@ -236,9 +263,24 @@ export class LiveMockClient {
     });
   }
 
-  listLogs(projectId: string, maxLogId?: number): Promise<LogM[]> {
-    return this.request<LogM[]>("/log/", {
-      query: { projectId, maxLogId },
+  queryLogs(
+    projectId: string,
+    params: QueryLogsParams = {}
+  ): Promise<QueryLogsResult> {
+    return this.request<QueryLogsResult>("/log/query", {
+      query: {
+        projectId,
+        maxLogId: params.maxLogId,
+        limit: params.limit,
+        method: params.method,
+        path: params.path,
+        pathContains: params.pathContains,
+        status: params.status,
+        expectationId: params.expectationId,
+        since: params.since,
+        until: params.until,
+        includeBody: params.includeBody,
+      },
     });
   }
 

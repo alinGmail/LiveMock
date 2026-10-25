@@ -123,7 +123,7 @@ Add this to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):
 | `create_group` | write | Create a group. |
 | `update_group` | write | Change name, activation or priority. |
 | `delete_group` | write | Delete a group and its member expectations. |
-| `list_logs` | read | Recent request logs; bodies only with `includeBody=true`. |
+| `list_logs` | read | Filtered request logs; bodies only with `includeBody=true`. |
 | `get_log` | read | One full request/response log. |
 | `import_api_spec` | write | Import OpenAPI, Swagger or Postman content. |
 
@@ -141,7 +141,7 @@ On `initialize` the server sends an `instructions` primer with the domain model 
 - **Action** — `CUSTOM_RESPONSE`, `PROXY` or `STATIC_DIRECTORY`. LiveMock currently executes the **first** action of a matched expectation.
 - **Group** — an optional bucket with its own `activate` and `priority`. An inactive group disables all its members.
 - **Match order** — a group is one block ranked by the group's `(priority, createTime)` descending; an ungrouped expectation is its own block and uses its own `(priority, createTime)` as that block's rank, so it competes directly with groups. Member priorities only order expectations inside their group and cannot lift a member above another block. The first match wins, and a later-created block wins a priority tie.
-- **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies.
+- **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies. `list_logs` filters by `method`, `path`, `pathContains`, `status` (an exact code or a family such as `2xx`), `expectationId` and request time; conditions are ANDed, repeated values are ORed, and the filters are ad-hoc — they never change the saved log views the web UI uses.
 
 Typical flow: `list_projects` → inspect with `list_expectations` / `get_expectation` / `list_groups` → `create_expectation` or `import_api_spec` → `start_project` → send a request to `mockBaseUrl` → verify with `list_logs` / `get_log`.
 

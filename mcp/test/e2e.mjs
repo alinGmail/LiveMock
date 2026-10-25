@@ -214,7 +214,7 @@ async function main() {
         includeBody: true,
       });
       assert.equal(logs.isError, false, logs.text);
-      log = logs.data.find((entry) => entry.path === "/e2e");
+      log = logs.data.logs.find((entry) => entry.path === "/e2e");
       if (!log) {
         await sleep(100);
       }

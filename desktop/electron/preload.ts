@@ -98,6 +98,9 @@ import {
   ListLogViewPathParam,
   ListLogViewReqBody,
   ListLogViewReqQuery,
+  QueryLogsPathParam,
+  QueryLogsReqBody,
+  QueryLogsReqQuery,
 } from "livemock-core/struct/params/LogParams";
 import {
   CreateLogFilterPathParam,
@@ -409,6 +412,18 @@ export const api = {
     ) => {
       return ipcRenderer.invoke(
         LogViewEvents.ListLogViewLogs,
+        reqParam,
+        reqQuery,
+        reqBody
+      );
+    },
+    queryLogs: (
+      reqParam: QueryLogsPathParam,
+      reqQuery: QueryLogsReqQuery,
+      reqBody: QueryLogsReqBody
+    ) => {
+      return ipcRenderer.invoke(
+        LogViewEvents.QueryLogs,
         reqParam,
         reqQuery,
         reqBody

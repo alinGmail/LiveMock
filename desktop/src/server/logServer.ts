@@ -3,11 +3,13 @@ import {
   GetLogDetailResponse,
   ListLogViewLogsReqQuery,
   ListLogViewReqQuery,
+  QueryLogsReqQuery,
 } from "livemock-core/struct/params/LogParams";
 import {
   DeleteAllRequestLogsResponse,
   ListLogViewLogsResponse,
   ListLogViewResponse,
+  QueryLogsResponse,
 } from "livemock-core/struct/response/LogResponse";
 
 export async function listLogViewReq(
@@ -21,6 +23,12 @@ export async function listLogViewLogs(
   query: ListLogViewLogsReqQuery
 ): Promise<ListLogViewLogsResponse> {
   return window.api.logView.listLogViewLogs({ logViewId }, query, {});
+}
+
+export async function queryLogs(
+  query: QueryLogsReqQuery
+): Promise<QueryLogsResponse> {
+  return window.api.logView.queryLogs({}, query, {});
 }
 
 export async function deleteAllRequestLogs(
