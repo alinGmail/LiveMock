@@ -1,0 +1,65 @@
+name: Pages
+
+# The Pages site of this repository is a single redirect to the documentation
+# site, which lives in its own repository (alinGmail/LiveMockDoc). GitHub Pages
+# is configured with "Source: GitHub Actions", so this workflow has to exist for
+# the site to deploy; without it the Pages site stays empty.
+#
+# The previous setup pointed Pages at a `main` /docs folder that no longer
+# exists, which made every push run the legacy Jekyll builder and fail with
+# "No such file or directory @ dir_chdir0 - /github/workspace/docs".
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy redirect page
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Build redirect page
+        run: |
+          mkdir -p _site
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <title>LiveMock documentation</title>
+              <link rel="canonical" href="https://alingmail.github.io/LiveMockDoc/docs/intro/" />
+              <meta http-equiv="refresh" content="0; url=https://alingmail.github.io/LiveMockDoc/docs/intro/" />
+            </head>
+            <body>
+              <p>
+                The LiveMock documentation has moved to
+                <a href="https://alingmail.github.io/LiveMockDoc/docs/intro/">alingmail.github.io/LiveMockDoc</a>.
+              </p>
+            </body>
+          </html>
+          HTML
+          # A .nojekyll file keeps the deployed output byte-for-byte as generated.
+          touch _site/.nojekyll
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

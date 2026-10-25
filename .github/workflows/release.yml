@@ -1,0 +1,27 @@
+name: Release
+
+# Creates the GitHub release for every v* tag.
+#
+# No binaries are attached. The desktop installers (dmg / exe / AppImage) are no
+# longer built or published, and the web flavor is distributed as the npm package
+# `livemock` plus the GHCR image built by docker-publish.yml. GitHub already
+# exposes "Source code (zip)" and "Source code (tar.gz)" for every tag, so the
+# release ships the source without running any build here.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release with generated notes
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

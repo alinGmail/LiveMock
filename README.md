@@ -25,20 +25,14 @@ LiveMock is a comprehensive tool for API development and testing, offering mock 
 ## 📦 features
 
 * **Dynamic mocking** - Apply mock changes without restarting the server
-* **Cross-platform** - Available as web, Windows, and Mac applications
+* **Web dashboard** - The dashboard is served by the same server and runs in any modern browser
 * **api proxy support** Forward requests to actual API when needed
 * **support mockjs** - Generate mock data with mockjs library
 * **Logging and analytics** - Log requests/responses for analysis.
 
 ## 🚧 Installation
 
-
-There are two versions of liveMock, one is a desktop application and the other is a web service. You can use either version, but I recommend using the desktop version.
-
-### Installation of the desktop version
-To install the desktop version, simply download from the [release page](https://github.com/alinGmail/LiveMock/releases). It supports both macOS and Windows operating systems.
-
-### Installation of the web service version
+### Install from npm
 
 The backend and dashboard are published to npm as the package [`livemock`](https://www.npmjs.com/package/livemock). No clone or build step is needed — run it straight from the registry:
 
@@ -118,9 +112,9 @@ With Docker Compose the same variable controls both the listener and the publish
 LIVEMOCK_PORT=8100 docker compose up
 ```
 
-### Authentication (web version only)
+### Authentication
 
-The web version is protected by a **single account**. The desktop version has no login and is unaffected.
+LiveMock is protected by a **single account**.
 
 - **First run:** the first visit shows an initialization form. Create the account (username + password) and you are signed in. After that, the registration endpoint is permanently closed and every visit requires signing in.
 - **Sessions:** the login is kept in an httpOnly cookie for 7 days of activity and survives backend restarts. Logging out ends only the current session, so several devices can stay signed in at the same time.
@@ -140,7 +134,7 @@ With Docker Compose the optional settings can be passed through the environment:
 LIVEMOCK_COOKIE_SECURE=true LIVEMOCK_TRUST_PROXY=127.0.0.1 docker compose up
 ```
 
-### MCP server (web version only)
+### MCP server
 
 LiveMock ships a separate MCP server, [`livemock-mcp`](mcp/README.md), so AI clients such as Claude Code, Claude Desktop and Cursor can manage projects, expectations, groups and request logs from the editor.
 
@@ -164,10 +158,6 @@ npx add-mcp@2 livemock-mcp -g -a claude-code \
 `add-mcp` prompts for the token, infers the server name `livemock`, and supports Cursor, OpenCode, Claude Desktop and other clients via `-a`. Keep `-g` so the token is not written into a project file, and see [`mcp/README.md`](mcp/README.md) for the full install notes.
 
 Tokens have full access to the data plane but cannot create or revoke other tokens or change the account password. Changing the password or running `livemock reset-admin` revokes every token. See [`mcp/README.md`](mcp/README.md) for client configurations, the tool list and raw expectation examples.
-
-The desktop version does not support MCP.
-
-
 
 ## 📌Quick Start
 After installing liveMock, the first visit asks you to create the account for the instance. After that, sign in and you will be able to access the welcome page (a page to create a project). Simply input the project name and submit the form, and you will be redirected to the dashboard page.

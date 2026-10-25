@@ -4,9 +4,7 @@
   <a href="./README.md">English</a> | <strong>简体中文</strong>
 </p>
 
-面向 [LiveMock](https://github.com/alinGmail/LiveMock) **web 版**的 MCP server。它让 AI 客户端可以列出并管理 LiveMock 项目(project)、创建原始 expectation、控制分组(group)、读取请求记录(request log)以及导入 API 文档——全部通过正在运行的 LiveMock `/api` 控制面(control plane)完成。
-
-不支持桌面版：桌面版没有登录，也没有控制面 HTTP 服务。
+面向 [LiveMock](https://github.com/alinGmail/LiveMock) 的 MCP server。它让 AI 客户端可以列出并管理 LiveMock 项目(project)、创建原始 expectation、控制分组(group)、读取请求记录(request log)以及导入 API 文档——全部通过正在运行的 LiveMock `/api` 控制面(control plane)完成。
 
 > 本文的术语与主 [README.zh-CN.md](../README.zh-CN.md#中英术语对照) 一致：expectation、matcher、action、proxy 保留英文，通用概念使用中文。
 

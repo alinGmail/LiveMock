@@ -4,9 +4,7 @@
   <strong>English</strong> | <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
-MCP server for the **web version** of [LiveMock](https://github.com/alinGmail/LiveMock). It lets an AI client list and manage LiveMock projects, create raw expectations, control groups, read request logs and import API documents — all through the running LiveMock `/api` control plane.
-
-The desktop version is not supported: it has no login and no control-plane HTTP server.
+MCP server for [LiveMock](https://github.com/alinGmail/LiveMock). It lets an AI client list and manage LiveMock projects, create raw expectations, control groups, read request logs and import API documents — all through the running LiveMock `/api` control plane.
 
 ## Requirements
 
