@@ -14,7 +14,9 @@
     "test": "yarn workspaces foreach -A --exclude livemock-monorepo run test",
     "test:back-end": "yarn workspace livemock test",
     "test:core": "yarn workspace livemock-core test",
-    "test:watch": "yarn workspaces foreach -A --exclude livemock-monorepo run test --watch"
+    "test:watch": "yarn workspaces foreach -A --exclude livemock-monorepo run test --watch",
+    "docker:verify": "bash scripts/docker-verify.sh",
+    "docker:verify:force": "FORCE=1 bash scripts/docker-verify.sh"
   },
   "repository": {
     "type": "git",
