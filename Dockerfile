@@ -2,7 +2,11 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-RUN apk add --no-cache git
+# git for the forked lokijs dependency, plus a C/C++ toolchain: bufferutil and
+# utf-8-validate (pulled in by mockserver-client -> websocket) ship prebuilds
+# for linux-x64 only, so on linux/arm64 yarn has to compile them with node-gyp
+# and node:alpine ships no compiler. Only the throwaway build stage needs this.
+RUN apk add --no-cache git python3 make g++
 RUN corepack enable
 
 # Source (see .dockerignore — node_modules / dist / build are excluded)

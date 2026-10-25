@@ -2,13 +2,23 @@ name: Docker image
 
 # Publishes the web flavour as a multi-arch image to GitHub Container Registry.
 # The image is verified end-to-end (scripts/docker-verify.sh) before anything is
-# pushed, so a tag can never publish a container that does not actually serve
-# the dashboard or answer mocked requests.
+# tagged, so a release can never publish a container that does not actually
+# serve the dashboard or answer mocked requests.
 #
 #   git tag v2.1.2 && git push origin v2.1.2   ->  2.1.2, 2.1, latest
 #   Actions -> Docker image -> Run workflow     ->  edge
 #
 # Pull requests touching Docker files only run the build + verification steps.
+#
+# Architectures are built on native runners, never under QEMU: the old single
+# job used setup-qemu-action for linux/arm64 and died with
+#   qemu: uncaught target signal 4 (Illegal instruction) - core dumped
+# because V8 (node) JITs instructions the user-mode emulator does not implement.
+# Instead each matrix leg builds one native arch and pushes it by digest, and
+# the `merge` job stitches the digests into one taggable manifest list.
+#
+# ubuntu-24.04-arm is a GitHub-hosted ARM runner and is free for public
+# repositories (this repo is public), so nothing self-hosted is needed.
 
 on:
   push:
@@ -35,20 +45,63 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: Build, verify, push
+  # GHCR requires a lowercase image path; GITHUB_REPOSITORY keeps the owner's
+  # casing (alinGmail/LiveMock), so normalise it once and share it.
+  prepare:
+    name: Resolve image name
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.name.outputs.image }}
+    steps:
+      - name: Resolve image name
+        id: name
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+  verify:
+    name: Verify image end-to-end
+    needs: prepare
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # GHCR requires a lowercase image path; GITHUB_REPOSITORY keeps the
-      # owner's casing (alinGmail/LiveMock), so normalise it explicitly.
-      - name: Resolve image name
-        run: echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      # Native amd64 build, loaded into the local daemon so the verification
+      # script can run it. Its cache is reused by the amd64 leg of `build`.
+      - name: Build for verification
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: livemock:verify
+          cache-from: type=gha,scope=amd64
+          cache-to: type=gha,mode=max,scope=amd64
+
+      - name: Verify image end-to-end
+        env:
+          IMAGE: livemock:verify
+        run: bash scripts/docker-verify.sh
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: [prepare, verify]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+            runner: ubuntu-latest
+          # GitHub-hosted arm64, free for public repos: builds natively, no QEMU.
+          - platform: linux/arm64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
@@ -61,55 +114,97 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Pushed by digest only, so neither leg can overwrite the other's tag;
+      # `merge` attaches the real tags once both architectures are in GHCR.
+      # PR runs just validate that the arch still builds (cache-only output).
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          labels: |
+            org.opencontainers.image.title=LiveMock
+            org.opencontainers.image.description=Mock server with a web dashboard: expectations, proxying and request logs.
+            org.opencontainers.image.licenses=Apache-2.0
+          outputs: ${{ github.event_name == 'pull_request' && 'type=cacheonly' || format('type=image,name={0},push-by-digest=true,name-canonical=true,push=true', needs.prepare.outputs.image) }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
+
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Merge manifest list
+    needs: [prepare, build]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ needs.prepare.outputs.image }}
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}
+          images: ${{ needs.prepare.outputs.image }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=edge,enable=${{ github.ref_type != 'tag' }}
-          labels: |
-            org.opencontainers.image.title=LiveMock
-            org.opencontainers.image.description=Mock server with a web dashboard: expectations, proxying and request logs.
-            org.opencontainers.image.licenses=Apache-2.0
 
-      # Native-arch build, loaded into the local daemon so the verification
-      # script can run it. Multi-platform images cannot be loaded, which is why
-      # the push build below is a separate step.
-      - name: Build for verification
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          load: true
-          tags: livemock:verify
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # Turns the per-arch digests into one index and only now attaches tags,
+      # i.e. after `verify` and both builds succeeded.
+      - name: Create manifest list
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ needs.prepare.outputs.image }}@sha256:%s ' *)
 
-      - name: Verify image end-to-end
-        env:
-          IMAGE: livemock:verify
-        run: bash scripts/docker-verify.sh
-
-      - name: Push multi-arch image
-        id: push
-        if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
+      - name: Inspect manifest list
+        run: |
+          INFO=$(docker buildx imagetools inspect "$IMAGE_NAME:${{ steps.meta.outputs.version }}")
+          echo "$INFO"
+          for plat in linux/amd64 linux/arm64; do
+            printf '%s' "$INFO" | grep -q "$plat" \
+              || { echo "::error::$plat missing from the manifest list"; exit 1; }
+          done
+          echo "DIGEST=$(printf '%s\n' "$INFO" | awk '/^Digest:/{print $2; exit}')" >> "$GITHUB_ENV"
 
       - name: Summary
-        if: github.event_name != 'pull_request'
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.push.outputs.digest }}
         run: |
           {
             echo "### Pushed \`$IMAGE_NAME\`"
@@ -118,5 +213,6 @@ jobs:
             echo "$TAGS"
             echo '```'
             echo
+            echo "Platforms: \`linux/amd64\`, \`linux/arm64\`"
             echo "Digest: \`$DIGEST\`"
           } >> "$GITHUB_STEP_SUMMARY"
