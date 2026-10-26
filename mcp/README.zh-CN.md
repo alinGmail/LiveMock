@@ -127,6 +127,11 @@ claude mcp add livemock \
 | `delete_group` | 写 | 删除分组及其成员 expectation。 |
 | `list_logs` | 读 | 按条件查询请求记录(request log)；只有 `includeBody=true` 时才返回请求体。 |
 | `filter_logs` | 读 | 使用与日志视图(log view)相同的筛选器(filter)做临时查询；不会改动已保存的视图。 |
+| `get_log_view` | 读 | 项目的已保存日志视图、其中的筛选器及其 id。 |
+| `add_view_filter` | 写 | 向已保存视图添加简单筛选器(simple filter)。 |
+| `update_view_filter` | 写 | 更新已保存视图中的简单筛选器。 |
+| `delete_view_filter` | 写 | 删除已保存视图中的筛选器。 |
+| `update_view_preset` | 写 | 设置或删除已保存视图的预设(preset)。 |
 | `get_log` | 读 | 一条完整的请求/响应记录。 |
 | `import_api_spec` | 写 | 导入 OpenAPI、Swagger 或 Postman 内容。 |
 
@@ -177,6 +182,19 @@ claude mcp add livemock \
 `FAMILY` 把 `2xx` 视为 200–299、`5xx` 视为 500–599。只是按状态码分组过滤时，用 `list_logs.status` 更短。
 
 条件之间是 AND，`activate: false` 会被跳过，不支持 `GROUP_FILTER`，不会读取或修改已保存的日志视图。
+
+### 管理已保存的日志视图
+
+已保存的日志视图(log view)是 Web UI 使用的持久化筛选器集合。`filter_logs` 不会修改它；下面的工具会。
+
+- `get_log_view` —— 读取当前视图、其中的筛选器及其 id。
+- `add_view_filter` / `update_view_filter` —— 只管理简单筛选器(simple filter)。`add` 在未提供 id 时生成一个；`update` 会拒绝 preset id。
+- `delete_view_filter` —— 按 id 删除任意已保存筛选器。
+- `update_view_preset` —— 设置或删除 `EXPECTATION`、`METHODS` 或 `STATUS_CODE` 预设(preset)。
+
+`EXPECTATION` 接受 expectation id；`METHODS` 和 `STATUS_CODE` 接受数组。空字符串、null 或空数组表示删除该预设。
+
+这些工具修改的是 Web UI 共用的视图。写入采用最后写入者覆盖，且不会实时刷新页面：重新加载日志页才能看到新筛选器。写入前先读取视图。项目必须恰好有一个日志视图；缺失或有多个都会报错。只读模式下不会注册写工具。
 
 ## 创建 expectation
 

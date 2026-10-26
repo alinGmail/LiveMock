@@ -3,8 +3,11 @@ import {
   ExpectationGroupM,
   ExpectationM,
   LogM,
+  LogViewM,
+  PresetFilterInput,
   ProjectM,
   QueryLogsByFiltersParams,
+  SimpleFilterInput,
 } from "./types.js";
 
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -227,6 +230,57 @@ export class LiveMockClient {
     return this.request(`/expectation/${expectationId}`, {
       method: "DELETE",
       query: { projectId },
+    });
+  }
+
+  listLogViews(projectId: string): Promise<Array<LogViewM>> {
+    return this.request<Array<LogViewM>>("/log/logView", {
+      query: { projectId },
+    });
+  }
+
+  addLogFilter(
+    projectId: string,
+    logViewId: string,
+    filter: SimpleFilterInput
+  ): Promise<unknown> {
+    return this.request("/logFilter/", {
+      method: "POST",
+      body: { projectId, logViewId, filter },
+    });
+  }
+
+  updateLogFilter(
+    projectId: string,
+    logViewId: string,
+    filterId: string,
+    filter: SimpleFilterInput
+  ): Promise<unknown> {
+    return this.request(`/logFilter/${filterId}`, {
+      method: "POST",
+      body: { projectId, logViewId, filter },
+    });
+  }
+
+  deleteLogFilter(
+    projectId: string,
+    logViewId: string,
+    filterId: string
+  ): Promise<unknown> {
+    return this.request(`/logFilter/${filterId}`, {
+      method: "DELETE",
+      query: { projectId, logViewId },
+    });
+  }
+
+  updatePresetLogFilter(
+    projectId: string,
+    logViewId: string,
+    filter: PresetFilterInput
+  ): Promise<unknown> {
+    return this.request("/logFilter/updatePresetLogFilter", {
+      method: "POST",
+      body: { projectId, logViewId, filter },
     });
   }
 

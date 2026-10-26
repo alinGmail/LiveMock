@@ -85,6 +85,22 @@ async function startFakeLiveMock() {
         createTime: new Date().toISOString(),
       },
     ],
+    logViews: [
+      {
+        id: "view-1",
+        name: "",
+        filters: [
+          {
+            type: "SIMPLE_FILTER",
+            id: "filter-1",
+            property: "req.path",
+            condition: "CONTAINS",
+            value: "/users",
+            activate: true,
+          },
+        ],
+      },
+    ],
     logs: [
       {
         id: 100001,
@@ -236,6 +252,58 @@ async function startFakeLiveMock() {
     if (req.method === "DELETE" && path.startsWith("/api/group/")) {
       return json(res, 200, { message: "success" });
     }
+    if (req.method === "GET" && path === "/api/log/logView") {
+      return json(res, 200, state.logViews);
+    }
+    if (req.method === "POST" && path === "/api/logFilter/") {
+      const view = state.logViews.find((item) => item.id === body.logViewId);
+      view.filters.push(body.filter);
+      return json(res, 200, { message: "success" });
+    }
+    if (
+      req.method === "POST" &&
+      path === "/api/logFilter/updatePresetLogFilter"
+    ) {
+      const view = state.logViews.find((item) => item.id === body.logViewId);
+      const index = view.filters.findIndex(
+        (item) =>
+          item.type === "PRESET_FILTER" && item.name === body.filter.name
+      );
+      const empty =
+        body.filter.value === null ||
+        (Array.isArray(body.filter.value) &&
+          body.filter.value.length === 0);
+      if (empty) {
+        if (index !== -1) {
+          view.filters.splice(index, 1);
+        }
+      } else if (index === -1) {
+        view.filters.push(body.filter);
+      } else {
+        view.filters[index] = {
+          ...view.filters[index],
+          value: body.filter.value,
+        };
+      }
+      return json(res, 200, { message: "success" });
+    }
+    if (req.method === "POST" && path.startsWith("/api/logFilter/")) {
+      const filterId = path.split("/").pop();
+      const view = state.logViews.find((item) => item.id === body.logViewId);
+      const index = view.filters.findIndex((item) => item.id === filterId);
+      if (index !== -1) {
+        view.filters[index] = body.filter;
+      }
+      return json(res, 200, { message: "success" });
+    }
+    if (req.method === "DELETE" && path.startsWith("/api/logFilter/")) {
+      const filterId = path.split("/").pop();
+      const view = state.logViews.find(
+        (item) => item.id === url.searchParams.get("logViewId")
+      );
+      view.filters = view.filters.filter((item) => item.id !== filterId);
+      return json(res, 200, { message: "success" });
+    }
     if (req.method === "GET" && path === "/api/log/") {
       return json(res, 200, state.logs);
     }
@@ -295,9 +363,14 @@ test("MCP server exposes the expected tools and can resolve a project", async ()
   try {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name);
-    assert.equal(names.length, 20);
+    assert.equal(names.length, 25);
     assert.ok(names.includes("list_projects"));
     assert.ok(names.includes("filter_logs"));
+    assert.ok(names.includes("get_log_view"));
+    assert.ok(names.includes("add_view_filter"));
+    assert.ok(names.includes("update_view_filter"));
+    assert.ok(names.includes("delete_view_filter"));
+    assert.ok(names.includes("update_view_preset"));
     assert.ok(names.includes("create_expectation"));
     assert.ok(names.includes("import_api_spec"));
 
@@ -331,6 +404,9 @@ test("server instructions explain the LiveMock domain and workflow", async () =>
       "Group",
       "Request log",
       "filter_logs",
+      "get_log_view",
+      "add_view_filter",
+      "update_view_preset",
       "FAMILY",
       "start_project",
       "priority",
@@ -361,6 +437,315 @@ test("server instructions explain the LiveMock domain and workflow", async () =>
     assert.match(fields.groupId.description, /own match-order block/i);
     assert.match(fields.groupId.description, /priority and createTime/i);
     assert.match(fields.matchers.description, /all matchers must match/i);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("get_log_view reads the saved view and refuses missing or ambiguous views", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const view = await call(client, "get_log_view", { project: "demo" });
+    assert.equal(view.isError, false, view.text);
+    assert.equal(view.data.id, "view-1");
+    assert.equal(view.data.filters[0].id, "filter-1");
+    assert.equal(view.data.filters[0].$loki, undefined);
+
+    const original = fake.state.logViews[0];
+    fake.state.logViews = [];
+    const missing = await call(client, "get_log_view", { project: "demo" });
+    assert.equal(missing.isError, true);
+    assert.match(missing.text, /no log view/i);
+
+    fake.state.logViews = [original, { ...original, id: "view-2" }];
+    const ambiguous = await call(client, "get_log_view", { project: "demo" });
+    assert.equal(ambiguous.isError, true);
+    assert.match(ambiguous.text, /multiple log views/i);
+    assert.match(ambiguous.text, /view-1/);
+    assert.match(ambiguous.text, /view-2/);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("add_view_filter creates a simple filter and returns the latest view", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const result = await call(client, "add_view_filter", {
+      project: "demo",
+      filter: {
+        property: "res.status",
+        condition: "EQUAL",
+        value: 200,
+      },
+    });
+    assert.equal(result.isError, false, result.text);
+    assert.equal(result.data.filter.type, "SIMPLE_FILTER");
+    assert.equal(result.data.filter.property, "res.status");
+    assert.equal(result.data.filter.activate, true);
+    assert.equal(typeof result.data.filter.id, "string");
+    assert.equal(result.data.logView.filters.length, 2);
+
+    const request = fake.state.requests.find(
+      (entry) => entry.method === "POST" && entry.path === "/api/logFilter/"
+    );
+    assert.equal(request.body.logViewId, "view-1");
+    assert.equal(request.body.projectId, "project-1");
+    assert.equal(request.body.filter.id, result.data.filter.id);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("update_view_filter updates simple filters and refuses preset ids", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const updated = await call(client, "update_view_filter", {
+      project: "demo",
+      filterId: "filter-1",
+      filter: {
+        property: "req.method",
+        condition: "EQUAL",
+        value: "GET",
+      },
+    });
+    assert.equal(updated.isError, false, updated.text);
+    assert.equal(updated.data.filter.id, "filter-1");
+    assert.equal(updated.data.filter.property, "req.method");
+    assert.equal(updated.data.filter.activate, true);
+
+    const request = fake.state.requests.find(
+      (entry) =>
+        entry.method === "POST" && entry.path === "/api/logFilter/filter-1"
+    );
+    assert.equal(request.body.filter.id, "filter-1");
+
+    fake.state.logViews[0].filters.push({
+      type: "PRESET_FILTER",
+      name: "STATUS_CODE",
+      id: "preset-1",
+      property: "res.status",
+      condition: "FAMILY",
+      value: ["2xx"],
+      activate: true,
+    });
+    const preset = await call(client, "update_view_filter", {
+      project: "demo",
+      filterId: "preset-1",
+      filter: {
+        property: "res.status",
+        condition: "EQUAL",
+        value: 200,
+      },
+    });
+    assert.equal(preset.isError, true);
+    assert.match(preset.text, /preset/i);
+    assert.match(preset.text, /update_view_preset/);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("delete_view_filter removes a filter and returns it", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const result = await call(client, "delete_view_filter", {
+      project: "demo",
+      filterId: "filter-1",
+    });
+    assert.equal(result.isError, false, result.text);
+    assert.equal(result.data.removed.id, "filter-1");
+    assert.equal(result.data.logView.filters.length, 0);
+
+    const request = fake.state.requests.find(
+      (entry) =>
+        entry.method === "DELETE" &&
+        entry.path === "/api/logFilter/filter-1"
+    );
+    assert.equal(request.query.logViewId, "view-1");
+    assert.equal(request.query.projectId, "project-1");
+
+    fake.state.logViews[0].filters.push({
+      type: "PRESET_FILTER",
+      name: "STATUS_CODE",
+      id: "preset-1",
+      property: "res.status",
+      condition: "FAMILY",
+      value: ["2xx"],
+      activate: true,
+    });
+    const preset = await call(client, "delete_view_filter", {
+      project: "demo",
+      filterId: "preset-1",
+    });
+    assert.equal(preset.isError, false, preset.text);
+    assert.equal(preset.data.removed.type, "PRESET_FILTER");
+    assert.equal(preset.data.logView.filters.length, 0);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("update_view_preset writes canonical presets and removes them", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const status = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "STATUS_CODE",
+      value: ["5xx"],
+    });
+    assert.equal(status.isError, false, status.text);
+    assert.equal(status.data.filter.name, "STATUS_CODE");
+    assert.equal(status.data.filter.property, "res.status");
+    assert.equal(status.data.filter.condition, "FAMILY");
+    assert.deepEqual(status.data.filter.value, ["5xx"]);
+
+    const methods = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "METHODS",
+      value: ["GET", "POST"],
+    });
+    assert.equal(methods.isError, false, methods.text);
+    assert.equal(methods.data.filter.property, "req.method");
+    assert.equal(methods.data.filter.condition, "IN");
+
+    const expectation = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "EXPECTATION",
+      value: "exp-1",
+    });
+    assert.equal(expectation.isError, false, expectation.text);
+    assert.equal(expectation.data.filter.property, "expectationId");
+    assert.equal(expectation.data.filter.condition, "EQUAL");
+
+    const numericStatus = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "STATUS_CODE",
+      value: [404, "5xx"],
+    });
+    assert.equal(numericStatus.isError, false, numericStatus.text);
+    assert.deepEqual(numericStatus.data.filter.value, ["404", "5xx"]);
+
+    const removedMethods = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "METHODS",
+      value: "",
+    });
+    assert.equal(removedMethods.isError, false, removedMethods.text);
+    assert.equal(removedMethods.data.filter, null);
+    assert.ok(
+      !removedMethods.data.logView.filters.some(
+        (filter) =>
+          filter.type === "PRESET_FILTER" && filter.name === "METHODS"
+      )
+    );
+
+    const removed = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "STATUS_CODE",
+      value: [],
+    });
+    assert.equal(removed.isError, false, removed.text);
+    assert.equal(removed.data.filter, null);
+    assert.ok(
+      !removed.data.logView.filters.some(
+        (filter) =>
+          filter.type === "PRESET_FILTER" && filter.name === "STATUS_CODE"
+      )
+    );
+
+    const request = fake.state.requests
+      .filter((entry) => entry.path === "/api/logFilter/updatePresetLogFilter")
+      .at(-1);
+    assert.equal(request.body.logViewId, "view-1");
+    assert.equal(request.body.filter.type, "PRESET_FILTER");
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("update_view_preset rejects wrong value shapes", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const expectation = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "EXPECTATION",
+      value: ["exp-1"],
+    });
+    assert.equal(expectation.isError, true);
+    assert.match(expectation.text, /EXPECTATION/);
+
+    const methods = await call(client, "update_view_preset", {
+      project: "demo",
+      name: "METHODS",
+      value: "GET",
+    });
+    assert.equal(methods.isError, true);
+    assert.match(methods.text, /array/i);
+  } finally {
+    await client.close();
+    await fake.close();
+  }
+});
+
+test("view filter writes validate their input", async () => {
+  const fake = await startFakeLiveMock();
+  const client = await connect({
+    LIVEMOCK_URL: fake.url,
+    LIVEMOCK_API_TOKEN: TOKEN,
+  });
+  try {
+    const preset = await call(client, "add_view_filter", {
+      project: "demo",
+      filter: {
+        type: "PRESET_FILTER",
+        property: "res.status",
+        condition: "FAMILY",
+        value: ["2xx"],
+      },
+    });
+    assert.equal(preset.isError, true);
+
+    const badProperty = await call(client, "add_view_filter", {
+      project: "demo",
+      filter: {
+        property: "$or",
+        condition: "EQUAL",
+        value: "GET",
+      },
+    });
+    assert.equal(badProperty.isError, true);
+    assert.match(badProperty.text, /property/i);
   } finally {
     await client.close();
     await fake.close();
@@ -398,6 +783,12 @@ test("filter_logs documents every comparator with examples", async () => {
         `filter_logs schema should document ${term}`
       );
     }
+
+    const addFilter = tools.tools.find(
+      (item) => item.name === "add_view_filter"
+    );
+    assert.match(addFilter.description, /last-write-wins/i);
+    assert.match(addFilter.description, /not atomic/i);
   } finally {
     await client.close();
     await fake.close();
@@ -564,9 +955,14 @@ test("read-only mode hides write tools", async () => {
   try {
     const tools = await client.listTools();
     const names = tools.tools.map((tool) => tool.name);
-    assert.equal(names.length, 8);
+    assert.equal(names.length, 9);
     assert.ok(names.includes("list_expectations"));
     assert.ok(names.includes("filter_logs"));
+    assert.ok(names.includes("get_log_view"));
+    assert.ok(!names.includes("add_view_filter"));
+    assert.ok(!names.includes("update_view_filter"));
+    assert.ok(!names.includes("delete_view_filter"));
+    assert.ok(!names.includes("update_view_preset"));
     assert.ok(!names.includes("create_expectation"));
     assert.ok(!names.includes("start_project"));
     assert.match(client.getInstructions(), /read-only/i);

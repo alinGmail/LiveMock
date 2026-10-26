@@ -8,6 +8,7 @@ import { registerExpectationTools } from "./tools/expectations.js";
 import { registerGroupTools } from "./tools/groups.js";
 import { registerImportTool } from "./tools/import.js";
 import { registerLogTools } from "./tools/logs.js";
+import { registerLogViewTools } from "./tools/logView.js";
 import { registerProjectTools } from "./tools/projects.js";
 
 export const VERSION = "0.1.0";
@@ -25,6 +26,7 @@ async function main() {
   registerExpectationTools(server, client, writable);
   registerGroupTools(server, client, writable);
   registerLogTools(server, client);
+  registerLogViewTools(server, client, writable);
   registerImportTool(server, client, writable);
 
   console.error(

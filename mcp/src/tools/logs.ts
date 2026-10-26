@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LiveMockClient } from "../client.js";
 import { stripInternal, summarizeLog } from "../domain.js";
+import { logFilterSchema } from "../logFilters.js";
 import { projectRefSchema } from "../schemas.js";
 import { LogFilterInput } from "../types.js";
 import { resolveProject, run } from "./helpers.js";
@@ -10,66 +11,6 @@ const multiString = z.union([z.string(), z.array(z.string())]);
 const statusValue = z.union([z.number().int(), z.string()]);
 const multiStatus = z.union([statusValue, z.array(statusValue)]);
 const timeValue = z.union([z.number().int(), z.string()]);
-
-const logFilterCondition = z.enum([
-  "EQUAL",
-  "NOT_EQUAL",
-  "CONTAINS",
-  "GREATER",
-  "LESS",
-  "IN",
-  "FAMILY",
-]);
-
-const logFilterValue = z.union([
-  z.string(),
-  z.number(),
-  z.array(z.union([z.string(), z.number()])),
-]);
-
-const logFilterPropertyDescription =
-  "Dot path into the request log. Common fields: req.method, req.path, " +
-  "req.headers.<name>, req.query.<name>, req.body.<field>, res.status, " +
-  "res.duration, expectationId, req.requestTime. Examples: " +
-  "req.headers.authorization, req.body.user.id.";
-
-const logFilterConditionDescription = `Comparison operator.
-- EQUAL: exact match; strings are case-sensitive and numeric strings match their number (for example "200" matches 200). Example: { "property": "req.method", "condition": "EQUAL", "value": "GET" }.
-- NOT_EQUAL: value differs from the filter value.
-- CONTAINS: substring match for strings. Example: { "property": "req.path", "condition": "CONTAINS", "value": "/users" }.
-- GREATER / LESS: numeric or lexicographic comparison. For req.requestTime and res.responseTime use epoch milliseconds or ISO-8601. Example: { "property": "res.duration", "condition": "GREATER", "value": 1000 }.
-- IN: value is one of the items in the array. Example: { "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }.
-- FAMILY: status-code family range, mainly for res.status. "2xx" means 200-299, "5xx" means 500-599; exact codes can be mixed in, e.g. ["4xx", 500] matches 400-499 or exactly 500. Example: { "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }.`;
-
-const logFilterValueDescription =
-  "Filter value. Use a scalar for EQUAL, NOT_EQUAL, CONTAINS, GREATER and " +
-  "LESS, and an array for IN and FAMILY. FAMILY accepts family tokens such " +
-  'as "2xx" plus exact codes, e.g. ["4xx", 500]. Time fields ' +
-  "(req.requestTime, res.responseTime) accept epoch milliseconds or " +
-  'ISO-8601 timestamps. Examples: "GET", 200, ["2xx", "500"], ' +
-  '"2026-01-01T00:00:00Z".';
-
-const logFilterSchema = z.object({
-  type: z
-    .enum(["SIMPLE_FILTER", "PRESET_FILTER"])
-    .optional()
-    .describe("Filter type; defaults to SIMPLE_FILTER."),
-  property: z.string().describe(logFilterPropertyDescription),
-  condition: logFilterCondition.describe(logFilterConditionDescription),
-  value: logFilterValue.describe(logFilterValueDescription),
-  activate: z
-    .boolean()
-    .optional()
-    .describe("Set false to skip this filter; defaults to true."),
-  id: z
-    .string()
-    .optional()
-    .describe("Ignored; accepted so a saved log-view filter can be reused."),
-  name: z
-    .string()
-    .optional()
-    .describe("Ignored; accepted for PRESET_FILTER-shaped objects."),
-});
 
 export function registerLogTools(server: McpServer, client: LiveMockClient) {
   server.registerTool(
