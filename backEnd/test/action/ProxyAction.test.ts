@@ -7,6 +7,9 @@ import { expectationCreation } from "../controller/common";
 import { createProxyAction, ProxyActionM } from "livemock-core/struct/action";
 import getMockRouter from "../../src/server/mockServer";
 import request from "supertest";
+import { setProxyTimeoutMs } from "../../src/action/ProxyAction";
+import * as http from "http";
+import { AddressInfo } from "net";
 import {
   getExpectationCollection,
   getLogCollection,
@@ -264,6 +267,151 @@ describe("test proxy action", () => {
     expect(log.req!.query["testParam"]).toEqual("testVal");
   });
 
+  test(`test proxy upstream error does not hang`, async () => {
+    const _host = proxyActionM.host;
+    // nothing is listening on this port, the proxy request fails immediately
+    proxyActionM.host = "localhost:1";
+    await updateProxyAction(
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
+    );
+    try {
+      const response = await request(proxyServer).get("/testProxy");
+      expect(response.status).toEqual(502);
+      expect(response.text).toContain("Proxy request failed");
+    } finally {
+      proxyActionM.host = _host;
+      await updateProxyAction(
+        projectM.id,
+        "test_db",
+        expectationM.id,
+        proxyActionM
+      );
+    }
+  });
+
+  test(`test proxy timeout only guards response headers`, async () => {
+    setProxyTimeoutMs(200);
+    const sseServer = http.createServer((req, res) => {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      });
+      let count = 0;
+      const interval = setInterval(() => {
+        res.write(`data: ${count++}\n\n`);
+      }, 50);
+      req.on("close", () => clearInterval(interval));
+    });
+    const ssePort = await listen(sseServer);
+    const frontServer = proxyServer.listen(0, "127.0.0.1");
+    await new Promise<void>((resolve) =>
+      frontServer.once("listening", () => resolve())
+    );
+    const frontPort = (frontServer.address() as AddressInfo).port;
+    const _host = proxyActionM.host;
+    proxyActionM.host = `localhost:${ssePort}`;
+    await updateProxyAction(
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
+    );
+    try {
+      let statusCode: number | undefined;
+      const chunks: string[] = [];
+      await new Promise<void>((resolve) => {
+        const req = http.get(
+          {
+            host: "127.0.0.1",
+            port: frontPort,
+            path: "/testProxy",
+            headers: { Accept: "text/event-stream" },
+          },
+          (res) => {
+            statusCode = res.statusCode;
+            res.on("data", (chunk) => chunks.push(chunk.toString()));
+            res.on("error", () => undefined);
+          }
+        );
+        req.on("error", () => undefined);
+        // the timeout is 200ms, so keep the stream open well past it
+        setTimeout(() => {
+          req.destroy();
+          resolve();
+        }, 600);
+      });
+      expect(statusCode).toBe(200);
+      // the stream must still be alive after the 200ms timeout
+      const eventCount = (chunks.join("").match(/data:/g) || []).length;
+      expect(eventCount).toBeGreaterThanOrEqual(6);
+    } finally {
+      proxyActionM.host = _host;
+      await updateProxyAction(
+        projectM.id,
+        "test_db",
+        expectationM.id,
+        proxyActionM
+      );
+      setProxyTimeoutMs(30 * 1000);
+      (frontServer as any).closeAllConnections?.();
+      await new Promise<void>((resolve) => frontServer.close(() => resolve()));
+      (sseServer as any).closeAllConnections?.();
+      await new Promise<void>((resolve) => sseServer.close(() => resolve()));
+    }
+  });
+
+  test(`test proxy timeout when upstream sends no headers`, async () => {
+    setProxyTimeoutMs(200);
+    const hangServer = http.createServer(() => {
+      // accept the request but never respond
+    });
+    let markUpstreamClosed: () => void = () => undefined;
+    const upstreamClosed = new Promise<void>((resolve) => {
+      markUpstreamClosed = resolve;
+    });
+    hangServer.on("connection", (socket) => {
+      socket.once("close", () => markUpstreamClosed());
+    });
+    const hangPort = await listen(hangServer);
+    const _host = proxyActionM.host;
+    proxyActionM.host = `localhost:${hangPort}`;
+    await updateProxyAction(
+      projectM.id,
+      "test_db",
+      expectationM.id,
+      proxyActionM
+    );
+    try {
+      const startedAt = Date.now();
+      const response = await request(proxyServer).get("/testProxy");
+      expect(response.status).toBe(504);
+      expect(response.text).toContain("timed out");
+      expect(Date.now() - startedAt).toBeLessThan(2000);
+      const aborted = await Promise.race([
+        upstreamClosed.then(() => true),
+        new Promise<boolean>((resolve) =>
+          setTimeout(() => resolve(false), 1000)
+        ),
+      ]);
+      expect(aborted).toBe(true);
+    } finally {
+      proxyActionM.host = _host;
+      await updateProxyAction(
+        projectM.id,
+        "test_db",
+        expectationM.id,
+        proxyActionM
+      );
+      setProxyTimeoutMs(30 * 1000);
+      (hangServer as any).closeAllConnections?.();
+      await new Promise<void>((resolve) => hangServer.close(() => resolve()));
+    }
+  });
+
   test(`test proxy json`, async () => {
     const response = await request(proxyServer).get("/testJson1");
     await testJsonResponse(response, projectM);
@@ -323,6 +471,13 @@ describe("test proxy action", () => {
     );
   });
 });
+
+async function listen(server: http.Server): Promise<number> {
+  await new Promise<void>((resolve) =>
+    server.listen(0, "127.0.0.1", resolve)
+  );
+  return (server.address() as AddressInfo).port;
+}
 
 async function getLastLog(projectId: string, path: string) {
   const logCollection = await getLogCollection(projectId, "test_db");

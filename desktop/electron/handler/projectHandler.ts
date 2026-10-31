@@ -24,6 +24,8 @@ import {
   getProjectStatus,
   setProjectServer,
   setProjectStatus,
+  stopServer,
+  trackServerConnections,
 } from "../server/projectStatusManage";
 import { isNotEmptyString } from "../common/utils";
 import { ServerError } from "./common";
@@ -145,6 +147,7 @@ export async function setProjectHandler(path: string): Promise<void> {
       if (server == null) {
         let expServer = express();
         server = http.createServer(expServer);
+        trackServerConnections(server);
         expServer.all("*", await getMockRouter(path, projectId));
 
         server.on("upgrade", async (req, socket, head) => {
@@ -191,18 +194,21 @@ export async function setProjectHandler(path: string): Promise<void> {
       const server = getProjectServer(projectId, path);
       if (server) {
         setProjectStatus(projectId, ProjectStatus.CLOSING);
-        // server.closeIdleConnections();
-        // server.closeAllConnections();
-        server.close((err) => {
-          if (err) {
-            console.log(err);
-            throw new ServerError(500, err.message);
-          }
-          setProjectStatus(projectId, ProjectStatus.STOPPED);
-          return {
-            message: "success",
-          };
-        });
+        try {
+          // force-close in-flight requests and WebSocket connections, otherwise
+          // server.close() waits for them and the project stays in CLOSING
+          await stopServer(server);
+        } catch (error) {
+          setProjectStatus(
+            projectId,
+            server.listening ? ProjectStatus.STARTED : ProjectStatus.STOPPED
+          );
+          throw new ServerError(500, (error as Error).message);
+        }
+        setProjectStatus(projectId, ProjectStatus.STOPPED);
+        return {
+          message: "success",
+        };
       } else {
         throw new ServerError(500, "server not exist");
       }
