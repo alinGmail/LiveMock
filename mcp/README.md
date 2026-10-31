@@ -123,7 +123,13 @@ Add this to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):
 | `create_group` | write | Create a group. |
 | `update_group` | write | Change name, activation or priority. |
 | `delete_group` | write | Delete a group and its member expectations. |
-| `list_logs` | read | Recent request logs; bodies only with `includeBody=true`. |
+| `list_logs` | read | Filtered request logs; bodies only with `includeBody=true`. |
+| `filter_logs` | read | Advanced ad-hoc query with log-view-shaped filters; saved views are untouched. |
+| `get_log_view` | read | The project's saved log view, its filters and their ids. |
+| `add_view_filter` | write | Add a simple filter to the saved log view. |
+| `update_view_filter` | write | Update a simple filter in the saved log view. |
+| `delete_view_filter` | write | Delete a filter from the saved log view. |
+| `update_view_preset` | write | Set or remove a saved-view preset. |
 | `get_log` | read | One full request/response log. |
 | `import_api_spec` | write | Import OpenAPI, Swagger or Postman content. |
 
@@ -141,9 +147,52 @@ On `initialize` the server sends an `instructions` primer with the domain model 
 - **Action** — `CUSTOM_RESPONSE`, `PROXY` or `STATIC_DIRECTORY`. LiveMock currently executes the **first** action of a matched expectation.
 - **Group** — an optional bucket with its own `activate` and `priority`. An inactive group disables all its members.
 - **Match order** — a group is one block ranked by the group's `(priority, createTime)` descending; an ungrouped expectation is its own block and uses its own `(priority, createTime)` as that block's rank, so it competes directly with groups. Member priorities only order expectations inside their group and cannot lift a member above another block. The first match wins, and a later-created block wins a priority tie.
-- **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies.
+- **Request log** — one request handled by the mock listener, including the matched `expectationId`, status, duration and bodies. `list_logs` filters by `method`, `path`, `pathContains`, `status` (an exact code or a family such as `2xx`), `expectationId` and request time; conditions are ANDed, repeated values are ORed, and the filters are ad-hoc — they never change the saved log views the web UI uses.
 
 Typical flow: `list_projects` → inspect with `list_expectations` / `get_expectation` / `list_groups` → `create_expectation` or `import_api_spec` → `start_project` → send a request to `mockBaseUrl` → verify with `list_logs` / `get_log`.
+
+### Querying logs
+
+`list_logs` covers method, path, status, `expectationId` and request time. For any other field or condition, `filter_logs` accepts the same filter objects as saved log views:
+
+```json
+{
+  "project": "demo",
+  "filters": [
+    { "property": "req.headers.authorization", "condition": "CONTAINS", "value": "Bearer" },
+    { "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }
+  ],
+  "limit": 20
+}
+```
+
+Common `property` paths: `req.method`, `req.path`, `req.headers.<name>`, `req.query.<name>`, `req.body.<field>`, `res.status`, `res.duration`, `expectationId`, `req.requestTime`.
+
+| Condition | Meaning | Example |
+|---|---|---|
+| `EQUAL` | Exact match; strings are case-sensitive and numeric strings match their number. | `{ "property": "req.method", "condition": "EQUAL", "value": "GET" }` |
+| `NOT_EQUAL` | Value differs from the filter value. | `{ "property": "res.status", "condition": "NOT_EQUAL", "value": 200 }` |
+| `CONTAINS` | Substring match for strings. | `{ "property": "req.path", "condition": "CONTAINS", "value": "/users" }` |
+| `GREATER` / `LESS` | Numeric or lexicographic comparison; time fields accept epoch milliseconds or ISO-8601. | `{ "property": "res.duration", "condition": "GREATER", "value": 1000 }` |
+| `IN` | Matches any value in the array. | `{ "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }` |
+| `FAMILY` | Status-code family range; exact codes can be mixed in. Mainly for `res.status`. | `{ "property": "res.status", "condition": "FAMILY", "value": ["4xx", 500] }` |
+
+`FAMILY` treats `2xx` as 200–299 and `5xx` as 500–599. For simple status-family filters, `list_logs.status` is shorter.
+
+Filters are ANDed, `activate: false` is skipped, `GROUP_FILTER` is not supported, and the saved log view is never read or written.
+
+### Managing the saved log view
+
+The saved log view is the persistent filter set the web UI uses. `filter_logs` never touches it; the view tools do.
+
+- `get_log_view` — read the current view, its filters and their ids.
+- `add_view_filter` / `update_view_filter` — simple filters only. `add` generates an id when omitted; `update` refuses preset ids.
+- `delete_view_filter` — remove any saved filter by id.
+- `update_view_preset` — set or remove `EXPECTATION`, `METHODS` or `STATUS_CODE`.
+
+`EXPECTATION` takes an expectation id; `METHODS` and `STATUS_CODE` take arrays. An empty string, null or empty array removes the preset.
+
+These tools edit the shared view used by the web UI. Writes are last-write-wins and do not live-refresh the page: reload the log page to see the new filters. Read the view before writing. A project must have exactly one log view; a missing or ambiguous view is an error. Write tools are absent in read-only mode.
 
 ## Creating an expectation
 

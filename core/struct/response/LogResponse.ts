@@ -8,6 +8,15 @@ export interface ListLogResponse{
 }
 
 /**
+ * query logs
+ */
+export interface QueryLogsResponse {
+  logs: Array<LogM>;
+  /** True when older matching logs remain beyond this page. */
+  hasMore: boolean;
+}
+
+/**
  * list logs by logView
  */
 
