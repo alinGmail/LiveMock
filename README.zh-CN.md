@@ -300,6 +300,10 @@ LiveMock 会把所有命中 expectation 的请求记录为一个 JSON 对象，�
 | static directory | 静态目录(static directory) | 界面标签为 `Static` |
 | comparator | 比较器(comparator) | |
 | filter | 筛选器(filter) | |
+| log view | 日志视图(log view) | |
+| view filter | 视图筛选器(view filter) | 保存在日志视图中的筛选器 |
+| simple filter | 简单筛选器(simple filter) | |
+| preset | 预设(preset) | 状态码、method 或 expectation 预设 |
 | import | 导入(import) | |
 | mock from log | 从请求记录生成 mock | 动作型短语，按语义翻译 |
 | mock port | mock 端口 | |

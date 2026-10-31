@@ -1,4 +1,4 @@
-import { LogM } from "../log";
+import { LogM, PresetFilterM, SimpleFilterM } from "../log";
 
 /**
  * list log
@@ -10,6 +10,59 @@ export interface ListLogReqBody {}
 export interface ListLogReqQuery {
   maxLogId?: number;
   projectId: string;
+}
+
+export interface QueryLogsPathParam {}
+
+export interface QueryLogsReqBody {}
+
+/**
+ * query logs
+ *
+ * Ad-hoc, read-only filtering over a project's request logs. Unlike a log
+ * view, these conditions are not persisted and do not change what the web UI
+ * sees. Values are ANDed across fields; repeated values of one field are ORed.
+ */
+export interface QueryLogsPaging {
+  /** Return entries older than this log id. */
+  maxLogId?: string | number | null;
+  /** Page size, capped at 100. Defaults to 100. */
+  limit?: string | number | null;
+  /** Include request and response bodies. Defaults to false. */
+  includeBody?: string | boolean;
+}
+
+export interface QueryLogsReqQuery extends QueryLogsPaging {
+  projectId: string;
+  /** HTTP method(s), case-insensitive. */
+  method?: string | Array<string>;
+  /** Exact URL path(s), query string excluded. */
+  path?: string | Array<string>;
+  /** URL path substring(s), case-sensitive. */
+  pathContains?: string | Array<string>;
+  /** Exact status code(s) or family tokens such as "2xx". */
+  status?: string | number | Array<string | number>;
+  expectationId?: string | Array<string>;
+  /** Request time lower bound, inclusive, as epoch milliseconds or ISO-8601. */
+  since?: string | number;
+  /** Request time upper bound, exclusive, as epoch milliseconds or ISO-8601. */
+  until?: string | number;
+}
+
+/**
+ * query logs by view-shaped filters
+ *
+ * The filters use the same shape as saved log-view filters, but they are
+ * evaluated ad hoc: nothing is persisted and the saved log view is untouched.
+ */
+export interface QueryLogsByFiltersPathParam {}
+
+export interface QueryLogsByFiltersReqQuery {}
+
+export interface QueryLogsByFiltersReqBody extends QueryLogsPaging {
+  projectId: string;
+  /** Active filters are ANDed; GROUP_FILTER is not supported. */
+  filters: Array<SimpleFilterM | PresetFilterM>;
 }
 
 /**

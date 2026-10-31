@@ -214,13 +214,30 @@ async function main() {
         includeBody: true,
       });
       assert.equal(logs.isError, false, logs.text);
-      log = logs.data.find((entry) => entry.path === "/e2e");
+      log = logs.data.logs.find((entry) => entry.path === "/e2e");
       if (!log) {
         await sleep(100);
       }
     }
     assert.ok(log, "the mock request was not captured in the request log");
     assert.equal(log.status, 200);
+
+    const filtered = await call(client, "filter_logs", {
+      project: projectName,
+      filters: [
+        { property: "req.path", condition: "CONTAINS", value: "/e2e" },
+      ],
+      includeBody: true,
+    });
+    assert.equal(filtered.isError, false, filtered.text);
+    const filteredLog = filtered.data.logs.find(
+      (entry) => entry.path === "/e2e"
+    );
+    assert.ok(
+      filteredLog,
+      "filter_logs did not return the captured request log"
+    );
+    assert.equal(filteredLog.status, 200);
 
     const stopped = await call(client, "stop_project", {
       project: projectName,

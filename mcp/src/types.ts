@@ -86,6 +86,71 @@ export interface ExpectationM {
   groupId?: string | null;
 }
 
+export type LogFilterCondition =
+  | "EQUAL"
+  | "NOT_EQUAL"
+  | "CONTAINS"
+  | "GREATER"
+  | "LESS"
+  | "IN"
+  | "FAMILY";
+
+export interface LogFilterInput {
+  type?: "SIMPLE_FILTER" | "PRESET_FILTER";
+  property: string;
+  condition: LogFilterCondition;
+  value: string | number | Array<string | number>;
+  activate?: boolean;
+  id?: string;
+  name?: string;
+}
+
+export interface SimpleFilterInput {
+  type?: "SIMPLE_FILTER";
+  id?: string;
+  property: string;
+  condition: LogFilterCondition;
+  value: string | number | Array<string | number>;
+  activate?: boolean;
+}
+
+export type PresetName = "EXPECTATION" | "METHODS" | "STATUS_CODE";
+
+export interface PresetFilterInput {
+  type: "PRESET_FILTER";
+  id: string;
+  name: PresetName;
+  property: string;
+  condition: LogFilterCondition;
+  value: string | Array<string> | null;
+  activate: boolean;
+}
+
+export interface ViewFilterM {
+  type: "SIMPLE_FILTER" | "PRESET_FILTER" | "GROUP_FILTER";
+  id: string;
+  property?: string;
+  condition?: LogFilterCondition;
+  value?: string | number | Array<string | number> | null;
+  activate?: boolean;
+  name?: string;
+  conjunction?: "AND" | "OR";
+  subGroup?: Array<ViewFilterM>;
+}
+
+export interface LogViewM {
+  id: string;
+  name: string;
+  filters: Array<ViewFilterM>;
+}
+
+export interface QueryLogsByFiltersParams {
+  filters: Array<LogFilterInput>;
+  maxLogId?: number;
+  limit?: number;
+  includeBody?: boolean;
+}
+
 export interface ExpectationGroupM {
   id: string;
   name: string;

@@ -125,7 +125,13 @@ claude mcp add livemock \
 | `create_group` | 写 | 创建一个分组。 |
 | `update_group` | 写 | 修改名称、启用状态或优先级(priority)。 |
 | `delete_group` | 写 | 删除分组及其成员 expectation。 |
-| `list_logs` | 读 | 最近的请求记录；只有 `includeBody=true` 时才返回请求体。 |
+| `list_logs` | 读 | 按条件查询请求记录(request log)；只有 `includeBody=true` 时才返回请求体。 |
+| `filter_logs` | 读 | 使用与日志视图(log view)相同的筛选器(filter)做临时查询；不会改动已保存的视图。 |
+| `get_log_view` | 读 | 项目的已保存日志视图、其中的筛选器及其 id。 |
+| `add_view_filter` | 写 | 向已保存视图添加简单筛选器(simple filter)。 |
+| `update_view_filter` | 写 | 更新已保存视图中的简单筛选器。 |
+| `delete_view_filter` | 写 | 删除已保存视图中的筛选器。 |
+| `update_view_preset` | 写 | 设置或删除已保存视图的预设(preset)。 |
 | `get_log` | 读 | 一条完整的请求/响应记录。 |
 | `import_api_spec` | 写 | 导入 OpenAPI、Swagger 或 Postman 内容。 |
 
@@ -143,9 +149,52 @@ claude mcp add livemock \
 - **action** —— `CUSTOM_RESPONSE`、`PROXY` 或 `STATIC_DIRECTORY`。LiveMock 目前只执行命中 expectation 的**第一个** action。
 - **分组(group)** —— 一个可选的分组容器，有自己的 `activate` 和 `priority`。停用的分组会禁用其全部成员。
 - **匹配顺序** —— 一个分组是一个整体块，按分组的 `(priority, createTime)` 降序排名；未分组的 expectation 自成一个块，并用它自己的 `(priority, createTime)` 作为该块的排名，因此会直接与分组竞争。成员的 priority 只决定它们在分组内部的顺序，无法把成员抬到其他块之前。先匹配到的胜出；priority 相同时，创建更晚的块胜出。
-- **请求记录(request log)** —— mock 监听器处理的一条请求，包含命中的 `expectationId`、状态码、耗时和请求/响应体。
+- **请求记录(request log)** —— mock 监听器处理的一条请求，包含命中的 `expectationId`、状态码、耗时和请求/响应体。`list_logs` 可按 `method`、`path`、`pathContains`、`status`（精确状态码或 `2xx` 这类区间）、`expectationId` 和请求时间过滤；条件之间是 AND，同一字段重复传值是 OR，且这些条件只是临时查询——不会改动 Web UI 使用的已保存日志视图。
 
 典型流程：`list_projects` → 用 `list_expectations` / `get_expectation` / `list_groups` 查看 → `create_expectation` 或 `import_api_spec` → `start_project` → 向 `mockBaseUrl` 发送请求 → 用 `list_logs` / `get_log` 验证。
+
+### 查询请求记录
+
+`list_logs` 覆盖 method、path、status、`expectationId` 和请求时间。其他字段或条件用 `filter_logs`，它接受与已保存日志视图相同的筛选器：
+
+```json
+{
+  "project": "demo",
+  "filters": [
+    { "property": "req.headers.authorization", "condition": "CONTAINS", "value": "Bearer" },
+    { "property": "res.status", "condition": "FAMILY", "value": ["5xx"] }
+  ],
+  "limit": 20
+}
+```
+
+常见 `property` 路径：`req.method`、`req.path`、`req.headers.<name>`、`req.query.<name>`、`req.body.<field>`、`res.status`、`res.duration`、`expectationId`、`req.requestTime`。
+
+| 比较器(comparator) | 含义 | 示例 |
+|---|---|---|
+| `EQUAL` | 精确匹配；字符串区分大小写，数字字符串也能匹配对应数字。 | `{ "property": "req.method", "condition": "EQUAL", "value": "GET" }` |
+| `NOT_EQUAL` | 与给定值不相等。 | `{ "property": "res.status", "condition": "NOT_EQUAL", "value": 200 }` |
+| `CONTAINS` | 字符串子串匹配。 | `{ "property": "req.path", "condition": "CONTAINS", "value": "/users" }` |
+| `GREATER` / `LESS` | 数值或字典序比较；时间字段接受 epoch 毫秒或 ISO-8601。 | `{ "property": "res.duration", "condition": "GREATER", "value": 1000 }` |
+| `IN` | 匹配数组中的任意一个值。 | `{ "property": "req.method", "condition": "IN", "value": ["GET", "POST"] }` |
+| `FAMILY` | 状态码区间；可以混入精确状态码，主要用于 `res.status`。 | `{ "property": "res.status", "condition": "FAMILY", "value": ["4xx", 500] }` |
+
+`FAMILY` 把 `2xx` 视为 200–299、`5xx` 视为 500–599。只是按状态码分组过滤时，用 `list_logs.status` 更短。
+
+条件之间是 AND，`activate: false` 会被跳过，不支持 `GROUP_FILTER`，不会读取或修改已保存的日志视图。
+
+### 管理已保存的日志视图
+
+已保存的日志视图(log view)是 Web UI 使用的持久化筛选器集合。`filter_logs` 不会修改它；下面的工具会。
+
+- `get_log_view` —— 读取当前视图、其中的筛选器及其 id。
+- `add_view_filter` / `update_view_filter` —— 只管理简单筛选器(simple filter)。`add` 在未提供 id 时生成一个；`update` 会拒绝 preset id。
+- `delete_view_filter` —— 按 id 删除任意已保存筛选器。
+- `update_view_preset` —— 设置或删除 `EXPECTATION`、`METHODS` 或 `STATUS_CODE` 预设(preset)。
+
+`EXPECTATION` 接受 expectation id；`METHODS` 和 `STATUS_CODE` 接受数组。空字符串、null 或空数组表示删除该预设。
+
+这些工具修改的是 Web UI 共用的视图。写入采用最后写入者覆盖，且不会实时刷新页面：重新加载日志页才能看到新筛选器。写入前先读取视图。项目必须恰好有一个日志视图；缺失或有多个都会报错。只读模式下不会注册写工具。
 
 ## 创建 expectation
 
