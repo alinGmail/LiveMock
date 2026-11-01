@@ -9,6 +9,7 @@ import { setProjectList } from "../slice/projectSlice";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import logoUrl from "../assets/logo.png";
+import { projectPath } from "../component/route/routes";
 import styles from "./WelcomePage.module.scss";
 
 /**
@@ -33,6 +34,10 @@ const WelcomePage = () => {
       await createProjectReq({ project });
       toast.success("Project created");
       const list = await getProjectListReq();
+      // The router mounts once the list is non-empty, so point it at the new
+      // project's URL first instead of letting a stale hash go through a
+      // redirect.
+      window.location.hash = `#${projectPath(project.id, "expectation")}`;
       dispatch(setProjectList(list));
     } catch (err) {
       setError(getErrorMessage(err));

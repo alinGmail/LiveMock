@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { App, Dropdown } from "antd";
 import { AppDispatch, useAppSelector } from "../store";
+import { useCurrentProject } from "../component/route/useCurrentProject";
 import {
   createExpectationReq,
   deleteExpectationReq,
@@ -205,11 +206,10 @@ type GroupModalState =
   | { mode: "edit"; group: ExpectationGroupM };
 
 const ExpectationPage = () => {
-  const projectState = useAppSelector((state) => state.project);
   const expectationState = useAppSelector((state) => state.expectation);
   const dispatch: AppDispatch = useDispatch();
   const { modal } = App.useApp();
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
+  const currentProject = useCurrentProject();
 
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);

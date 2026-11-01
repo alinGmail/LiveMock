@@ -62,6 +62,7 @@ import {
 } from "livemock-core/struct/events/desktopEvents";
 import IpcRendererEvent = Electron.IpcRendererEvent;
 import styles from "./LogPage.module.scss";
+import { useCurrentProject } from "../component/route/useCurrentProject";
 
 const METHOD_COLOR: { [key: string]: string } = {
   GET: "#22c55e",
@@ -232,8 +233,7 @@ const XIcon = () => (
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
   const expectationState = useAppSelector((state) => state.expectation);
-  const projectState = useAppSelector((state) => state.project);
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
+  const currentProject = useCurrentProject();
   const dispatch: AppDispatch = useDispatch();
   const { modal } = App.useApp();
 
@@ -413,8 +413,7 @@ const LogPage: React.FC = () => {
   };
 
   const isCurrentProject = (projectId: string) => {
-    const project = store.getState().project;
-    return project.projectList[project.curProjectIndex]?.id === projectId;
+    return store.getState().project.currentProjectId === projectId;
   };
 
   const saveFilter = async (next: SimpleFilterM) => {
