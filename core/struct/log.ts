@@ -79,6 +79,19 @@ export function createLog(id: number): LogM {
   };
 }
 
+/**
+ * Formats a log timestamp as `YYYY-MM-DD HH:mm:ss` in the local time zone of
+ * the process that captured the request. Kept separate from the epoch
+ * millisecond fields, which remain the source of truth for filtering/sorting.
+ */
+export function formatLogTime(date: Date): string {
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  );
+}
+
 export function createRequestLog(): RequestLogM {
   const _now = new Date();
   return {
@@ -89,7 +102,7 @@ export function createRequestLog(): RequestLogM {
     path: "",
     rawBody: null,
     requestTime: _now.getTime(),
-    requestTimeStr: _now.toString(),
+    requestTimeStr: formatLogTime(_now),
   };
 }
 
@@ -109,7 +122,7 @@ export function createResponseLog(): ResponseLogM {
     headers: {},
     rawBody: "",
     responseTime: _now.getTime(),
-    responseTimeStr: _now.toString(),
+    responseTimeStr: formatLogTime(_now),
     status: 0,
     statusMessage: "",
   };

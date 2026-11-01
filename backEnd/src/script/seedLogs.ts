@@ -10,6 +10,7 @@ import {
   createLog,
   createRequestLog,
   createResponseLog,
+  formatLogTime,
   LogM,
   ParsedQs,
   WebsocketMessageM,
@@ -313,7 +314,7 @@ export async function seedLogs(
     req.rawBody = spec.reqBody != null ? JSON.stringify(spec.reqBody) : null;
     req.headers = toHeaderObject(spec.reqHeaders);
     req.requestTime = now - (LOG_SPECS.length - index) * 1000;
-    req.requestTimeStr = new Date(req.requestTime).toISOString();
+    req.requestTimeStr = formatLogTime(new Date(req.requestTime));
     log.req = req;
 
     if (spec.status != null) {
@@ -330,7 +331,7 @@ export async function seedLogs(
             ? JSON.stringify(spec.resBody)
             : null;
       res.responseTime = req.requestTime + res.duration;
-      res.responseTimeStr = new Date(res.responseTime).toISOString();
+      res.responseTimeStr = formatLogTime(new Date(res.responseTime));
       log.res = res;
     }
 

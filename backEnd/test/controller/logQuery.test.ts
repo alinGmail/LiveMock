@@ -4,6 +4,7 @@ import { createProject } from "livemock-core/struct/project";
 import {
   createLog,
   createSimpleFilter,
+  formatLogTime,
   LogFilterCondition,
   LogM,
   SimpleFilterM,
@@ -43,7 +44,7 @@ describe("log query", () => {
       method,
       path: logPath,
       requestTime,
-      requestTimeStr: new Date(requestTime).toISOString(),
+      requestTimeStr: formatLogTime(new Date(requestTime)),
     };
     log.res = {
       body: { id },
@@ -53,7 +54,7 @@ describe("log query", () => {
       statusMessage: "test",
       duration: 5,
       responseTime: requestTime + 5,
-      responseTimeStr: new Date(requestTime + 5).toISOString(),
+      responseTimeStr: formatLogTime(new Date(requestTime + 5)),
     };
     return log;
   }

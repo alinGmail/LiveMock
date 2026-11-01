@@ -2,7 +2,7 @@ import express from "express";
 import { CustomErrorMiddleware } from "../../src/controller/common";
 import { createProject, ProjectM } from "livemock-core/struct/project";
 import { getLogCollection, getNewLogNumber, } from "../../src/db/dbManager";
-import { createLog, createSimpleFilter, LogFilterCondition } from "livemock-core/struct/log";
+import { createLog, createSimpleFilter, formatLogTime, LogFilterCondition } from "livemock-core/struct/log";
 import { deleteFolderRecursive } from "../../src/common/utils";
 import supertest from "supertest";
 import { ListLogReqQuery } from "livemock-core/struct/params/LogParams";
@@ -26,7 +26,7 @@ describe("test log controller", () => {
     method: "",
     rawBody: "",
     requestTime: _now.getTime(),
-    requestTimeStr: _now.toString(),
+    requestTimeStr: formatLogTime(_now),
     path: "log1_path",
   };
   log2.req = {
@@ -38,7 +38,7 @@ describe("test log controller", () => {
     method: "",
     rawBody: "",
     requestTime: _now.getTime(),
-    requestTimeStr: _now.toString(),
+    requestTimeStr: formatLogTime(_now),
     path: "log2_path",
   };
   log3.req = {
@@ -50,7 +50,7 @@ describe("test log controller", () => {
     method: "",
     rawBody: "",
     requestTime: _now.getTime(),
-    requestTimeStr: _now.toString(),
+    requestTimeStr: formatLogTime(_now),
     path: "log3_path",
   };
   log4.req = {
@@ -62,7 +62,7 @@ describe("test log controller", () => {
     method: "",
     rawBody: "",
     requestTime: _now.getTime(),
-    requestTimeStr: _now.toString(),
+    requestTimeStr: formatLogTime(_now),
     path: "log4_path",
   };
 
