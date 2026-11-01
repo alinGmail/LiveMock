@@ -14,6 +14,8 @@ import { Route, Routes, Navigate, HashRouter } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
 import SettingsPage from "./page/SettingsPage";
+import ProjectRoute from "./component/route/ProjectRoute";
+import LegacyRedirect from "./component/route/LegacyRedirect";
 import { useEffect, useRef, useState } from "react";
 import AuthPage from "./page/AuthPage";
 import { setUsername } from "./slice/authSlice";
@@ -138,20 +140,27 @@ function App() {
                 <HashRouter>
                   <Routes>
                     <Route element={<Layout />}>
-                      <Route
-                        path={"expectation"}
-                        element={<ExpectationPage />}
-                      />
-                      <Route path={"requestLog"} element={<LogPage />} />
+                      <Route element={<ProjectRoute />} path={"project/:projectId"}>
+                        <Route
+                          index
+                          element={<Navigate to={"expectation"} replace />}
+                        />
+                        <Route
+                          path={"expectation"}
+                          element={<ExpectationPage />}
+                        />
+                        <Route path={"requestLog"} element={<LogPage />} />
+                        <Route
+                          path={"*"}
+                          element={<Navigate to={"expectation"} replace />}
+                        />
+                      </Route>
                       <Route path={"settings"} element={<SettingsPage />} />
                       <Route
                         path={"config"}
                         element={<Navigate to={"/settings"} replace />}
                       />
-                      <Route
-                        path={"*"}
-                        element={<Navigate to={"expectation"} />}
-                      />
+                      <Route path={"*"} element={<LegacyRedirect />} />
                     </Route>
                   </Routes>
                 </HashRouter>

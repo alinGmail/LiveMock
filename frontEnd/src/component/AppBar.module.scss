@@ -202,6 +202,10 @@
   background: var(--surface-2);
   color: var(--text);
 }
+.menuLink {
+  box-sizing: border-box;
+  text-decoration: none;
+}
 .menuItemActive {
   background: rgba(59, 130, 246, 0.12);
 }
