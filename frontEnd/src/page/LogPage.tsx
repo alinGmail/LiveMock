@@ -14,6 +14,7 @@ import {
 } from "livemock-core/struct/log";
 import { io, Socket } from "socket.io-client";
 import { AppDispatch, store, useAppSelector } from "../store";
+import { useCurrentProject } from "../component/route/useCurrentProject";
 import { useDispatch } from "react-redux";
 import { App } from "antd";
 import toast from "react-hot-toast";
@@ -226,12 +227,12 @@ const XIcon = () => (
 const LogPage: React.FC = () => {
   const logState = useAppSelector((state) => state.log);
   const expectationState = useAppSelector((state) => state.expectation);
-  const projectState = useAppSelector((state) => state.project);
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
+  const currentProject = useCurrentProject();
   const dispatch: AppDispatch = useDispatch();
   const { modal } = App.useApp();
 
   const logViewIdRef = useRef<string>();
+  const logsProjectIdRef = useRef<string | null>(null);
   const [logs, setLogs] = useImmer<Array<LogM>>([]);
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
   const [paused, setPaused] = useState(false);
@@ -289,8 +290,20 @@ const LogPage: React.FC = () => {
   });
 
   useEffect(() => {
+    logsProjectIdRef.current = null;
+    setLogs([]);
+    setHasMore(false);
+    dispatch(updatePresetFilter({
+      expectationId: null,
+      methods: [],
+      statusCode: [],
+    }));
+    dispatch(setSelectedLogId(null));
+    dispatch(setSelectedLogItem(null));
     dispatch(resetLogFilter([]));
-  }, [currentProject.id, dispatch]);
+    setFilterEditor(null);
+    setFilterSaving(false);
+  }, [currentProject.id, dispatch, setLogs]);
 
   const getExpectationListQuery = useQuery(
     ["getExpectationList", currentProject.id],
@@ -314,6 +327,7 @@ const LogPage: React.FC = () => {
         limit: PAGE_SIZE,
         projectId: currentProject.id,
       }).then((res) => {
+        logsProjectIdRef.current = currentProject.id;
         setLogs(res);
         setHasMore(res.length === PAGE_SIZE);
         return res;
@@ -583,16 +597,23 @@ const LogPage: React.FC = () => {
 
   // default-select the newest request once logs arrive
   useEffect(() => {
-    if (logs.length && logState.selectedLogId == null) {
+    if (
+      logsProjectIdRef.current === currentProject.id &&
+      logs.length &&
+      logState.selectedLogId == null
+    ) {
       dispatch(setSelectedLogId(logs[0].id));
       dispatch(setSelectedLogItem(logs[0]));
     }
-  }, [logs, logState.selectedLogId]);
+  }, [logs, logState.selectedLogId, currentProject.id, dispatch]);
 
   const selectedLog =
-    logs.find((log) => log.id === logState.selectedLogId) ??
-    logState.selectedLogItem ??
-    null;
+    logState.selectedLogId == null ||
+    logsProjectIdRef.current !== currentProject.id
+      ? null
+      : logs.find((log) => log.id === logState.selectedLogId) ??
+        logState.selectedLogItem ??
+        null;
 
   // Filtering happens on the server (persisted in the log view); the list only
   // renders what the server returns. This flag just picks the empty-state copy.

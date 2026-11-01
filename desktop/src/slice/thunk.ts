@@ -6,8 +6,8 @@ export const getExpectationSuccess =
   (projectId: string, expectationList: Array<ExpectationM>):AppThunk =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
     const state = getState();
-    const curProject = state.project.projectList[state.project.curProjectIndex];
-    if (curProject.id === projectId) {
+    const curProjectId = state.project.currentProjectId;
+    if (curProjectId === projectId) {
       dispatch(setExpectationList(expectationList));
     }
   };

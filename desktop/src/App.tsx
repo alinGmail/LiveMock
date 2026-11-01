@@ -13,6 +13,8 @@ import { Spin, ConfigProvider, theme, App as AntApp } from "antd";
 import { Route, Routes, Navigate, HashRouter } from "react-router-dom";
 import ExpectationPage from "./page/ExpectationPage";
 import LogPage from "./page/LogPage";
+import ProjectRoute from "./component/route/ProjectRoute";
+import LegacyRedirect from "./component/route/LegacyRedirect";
 import { useEffect } from "react";
 
 function App() {
@@ -42,9 +44,22 @@ function App() {
               <HashRouter>
                 <Routes>
                   <Route element={<Layout />}>
-                    <Route path={"expectation"} element={<ExpectationPage />} />
-                    <Route path={"requestLog"} element={<LogPage />}></Route>
-                    <Route path={"*"} element={<Navigate to={"expectation"} />} />
+                    <Route element={<ProjectRoute />} path={"project/:projectId"}>
+                      <Route
+                        index
+                        element={<Navigate to={"expectation"} replace />}
+                      />
+                      <Route
+                        path={"expectation"}
+                        element={<ExpectationPage />}
+                      />
+                      <Route path={"requestLog"} element={<LogPage />} />
+                      <Route
+                        path={"*"}
+                        element={<Navigate to={"expectation"} replace />}
+                      />
+                    </Route>
+                    <Route path={"*"} element={<LegacyRedirect />} />
                   </Route>
                 </Routes>
               </HashRouter>

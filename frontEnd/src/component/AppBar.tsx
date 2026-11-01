@@ -1,5 +1,5 @@
 import styles from "./AppBar.module.scss";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Dropdown } from "antd";
 import {
   LoadingOutlined,
@@ -12,7 +12,8 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import logoUrl from "../assets/logo.png";
 import { useAppSelector } from "../store";
-import { setCurProjectIndex, setProjectList } from "../slice/projectSlice";
+import { useOptionalCurrentProject } from "./route/useCurrentProject";
+import { setProjectList } from "../slice/projectSlice";
 import { createProject, ProjectStatus } from "livemock-core/struct/project";
 import ProjectSettingsModal, {
   ProjectSettingsValues,
@@ -32,10 +33,15 @@ import {
 import { logoutReq } from "../server/authServer";
 import toast from "react-hot-toast";
 import { getErrorMessage, toastPromise } from "./common";
+import {
+  ProjectPage,
+  pageSegmentFromPathname,
+  projectPath,
+} from "./route/routes";
 
-const NAV_ITEMS = [
-  { to: "/expectation", label: "Expectation" },
-  { to: "/requestLog", label: "Request Log" },
+const NAV_ITEMS: Array<{ page: ProjectPage; label: string }> = [
+  { page: "expectation", label: "Expectation" },
+  { page: "requestLog", label: "Request Log" },
 ];
 
 function statusLabel(status: ProjectStatus, port: string): string {
@@ -90,7 +96,10 @@ const AppBar = () => {
   const username = useAppSelector((state) => state.auth.username);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const currentProject = projectState.projectList[projectState.curProjectIndex];
+  const { pathname } = useLocation();
+  const currentProject = useOptionalCurrentProject();
+  // Which page the user is on, so a project switch keeps it.
+  const pageSegment = pageSegmentFromPathname(pathname);
 
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -100,10 +109,10 @@ const AppBar = () => {
   const [projectSettingsSaving, setProjectSettingsSaving] = useState(false);
   const [projectDeleting, setProjectDeleting] = useState(false);
 
-  const refreshProjects = () => {
-    getProjectListReq().then((list) => {
-      dispatch(setProjectList(list));
-    });
+  const refreshProjects = async () => {
+    const list = await getProjectListReq();
+    dispatch(setProjectList(list));
+    return list;
   };
 
   const onCreateProject = async (values: ProjectFormValues) => {
@@ -117,7 +126,11 @@ const AppBar = () => {
       await createProjectReq({ project });
       toast.success("Project created");
       setProjectModalShow(false);
-      refreshProjects();
+      // Load the list first, so the guard can resolve the new project's URL.
+      const list = await refreshProjects();
+      if (list.some((item) => item.id === project.id)) {
+        navigate(projectPath(project.id, "expectation"));
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -163,10 +176,21 @@ const AppBar = () => {
       await deleteProjectReq(currentProject.id);
       toast.success("Project deleted");
       setProjectSettingsOpen(false);
+      // Remove the project locally first, so a failed refresh cannot leave the
+      // deleted project selected.
+      const remaining = projectState.projectList.filter(
+        (project) => project.id !== currentProject.id
+      );
+      dispatch(setProjectList(remaining));
+      if (remaining[0]) {
+        navigate(projectPath(remaining[0].id, pageSegment), { replace: true });
+      }
       getProjectListReq()
         .then((list) => {
           dispatch(setProjectList(list));
-          dispatch(setCurProjectIndex(0));
+          if (!remaining[0] && list[0]) {
+            navigate(projectPath(list[0].id, pageSegment), { replace: true });
+          }
         })
         .catch(() => {
           toast.error("Project deleted, but the list failed to refresh.");
@@ -193,18 +217,16 @@ const AppBar = () => {
 
   const projectMenu = (
     <div className={styles.menu}>
-      {projectState.projectList.map((p, index) => (
-        <button
+      {projectState.projectList.map((p) => (
+        <Link
           key={p.id}
-          type="button"
+          to={projectPath(p.id, pageSegment)}
           className={[
             styles.menuItem,
-            index === projectState.curProjectIndex
-              ? styles.menuItemActive
-              : "",
+            styles.menuLink,
+            p.id === currentProject?.id ? styles.menuItemActive : "",
           ].join(" ")}
           onClick={() => {
-            dispatch(setCurProjectIndex(index));
             setProjectMenuOpen(false);
           }}
         >
@@ -220,7 +242,7 @@ const AppBar = () => {
               {statusLabel(p.status, p.port)}
             </span>
           </div>
-        </button>
+        </Link>
       ))}
       <div className={styles.menuSep} />
       <button
@@ -331,10 +353,14 @@ const AppBar = () => {
       <nav className={styles.nav} aria-label="Pages">
         {NAV_ITEMS.map((item) => (
           <NavLink
-            key={item.to}
-            to={item.to}
+            key={item.page}
             className={({ isActive }) =>
               [styles.navTab, isActive ? styles.navTabActive : ""].join(" ")
+            }
+            to={
+              currentProject
+                ? projectPath(currentProject.id, item.page)
+                : `/${item.page}`
             }
           >
             {item.label}
@@ -376,22 +402,24 @@ const AppBar = () => {
           : ""}
       </span>
 
-      <button
-        type="button"
-        className={[styles.iconBtn, running ? styles.stopBtn : ""].join(" ")}
-        onClick={onToggleServer}
-        disabled={!currentProject || !!transitioning}
-        aria-label={running ? "Stop project" : "Start project"}
-        title={running ? "Stop project" : "Start project"}
-      >
-        {transitioning ? (
-          <LoadingOutlined />
-        ) : running ? (
-          <StopOutlined />
-        ) : (
-          <PlayCircleOutlined />
-        )}
-      </button>
+      {currentProject ? (
+        <button
+          type="button"
+          className={[styles.iconBtn, running ? styles.stopBtn : ""].join(" ")}
+          onClick={onToggleServer}
+          disabled={!!transitioning}
+          aria-label={running ? "Stop project" : "Start project"}
+          title={running ? "Stop project" : "Start project"}
+        >
+          {transitioning ? (
+            <LoadingOutlined />
+          ) : running ? (
+            <StopOutlined />
+          ) : (
+            <PlayCircleOutlined />
+          )}
+        </button>
+      ) : null}
 
       <Dropdown
         trigger={["click"]}
