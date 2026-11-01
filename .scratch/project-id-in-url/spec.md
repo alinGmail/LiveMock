@@ -120,7 +120,7 @@ All redirects use `replace` so history does not fill with hops.
 | `#/`, `#/expectation` | first project, `expectation` |
 | `#/requestLog` | first project, `requestLog` |
 | `#/config` | `#/settings` |
-| `project/<unknown or deleted id>/…` | first project, `expectation` + a `Project not found` toast |
+| `project/<unknown or deleted id>/…` | first project, same page segment; a `Project not found` toast only when the id was never in this session's list |
 
 When the project list is empty the welcome page renders outside the router, as it does today.
 
@@ -128,6 +128,11 @@ When the project list is empty the welcome page renders outside the router, as i
 
 - The URL is authoritative. A route-level guard element resolves the `projectId` param against the
   loaded project list **during render**, and either renders its child route or redirects.
+- "Not found" means an id this session never resolved. A project that disappears from the list was
+  deleted, so it redirects silently; only a stale link (an id that was never in any list the
+  session rendered) raises the notice. The redirect keeps the current page segment, which is also
+  what the delete flow navigates to — the two must agree, because a project removal can commit a
+  frame before the router's location update does.
 - The guard publishes the resolved project through React context (outlet context or a dedicated
   context) so pages read the current project synchronously during render. There is no
   "project is undefined for one frame" state.
@@ -236,3 +241,20 @@ When the project list is empty the welcome page renders outside the router, as i
 - Left open by design: `useCurrentProject()` asserts non-null because the route guard guarantees it;
   and the project id lives in both the URL and the store mirror (the mirror exists so non-React
   consumers and the top bar see it before paint).
+
+**Follow-up: the `Project not found` toast fired on every project deletion**
+
+Cause: the delete flow updates two independent sources in one tick — the Redux project list
+(`useSyncExternalStore`, which React schedules at `SyncLane`) and the router location (`<Router>`'s
+plain `useState`, `DefaultLane`). React renders the sync lane first, in a microtask, so one commit
+sees the new list with the old URL: the guard concluded "unknown id" and toasted. Call order does
+not help — lane priority, not ordering, decides. The same intermediate commit also raced the
+guard's hard-coded `<Navigate to=…/expectation>` against the delete flow's `…/requestLog`.
+
+Fix (semantics, not a patch): the guard now remembers every project id it has seen this session and
+treats "was in the list, is not any more" as a deletion — a silent redirect — reserving the notice
+for ids the session never resolved (a stale or shared link). The fallback redirect keeps the current
+page segment, so it lands where the delete flow was going anyway and the race has one target.
+
+Known consequence: a project deleted by another client while open here is redirected silently
+rather than explained.

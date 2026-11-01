@@ -37,3 +37,7 @@ links to `project/<id>/<current page>`.
 Verified: renderer typecheck for both flavors, `yarn workspace front-end lint`, `yarn
 workspace livemock-desktop lint`, `yarn web-build`. Browser walkthrough of the redirect table is
 still pending (no automation harness in the repo).
+
+Review follow-up: "not found" is now scoped to ids this session never resolved, and the fallback
+redirect keeps the current page segment. Without that, every deletion toasted `Project not found`
+(the Redux list commits at `SyncLane` one frame before the router's location update at `DefaultLane`).
